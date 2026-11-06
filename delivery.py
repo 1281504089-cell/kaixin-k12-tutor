@@ -95,7 +95,7 @@ else:
     if a.target.startswith('windows'): shutil.copy2(checkout/'windows-installer.nsi',desktop/'platforms/windows-x64/installer.nsi')
     env={**os.environ,'KX_CONSUME_CI_INPUTS':'1'}; run(['node','scripts/package.mjs','--target',a.target],desktop,env)
     if a.target.startswith('windows'):
-        run(['powershell','-NoProfile','-File',desktop/'platforms/windows-x64/smoke-installer.ps1'],desktop)
+        run(['pwsh','-NoProfile','-NonInteractive','-File',desktop/'platforms/windows-x64/smoke-installer.ps1'],desktop)
     else:
         run(['node',checkout/'smoke_mac.mjs','--target',a.target],root)
     for name in ['components.json','smoke-result.json']:
