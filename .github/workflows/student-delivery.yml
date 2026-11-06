@@ -51,9 +51,9 @@ jobs:
             sudo xcode-select -s /Library/Developer/CommandLineTools
             sudo rm -rf /Applications/Xcode*.app
           else
-            selected=$(xcode-select -p)
+            selected=$(cd "$(xcode-select -p)/../.." && pwd -P)
             for xcode in /Applications/Xcode*.app; do
-              if [ "$xcode/Contents/Developer" != "$selected" ]; then sudo rm -rf "$xcode"; fi
+              if [ ! -L "$xcode" ] && [ "$xcode" != "$selected" ]; then sudo rm -rf "$xcode"; fi
             done
           fi
           sudo rm -rf /Users/runner/Library/Developer/CoreSimulator
