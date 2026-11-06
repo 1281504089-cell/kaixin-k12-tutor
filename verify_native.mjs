@@ -28,5 +28,5 @@ for (const extra of [[], ['--local-ai-only']]) {
 const components = JSON.parse(await readFile(path.join(output, 'components.json')));
 assert.equal(components.remotion_browser_layout.ok, true, 'Native Electron layout probe must run');
 await writeFile(path.join(output, 'native-build.json'), JSON.stringify({ target: target.id,
-  sourceCommit: manifest.commit, approvedSource: '72bc442670ae1211177a9bd198aa7921ddd17cd5',
+  sourceCommit: manifest.commit, approvedSource: JSON.parse(await readFile(path.join(root, 'SOURCE_FREEZE.json'))).commit,
   nativeComponents: 'passed', privateKeysUploaded: false, textbooks: 'merge locally before delivery' }, null, 2));
