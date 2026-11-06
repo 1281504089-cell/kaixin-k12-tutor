@@ -48,12 +48,19 @@ if a.stage=='payload':
     for book in books['books']:
         file=inputs/book['file']; assert file.stat().st_size==book['bytes'] and digest(file)==book['sha256']
         relative=Path(book['relative']); assert relative.parts[0]=='reading' and relative.parts[1]==book['sha256'] and relative.parts[2]=='raw' and len(relative.parts)==4 and relative.suffix=='.pdf'
+        if a.target.startswith('windows'): relative=Path(*relative.parts[:3])/'source.pdf'
         dest=runtime/'student-seed'/relative; dest.parent.mkdir(parents=True,exist_ok=True); file.replace(dest)
+    if a.target.startswith('windows'):
+        unsupported=[str(p.relative_to(runtime)) for p in runtime.rglob('*') if not str(p.relative_to(runtime)).isascii()]
+        assert not unsupported, f'Nonportable resource paths: {unsupported[:8]}'
     python=runtime/('python/python.exe' if a.target.startswith('windows') else 'python/bin/python3')
     run([python,root/'scripts/audit-student-bundle.py',runtime])
     run(['node','scripts/seal-runtime.mjs','--target',a.target,'--new-key'],desktop)
     run(['node',checkout/'verify_native.mjs','--target',a.target])
-    run(['node','scripts/smoke.mjs','--target',a.target],desktop)
+    smoke_env=dict(os.environ)
+    if a.target.startswith('windows'):
+        unicode_temp=inputs/'全新 学生资料';unicode_temp.mkdir();smoke_env.update({'TEMP':str(unicode_temp),'TMP':str(unicode_temp)})
+    run(['node','scripts/smoke.mjs','--target',a.target],desktop,smoke_env)
     manifest=json.loads((seed/'runtime.json').read_text()); assert manifest['commit']==freeze['commit']
     code="import {splitPayload} from './apps/desktop/scripts/lib/split-payload.mjs';import{writeFile}from'node:fs/promises';const parts=await splitPayload(process.argv[1],process.argv[1]);await writeFile(process.argv[2],JSON.stringify({parts}));"
     archive=seed/manifest['archive']; run(['node','--input-type=module','-e',code,archive,seed/'parts.json']); archive.unlink()
