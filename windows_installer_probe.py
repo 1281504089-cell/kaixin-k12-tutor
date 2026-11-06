@@ -27,4 +27,11 @@ Write-Host ('INSTALLED='+[bool](Test-Path (Join-Path $install '开心动力超�
 if ($result.ExitCode -ne 0) {throw 'Small valid installer failed'}
 """,encoding='utf-8-sig')
 env={**os.environ,'KX_PROBE_EXE':str(exe),'KX_PROBE_LOG':str(work/'installer-probe.log')}
-subprocess.run(['powershell','-NoProfile','-File',script],env=env,check=True)
+results=[]
+for shell in ['powershell','pwsh']:
+    result=subprocess.run([shell,'-NoProfile','-File',script],env=env,capture_output=True,text=True,errors='replace')
+    print('PARENT_SHELL='+shell+' EXIT='+str(result.returncode),flush=True)
+    print(result.stdout+result.stderr,flush=True)
+    results.append({'parent':shell,'exit':result.returncode})
+print('INSTALLER_PARENT_RESULTS='+json.dumps(results),flush=True)
+
