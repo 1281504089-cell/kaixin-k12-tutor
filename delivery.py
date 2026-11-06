@@ -39,6 +39,7 @@ if a.stage=='payload':
         extract(archive,runtime)
     archive.unlink()
     run(['node','apps/desktop/scripts/refresh-runtime.mjs','--target',a.target])
+    run(['node',root/'web/node_modules/vitest/vitest.mjs','run','tests/mermaid-error-recovery.spec.tsx','tests/markdown-math-renderer.spec.tsx','tests/visualize/VisualizationViewer.spec.tsx','--maxWorkers=2'],root/'web')
     shutil.rmtree(root/'web/node_modules', ignore_errors=True); shutil.rmtree(root/'web/.next',ignore_errors=True)
     download('delivery-resources-20261107','textbooks-manifest.json'); download('delivery-resources-20261107','textbook-metadata.tar.gz'); download('delivery-resources-20261107','book-*.pdf')
     books=json.loads((inputs/'textbooks-manifest.json').read_text()); assert books['count']==136
