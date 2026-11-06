@@ -15,3 +15,5 @@ try {
     if($LASTEXITCODE -eq 0 -or (Test-Path $env:KX_PAYLOAD_OUTPUT)){throw 'Corrupted part was accepted'}
     Write-Host 'PASS: valid parts join and corrupt parts remove only their incomplete output.'
 }finally{Remove-Item $root -Recurse -Force}
+
+exit 0
