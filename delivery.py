@@ -1,5 +1,5 @@
 """Assemble private, credential-free native deliveries on disposable GitHub runners."""
-import argparse, hashlib, json, os, shutil, subprocess, tarfile
+import argparse, hashlib, json, os, shutil, subprocess, tarfile, time
 from pathlib import Path
 
 args = argparse.ArgumentParser(); args.add_argument('--target', required=True); args.add_argument('--stage', choices=['payload','package'], required=True); args.add_argument('--payload-run'); a=args.parse_args()
@@ -9,7 +9,16 @@ def run(command, cwd=root, env=None): subprocess.run([str(x) for x in command], 
 def digest(file):
     with file.open('rb') as stream: return hashlib.file_digest(stream,'sha256').hexdigest()
 def download(tag, pattern, folder=inputs):
-    folder.mkdir(parents=True, exist_ok=True); run(['gh','release','download',tag,'--repo',repo,'--pattern',pattern,'--dir',folder],checkout)
+    folder.mkdir(parents=True, exist_ok=True)
+    command=['gh','release','download',tag,'--repo',repo,'--pattern',pattern,'--dir',str(folder),'--clobber']
+    for attempt in range(4):
+        result=subprocess.run(command,cwd=checkout,capture_output=True,text=True)
+        if result.returncode==0: return
+        error=result.stderr+result.stdout
+        if attempt==3 or not any(token in error.lower() for token in ['http 500','http 502','http 503','http 504','http 429','timed out','connection reset','unexpected eof']):
+            raise RuntimeError(error[-2000:])
+        print(f'Transient download failure for {pattern}; retry {attempt+1}/3',flush=True)
+        time.sleep(2**(attempt+1))
 def extract(file,destination):
     destination.mkdir(parents=True, exist_ok=True)
     with tarfile.open(file) as archive: archive.extractall(destination,filter='data')
