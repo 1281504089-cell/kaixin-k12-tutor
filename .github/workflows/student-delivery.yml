@@ -60,5 +60,9 @@ jobs:
         shell: pwsh
         run: |
           if (!(Test-Path "${env:ProgramFiles(x86)}/NSIS/makensis.exe")) { choco install nsis --version=3.12 --yes --no-progress }
+      - name: Verify Windows resource part checksums
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./test-payload.ps1
       - name: Assemble and validate native delivery
         run: python delivery.py --target ${{ matrix.target }} --stage ${{ inputs.stage }} --payload-run '${{ inputs.payload_run }}'
