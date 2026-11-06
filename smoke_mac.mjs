@@ -5,13 +5,15 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { loadTarget } from './student-source/apps/desktop/scripts/lib/target.mjs';
 const target = await loadTarget();
+const {probe}=await import('./student-source/apps/desktop/src/processes.mjs');
+let backend,frontend;
 const root = process.cwd();
 const bundle = path.join(root, `apps/desktop/out/开心动力超级学霸-darwin-${target.arch}/开心动力超级学霸.app`);
 const home = await mkdtemp(path.join(os.tmpdir(), 'KX 安装体验 '));
 const log = path.join(home, 'logs/runtime.log');
 const app = spawn(path.join(bundle, 'Contents/MacOS/开心动力超级学霸'), [], {env:{...process.env,OPEN_DEEPTUTOR_TEST_HOME:home,PATH:'/usr/bin:/bin:/usr/sbin:/sbin'},stdio:'ignore',detached:true});
 try {
-  const deadline=Date.now()+900000; let backend,frontend;
+  const deadline=Date.now()+900000;
   while(Date.now()<deadline) {
     assert.equal(app.exitCode,null,'Installed app exited before becoming ready');
     let text='';try{text=await readFile(log,'utf8')}catch{}
@@ -34,5 +36,9 @@ try {
 } finally {
   try { process.kill(-app.pid,'SIGTERM'); } catch {}
   await new Promise(resolve=>{if(app.exitCode!==null)resolve();else{const t=setTimeout(()=>{try { process.kill(-app.pid,'SIGKILL'); } catch {} resolve()},30000);app.once('exit',()=>{clearTimeout(t);resolve()})}});
+  const deadline=Date.now()+20000;
+  while(Date.now()<deadline && ((backend&&await probe(backend))||(frontend&&await probe(frontend)))) await new Promise(resolve=>setTimeout(resolve,500));
+  if(backend) assert.equal(await probe(backend),false,'Backend survived app termination');
+  if(frontend) assert.equal(await probe(frontend),false,'Frontend survived app termination');
   await rm(home,{recursive:true,force:true});
 }
