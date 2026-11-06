@@ -92,6 +92,7 @@ else:
             file.unlink()
     assert digest(archive)==manifest['sha256']; (seed/'runtime.json').write_text(json.dumps(manifest,indent=2)+'\n')
     shutil.copy2(checkout/'delivery-runtime-public.pem',desktop/'assets/runtime-public.pem')
+    if a.target.startswith('windows'): shutil.copy2(checkout/'windows-installer.nsi',desktop/'platforms/windows-x64/installer.nsi')
     env={**os.environ,'KX_CONSUME_CI_INPUTS':'1'}; run(['node','scripts/package.mjs','--target',a.target],desktop,env)
     if a.target.startswith('windows'):
         run(['powershell','-NoProfile','-File',desktop/'platforms/windows-x64/smoke-installer.ps1'],desktop)
@@ -103,6 +104,8 @@ else:
     files=[p for p in (desktop/'out').iterdir() if p.is_file()]
     assert files and all(p.stat().st_size<2*1024**3 for p in files)
     report={'target':a.target,'approvedSource':freeze['commit'],'runtime':manifest['runtimeId'],'apiKeysIncluded':False,'studentRecordsIncluded':False,'installerSmoke':'passed','runner':os.environ.get('ImageOS'),'platformSigning':'ad-hoc' if not a.target.startswith('windows') else 'unsigned'}
+    report['packagingCommit']=os.environ['GITHUB_SHA']
+    if a.target.startswith('windows'): report['installerScriptSHA256']=digest(checkout/'windows-installer.nsi')
     receipt=desktop/'out/validation.json'; receipt.write_text(json.dumps(report,indent=2)+'\n')
     guide=desktop/'out/INSTALL.txt'; guide.write_text('同一平台的全部分卷请放在同一文件夹。Mac 打开第一个 .dmg，再拖入 Applications；Windows 双击 Setup.exe，资源分卷自动校验合并。首次启动解压本机运行环境，建议预留至少 30GB 可用空间。安装包不含 API Key，请在设置中填写个人接口。教材、错题本、笔记和学习记录保存在本机。此体验版没有购买系统开发者签名。\n',encoding='utf-8')
     files=[*files,receipt,guide]
