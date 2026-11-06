@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12.13'
+          python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.4'
@@ -69,3 +69,4 @@ jobs:
           python -c "from pathlib import Path; p=Path('.local/${{ matrix.target }}/seed'); assert all(x.stat().st_size < 2*1024**3 for x in p.iterdir() if x.is_file()), 'Payload exceeds Release file limit'"
           gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "Native validation ${{ matrix.target }} / ${{ github.run_id }}" --prerelease --notes "Internal native payload, not a student installer. No model API keys, student records or textbook originals. Textbooks and the maintainer signature are merged locally before delivery."
           gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" .local/${{ matrix.target }}/seed/* assets/runtime-public.pem .local/${{ matrix.target }}/smoke-result.json .local/${{ matrix.target }}/native-evidence/*.json
+
