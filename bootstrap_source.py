@@ -27,6 +27,6 @@ assert not (destination / "apps/desktop/.local").exists()
 (destination / "SOURCE_FREEZE.json").write_text(json.dumps(manifest, indent=2))
 for arguments in (["init"], ["config", "user.name", "Kaixin Student Builder"],
                   ["config", "user.email", "build@users.noreply.github.com"],
-                  ["add", "."], ["commit", "-m", "Frozen student source " + manifest["commit"]]):
+                  ["add", "--force", "."], ["commit", "-m", "Frozen student source " + manifest["commit"]]):
     subprocess.run(["git", "-C", str(destination), *arguments], check=True)
 print("Verified credential-free source snapshot", manifest["commit"])
