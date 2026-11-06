@@ -13,7 +13,12 @@ try {
     [IO.File]::WriteAllBytes($second,[byte[]](4,6))
     & powershell -NoProfile -File $script
     if($LASTEXITCODE -eq 0 -or (Test-Path $env:KX_PAYLOAD_OUTPUT)){throw 'Corrupted part was accepted'}
-    Write-Host 'PASS: valid parts join and corrupt parts remove only their incomplete output.'
+    [IO.File]::WriteAllBytes($second,[byte[]](4,5))
+    $manifest.sha256='0'*64
+    $manifest | ConvertTo-Json -Depth 5 | Set-Content $env:KX_PARTS_MANIFEST -Encoding UTF8
+    & powershell -NoProfile -File $script
+    if($LASTEXITCODE -eq 0 -or (Test-Path $env:KX_PAYLOAD_OUTPUT)){throw 'Wrong aggregate checksum was accepted'}
+    Write-Host 'PASS: valid parts join; corrupt parts and wrong aggregate hashes remove only their incomplete output.'
 }finally{Remove-Item $root -Recurse -Force}
 
 exit 0
