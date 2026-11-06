@@ -72,6 +72,13 @@ def main():
         for name in ("tlpkg/tlperl", "texmf-var", "texmf-config"):
             if (windows_tex / name).exists():
                 shutil.copytree(windows_tex / name, tex / name, dirs_exist_ok=True)
+        dvisvgm = next(x for x in json.loads((desktop / "student-resources.json").read_text())["assets"] if x["file"].startswith("dvisvgm.windows"))
+        package_path = root.parent / dvisvgm["file"]
+        with package_path.open("rb") as stream:
+            assert hashlib.file_digest(stream, "sha256").hexdigest() == dvisvgm["sha256"]
+        with tarfile.open(package_path) as package:
+            package.extractall(tex, filter="data")
+        assert (tex / "bin/windows/dvisvgm.exe").is_file()
         run([tex / "bin/windows/mktexlsr.exe"])
     else:
         env.update(PATH=str(prefix / "bin") + os.pathsep + env["PATH"],
