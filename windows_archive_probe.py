@@ -15,4 +15,9 @@ with tempfile.TemporaryDirectory(prefix='KX archive probe ') as folder:
                 output=root/f'测试 {len(results)}';output.mkdir();r=subprocess.run([str(binary),'-xzf','-',*options],input=data,cwd=output,env={**os.environ,**extra},capture_output=True)
                 expected=output/'资料/公式α.txt'
                 results.append({'format':name,'locale':label,'options':options,'exit':r.returncode,'correct':expected.exists() and expected.read_text(encoding='utf-8')=='负二分之一','stderr':r.stderr.decode(errors='replace')[:180]})
+    memory=io.BytesIO()
+    with tarfile.open(fileobj=memory,mode='w:gz',format=tarfile.PAX_FORMAT) as archive:
+        info=tarfile.TarInfo('reading/book/raw/source.pdf'); payload=b'verified sample';info.size=len(payload);archive.addfile(info,io.BytesIO(payload))
+    output=root/'全新 学生资料';output.mkdir();r=subprocess.run([str(binary),'-xzf','-'],input=memory.getvalue(),cwd=output,capture_output=True)
+    file=output/'reading/book/raw/source.pdf';results.append({'format':'pax-ascii','locale':'default','options':[],'exit':r.returncode,'correct':file.exists() and file.read_bytes()==payload,'stderr':r.stderr.decode(errors='replace')[:180]})
 print('ARCHIVE_PROBE='+json.dumps(results,ensure_ascii=False))
