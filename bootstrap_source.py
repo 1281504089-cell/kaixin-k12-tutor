@@ -24,6 +24,11 @@ with tarfile.open(archive) as package:
     package.extractall(destination, filter="data")
 assert not (destination / "data/user").exists()
 assert not (destination / "apps/desktop/.local").exists()
+native_script = destination / "apps/desktop/scripts/prepare-student-native.py"
+assert hashlib.sha256(native_script.read_bytes()).hexdigest() == "1da564b46480450a8fc1b9b2829eb944462a5c8eb53684c09a4e32b41ed423fc"
+native_fix = (root / "prepare-student-native.py").read_bytes()
+native_script.write_bytes(native_fix)
+manifest["nativePackagingOverrideSHA256"] = hashlib.sha256(native_fix).hexdigest()
 (destination / "SOURCE_FREEZE.json").write_text(json.dumps(manifest, indent=2))
 for arguments in (["init"], ["config", "user.name", "Kaixin Student Builder"],
                   ["config", "user.email", "build@users.noreply.github.com"],
