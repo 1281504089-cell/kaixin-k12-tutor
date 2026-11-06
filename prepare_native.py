@@ -44,11 +44,17 @@ def main():
     assets.mkdir(parents=True)
     with tarfile.open(args.common) as package:
         package.extractall(assets, filter="data")
+    ocr = root.parent / "student-ocr-languages.tar.gz"
+    with ocr.open("rb") as stream:
+        assert hashlib.file_digest(stream, "sha256").hexdigest() == "b37f2f975303543a6c3e391b3cb6e528bdec911e7918920af4b220a7c1c2ef36"
+    with tarfile.open(ocr) as package:
+        package.extractall(assets, filter="data")
     assert not (assets / "student-seed").exists()
     (assets / "student-seed").mkdir()
     prefix = local / "native-prefix"
     run([sys.executable, desktop / "scripts/prepare-student-native.py", "--target", args.target,
          "--cache", local / "native-cache", "--prefix", prefix])
+    shutil.copytree(assets / "support/tessdata", prefix / ("Library/share/tessdata" if sys.platform == "win32" else "share/tessdata"), dirs_exist_ok=True)
     env = os.environ.copy()
     if sys.platform == "win32":
         spec = next(x for x in json.loads((desktop / "student-resources.json").read_text())["assets"] if x["file"].startswith("TinyTeX-1-windows"))
