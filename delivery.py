@@ -22,6 +22,12 @@ def download(tag, pattern, folder=inputs):
 def extract(file,destination):
     destination.mkdir(parents=True, exist_ok=True)
     with tarfile.open(file) as archive: archive.extractall(destination,filter='data')
+    removed=0
+    for sidecar in destination.rglob('._*'):
+        if sidecar.is_file() and not sidecar.is_symlink():
+            with sidecar.open('rb') as stream: apple_double=stream.read(4)==b'\x00\x05\x16\x07'
+            if apple_double: sidecar.unlink(); removed+=1
+    if removed: print(f'Removed {removed} AppleDouble metadata sidecars from build inputs',flush=True)
 def publish(tag, title, files, note):
     run(['gh','release','create',tag,'--repo',repo,'--prerelease','--title',title,'--notes',note], checkout)
     run(['gh','release','upload',tag,'--repo',repo,*files], checkout)
