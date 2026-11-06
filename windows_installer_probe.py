@@ -35,3 +35,5 @@ for shell in ['powershell','pwsh']:
     results.append({'parent':shell,'exit':result.returncode})
 print('INSTALLER_PARENT_RESULTS='+json.dumps(results),flush=True)
 
+
+assert all(row['exit']==0 for row in results), results
