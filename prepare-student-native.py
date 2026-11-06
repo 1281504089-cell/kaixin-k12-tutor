@@ -94,6 +94,8 @@ def prepare(target: str, cache: Path, prefix: Path | None, download_only: bool):
                 "--yes",
                 "--no-rc",
                 "--offline",
+                # Prefix image caches are not exported; their hooks can block Windows DLL linking.
+                *(["--skip-run-link-scripts"] if target == "windows-x64" else []),
                 "--prefix",
                 str(prefix.resolve()),
                 "--file",
