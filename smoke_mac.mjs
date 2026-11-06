@@ -37,8 +37,8 @@ try {
   try { process.kill(-app.pid,'SIGTERM'); } catch {}
   await new Promise(resolve=>{if(app.exitCode!==null)resolve();else{const t=setTimeout(()=>{try { process.kill(-app.pid,'SIGKILL'); } catch {} resolve()},30000);app.once('exit',()=>{clearTimeout(t);resolve()})}});
   const deadline=Date.now()+20000;
-  while(Date.now()<deadline && ((backend&&await probe(backend))||(frontend&&await probe(frontend)))) await new Promise(resolve=>setTimeout(resolve,500));
-  if(backend) assert.equal(await probe(backend),false,'Backend survived app termination');
+  while(Date.now()<deadline && ((backend&&await probe(backend+'/health/ready'))||(frontend&&await probe(frontend)))) await new Promise(resolve=>setTimeout(resolve,500));
+  if(backend) assert.equal(await probe(backend+'/health/ready'),false,'Backend survived app termination');
   if(frontend) assert.equal(await probe(frontend),false,'Frontend survived app termination');
   await rm(home,{recursive:true,force:true});
 }
