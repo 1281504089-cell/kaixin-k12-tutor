@@ -15,7 +15,7 @@ OutFile "${OUTFILE}"
 InstallDir "$LOCALAPPDATA\Programs\${APP}"
 InstallDirRegKey HKCU "${REG}" "InstallDir"
 RequestExecutionLevel user
-SetCompressor /SOLID lzma
+SetCompressor /SOLID zlib
 BrandingText "开心动力超级学霸（Windows） v${VERSION}"
 
 VIProductVersion "${FILEVERSION}"
