@@ -37,3 +37,9 @@ print('INSTALLER_PARENT_RESULTS='+json.dumps(results),flush=True)
 
 
 assert all(row['exit']==0 for row in results), results
+
+import shutil
+validation=root/'student-source/apps/desktop/platforms/windows-x64'
+validation.mkdir(parents=True,exist_ok=True)
+shutil.copy2(root/'join-payload.ps1',validation/'join-payload.ps1')
+subprocess.run(['pwsh','-NoProfile','-NonInteractive','-File',root/'test-payload.ps1'],check=True)
