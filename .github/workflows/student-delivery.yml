@@ -47,8 +47,16 @@ jobs:
       - name: Free only unused preinstalled tools on this disposable macOS runner
         if: runner.os == 'macOS'
         run: |
-          if [ -d /Library/Developer/CommandLineTools ]; then sudo xcode-select -s /Library/Developer/CommandLineTools; fi
-          sudo rm -rf /Applications/Xcode*.app /Library/Developer/CoreSimulator /Users/runner/Library/Developer/CoreSimulator
+          if [ -d /Library/Developer/CommandLineTools ]; then
+            sudo xcode-select -s /Library/Developer/CommandLineTools
+            sudo rm -rf /Applications/Xcode*.app
+          else
+            selected=$(xcode-select -p)
+            for xcode in /Applications/Xcode*.app; do
+              if [ "$xcode/Contents/Developer" != "$selected" ]; then sudo rm -rf "$xcode"; fi
+            done
+          fi
+          sudo rm -rf /Users/runner/Library/Developer/CoreSimulator
           df -h .
       - name: Verify approved source
         run: python bootstrap_source.py
