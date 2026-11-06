@@ -72,10 +72,13 @@ else:
         run(['powershell','-NoProfile','-File',desktop/'platforms/windows-x64/smoke-installer.ps1'],desktop)
     else:
         run(['node',checkout/'smoke_mac.mjs','--target',a.target],root)
+    for name in ['components.json','smoke-result.json']:
+        download(tag,name); shutil.copy2(inputs/name,desktop/'out'/name)
+    shutil.copy2(checkout/'delivery-notes.md',desktop/'out/接口与授权说明.md')
     files=[p for p in (desktop/'out').iterdir() if p.is_file()]
     assert files and all(p.stat().st_size<2*1024**3 for p in files)
     checksums=''.join(f'{digest(p)}  {p.name}\n' for p in files); sums=desktop/'out/SHA256SUMS.txt'; sums.write_text(checksums)
     report={'target':a.target,'approvedSource':freeze['commit'],'runtime':manifest['runtimeId'],'apiKeysIncluded':False,'studentRecordsIncluded':False,'installerSmoke':'passed','runner':os.environ.get('ImageOS'),'platformSigning':'ad-hoc' if not a.target.startswith('windows') else 'unsigned'}
     receipt=desktop/'out/validation.json'; receipt.write_text(json.dumps(report,indent=2)+'\n')
-    guide=desktop/'out/安装说明.txt'; guide.write_text('同一平台的全部分卷请放在同一文件夹。Mac 打开第一个 .dmg，再拖入 Applications；Windows 双击 Setup.exe，资源分卷自动校验合并。首次启动解压本机运行环境，需要约 20GB 可用空间。安装包不含 API Key，请在设置中填写个人接口。教材、错题本、笔记和学习记录保存在本机。此体验版没有购买系统开发者签名。\n',encoding='utf-8')
+    guide=desktop/'out/安装说明.txt'; guide.write_text('同一平台的全部分卷请放在同一文件夹。Mac 打开第一个 .dmg，再拖入 Applications；Windows 双击 Setup.exe，资源分卷自动校验合并。首次启动解压本机运行环境，建议预留至少 30GB 可用空间。安装包不含 API Key，请在设置中填写个人接口。教材、错题本、笔记和学习记录保存在本机。此体验版没有购买系统开发者签名。\n',encoding='utf-8')
     publish(f'student-{freeze["commit"][:9]}-{a.target}',f'开心动力超级学霸体验版 · {a.target}',[*files,sums,receipt,guide],'Student installer. Download all files for this platform into one folder. No API keys or personal learning records. Native install/startup checks passed on a fresh CI profile; consumer hardware testing remains separate.')
