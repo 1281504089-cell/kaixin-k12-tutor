@@ -2,18 +2,29 @@
 $ErrorActionPreference = 'Stop'
 try {
     $manifest = Get-Content -LiteralPath $env:KX_PARTS_MANIFEST -Raw -Encoding UTF8 | ConvertFrom-Json
+    $archiveHash = [System.Security.Cryptography.SHA256]::Create()
     $output = [System.IO.File]::Open($env:KX_PAYLOAD_OUTPUT, 'Create', 'Write', 'None')
     try {
-        foreach ($part in $manifest.parts) {
-            if ($part.file -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]+$') { throw 'Invalid resource name' }
-            $source = Join-Path $env:KX_PARTS_DIRECTORY $part.file
-            $info = Get-Item -LiteralPath $source
-            if ($info.Length -ne $part.bytes -or (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -ne $part.sha256) { throw "Incomplete resource: $($part.file)" }
-            $input = [System.IO.File]::OpenRead($source)
-            try { $input.CopyTo($output) } finally { $input.Dispose() }
-        }
-    } finally { $output.Dispose() }
-    if ((Get-FileHash -LiteralPath $env:KX_PAYLOAD_OUTPUT -Algorithm SHA256).Hash -ne $manifest.sha256) { throw 'Resource checksum mismatch' }
+        $writer = [System.Security.Cryptography.CryptoStream]::new($output, $archiveHash, [System.Security.Cryptography.CryptoStreamMode]::Write)
+        try {
+            foreach ($part in $manifest.parts) {
+                if ($part.file -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]+$') { throw 'Invalid resource name' }
+                $source = Join-Path $env:KX_PARTS_DIRECTORY $part.file
+                if ((Get-Item -LiteralPath $source).Length -ne $part.bytes) { throw "Incomplete resource: $($part.file)" }
+                $partHash = [System.Security.Cryptography.SHA256]::Create()
+                $input = [System.IO.File]::OpenRead($source)
+                try {
+                    $reader = [System.Security.Cryptography.CryptoStream]::new($input, $partHash, [System.Security.Cryptography.CryptoStreamMode]::Read)
+                    try {
+                        $reader.CopyTo($writer)
+                        if ([BitConverter]::ToString($partHash.Hash).Replace('-', '') -ne $part.sha256) { throw "Incomplete resource: $($part.file)" }
+                    } finally { $reader.Dispose() }
+                } finally { $input.Dispose(); $partHash.Dispose() }
+            }
+            $writer.FlushFinalBlock()
+            if ([BitConverter]::ToString($archiveHash.Hash).Replace('-', '') -ne $manifest.sha256) { throw 'Resource checksum mismatch' }
+        } finally { $writer.Dispose() }
+    } finally { $output.Dispose(); $archiveHash.Dispose() }
     exit 0
 } catch {
     Write-Output $_.Exception.Message
