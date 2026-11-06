@@ -52,8 +52,12 @@ if a.stage=='payload':
     publish(tag,f'Validated full student runtime / {a.target}',[*seed.iterdir(),local/'smoke-result.json',*evidence],'Internal full runtime, pending local maintainer signature and installer packaging. No API keys or student records. Textbooks included.')
     print('DELIVERY_UNSIGNED_MANIFEST='+json.dumps({'payloadTag':tag,'manifest':manifest},separators=(',',':')))
 else:
-    assert a.payload_run and a.payload_run.isdigit()
-    tag=f'payload-{a.payload_run}-{a.target}'; download(tag,'parts.json'); download(tag,'*.tar.gz.*')
+    if a.payload_run:
+        assert a.payload_run.isdigit(); tag=f'payload-{a.payload_run}-{a.target}'
+    else:
+        tag=json.loads((checkout/'delivery-payloads.json').read_text())[a.target]
+        assert tag.startswith('payload-') and tag.endswith('-'+a.target)
+    download(tag,'parts.json'); download(tag,'*.tar.gz.*')
     manifest=json.loads((checkout/f'delivery-signed-{a.target}.json').read_text()); assert manifest['commit']==freeze['commit']
     seed.mkdir(parents=True,exist_ok=True); archive=seed/manifest['archive']; parts=json.loads((inputs/'parts.json').read_text())['parts']
     with archive.open('wb') as output:
