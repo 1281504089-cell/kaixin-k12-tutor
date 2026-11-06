@@ -79,6 +79,7 @@ def main():
         with tarfile.open(package_path) as package:
             package.extractall(tex, filter="data")
         assert (tex / "bin/windows/dvisvgm.exe").is_file()
+        shutil.copy2(root.parent / "dvisvgm-LICENSE.txt", assets / "support/tex/dvisvgm-LICENSE.txt")
         run([tex / "bin/windows/mktexlsr.exe"])
     else:
         env.update(PATH=str(prefix / "bin") + os.pathsep + env["PATH"],

@@ -24,16 +24,6 @@ with tarfile.open(archive) as package:
     package.extractall(destination, filter="data")
 assert not (destination / "data/user").exists()
 assert not (destination / "apps/desktop/.local").exists()
-manifest["nativePackagingOverrides"] = []
-for filename, relative, before in [
-    ("prepare-student-native.py", "apps/desktop/scripts/prepare-student-native.py", "1da564b46480450a8fc1b9b2829eb944462a5c8eb53684c09a4e32b41ed423fc"),
-    ("native-macos-arm64-lock.json", "apps/desktop/platforms/macos-arm64/native-lock.json", "74601c5a92bb1c4336718362731783bad76175b56cd80d7a615d4dcb2f34c35f"),
-]:
-    target = destination / relative
-    assert hashlib.sha256(target.read_bytes()).hexdigest() == before
-    replacement = (root / filename).read_bytes()
-    target.write_bytes(replacement)
-    manifest["nativePackagingOverrides"].append({"path": relative, "sha256": hashlib.sha256(replacement).hexdigest()})
 (destination / "SOURCE_FREEZE.json").write_text(json.dumps(manifest, indent=2))
 for arguments in (["init"], ["config", "user.name", "Kaixin Student Builder"],
                   ["config", "user.email", "build@users.noreply.github.com"],
