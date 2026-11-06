@@ -74,7 +74,7 @@ Section
   System::Call 'kernel32::SetEnvironmentVariableW(w "KX_PARTS_MANIFEST", w "$PLUGINSDIR\parts.json") i .r0'
   System::Call 'kernel32::SetEnvironmentVariableW(w "KX_PARTS_DIRECTORY", w "$EXEDIR") i .r0'
   System::Call 'kernel32::SetEnvironmentVariableW(w "KX_PAYLOAD_OUTPUT", w "$R0") i .r0'
-  nsExec::ExecToStack '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\join-payload.ps1"'
+  nsExec::ExecToStack '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -InputFormat None -ExecutionPolicy Bypass -File "$PLUGINSDIR\join-payload.ps1"'
   Pop $0
   Pop $1
   FileOpen $2 "$EXEDIR\installer-probe.log" w
