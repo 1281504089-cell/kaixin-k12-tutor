@@ -62,6 +62,8 @@ if a.stage=='payload':
     publish(tag,f'Validated full student runtime / {a.target}',[*seed.iterdir(),local/'smoke-result.json',*evidence],'Internal full runtime, pending local maintainer signature and installer packaging. No API keys or student records. Textbooks included.')
     print('DELIVERY_UNSIGNED_MANIFEST='+json.dumps({'payloadTag':tag,'manifest':manifest},separators=(',',':')))
 else:
+    electron_zip="import {downloadArtifact} from '@electron/get'; import {readFile,mkdir,copyFile} from 'node:fs/promises'; import path from 'node:path'; const pkg=JSON.parse(await readFile('package.json')); const version=pkg.devDependencies.electron; const zip=await downloadArtifact({version,platform:process.platform,arch:process.arch,artifactName:'electron'}); const dir='.local/tooling/downloads'; await mkdir(dir,{recursive:true}); await copyFile(zip,path.join(dir,`electron-v${version}-${process.platform}-${process.arch}.zip`));"
+    run(['node','--input-type=module','-e',electron_zip],desktop)
     if a.payload_run:
         assert a.payload_run.isdigit(); tag=f'payload-{a.payload_run}-{a.target}'
     else:
