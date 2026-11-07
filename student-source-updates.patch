@@ -2828,9 +2828,18 @@ index bbabedd..50bc969 100644
            <details className={`p-3.5 ${subPanelClass}`}>
              <summary className="cursor-pointer select-none rounded text-[13px] font-medium marker:text-[var(--muted-foreground)]">
 diff --git a/web/components/settings/ProvidersWorkspace.tsx b/web/components/settings/ProvidersWorkspace.tsx
-index 9f0f36d..b4b588b 100644
+index 9f0f36d..7eab8e1 100644
 --- a/web/components/settings/ProvidersWorkspace.tsx
 +++ b/web/components/settings/ProvidersWorkspace.tsx
+@@ -7,7 +7,7 @@ import Tooltip from "@/shared/ui/Tooltip";
+ import { stageRegistryAction, type RegistryEdit } from "@/lib/provider-registry";
+ import { useEffect, useRef, useState } from "react";
+ import Link from "next/link";
+-import { ArrowRight, Cable, Plus, Trash2 } from "lucide-react";
++import { ArrowRight, Cable, ChevronDown, Plus, Trash2 } from "lucide-react";
+ import { useTranslation } from "react-i18next";
+ import { formatConfiguredProviderName, formatProviderLabel } from "@/lib/provider-branding";
+ import ProviderIcon from "@/components/common/ProviderIcon";
 @@ -19,6 +19,9 @@ import {
  } from "@/features/settings/store/SettingsStore";
  import {
@@ -2841,17 +2850,18 @@ index 9f0f36d..b4b588b 100644
    providerUsage,
    providerProbeInput,
    updateProvider,
-@@ -39,7 +42,8 @@ import { ProviderServices } from "./ProviderServices";
+@@ -39,7 +42,9 @@ import { ProviderServices } from "./ProviderServices";
  import { AddProviderPanel, ProviderProtocol, type CustomProviderInput } from "./AddProviderPanel";
  import { CodexOAuthCard } from "./CodexOAuthCard";
  import { CodeBuddyAuthCard } from "./CodeBuddyAuthCard";
 -import { stringifyExtraHeaders, subPanelClass } from "./shared";
 +import { modelDefaultEffortOptions, setModelReasoningEffort } from "@/lib/reasoning-effort";
++import { showModelInChat } from "@/lib/llm-options";
 +import { selectClass, stringifyExtraHeaders, subPanelClass } from "./shared";
  import {
    WorkspaceDetailEmpty,
    WorkspaceRail,
-@@ -121,6 +125,9 @@ export function ProvidersWorkspace() {
+@@ -121,6 +126,9 @@ export function ProvidersWorkspace() {
    const addableOptions = options.filter((p) => p.status !== "legacy");
    const optionLabel = (provider: string) => formatProviderLabel(provider, options.find(p => p.value === provider)?.label ?? provider, uiLanguage);
    const source = sources.find((p) => p.id === selected);
@@ -2861,7 +2871,72 @@ index 9f0f36d..b4b588b 100644
    const option = options.find((p) => p.value === source?.provider);
    const managed = source?.provider === "openai_codex";
    const connection = source?.source;
-@@ -398,6 +405,47 @@ export function ProvidersWorkspace() {
+@@ -195,8 +203,64 @@ export function ProvidersWorkspace() {
+         />
+       </div>
+     );
++  const chatModels = STUDENT_EDITION ? flattenModels(draft, ["llm"]).flatMap(({ key, profile, model }) => {
++    if (!model?.model.trim()) return [];
++    const ref = modelProviderRef("llm", profile, model);
++    const provider = sources.find((source) => source.id === providerIdentity(ref));
++    const override = provider?.source.service_overrides?.llm;
++    const binding = (override?.enabled && override.binding) ||
++      ref.binding || provider?.provider || profile.binding || "";
++    const isDefault = draft.services.llm.active_profile_id === profile.id &&
++      draft.services.llm.active_model_id === model.id;
++    return [{
++      key, profile, model, provider, isDefault,
++      visible: isDefault || showModelInChat({ provider: binding, model: model.model, show_in_chat: model.show_in_chat }),
++    }];
++  }) : [];
+   return (
+     <div className="space-y-5">
++      {chatModels.length > 0 && (
++        <details id="chat-model-menu" open className={`group scroll-mt-4 p-4 ${subPanelClass}`}>
++          <summary className="flex cursor-pointer list-none items-center gap-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
++            <span className="flex-1">{t("Models shown in chat")}</span>
++            <span className="text-xs font-normal text-[var(--muted-foreground)]">
++              {t("{{shown}} / {{total}} shown", { shown: chatModels.filter((row) => row.visible).length, total: chatModels.length })}
++            </span>
++            <ChevronDown size={16} className="shrink-0 group-open:rotate-180" aria-hidden />
++          </summary>
++          <p className="my-3 text-[13px] leading-relaxed text-[var(--muted-foreground)]">
++            {t("Check the models you want in the chat menu, then apply changes. The default model is always shown.")}
++          </p>
++          <div className="grid max-h-64 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
++            {chatModels.map(({ key, profile, model, provider, isDefault, visible }) => (
++              <label key={key} className="flex min-w-0 items-center gap-3 rounded-lg border border-[var(--border)] px-3 py-2 has-[:enabled]:cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--primary)]">
++                <input
++                  type="checkbox"
++                  aria-label={`${model.name || model.model} · ${t("Show in model menu")}`}
++                  checked={visible}
++                  disabled={isDefault || applying}
++                  className="size-4 shrink-0 accent-[var(--primary)]"
++                  onChange={(event) => {
++                    const show = event.target.checked;
++                    mutateCatalog((next) => {
++                      const target = next.services.llm.profiles.find((row) => row.id === profile.id)?.models.find((row) => row.id === model.id);
++                      if (target) target.show_in_chat = show;
++                    });
++                  }}
++                />
++                <span className="min-w-0 flex-1 break-words text-sm">
++                  <span className="block font-medium">{model.name || model.model}</span>
++                  <span className="block text-xs text-[var(--muted-foreground)]">
++                    {provider ? formatConfiguredProviderName(provider.provider, provider.name, uiLanguage) : profile.name}
++                    {model.name && model.name !== model.model && ` · ${model.model}`}
++                  </span>
++                </span>
++                {isDefault && <span className="shrink-0 text-xs text-[var(--primary)]">{t("Default model")}</span>}
++              </label>
++            ))}
++          </div>
++        </details>
++      )}
+       <WorkspaceSplit
+         rail={
+           <WorkspaceRail
+@@ -398,6 +462,47 @@ export function ProvidersWorkspace() {
                        />
                      </>
                    )}
@@ -3958,11 +4033,14 @@ index 3376a0f..a35a223 100644
 +  return row.analysis?.verdict === 'incorrect' ? '已分析 · 可复习' : '已分析'
  }
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa..8346cfb 100644
+index 613b5fa..db12962 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
-@@ -1,4 +1,15 @@
+@@ -1,4 +1,18 @@
  {
++  "Models shown in chat": "Models shown in chat",
++  "{{shown}} / {{total}} shown": "{{shown}} / {{total}} shown",
++  "Check the models you want in the chat menu, then apply changes. The default model is always shown.": "Check the models you want in the chat menu, then apply changes. The default model is always shown.",
 +  "Chat model defaults": "Chat model defaults",
 +  "Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.": "Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.",
 +  "Default reasoning effort": "Default reasoning effort",
@@ -3977,7 +4055,7 @@ index 613b5fa..8346cfb 100644
    "Speech synthesis and transcription models with saved providers.": "Speech synthesis and transcription models with saved providers.",
    "Image and video generation models with saved providers.": "Image and video generation models with saved providers.",
    "Manage provider names, addresses, credentials, and connectivity.": "Manage provider names, addresses, credentials, and connectivity.",
-@@ -3038,9 +3049,14 @@
+@@ -3038,9 +3052,14 @@
    "Underline": "Underline",
    "Add note": "Add note",
    "Save citation": "Save citation",
@@ -3993,7 +4071,7 @@ index 613b5fa..8346cfb 100644
    "Ask about this": "Ask about this",
    "Your note…": "Your note…",
    "Save note": "Save note",
-@@ -3173,6 +3189,9 @@
+@@ -3173,6 +3192,9 @@
    "The tutor thread could not be detached.": "The tutor thread could not be detached.",
    "Ask Little Tutor": "Ask Little Tutor",
    "Ask about selected text": "Ask about selected text",
@@ -4004,11 +4082,14 @@ index 613b5fa..8346cfb 100644
    "Ask anything about the selected text.": "Ask anything about the selected text.",
    "Choose color": "Choose color",
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..f5528f4 100644
+index 6c4afd4..4b45d0d 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
-@@ -1,4 +1,15 @@
+@@ -1,4 +1,18 @@
  {
++  "Models shown in chat": "对话菜单展示的模型",
++  "{{shown}} / {{total}} shown": "展示 {{shown}} / {{total}} 个",
++  "Check the models you want in the chat menu, then apply changes. The default model is always shown.": "勾选要在对话菜单里显示的模型，再点「应用更改」。默认模型始终展示。",
 +  "Chat model defaults": "对话模型默认设置",
 +  "Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.": "选择新对话默认用哪个模型，并单独设置每个模型的推理强度。点击「应用更改」保存。",
 +  "Default reasoning effort": "默认推理强度",
@@ -4023,7 +4104,7 @@ index 6c4afd4..f5528f4 100644
    "Speech synthesis and transcription models with saved providers.": "使用已配置的提供方管理语音合成与语音识别模型。",
    "Image and video generation models with saved providers.": "使用已配置的提供方管理图片与视频生成模型。",
    "Manage provider names, addresses, credentials, and connectivity.": "管理提供方的名称、地址、密钥并测试连接。",
-@@ -3038,9 +3049,14 @@
+@@ -3038,9 +3052,14 @@
    "Underline": "下划线",
    "Add note": "添加批注",
    "Save citation": "保存引用",
@@ -4039,7 +4120,7 @@ index 6c4afd4..f5528f4 100644
    "Ask about this": "就此提问",
    "Your note…": "写下你的批注…",
    "Save note": "保存批注",
-@@ -3173,6 +3189,9 @@
+@@ -3173,6 +3192,9 @@
    "The tutor thread could not be detached.": "无法解除这条小老师追问的关联。",
    "Ask Little Tutor": "问小老师",
    "Ask about selected text": "针对选中内容提问",
