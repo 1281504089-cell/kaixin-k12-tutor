@@ -1,10 +1,10 @@
 # 开心动力超级学霸
 
-> 「老师，这里的 x 怎么就约掉了？」
+我们基于 DeepTutor 做了这个桌面版，给用中文课本的小学、初中和高中学生用。这个版本主要改了三处。
 
-在课本上圈出那一步，就能带着原页问。题在作业纸上，拍下来也行。想自己算，就先要个提示，算完再回来核对。
-
-这是基于 DeepTutor 开发的电脑学习工具，给用中文课本的小学、初中和高中学生做。装好就有 **136 册教材**可以翻，九门课都能选对应的 AI 老师。平时做错的题按科目收起来，考前拿出来再做一遍。
+- **装好就能翻 136 册教材。** 课本随安装包一起带上，可以按学段和科目找书。
+- **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
+- **九科有各自的 AI 老师。** 语文到物理、历史等九科都有自己的学习项目，做题时可以按科目选老师，先要个提示，算到哪一步再问哪一步。
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
 
