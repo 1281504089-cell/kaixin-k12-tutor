@@ -5,7 +5,7 @@
 | 电脑 | 下载文件 | 验证 |
 | --- | --- | --- |
 | Apple 芯片 Mac | [下载安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-e8bfcb87d-macos-arm64) | 分卷完整性、打包应用首次启动、UI/API、教材与退出清理通过 |
-| Intel Mac | [下载上一版](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-ae6b75ad3-macos-x64) | 上一版已通过试装，新版正在重新封装磁盘镜像 |
+| Intel Mac | [下载新版安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-e8bfcb87d-macos-x64) | 原生试装通过，重新下载后在 macOS 15.7.9 挂载及签名验证通过 |
 | Windows x64 | [下载新版安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-e8bfcb87d-windows-x64) | 原生安装、启动、退出、卸载保留用户资料通过 |
 
 仓库已于 2026-11-07 按拥有者确认改为公开。Agent 和学生无需 GitHub 登录即可访问源码、历史记录与 Releases 安装资源；下载安装文件请使用上表的平台链接，并下载该平台全部分卷。安装包仍不含 API Key、个人学习记录或签名私钥。
@@ -15,7 +15,7 @@
 ## 安装
 
 1. 只下载对应电脑的平台文件，不用下载 Source code。每个平台的全部分卷放入同一文件夹，保留原名。
-2. Mac：一个 `.dmg` 和三个 `.dmgpart`。双击第一个 `.dmg`，把应用拖入 Applications。
+2. Mac：在一个新建文件夹里存放同一发布页下载的四个原名文件，包括一个 `.dmg` 和三个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。若曾下载旧版，请另用一个空文件夹，避免同名分卷混用。
 3. Windows：一个 `Setup.exe` 和四个 `*-Runtime.001` 至 `*-Runtime.004` 分卷，双击 Setup 即可自动校验合并。
 4. 建议预留至少 30GB 空间。安装时校验资源，首次启动还会解压环境，两阶段均可能需要数分钟。
 5. 新电脑在设置中填写自己的有效聊天接口；旧用户升级保留本机配置与学习记录。
