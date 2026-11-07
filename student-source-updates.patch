@@ -865,6 +865,49 @@ index bbabeddedbb4c16aad4552a07dcdcf432c17cba9..50a77e73f156af08b6b03c330b50906f
              className={registryButton}
            >
              {active && <Check size={13} />}{" "}
+diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
+index 70f5dd930a3e93cef9b0d520ccf715324b83b078..9adbd8dc48aa450e6814d47549b20ca8087f76bd 100644
+--- a/web/features/chat/components/ChatWorkspace.tsx
++++ b/web/features/chat/components/ChatWorkspace.tsx
+@@ -2638,14 +2638,30 @@ export default function ChatWorkspace() {
+                 // window leaves the greeting no room.
+                 <div className="flex w-full flex-1 min-h-0 items-end justify-center overflow-hidden pb-14 animate-fade-in px-6">
+                   <div className="w-full max-w-[960px] flex items-center justify-center gap-4">
+-                    <img
+-                      src="/brand/black-logo.png"
+-                      alt="开心动力超级学霸"
+-                      width={40}
+-                      height={40}
+-                      className="h-10 w-10 select-none"
+-                      draggable={false}
+-                    />
++                    <svg
++                      role="img"
++                      aria-label="KAIXINDONGLI · 开心动力"
++                      viewBox="0 0 144 54"
++                      className="h-auto w-24 shrink-0 text-[var(--foreground)] lg:w-[7.5rem]"
++                    >
++                      <path
++                        d="M12 7h5v12L29 7h7L23 21l14 14h-7L17 23v12h-5z
++                           M44 7h6l8 10 8-10h6L61 21l12 14h-6l-9-10-9 10h-6l12-14z
++                           M82 7h10c9 0 15 5 15 14s-6 14-15 14H82zm5 5v18h5c6 0 10-3 10-9s-4-9-10-9z
++                           M116 7h5v23h14v5h-19z"
++                        fill="currentColor"
++                        fillRule="evenodd"
++                      />
++                      <text
++                        x="72"
++                        y="50"
++                        fill="currentColor"
++                        textAnchor="middle"
++                        className="font-sans text-[11px] font-semibold tracking-[0.18em]"
++                      >
++                        KAIXINDONGLI
++                      </text>
++                    </svg>
+                     <h1 className="font-serif text-[40px] font-medium leading-[1.1] tracking-[-0.015em] text-[var(--foreground)]">
+                       {t(welcomeGreeting)}
+                     </h1>
 diff --git a/web/features/chat/messages/ChatMessageList.tsx b/web/features/chat/messages/ChatMessageList.tsx
 index de5ee55b3f47b5bf796b86df2a7969cee248eacb..8c3b9d915a0fc67cdb83f8ce7bbb8062d362cdec 100644
 --- a/web/features/chat/messages/ChatMessageList.tsx
