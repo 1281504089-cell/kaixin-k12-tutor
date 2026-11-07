@@ -8,7 +8,9 @@
 | Intel Mac | [下载安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-ae6b75ad3-macos-x64) | 分卷完整性、打包应用首次启动、UI/API、教材与退出清理通过 |
 | Windows x64 | [下载 Windows 候选安装包](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/payload-42285703885-windows-x64) | 原生运行资源通过；最终新版安装程序尚未完成 Windows 试装 |
 
-仓库目前私有，需要拥有者登录下载。你可将同一平台的完整安装文件转发给学生；学生使用不需要 GitHub 账号。尚未开放源码或教材的公开下载。
+仓库已于 2026-11-07 按拥有者确认改为公开。Agent 和学生无需 GitHub 登录即可访问源码、历史记录与 Releases 安装资源；下载安装文件请使用上表的平台链接，并下载该平台全部分卷。安装包仍不含 API Key、个人学习记录或签名私钥。
+
+历史 Release 说明或包内文档中“私有／需拥有者登录”的文字反映发布时状态；当前公开访问状态以本页为准。公开访问不改变第三方教材、组件及商用许可的适用条件。
 
 ## 安装
 
