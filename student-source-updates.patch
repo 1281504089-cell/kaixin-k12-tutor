@@ -802,22 +802,52 @@ index 8cff1dc..5764490 100644
  
      调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
 diff --git a/deeptutor/api/routers/student_learning.py b/deeptutor/api/routers/student_learning.py
-index b5c804d..28f0083 100644
+index b5c804d..7818b2d 100644
 --- a/deeptutor/api/routers/student_learning.py
 +++ b/deeptutor/api/routers/student_learning.py
-@@ -67,9 +67,9 @@ async def prepare_temporary_attachment(file: UploadFile, background: BackgroundT
+@@ -1,6 +1,8 @@
+ """Student notebook and read-only default-library endpoints."""
+ 
+-from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
++from typing import Annotated
++
++from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, UploadFile
+ from pydantic import Field
+ 
+ from deeptutor.services.student_learning import mistakes, reports, textbooks
+@@ -67,13 +69,27 @@ async def prepare_temporary_attachment(file: UploadFile, background: BackgroundT
  
  
  @router.get("/reports")
 -async def learning_reports(from_date: str, to_date: str):
-+async def learning_reports(from_date: str, to_date: str, subject: reports.ReportSubject | None = None):
++async def learning_reports(
++    from_date: str,
++    to_date: str,
++    subject: reports.ReportSubject | None = None,
++    extra_session: Annotated[list[str] | None, Query(max_length=reports.MAX_EXTRA_SESSIONS)] = None,
++):
      try:
 -        return await reports.overview(reports.ReportRange(from_date=from_date, to_date=to_date))
-+        return await reports.overview(reports.ReportRange(from_date=from_date, to_date=to_date, subject=subject))
-     except reports.ReportError as exc:
-         raise HTTPException(exc.status, detail=str(exc)) from None
+-    except reports.ReportError as exc:
+-        raise HTTPException(exc.status, detail=str(exc)) from None
++        extras = []
++        for reference in extra_session or []:
++            workspace, session = reference.split(":", 1)
++            extras.append(reports.ReportSession(workspace_id=workspace, session_id=session))
++    except ValueError:
++        raise HTTPException(422, detail="补充对话格式不正确。") from None
++    try:
++        period = reports.ReportRange(from_date=from_date, to_date=to_date, subject=subject, extra_sessions=extras)
      except ValueError:
-@@ -87,6 +87,11 @@ async def generate_learning_report(body: reports.ReportRange, background: Backgr
+         raise HTTPException(422, detail="请选择截至今天的连续1至28天。") from None
++    try:
++        return await reports.overview(period)
++    except reports.ReportError as exc:
++        raise HTTPException(exc.status, detail=str(exc)) from None
+ 
+ 
+ @router.post("/reports")
+@@ -87,6 +103,16 @@ async def generate_learning_report(body: reports.ReportRange, background: Backgr
          raise HTTPException(exc.status, detail=str(exc)) from None
  
  
@@ -826,10 +856,15 @@ index b5c804d..28f0083 100644
 +    return [reports.public(row) for row, _ in (await reports.checked_rows())[:100]]
 +
 +
++@router.get("/reports/sessions")
++async def list_report_sessions(subject: reports.ReportSubject, offset: Annotated[int, Query(ge=0)] = 0):
++    return await reports.available_sessions(subject, offset)
++
++
  @router.get("/reports/{report_id}")
  async def learning_report(report_id: str):
      try:
-@@ -117,8 +122,11 @@ def _error(exc):
+@@ -117,8 +143,11 @@ def _error(exc):
  
  
  class Capture(mistakes.StrictModel):
@@ -843,7 +878,7 @@ index b5c804d..28f0083 100644
  
  
  class Revision(mistakes.StrictModel):
-@@ -126,31 +134,57 @@ class Revision(mistakes.StrictModel):
+@@ -126,31 +155,57 @@ class Revision(mistakes.StrictModel):
  
  
  @router.get("/mistakes")
@@ -908,7 +943,7 @@ index b5c804d..28f0083 100644
      except (ValueError, LookupError) as exc:
          raise _error(exc) from None
  
-@@ -164,9 +198,9 @@ def amend_mistake(record_id: str, body: mistakes.Amendment):
+@@ -164,9 +219,9 @@ def amend_mistake(record_id: str, body: mistakes.Amendment):
  
  
  @router.delete("/mistakes/{record_id}")
@@ -933,6 +968,71 @@ index d1d7363..6435b22 100644
              context_window = _coerce_int(model.get("context_window"))
              official_name = model.get("official_name")
              if isinstance(official_name, str) and official_name:
+diff --git a/deeptutor/services/session/pocketbase_store.py b/deeptutor/services/session/pocketbase_store.py
+index 1243d37..deba0fc 100644
+--- a/deeptutor/services/session/pocketbase_store.py
++++ b/deeptutor/services/session/pocketbase_store.py
+@@ -745,10 +745,14 @@ class PocketBaseSessionStore:
+     async def get_session_summaries(
+         self,
+         session_ids: list[str],
++        *,
++        active_only: bool = False,
+     ) -> list[dict[str, Any]]:
+         """Return bounded metadata without loading complete chat transcripts."""
+ 
+         async def summarize(session_id: str) -> dict[str, Any] | None:
++            if active_only and session_id.startswith("imported_"):
++                return None
+             session = await self.get_session(session_id)
+             if session is None:
+                 return None
+diff --git a/deeptutor/services/session/protocol.py b/deeptutor/services/session/protocol.py
+index 748eece..68836f9 100644
+--- a/deeptutor/services/session/protocol.py
++++ b/deeptutor/services/session/protocol.py
+@@ -247,6 +247,8 @@ class SessionStoreProtocol(SessionRepository, TurnRepository, MessageRepository,
+     async def get_session_summaries(
+         self,
+         session_ids: list[str],
++        *,
++        active_only: bool = False,
+     ) -> list[dict[str, Any]]: ...
+ 
+     async def update_summary(
+diff --git a/deeptutor/services/session/sqlite_store.py b/deeptutor/services/session/sqlite_store.py
+index 7be9696..9f63bd3 100644
+--- a/deeptutor/services/session/sqlite_store.py
++++ b/deeptutor/services/session/sqlite_store.py
+@@ -3044,6 +3044,7 @@ class SQLiteSessionStore:
+     def _get_session_summaries_sync(
+         self,
+         session_ids: list[str],
++        active_only: bool = False,
+     ) -> list[dict[str, Any]]:
+         ids = list(dict.fromkeys(str(item or "").strip() for item in session_ids))
+         ids = [item for item in ids if item]
+@@ -3051,6 +3052,8 @@ class SQLiteSessionStore:
+             return []
+         placeholders = ",".join("?" for _ in ids)
+         where = f"WHERE s.id IN ({placeholders})"
++        if active_only:
++            where = f"{self._WHERE_NATIVE} AND s.id IN ({placeholders})"
+         with self._connect() as conn:
+             rows = conn.execute(
+                 self._SESSION_SUMMARY_SQL.format(where=where),
+@@ -3228,8 +3231,10 @@ class SQLiteSessionStore:
+     async def get_session_summaries(
+         self,
+         session_ids: list[str],
++        *,
++        active_only: bool = False,
+     ) -> list[dict[str, Any]]:
+-        return await self._run(self._get_session_summaries_sync, session_ids)
++        return await self._run(self._get_session_summaries_sync, session_ids, active_only)
+ 
+     async def list_imported_sessions(
+         self,
 diff --git a/deeptutor/services/settings/connection_setup.py b/deeptutor/services/settings/connection_setup.py
 index a06dd2a..f9c0b4e 100644
 --- a/deeptutor/services/settings/connection_setup.py
@@ -1964,7 +2064,7 @@ index 865c603..4ec46ba 100644
      with manager._locked(notebook):
          try:
 diff --git a/deeptutor/services/student_learning/report-contract.cjs b/deeptutor/services/student_learning/report-contract.cjs
-index 8d6f13c..ac2f2a7 100644
+index 8d6f13c..b03b90c 100644
 --- a/deeptutor/services/student_learning/report-contract.cjs
 +++ b/deeptutor/services/student_learning/report-contract.cjs
 @@ -1,14 +1,61 @@
@@ -1982,7 +2082,7 @@ index 8d6f13c..ac2f2a7 100644
 +  const headings = subjectRules.headings[subject];
 +  const english = subject === 'english';
 +  const exerciseRules = english ? fs.readFileSync(path.join(root, 'subject-english-exercises.md'), 'utf8') : '';
-+  const scopeRule = '只依据所选默认学科项目的学习记录。reviewDate 是按学生发言的北京时间确定的完整问答所属日期。保留题干、公式和作答上下文；不把未提供的图片、自报或 AI 讲解当作学生已掌握的证据。';
++  const scopeRule = '依据本次提供的学科项目记录与学生手动补充的对话，只整理所选学科的内容。reviewDate 是按学生发言的北京时间确定的完整问答所属日期。保留题干、公式和作答上下文；不把未提供的图片、自报或 AI 讲解当作学生已掌握的证据。';
 +  const usable = messages.filter(m => m.status === 'complete' || m.kind === 'student_reflection');
 +  if (operation === 'prepare') {
 +    const skill = fs.readFileSync(path.join(root, 'subject-' + subject + '.md'), 'utf8');
@@ -2042,7 +2142,7 @@ index 8d6f13c..ac2f2a7 100644
  }
  module.exports = {contract};
 diff --git a/deeptutor/services/student_learning/reports.py b/deeptutor/services/student_learning/reports.py
-index d0412b9..0c3aa7b 100644
+index d0412b9..ec4a516 100644
 --- a/deeptutor/services/student_learning/reports.py
 +++ b/deeptutor/services/student_learning/reports.py
 @@ -6,10 +6,12 @@ from datetime import date, datetime, timedelta, timezone
@@ -2058,7 +2158,7 @@ index d0412b9..0c3aa7b 100644
  
  from pydantic import BaseModel, ConfigDict, Field, model_validator
  
-@@ -20,6 +22,11 @@ TZ = timezone(timedelta(hours=8))
+@@ -20,6 +22,12 @@ TZ = timezone(timedelta(hours=8))
  ROOT = Path(__file__).parent
  LEASE = 420
  BOOT = uuid.uuid4().hex
@@ -2067,18 +2167,40 @@ index d0412b9..0c3aa7b 100644
 +REPORT_OUTPUT_TOKENS = 16384
 +DEEPSEEK_V4_REPORT_OUTPUT_TOKENS = 32768
 +DEEPSEEK_V4_REPORT_MODELS = {"deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro"}
++MAX_EXTRA_SESSIONS = 20
  
  
  class ReportError(ValueError):
-@@ -32,6 +39,7 @@ class ReportRange(BaseModel):
+@@ -28,10 +36,18 @@ class ReportError(ValueError):
+         self.status = status
+ 
+ 
++class ReportSession(BaseModel):
++    model_config = ConfigDict(extra="forbid", frozen=True)
++    workspace_id: str = Field(max_length=128)
++    session_id: str = Field(min_length=1, max_length=256)
++
++
+ class ReportRange(BaseModel):
      model_config = ConfigDict(extra="forbid", populate_by_name=True)
      from_date: str
      to_date: str
 +    subject: ReportSubject | None = None
++    extra_sessions: list[ReportSession] = Field(default_factory=list, max_length=MAX_EXTRA_SESSIONS)
  
      @model_validator(mode="after")
      def check_dates(self):
-@@ -64,7 +72,7 @@ def reflection(period: ReportRange):
+@@ -43,6 +59,9 @@ class ReportRange(BaseModel):
+                 raise ValueError
+         except ValueError:
+             raise ValueError("请选择截至今天的连续1至28天。") from None
++        if self.extra_sessions and not self.subject:
++            raise ValueError("请先选择英语或数学，再补充对话。")
++        self.extra_sessions = sorted(set(self.extra_sessions), key=lambda item: (item.workspace_id, item.session_id))
+         return self
+ 
+     def payload(self):
+@@ -64,7 +83,7 @@ def reflection(period: ReportRange):
      manager, notebook = storage()
      for record in manager.get_records(notebook):
          value = record.get("metadata", {}).get("student_reflection")
@@ -2087,7 +2209,7 @@ index d0412b9..0c3aa7b 100644
              return {"id": record["id"], **value}
      return {"revision": 0, "range": period.payload(), "answers": dict.fromkeys(REFLECTION_QUESTIONS, ""), "saved_at": None}
  
-@@ -79,6 +87,8 @@ def save_reflection(body: Reflection):
+@@ -79,6 +98,8 @@ def save_reflection(body: Reflection):
          if answers == current["answers"]:
              return current
          value = {"range": body.payload(), "revision": body.revision + 1, "answers": answers, "saved_at": time.time()}
@@ -2096,23 +2218,110 @@ index d0412b9..0c3aa7b 100644
          if current.get("id"):
              manager.update_record(notebook, current["id"], metadata={"student_reflection": value})
          else:
-@@ -138,8 +148,13 @@ async def collect(period: ReportRange) -> dict:
-     from deeptutor.services.workspace import get_content_workspace_service
+@@ -132,21 +153,78 @@ def rows(manager, notebook):
+     return sorted(result, key=lambda r: r["created_at"], reverse=True)
+ 
+ 
+-async def collect(period: ReportRange) -> dict:
++def report_workspaces(subject: ReportSubject | None):
++    from deeptutor.services.workspace import get_content_workspace_service
++
++    catalog = get_content_workspace_service().describe_catalog()
++    names = {"": "未归类对话"}
++    defaults = {""} if subject is None else set()
++    for row in catalog["workspaces"]:
++        if row["kind"] != "workspace" or row["status"] != "ready" or row["archived"]:
++            continue
++        workspace = row["workspace_id"]
++        names[workspace] = row["display_name"]
++        if subject is None or Path(row["path"]) == Path(catalog["root"]) / ("student-study-" + subject):
++            defaults.add(workspace)
++    return names, defaults
++
++
++def report_session_kind(session: dict) -> str | None:
+     from deeptutor.multi_user.learning_access import learning_material_allowed, learning_surface_allowed
++
++    prefs = session.get("preferences") or {}
++    if prefs.get("archived"):
++        return None
++    if "immersive_reading" in (prefs.get("capability"), prefs.get("workspace_mode"), prefs.get("session_kind")):
++        material = prefs.get("reading_material_id")
++        if learning_surface_allowed("reading") and (not material or learning_material_allowed(material)):
++            return "reading"
++        return None
++    return "chat" if learning_surface_allowed("chat") else None
++
++
++async def available_sessions(subject: ReportSubject, offset: int):
++    from deeptutor.services.workspace.navigation import session_index
++
++    names, defaults = report_workspaces(subject)
++    limit = 60
++    page = await session_index(limit, offset)
++    result = []
++    for session in page["sessions"]:
++        workspace = session["content_workspace_id"]
++        if workspace not in names or workspace in defaults or not session.get("message_count"):
++            continue
++        kind = report_session_kind(session)
++        if kind:
++            result.append({
++                "workspace_id": workspace, "session_id": session["session_id"],
++                "title": session.get("title") or "学习对话", "workspace_name": names[workspace],
++                "kind": kind, "updated_at": session["updated_at"],
++            })
++    return {"sessions": result, "next_offset": offset + limit if len(page["sessions"]) == limit else None}
++
++
++async def collect(period: ReportRange) -> dict:
+     from deeptutor.services.session import get_session_store
+-    from deeptutor.services.workspace import get_content_workspace_service
      from deeptutor.services.workspace.context import workspace_context
  
 -    catalog = get_content_workspace_service().describe_catalog()["workspaces"]
 -    scopes = [("", "未归类对话"), *[(r["workspace_id"], r["display_name"]) for r in catalog if r["kind"] == "workspace" and r["status"] == "ready" and not r["archived"]]]
-+    catalog = get_content_workspace_service().describe_catalog()
-+    active = [r for r in catalog["workspaces"] if r["kind"] == "workspace" and r["status"] == "ready" and not r["archived"]]
-+    if period.subject:
-+        subject_path = Path(catalog["root"]) / ("student-study-" + period.subject)
-+        active = [r for r in active if Path(r["path"]) == subject_path]
-+    scopes = [] if period.subject else [("", "未归类对话")]
-+    scopes.extend((r["workspace_id"], r["display_name"]) for r in active)
++    names, defaults = report_workspaces(period.subject)
++    extra_by_workspace: dict[str, list[str]] = {}
++    for item in period.extra_sessions:
++        extra_by_workspace.setdefault(item.workspace_id, []).append(item.session_id)
++    missing = {(item.workspace_id, item.session_id) for item in period.extra_sessions}
      messages, seen = [], set()
-     for workspace, name in scopes:
+-    for workspace, name in scopes:
++    for workspace, name in names.items():
++        if workspace not in defaults and workspace not in extra_by_workspace:
++            continue
          with workspace_context(workspace):
-@@ -169,11 +184,15 @@ async def collect(period: ReportRange) -> dict:
+             store = get_session_store()
+-            sessions = await store.list_sessions(limit=2001)
+-            if len(sessions) > 2000:
+-                raise ReportError("对话记录较多，请先整理归档后再生成，不会静默遗漏记录。", 413)
++            if workspace in defaults:
++                sessions = await store.list_sessions(limit=2001)
++                if len(sessions) > 2000:
++                    raise ReportError("对话记录较多，请先整理归档后再生成，不会静默遗漏记录。", 413)
++            else:
++                sessions = await store.get_session_summaries(extra_by_workspace[workspace], active_only=True)
+             for session in sessions:
+                 sid = session["session_id"]
+                 identity = (str(getattr(store, "db_path", workspace)), sid)
+@@ -154,14 +232,7 @@ async def collect(period: ReportRange) -> dict:
+                     continue
+                 seen.add(identity)
+                 prefs = session.get("preferences", {})
+-                if prefs.get("archived"):
+-                    continue
+-                capability = prefs.get("capability", "chat")
+-                material_id = prefs.get("reading_material_id")
+-                if capability == "immersive_reading" or prefs.get("workspace_mode") == "immersive_reading":
+-                    if not learning_surface_allowed("reading") or material_id and not learning_material_allowed(material_id):
+-                        continue
+-                elif not learning_surface_allowed("chat"):
++                if not report_session_kind(session):
+                     continue
+                 flat = await store.get_messages(sid)
+                 if not flat:
+@@ -169,11 +240,15 @@ async def collect(period: ReportRange) -> dict:
                  selected_ids = await bridge("path", {"messages": [{"id": m["id"], "parentMessageId": m.get("parent_message_id")} for m in flat], "selection": prefs.get("selected_branches", {})})
                  by_id = {m["id"]: m for m in flat}
                  path = [by_id[mid] for mid in selected_ids]
@@ -2129,12 +2338,14 @@ index d0412b9..0c3aa7b 100644
                          continue
                      status = "complete"
                      if message["role"] == "assistant":
-@@ -183,13 +202,17 @@ async def collect(period: ReportRange) -> dict:
+@@ -183,13 +258,22 @@ async def collect(period: ReportRange) -> dict:
                              if turn and turn["status"] != "completed":
                                  status = "incomplete"
                      messages.append({"id": digest([workspace, sid, message["id"]])[:24], "message_id": str(message["id"]), "conversationId": digest([workspace, sid])[:24], "session_id": sid, "workspace_id": workspace, "projectName": name, "title": session.get("title", "学习对话"), "role": message["role"], "content": text, "createdAt": datetime.fromtimestamp(timestamp, timezone.utc).isoformat(), "date": day, "status": status, "has_images": bool(message.get("attachments"))})
 +                    if period.subject:
 +                        messages[-1]["reviewDate"] = scope_day
++                    if message["role"] == "user":
++                        missing.discard((workspace, sid))
                  if len(messages) > 240 or sum(len(m["content"]) for m in messages) > 100000:
                      raise ReportError("记录较多，请缩小日期范围；不会截掉题干后生成报告。", 413)
      messages.sort(key=lambda m: (m["createdAt"], m["conversationId"], int(m["message_id"])))
@@ -2146,23 +2357,40 @@ index d0412b9..0c3aa7b 100644
 +    source = {"range": period.payload(), "messages": messages, "coverage": {"factDates": fact_dates, "missingDates": [d for d in dates if d not in fact_dates], "partialDates": sorted({m.get("reviewDate", m["date"]) for m in messages if m["status"] != "complete" or m["has_images"]})}}
 +    if period.subject:
 +        source["subject"] = period.subject
++    if period.extra_sessions:
++        source["missing_extra_sessions"] = len(missing)
++        source["extra_sessions"] = [item.model_dump() for item in period.extra_sessions]
      if len(json.dumps(source, ensure_ascii=False)) > 160000:
          raise ReportError("完整原文超出本次整理范围，请缩小日期范围。", 413)
      source["metrics"] = {"message_count": len(messages), "conversation_count": len({m["conversationId"] for m in messages}), "active_days": len({m["date"] for m in messages if m["role"] == "user"}), "minutes": None, "exercise_count": None, "accuracy": None}
-@@ -215,10 +238,10 @@ async def checked_rows():
+@@ -211,14 +295,24 @@ async def valid_sources(row: dict, source: dict) -> bool:
+     return all(current.get(m["id"]) == m for m in row.get("evidence", []))
+ 
+ 
++def saved_period(row: dict) -> ReportRange:
++    return ReportRange(
++        from_date=row["range"]["from"],
++        to_date=row["range"]["to"],
++        subject=row.get("subject"),
++        extra_sessions=row.get("extra_sessions", []),
++    )
++
++
+ async def checked_rows():
      manager, notebook = storage()
      result, sources = [], {}
      for row in rows(manager, notebook):
 -        key = (row["range"]["from"], row["range"]["to"])
-+        key = (row["range"]["from"], row["range"]["to"], row.get("subject"))
++        period = saved_period(row)
++        key = period.model_dump_json()
          if key not in sources:
              try:
 -                sources[key] = await collect(ReportRange(from_date=key[0], to_date=key[1]))
-+                sources[key] = await collect(ReportRange(from_date=key[0], to_date=key[1], subject=key[2]))
++                sources[key] = await collect(period)
              except ReportError:
                  sources[key] = None
          source = sources[key]
-@@ -226,7 +249,7 @@ async def checked_rows():
+@@ -226,7 +320,7 @@ async def checked_rows():
              with manager._locked(notebook):
                  current = manager.get_record(notebook, row["id"])
                  if current:
@@ -2171,12 +2399,14 @@ index d0412b9..0c3aa7b 100644
                      save(manager, notebook, row)
              continue
          result.append((row, source))
-@@ -234,17 +257,19 @@ async def checked_rows():
+@@ -234,19 +328,23 @@ async def checked_rows():
  
  
  def public(row, *, stale=False, detail=False):
 -    result = {k: row[k] for k in ["id", "created_at", "range", "state", "stage", "message", "metrics"] if k in row}
 +    result = {k: row[k] for k in ["id", "created_at", "range", "subject", "state", "stage", "message", "metrics", "result_level"] if k in row}
++    if row.get("extra_sessions"):
++        result["extra_session_count"] = len(row["extra_sessions"])
      result["stale"] = stale
      if detail and row["state"] == "ready":
          result.update(summary=row["summary"], evidence=row["evidence"], coverage=row["coverage"])
@@ -2189,11 +2419,22 @@ index d0412b9..0c3aa7b 100644
      source = await collect(period)
      reports = await checked_rows()
 -    matching = [(r, s) for r, s in reports if r["range"] == period.payload()]
-+    matching = [(r, s) for r, s in reports if r["range"] == period.payload() and r.get("subject") == period.subject]
++    matching = [(r, s) for r, s in reports if saved_period(r) == period]
      latest = matching[0][0] if matching and matching[0][1] is not None else None
-     return {"range": period.payload(), "metrics": source["metrics"], "coverage": source["coverage"], "reflection": source["reflection"], "report": public(latest, stale=latest["fingerprint"] != source["fingerprint"] or latest["policy"] != policy_version(), detail=True) if latest else None, "history": [public(r) for r, _ in reports[:100]]}
+-    return {"range": period.payload(), "metrics": source["metrics"], "coverage": source["coverage"], "reflection": source["reflection"], "report": public(latest, stale=latest["fingerprint"] != source["fingerprint"] or latest["policy"] != policy_version(), detail=True) if latest else None, "history": [public(r) for r, _ in reports[:100]]}
++    return {"range": period.payload(), "metrics": source["metrics"], "coverage": source["coverage"], "reflection": source["reflection"], "report": public(latest, stale=latest["fingerprint"] != source["fingerprint"] or latest["policy"] != policy_version(), detail=True) if latest else None, "history": [public(r) for r, _ in reports[:100]], "missing_extra_sessions": source.get("missing_extra_sessions", 0)}
  
-@@ -266,7 +291,7 @@ async def begin(period: ReportRange):
+ 
+ async def detail(report_id: str):
+@@ -260,13 +358,15 @@ async def detail(report_id: str):
+ 
+ async def begin(period: ReportRange):
+     source = await collect(period)
++    if source.get("missing_extra_sessions"):
++        raise ReportError("部分补充对话在所选日期内没有可用记录，请调整日期或取消勾选。", 422)
+     if not any(m["role"] == "user" for m in source["messages"]):
+         raise ReportError("这段时间还没有可整理的学习对话。先聊一道题或边读边问，再回来看看。", 422)
+     manager, notebook = storage()
      version = policy_version()
      with manager._locked(notebook):
          existing = rows(manager, notebook)
@@ -2202,7 +2443,7 @@ index d0412b9..0c3aa7b 100644
          if exact:
              return public(exact, detail=True), None
          if any(r["state"] == "pending" for r in existing):
-@@ -275,10 +300,15 @@ async def begin(period: ReportRange):
+@@ -275,10 +375,17 @@ async def begin(period: ReportRange):
              raise ReportError("已保存100份报告，请先导出并移除不再需要的报告。")
          from deeptutor.services.llm.config import get_llm_config
          try:
@@ -2216,10 +2457,12 @@ index d0412b9..0c3aa7b 100644
          data = {"range": period.payload(), "state": "pending", "stage": "generating", "message": "正在整理完整原文…", "worker": BOOT, "lease_until": time.time() + LEASE, "fingerprint": source["fingerprint"], "policy": version, "evidence": source["messages"], "coverage": source["coverage"], "metrics": source["metrics"], "summary": None}
 +        if period.subject:
 +            data["subject"] = period.subject
++        if period.extra_sessions:
++            data["extra_sessions"] = [item.model_dump() for item in period.extra_sessions]
          added = manager.add_record([notebook], "chat", "学习报告", "", "", metadata={"student_report": data})
          row = unpack(added["record"])
      return public(row), (manager, notebook, row, source, config)
-@@ -290,8 +320,10 @@ async def bridge(operation, data):
+@@ -290,8 +397,10 @@ async def bridge(operation, data):
          raise ReportError("本机报告组件尚未就绪，请重新启动应用。")
      process = await asyncio.create_subprocess_exec(node, str(ROOT / "report-contract.cjs"), operation, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
      try:
@@ -2231,12 +2474,12 @@ index d0412b9..0c3aa7b 100644
              raise ReportError("报告内容或原文依据未通过校验，请核对原记录后手动重试。")
          return json.loads(output)
      finally:
-@@ -305,30 +337,64 @@ async def generate(manager, notebook, row, source, config, complete=None):
+@@ -305,30 +414,64 @@ async def generate(manager, notebook, row, source, config, complete=None):
      from deeptutor.services.llm.metrics import TurnUsage, current_usage
      usage = TurnUsage(turn_id="student-report-" + row["id"], source="student_report")
      usage_token = current_usage.set(usage)
 +    stage = "generating"
-+    period = ReportRange(from_date=row["range"]["from"], to_date=row["range"]["to"], subject=row.get("subject"))
++    period = saved_period(row)
      if complete is None:
          async def complete(system, prompt):
 -            return await complete_with_config(config, prompt, system_prompt=system, max_retries=0)
@@ -2426,7 +2669,7 @@ index 0000000..2d5ca7a
 +    assert result["question"] == ""
 +    assert result["source"]["images"] == [image]
 diff --git a/tests/api/test_student_reports.py b/tests/api/test_student_reports.py
-index 293b762..45a82aa 100644
+index 293b762..a93f4f9 100644
 --- a/tests/api/test_student_reports.py
 +++ b/tests/api/test_student_reports.py
 @@ -24,7 +24,7 @@ def setup(tmp_path, monkeypatch):
@@ -2462,7 +2705,7 @@ index 293b762..45a82aa 100644
      repeat, duplicate = await reports.begin(PERIOD)
      assert repeat["id"] == row["id"] and duplicate is None
      complete = AsyncMock(side_effect=[json.dumps(output(), ensure_ascii=False), '{"approved":true,"issues":[]}'])
-@@ -253,3 +261,70 @@ async def test_modified_reflection_invalidates_a_saved_report(setup):
+@@ -253,3 +261,144 @@ async def test_modified_reflection_invalidates_a_saved_report(setup):
      reports.save_reflection(reports.Reflection(from_date=PERIOD.from_date, to_date=PERIOD.to_date, revision=1, goal="原补充需要更正"))
      with pytest.raises(reports.ReportError):
          await reports.detail(row["id"])
@@ -2533,6 +2776,80 @@ index 293b762..45a82aa 100644
 +    _, task = await reports.begin(reports.ReportRange(**PERIOD.model_dump(exclude={"subject"}), subject="math"))
 +    assert task[-1].max_tokens == 32768
 +    assert task[-1].reasoning_effort == "high"
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("subject", ["math", "english"])
++async def test_manual_scope_adds_normal_and_reading_chats_without_changing_default(setup, monkeypatch, subject):
++    from deeptutor.multi_user import learning_access
++    from deeptutor.services.workspace import navigation
++
++    other = "english" if subject == "math" else "math"
++    await seed(setup, workspace=subject, sid="shared", content="默认学科项目")
++    await seed(setup, sid="shared", content="手动补充普通聊天")
++    await seed(setup, sid="ignored", content="未勾选的普通聊天")
++    await seed(setup, workspace=other, sid="reader", content="手动补充边读边问")
++    await setup.stores[other].update_session_preferences(
++        "reader", {"session_kind": "immersive_reading", "reading_material_id": "book"}
++    )
++    await seed(setup, workspace=other, sid="blocked", content="不可访问的阅读对话")
++    await setup.stores[other].update_session_preferences(
++        "blocked", {"capability": "immersive_reading", "reading_material_id": "revoked"}
++    )
++    monkeypatch.setattr(learning_access, "learning_material_allowed", lambda key: key == "book")
++
++    async def fixture_index(limit, offset):
++        return {"sessions": [
++            {**row, "content_workspace_id": workspace}
++            for workspace, store in setup.stores.items()
++            for row in await store.list_sessions(limit=limit, offset=offset)
++        ]}
++
++    monkeypatch.setattr(navigation, "session_index", fixture_index)
++    listed = setup.client.get("/api/student/reports/sessions", params={"subject": subject})
++    assert listed.status_code == 200
++    options = {(row["workspace_id"], row["session_id"]): row["kind"] for row in listed.json()["sessions"]}
++    assert options == {("", "shared"): "chat", ("", "ignored"): "chat", (other, "reader"): "reading"}
++
++    refs = [
++        {"workspace_id": "", "session_id": "shared"},
++        {"workspace_id": other, "session_id": "reader"},
++    ]
++    period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject=subject)
++    extra_period = reports.ReportRange(**{**period.model_dump(), "extra_sessions": [*refs, refs[0]]})
++    assert {m["content"] for m in (await reports.collect(period))["messages"]} == {"默认学科项目"}
++    assert {m["content"] for m in (await reports.collect(extra_period))["messages"]} == {
++        "默认学科项目", "手动补充普通聊天", "手动补充边读边问",
++    }
++    overview = setup.client.get("/api/student/reports", params=[
++        ("from_date", period.from_date), ("to_date", period.to_date), ("subject", subject),
++        ("extra_session", ":shared"), ("extra_session", other + ":reader"),
++    ])
++    assert overview.status_code == 200 and overview.json()["metrics"]["conversation_count"] == 3
++
++    row, task = await reports.begin(extra_period)
++    await reports.generate(*task, complete=AsyncMock(return_value=""))
++    result = await reports.detail(row["id"])
++    assert result["extra_session_count"] == 2 and result["result_level"] == "records"
++    assert (await reports.overview(period))["report"] is None
++    assert (await reports.overview(extra_period))["report"]["id"] == row["id"]
++
++    await setup.stores[other].soft_delete_session("reader")
++    assert (await reports.collect(extra_period))["missing_extra_sessions"] == 1
++    with pytest.raises(reports.ReportError, match="原文"):
++        await reports.detail(row["id"])
++
++
++@pytest.mark.asyncio
++async def test_extra_sessions_outside_period_or_workspace_are_reported_before_model_use(setup):
++    await seed(setup, sid="later", at="2024-03-01T16:30:00+00:00")
++    period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="math", extra_sessions=[
++        {"workspace_id": "", "session_id": "later"},
++        {"workspace_id": "unknown", "session_id": "unauthorized"},
++    ])
++    assert (await reports.overview(period))["missing_extra_sessions"] == 2
++    with pytest.raises(reports.ReportError, match="部分补充对话"):
++        await reports.begin(period)
 diff --git a/web/app/globals.css b/web/app/globals.css
 index 457ab09..68ee70b 100644
 --- a/web/app/globals.css
@@ -4209,28 +4526,49 @@ index 9f0f36d..7eab8e1 100644
  
                        <Tooltip label={
 diff --git a/web/components/student/LearningReports.module.css b/web/components/student/LearningReports.module.css
-index a839c2b..4b4c633 100644
+index a839c2b..bee83f2 100644
 --- a/web/components/student/LearningReports.module.css
 +++ b/web/components/student/LearningReports.module.css
-@@ -13,3 +13,4 @@
+@@ -13,3 +13,19 @@
  @media(prefers-reduced-motion:reduce){.dialog,.closing{animation:none}.quiet,.dates,.primary,.iconButton{transition:none}.spin{animation-duration:2.8s}}
  .reflection{border:1px solid var(--border);border-radius:14px;background:var(--background);margin:0 0 20px;overflow:hidden}.reflection>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 17px;cursor:pointer;list-style:none;font-size:12px}.reflection>summary::-webkit-details-marker{display:none}.reflection>summary>span{display:flex;align-items:center;gap:8px}.reflection>summary>span:first-child{font-weight:550}.reflection>summary>span:first-child>svg{color:var(--sage)}.reflection>summary small,.reflection>summary>span:last-child{font-size:10px;color:var(--muted-foreground);font-weight:400}.reflection[open]>summary>span:last-child>svg{transform:rotate(90deg)}.reflection>p{font-size:11px;color:var(--muted-foreground);line-height:1.9;padding:0 17px 15px}.reflection form{padding:0 17px 17px}.reflectionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.reflectionGrid label{display:flex;flex-direction:column;gap:7px}.reflectionGrid label>span{display:flex;align-items:center;gap:7px;color:var(--sage);font-size:11px;font-weight:550}.reflectionGrid label>span small{font-size:9px;letter-spacing:.05em;opacity:.7}.reflectionGrid strong{font-size:12px;font-weight:500}.reflectionGrid textarea{border:1px solid var(--border);border-radius:9px;font-size:12px;background:var(--background);color:var(--foreground);padding:10px;resize:vertical;min-height:84px;line-height:1.8}.reflectionGrid textarea:focus-visible{outline:2px solid var(--sage);outline-offset:2px}.reflectionGrid textarea:disabled{opacity:.6}.reflectionFooter{display:flex;align-items:center;gap:9px;margin-top:15px}.reflectionFooter>small{flex:1;color:var(--muted-foreground);font-size:10px;line-height:1.8}.reflectionError{color:var(--destructive);font-size:11px;margin-top:12px}.page summary:focus-visible{outline:2px solid var(--sage);outline-offset:-3px;border-radius:14px}
  :global(.dark) .page{--sage:#9ec1aa}:global(.dark) .primary{color:#17271d}
 +.subjectPicker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px}.subjectPicker button{display:grid;gap:4px;text-align:left;min-height:60px;padding:10px 15px;border:1px solid var(--border);border-radius:12px;background:var(--background);color:var(--foreground)}.subjectPicker button:hover:not(:disabled),.subjectPicker button[aria-pressed=true]{border-color:var(--sage);background:var(--soft)}.subjectPicker button[aria-pressed=true] strong{color:var(--sage)}.subjectPicker strong{font-size:14px;font-weight:600}.subjectPicker small{font-size:11px;line-height:1.5;color:var(--muted-foreground)}.subjectPicker button:disabled{cursor:default;opacity:.8}.subjectReport{min-width:0;padding:0 clamp(16px,4vw,30px) 24px}.subjectCover{background:var(--soft);border-radius:13px;padding:12px 16px;margin-bottom:16px}.subjectSection{min-width:0;overflow-wrap:anywhere;border-top:1px solid var(--border);padding:17px 0}.subjectSection h3{font-size:16px;font-weight:600;margin:0 0 8px}.notice button:disabled{opacity:.5;cursor:default}
++
++.sessionScope{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);color:var(--muted-foreground);font-size:12px}
++.sessionScope>p{flex:0 0 100%;line-height:1.6;color:var(--foreground)}
++.sessionPicker{display:grid;gap:14px}
++.sessionPicker>input{width:100%;min-height:38px;border:1px solid var(--border);border-radius:9px;padding:8px 11px;font-size:13px;background:var(--background);color:var(--foreground)}
++.sessionChoices{max-height:min(43vh,380px);overflow-y:auto;display:grid;gap:14px;overscroll-behavior:contain}
++.sessionChoices h3{margin:0 0 6px;font-size:13px;font-weight:600}
++.sessionChoice{display:flex;align-items:center;gap:10px;min-height:45px;padding:6px 10px;border-radius:8px;cursor:pointer}
++.sessionChoice:hover,.sessionChoice:focus-within{background:var(--soft)}
++.sessionChoice input{flex-shrink:0;accent-color:var(--sage)}
++.sessionChoice span{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}
++.sessionChoice strong{font-size:13px;font-weight:550}
++.sessionChoice small,.sessionPickerActions>span{font-size:11px;color:var(--muted-foreground)}
++.sessionPickerActions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--border)}
++.sessionPickerActions>span{margin-right:auto}
 diff --git a/web/components/student/LearningReports.tsx b/web/components/student/LearningReports.tsx
-index b870b90..3290fa0 100644
+index b870b90..17da8fb 100644
 --- a/web/components/student/LearningReports.tsx
 +++ b/web/components/student/LearningReports.tsx
-@@ -4,13 +4,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
- import { ArrowDownToLine, ArrowRight, CalendarDays, Check, CheckCheck, ChevronRight, Clipboard, FileChartColumnIncreasing, History, Leaf, Loader2, MessageCircle, Quote, RefreshCw, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
+@@ -1,16 +1,18 @@
+ 'use client'
+ 
+ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent } from 'react'
+-import { ArrowDownToLine, ArrowRight, CalendarDays, Check, CheckCheck, ChevronRight, Clipboard, FileChartColumnIncreasing, History, Leaf, Loader2, MessageCircle, Quote, RefreshCw, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
++import { ArrowDownToLine, ArrowRight, CalendarDays, Check, CheckCheck, ChevronRight, Clipboard, FileChartColumnIncreasing, History, Leaf, Loader2, MessageCircle, Plus, Quote, RefreshCw, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
  import { Dialog } from '@/shared/ui/Dialog'
  import Tooltip from '@/shared/ui/Tooltip'
 -import { beijingDate, generateReport, getReport, getReports, presetPeriod, removeReport, reportMarkdown, saveReflection, type LearningReport, type ReflectionAnswers, type ReportClaim, type ReportOverview, type ReportPeriod } from '@/lib/student-reports'
 +import RichMarkdownRenderer from '@/components/common/RichMarkdownRenderer'
++import ReportSessionPicker from './ReportSessionPicker'
 +import { beijingDate, generateReport, getReport, getReportHistory, getReports, presetPeriod, removeReport, reportMarkdown, reportSubjectNames, saveReflection, subjectSectionMarkdown, type LearningReport, type ReflectionAnswers, type ReportClaim, type ReportOverview, type ReportPeriod, type ReportSubject } from '@/lib/student-reports'
  import styles from './LearningReports.module.css'
  
- type Modal = { type: 'history' | 'dates' | 'sources'; claim?: ReportClaim }
+-type Modal = { type: 'history' | 'dates' | 'sources'; claim?: ReportClaim }
++type Modal = { type: 'history' | 'dates' | 'sources' | 'sessions'; claim?: ReportClaim }
  const presets = [{ label: '今天', days: 1 }, { label: '昨天', days: 1, yesterday: true }, { label: '近7天', days: 7 }, { label: '近14天', days: 14 }, { label: '近28天', days: 28 }]
  const dateLabel = (value: string) => value.replaceAll('-', '.')
 -const label = (report: LearningReport) => report.state === 'pending' ? '正在整理' : report.state === 'failed' ? '未完成' : report.stale ? '有新记录' : '已核对'
@@ -4238,7 +4576,7 @@ index b870b90..3290fa0 100644
  const emptyReflection: ReflectionAnswers = { goal: '', state: '', process: '', adjustment: '' }
  const reflectionQuestions = [{ key: 'goal', name: '目标管理', prompt: '这段时间，我想解决什么？', placeholder: '想弄懂的内容，或想完成的一件事…' }, { key: 'state', name: '状态检查', prompt: '现在的我，顺在哪里、卡在哪里？', placeholder: '按自己的感受写，不必给自己打分…' }, { key: 'process', name: '过程感知', prompt: '我具体做了什么尝试？', placeholder: '区分听讲解、跟着做和自己重做…' }, { key: 'adjustment', name: '及时调节', prompt: '接下来，我愿意怎样调整？', placeholder: '一小步就好。计划不代表已经执行…' }] as const
  
-@@ -20,6 +21,7 @@ export default function LearningReports() {
+@@ -20,6 +22,7 @@ export default function LearningReports() {
    const [data, setData] = useState<ReportOverview | null>(null)
    const [report, setReport] = useState<LearningReport | null>(null)
    const [historyId, setHistoryId] = useState('')
@@ -4246,7 +4584,7 @@ index b870b90..3290fa0 100644
    const [parent, setParent] = useState(false)
    const [loading, setLoading] = useState(true)
    const [busy, setBusy] = useState(false)
-@@ -50,9 +52,15 @@ export default function LearningReports() {
+@@ -50,9 +53,15 @@ export default function LearningReports() {
    const load = useCallback(async (signal?: AbortSignal) => {
      const version = ++requestVersion.current
      try {
@@ -4265,18 +4603,21 @@ index b870b90..3290fa0 100644
      } catch (caught) {
        if (!signal?.aborted && alive.current && version === requestVersion.current) { setReport(null); setData(null); setError(caught instanceof Error ? caught.message : '暂时没能读取报告，请重试。') }
      } finally {
-@@ -117,8 +125,8 @@ export default function LearningReports() {
+@@ -117,8 +126,11 @@ export default function LearningReports() {
      closeTimer.current = setTimeout(() => { if (alive.current && motionVersion.current === version) { setModal(null); setClosing(false) } }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220)
    }
    function choose(next: ReportPeriod) {
 -    if (dirtyReflection.current) { setError('四问补充还没保存，请先保存或放弃修改，再切换日期。'); return }
 -    if (!historyId && period.from_date === next.from_date && period.to_date === next.to_date) return
-+    if (dirtyReflection.current) { setError('四问补充还没保存，请先保存或放弃修改，再切换学科或日期。'); return }
-+    if (!historyId && period.subject === next.subject && period.from_date === next.from_date && period.to_date === next.to_date) return
++    if (dirtyReflection.current) { setError('四问补充还没保存，请先保存或放弃修改，再调整复盘范围。'); return }
++    if (!historyId && period.subject === next.subject && period.from_date === next.from_date && period.to_date === next.to_date
++      && JSON.stringify(period.extra_sessions ?? []) === JSON.stringify(next.extra_sessions ?? [])) return
++    requestVersion.current++
++    setLoading(true)
      setPeriod(next); setHistoryId(''); setReport(null); setData(null); setReflection(emptyReflection); setError(''); setReflectionError('')
    }
  
-@@ -133,7 +141,7 @@ export default function LearningReports() {
+@@ -133,7 +145,7 @@ export default function LearningReports() {
    }
  
    async function generate() {
@@ -4285,7 +4626,7 @@ index b870b90..3290fa0 100644
      setBusy(true); setError('')
      try {
        const next = await generateReport(period)
-@@ -142,7 +150,7 @@ export default function LearningReports() {
+@@ -142,7 +154,7 @@ export default function LearningReports() {
      finally { if (alive.current) setBusy(false) }
    }
    async function copy() {
@@ -4294,7 +4635,7 @@ index b870b90..3290fa0 100644
      try {
        await navigator.clipboard.writeText(reportMarkdown(report, parent)); setCopied(true)
        if (copyTimer.current) clearTimeout(copyTimer.current)
-@@ -150,9 +158,9 @@ export default function LearningReports() {
+@@ -150,9 +162,9 @@ export default function LearningReports() {
      } catch { setError('未能复制，请使用旁边的下载按钮保存。') }
    }
    function download() {
@@ -4306,18 +4647,20 @@ index b870b90..3290fa0 100644
      setTimeout(() => URL.revokeObjectURL(url), 1000)
    }
    async function remove(row: LearningReport) {
-@@ -167,7 +175,9 @@ export default function LearningReports() {
+@@ -167,7 +179,11 @@ export default function LearningReports() {
  
    const metrics = report?.metrics || data?.metrics
    const summary = report?.summary
 -  const canGenerate = !historyId && !!(data?.metrics.message_count || data?.metrics.reflection_count) && !loading && !pending && !busy && !reflectionDirty && !reflectionBusy
 +  const subjectReview = report?.subject_review
 +  const displayedSubject = historyId ? report?.subject : period.subject
-+  const canGenerate = !!period.subject && !historyId && !!(data?.metrics.message_count || data?.metrics.reflection_count) && !loading && !pending && !busy && !reflectionDirty && !reflectionBusy
++  const missingSessions = data?.missing_extra_sessions ?? 0
++  const extraCount = period.extra_sessions?.length ?? 0
++  const canGenerate = !!period.subject && !historyId && !!(data?.metrics.message_count || data?.metrics.reflection_count) && !missingSessions && !loading && !pending && !busy && !reflectionDirty && !reflectionBusy
    const range = report?.range || data?.range
    const periodLabel = range && range.from === range.to ? dateLabel(range.from) : `${dateLabel(range?.from || period.from_date)} — ${dateLabel(range?.to || period.to_date)}`
    const sourceRows = modal?.claim ? (report?.evidence || []).filter(row => modal.claim!.contextRefs.includes(row.id)) : []
-@@ -175,32 +185,57 @@ export default function LearningReports() {
+@@ -175,32 +191,63 @@ export default function LearningReports() {
  
    return <main className={styles.page} aria-label="学习报告">
      <header className={styles.header}>
@@ -4329,7 +4672,7 @@ index b870b90..3290fa0 100644
  
 -    <section className={styles.toolbar} aria-label="选择报告日期">
 +    <section className={styles.subjectPicker} aria-label="选择复盘学科">
-+      {(['english', 'math'] as const).map(subject => <button key={subject} type="button" aria-pressed={displayedSubject === subject} disabled={busy || pending || reflectionBusy} onClick={() => choose({ ...period, subject })}>
++      {(['english', 'math'] as const).map(subject => <button key={subject} type="button" aria-pressed={displayedSubject === subject} disabled={busy || pending || reflectionBusy} onClick={() => choose({ ...period, subject, extra_sessions: period.subject === subject ? period.extra_sessions : undefined })}>
 +        <strong>{reportSubjectNames[subject]}复盘</strong>
 +        <small>{subject === 'english' ? '课文、词汇、语法与表达' : '算理、错因与分题型训练'}</small>
 +      </button>)}
@@ -4338,11 +4681,18 @@ index b870b90..3290fa0 100644
        <div className={styles.presets}>{presets.map(item => {
          const selected = presetPeriod(item.days, new Date(), item.yesterday)
 -        return <button type="button" key={item.label} aria-pressed={!historyId && period.from_date === selected.from_date && period.to_date === selected.to_date} onClick={() => choose(selected)}>{item.label}</button>
-+        return <button type="button" key={item.label} aria-pressed={!historyId && period.from_date === selected.from_date && period.to_date === selected.to_date} onClick={() => choose({ ...selected, subject: period.subject })}>{item.label}</button>
++        return <button type="button" key={item.label} disabled={busy || pending || reflectionBusy} aria-pressed={!historyId && period.from_date === selected.from_date && period.to_date === selected.to_date} onClick={() => choose({ ...period, ...selected })}>{item.label}</button>
        })}</div>
-       <button type="button" className={styles.dates} onClick={event => open(event, { type: 'dates' })}><CalendarDays size={15} /><span>{periodLabel}</span><ChevronRight size={13} /></button>
+-      <button type="button" className={styles.dates} onClick={event => open(event, { type: 'dates' })}><CalendarDays size={15} /><span>{periodLabel}</span><ChevronRight size={13} /></button>
 -    </section>
++      <button type="button" className={styles.dates} disabled={busy || pending || reflectionBusy} onClick={event => open(event, { type: 'dates' })}><CalendarDays size={15} /><span>{periodLabel}</span><ChevronRight size={13} /></button>
 +    </section>}
++
++    {period.subject && !historyId && <div className={styles.sessionScope}>
++      <span>默认纳入{reportSubjectNames[period.subject]}项目的对话{extraCount ? `，已补充 ${extraCount} 段` : ''}</span>
++      <button type="button" className={styles.quiet} disabled={busy || pending || reflectionBusy} onClick={event => open(event, { type: 'sessions' })}><Plus size={15} />补充对话</button>
++      {!!missingSessions && <p role="status">有 {missingSessions} 段补充对话在所选日期内没有可用记录。请调整日期或取消勾选。</p>}
++    </div>}
  
 -    <section className={styles.metrics} aria-label="所选日期的记录统计">
 +    {(period.subject || historyId) && <section className={styles.metrics} aria-label="所选日期的记录统计">
@@ -4359,7 +4709,7 @@ index b870b90..3290fa0 100644
  
 -    {loading ? <div className={styles.loading} role="status"><Loader2 className={styles.spin} size={22} />正在读取本机学习记录…</div> : pending || busy ? <section className={styles.preparing} aria-live="polite">
 +    {!period.subject && !historyId ? <section className={styles.empty}>
-+      <FileChartColumnIncreasing size={32} /><h2>先选英语或数学</h2><p>每门学科单独整理，只读取对应默认项目的学习记录。</p>
++      <FileChartColumnIncreasing size={32} /><h2>先选英语或数学</h2><p>默认整理对应项目的记录，也可以补充普通聊天和学习栏里的对话。</p>
 +    </section> : loading ? <div className={styles.loading} role="status"><Loader2 className={styles.spin} size={22} />正在读取本机学习记录…</div> : pending || busy ? <section className={styles.preparing} aria-live="polite">
        <div className={styles.preparingIcon}><Loader2 className={styles.spin} size={28} /></div><h2>{report?.stage === 'reviewing' ? '再核对一遍，让回顾更可靠。' : '正在把这段学习，整理清楚。'}</h2><p>保留完整原文，区分你的作答与老师的讲解。</p>
        <div className={styles.steps}><span data-active="true">{report?.stage === 'reviewing' ? <Check size={15} /> : <Loader2 size={15} className={styles.spin} />}整理原文</span><i /><span data-active={report?.stage === 'reviewing'}><ShieldCheck size={15} />独立核对</span></div><small>可以离开本页，回来继续查看；不会因重复打开而再次生成。</small>
@@ -4385,7 +4735,7 @@ index b870b90..3290fa0 100644
        <div className={styles.reportHeader}><div><span className={styles.verified}><ShieldCheck size={14} />已完成独立核对</span><h2>{parent ? '孩子的学习近况' : '我的学习回顾'}</h2><p>{periodLabel}</p></div><div className={styles.reportTools}><div className={styles.views} aria-label="报告阅读视角"><button type="button" aria-pressed={!parent} onClick={() => setParent(false)}>学生</button><button type="button" aria-pressed={parent} onClick={() => setParent(true)}>家长</button></div><Tooltip label={copied ? '已复制' : '复制报告'}><button className={styles.iconButton} type="button" aria-label={copied ? '已复制报告' : '复制报告'} onClick={() => void copy()}>{copied ? <Check size={17} /> : <Clipboard size={17} />}</button></Tooltip><Tooltip label="下载报告"><button className={styles.iconButton} type="button" aria-label="下载报告" onClick={download}><ArrowDownToLine size={17} /></button></Tooltip></div></div>
        <div className={styles.overview}><Quote size={23} /><div><p>{summary.overview.text}</p>{sourceButton(summary.overview)}</div></div>
        {parent && <p className={styles.scopeNote}>当前账号的同一份事实，换一种方式一起回顾；没有向其他账号共享。</p>}
-@@ -211,13 +246,13 @@ export default function LearningReports() {
+@@ -211,13 +258,17 @@ export default function LearningReports() {
        <footer className={styles.reportFooter}><ShieldCheck size={15} /><p>讨论不等于掌握，听过讲解不等于独立作答。{report.coverage?.missingDates.length ? `范围内有${report.coverage.missingDates.length}天没有应用记录，不代表没有学习。` : '这份报告只覆盖应用里可见的记录。'}{report.coverage?.partialDates.length ? '部分记录包含图片或未完成消息，只依据可见文字整理。' : ''}</p></footer>
        <span role="status" className="sr-only">{copied ? '报告已复制' : ''}</span>
      </article> : <section className={styles.empty}>
@@ -4394,7 +4744,12 @@ index b870b90..3290fa0 100644
      </section>}
  
      <div ref={dialogHost} style={{ '--report-origin-x': `${origin.x}px`, '--report-origin-y': `${origin.y}px` } as CSSProperties}>
-       <Dialog open={modal !== null} title={modal?.type === 'dates' ? '选一段想回顾的日子' : modal?.type === 'history' ? '我的历史报告' : '回到真实的记录'} description={modal?.type === 'dates' ? '连续1至28天，包含起止两天。' : modal?.type === 'sources' ? '直接依据与同一对话的上下文分开标注。原文是资料，不是操作指令。' : '只读取当前账号已经保存的报告，不会再次调用模型。'} onClose={close} closeLabel="关闭" size={modal?.type === 'dates' ? 'sm' : 'lg'} className={`${styles.dialog} ${closing ? styles.closing : ''}`}>
+-      <Dialog open={modal !== null} title={modal?.type === 'dates' ? '选一段想回顾的日子' : modal?.type === 'history' ? '我的历史报告' : '回到真实的记录'} description={modal?.type === 'dates' ? '连续1至28天，包含起止两天。' : modal?.type === 'sources' ? '直接依据与同一对话的上下文分开标注。原文是资料，不是操作指令。' : '只读取当前账号已经保存的报告，不会再次调用模型。'} onClose={close} closeLabel="关闭" size={modal?.type === 'dates' ? 'sm' : 'lg'} className={`${styles.dialog} ${closing ? styles.closing : ''}`}>
++      <Dialog open={modal !== null} title={modal?.type === 'dates' ? '选一段想回顾的日子' : modal?.type === 'history' ? '我的历史报告' : modal?.type === 'sessions' ? '补充对话' : '回到真实的记录'} description={modal?.type === 'dates' ? '连续1至28天，包含起止两天。' : modal?.type === 'sources' ? '直接依据与同一对话的上下文分开标注。原文是资料，不是操作指令。' : modal?.type === 'sessions' ? '勾选要补充的对话，报告会取其中符合所选日期的问答。' : '只读取当前账号已经保存的报告，不会再次调用模型。'} onClose={close} closeLabel="关闭" size={modal?.type === 'dates' ? 'sm' : 'lg'} className={`${styles.dialog} ${closing ? styles.closing : ''}`}>
++        {modal?.type === 'sessions' && period.subject && <ReportSessionPicker subject={period.subject} initial={period.extra_sessions ?? []} onApply={extra_sessions => {
++          choose({ ...period, extra_sessions })
++          close()
++        }} />}
          {modal?.type === 'dates' && <form className={styles.dateForm} onSubmit={event => { event.preventDefault(); const span = (Date.parse(draftPeriod.to_date) - Date.parse(draftPeriod.from_date)) / 86400_000 + 1; if (!(span >= 1 && span <= 28) || draftPeriod.to_date > beijingDate()) { setDateError('请选择截至今天的连续1至28天。'); return } choose(draftPeriod); close() }}><label>从哪一天<input type="date" required value={draftPeriod.from_date} max={beijingDate()} onChange={event => setDraftPeriod({ ...draftPeriod, from_date: event.target.value })} data-autofocus /></label><label>到哪一天<input type="date" required value={draftPeriod.to_date} max={beijingDate()} min={draftPeriod.from_date} onChange={event => setDraftPeriod({ ...draftPeriod, to_date: event.target.value })} /></label>{dateError && <p role="alert" className={styles.scopeNote}>{dateError}</p>}<button type="submit" className={styles.primary}>查看这段时间<ArrowRight size={15} /></button></form>}
 -        {modal?.type === 'history' && <div className={styles.history}>{data?.history.length ? data.history.map(row => <div className={styles.historyRow} key={row.id}><button type="button" onClick={() => { setHistoryId(row.id); close() }}><span className={styles.historyIcon}><FileChartColumnIncreasing size={20} /></span><span><strong>{dateLabel(row.range.from)}{row.range.from !== row.range.to ? ' — ' + dateLabel(row.range.to) : ''}</strong><small>{new Date(row.created_at * 1000).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</small></span><span className={styles.historyState}>{label(row)}</span><ChevronRight size={15} /></button><Tooltip label="移除报告，保留原对话"><button type="button" className={styles.iconButton} aria-label={`移除${row.range.from}至${row.range.to}的报告`} onClick={() => void remove(row)}><Trash2 size={15} /></button></Tooltip></div>) : <div className={styles.noHistory}><History size={28} /><p>第一份报告，会从这里开始保存。</p></div>}</div>}
 +        {modal?.type === 'history' && <div className={styles.history}>{history.length ? history.map(row => <div className={styles.historyRow} key={row.id}><button type="button" onClick={() => { setHistoryId(row.id); close() }}><span className={styles.historyIcon}><FileChartColumnIncreasing size={20} /></span><span><strong>{row.subject ? reportSubjectNames[row.subject] + " · " : "综合 · "}{dateLabel(row.range.from)}{row.range.from !== row.range.to ? ' — ' + dateLabel(row.range.to) : ''}</strong><small>{new Date(row.created_at * 1000).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</small></span><span className={styles.historyState}>{label(row)}</span><ChevronRight size={15} /></button><Tooltip label="移除报告，保留原对话"><button type="button" className={styles.iconButton} aria-label={`移除${row.range.from}至${row.range.to}的报告`} onClick={() => void remove(row)}><Trash2 size={15} /></button></Tooltip></div>) : <div className={styles.noHistory}><History size={28} /><p>第一份报告，会从这里开始保存。</p></div>}</div>}
@@ -4457,6 +4812,106 @@ index ed07760..6818b71 100644
      </Dialog>
    </main>
  }
+diff --git a/web/components/student/ReportSessionPicker.tsx b/web/components/student/ReportSessionPicker.tsx
+new file mode 100644
+index 0000000..0aef04c
+--- /dev/null
++++ b/web/components/student/ReportSessionPicker.tsx
+@@ -0,0 +1,94 @@
++'use client'
++
++import { useCallback, useEffect, useRef, useState } from 'react'
++import {
++  beijingDate, getReportSessions, MAX_EXTRA_REPORT_SESSIONS, reportSessionKey,
++  type ReportSession, type ReportSessionChoice, type ReportSubject,
++} from '@/lib/student-reports'
++import styles from './LearningReports.module.css'
++
++const groups = [{ kind: 'reading', title: '边读边问（学习栏）' }, { kind: 'chat', title: '普通聊天' }] as const
++
++export default function ReportSessionPicker({ subject, initial, onApply }: {
++  subject: ReportSubject
++  initial: ReportSession[]
++  onApply: (sessions: ReportSession[]) => void
++}) {
++  const [selected, setSelected] = useState(initial)
++  const [sessions, setSessions] = useState<ReportSessionChoice[]>([])
++  const [query, setQuery] = useState('')
++  const [nextOffset, setNextOffset] = useState<number | null>(0)
++  const [loading, setLoading] = useState(true)
++  const [error, setError] = useState('')
++  const request = useRef<AbortController | null>(null)
++
++  const load = useCallback(async (offset: number) => {
++    request.current?.abort()
++    const controller = new AbortController()
++    request.current = controller
++    setLoading(true)
++    setError('')
++    try {
++      const page = await getReportSessions(subject, offset, controller.signal)
++      if (controller.signal.aborted) return
++      setSessions(previous => {
++        const combined = new Map((offset ? previous : []).map(row => [reportSessionKey(row), row]))
++        for (const row of page.sessions) combined.set(reportSessionKey(row), row)
++        return [...combined.values()]
++      })
++      setNextOffset(page.next_offset)
++    } catch (caught) {
++      if (!controller.signal.aborted) setError(caught instanceof Error ? caught.message : '暂时未能读取对话。')
++    } finally {
++      if (!controller.signal.aborted) setLoading(false)
++    }
++  }, [subject])
++
++  useEffect(() => {
++    void load(0)
++    return () => request.current?.abort()
++  }, [load])
++
++  const keys = new Set(selected.map(reportSessionKey))
++  const matching = sessions.filter(row => row.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
++
++  function toggle(row: ReportSessionChoice) {
++    const { workspace_id, session_id } = row
++    const key = reportSessionKey(row)
++    setSelected(previous => {
++      if (previous.some(item => reportSessionKey(item) === key)) {
++        return previous.filter(item => reportSessionKey(item) !== key)
++      }
++      return previous.length < MAX_EXTRA_REPORT_SESSIONS ? [...previous, { workspace_id, session_id }] : previous
++    })
++  }
++
++  return <div className={styles.sessionPicker}>
++    <input type="search" aria-label="筛选已加载对话" placeholder="按标题筛选已加载对话" value={query} onChange={event => setQuery(event.target.value)} data-autofocus />
++    <div className={styles.sessionChoices}>
++      {groups.map(group => {
++        const rows = matching.filter(row => row.kind === group.kind)
++        return <section key={group.kind}>
++          <h3>{group.title}</h3>
++          {rows.length ? rows.map(row => {
++            const key = reportSessionKey(row)
++            const checked = keys.has(key)
++            return <label className={styles.sessionChoice} key={key}>
++              <input type="checkbox" checked={checked} disabled={!checked && selected.length >= MAX_EXTRA_REPORT_SESSIONS} onChange={() => toggle(row)} />
++              <span><strong>{row.title}</strong><small>{row.workspace_name} · 最近活动 {beijingDate(new Date(row.updated_at * 1000))}</small></span>
++            </label>
++          }) : <p className={styles.scopeNote}>{loading ? '正在读取…' : '已加载的对话中暂无匹配项。'}</p>}
++        </section>
++      })}
++      {error && <p role="alert" className={styles.scopeNote}>{error}</p>}
++      {nextOffset !== null && <button type="button" className={styles.quiet} disabled={loading} onClick={() => void load(nextOffset)}>
++        {loading ? '正在读取…' : error ? '重试读取' : '加载更早的对话'}
++      </button>}
++    </div>
++    <div className={styles.sessionPickerActions}>
++      <span aria-live="polite">已选 {selected.length} / {MAX_EXTRA_REPORT_SESSIONS} 段</span>
++      {selected.length > 0 && <button type="button" className={styles.quiet} onClick={() => setSelected([])}>清空</button>}
++      <button type="button" className={styles.primary} onClick={() => onApply(selected)}>应用选择</button>
++    </div>
++  </div>
++}
 diff --git a/web/components/student/SaveMistakeButton.tsx b/web/components/student/SaveMistakeButton.tsx
 index f6ba7e6..b77854e 100644
 --- a/web/components/student/SaveMistakeButton.tsx
@@ -5450,29 +5905,51 @@ index 3376a0f..a35a223 100644
 +  return row.analysis?.verdict === 'incorrect' ? '已分析 · 可复习' : '已分析'
  }
 diff --git a/web/lib/student-reports.ts b/web/lib/student-reports.ts
-index e8f8270..f98796a 100644
+index e8f8270..27f6db2 100644
 --- a/web/lib/student-reports.ts
 +++ b/web/lib/student-reports.ts
-@@ -1,12 +1,16 @@
+@@ -1,13 +1,21 @@
  import { apiFetch, apiUrl, asJsonOrThrow } from './api'
  
 -export type ReportPeriod = { from_date: string; to_date: string }
 +export type ReportSubject = 'english' | 'math'
 +export const reportSubjectNames = { english: '英语', math: '数学' }
-+export type ReportPeriod = { from_date: string; to_date: string; subject?: ReportSubject }
++export type ReportSession = { workspace_id: string; session_id: string }
++export type ReportSessionChoice = ReportSession & { title: string; workspace_name: string; kind: 'chat' | 'reading'; updated_at: number }
++export type ReportPeriod = { from_date: string; to_date: string; subject?: ReportSubject; extra_sessions?: ReportSession[] }
++export const reportSessionKey = (session: ReportSession) => `${session.workspace_id}:${session.session_id}`
++export const MAX_EXTRA_REPORT_SESSIONS = 20
  export type ReportClaim = { text: string; title?: string; subject?: string; next?: string; refs: string[]; contextRefs: string[] }
  export type ReportEvidence = { id: string; role: 'user' | 'assistant'; content: string; date: string | null; recordedAt?: string; kind?: string; projectName: string; title: string; status: string; has_images: boolean }
  export type ReportMetrics = { message_count: number; conversation_count: number; active_days: number; minutes: number | null; exercise_count: number | null; accuracy: number | null; reflection_count?: number }
  export type ReflectionAnswers = { goal: string; state: string; process: string; adjustment: string }
  export type ReportReflection = { id?: string; revision: number; answers: ReflectionAnswers; saved_at: number | null }
 -export type LearningReport = { id: string; range: { from: string; to: string }; created_at: number; state: 'pending' | 'ready' | 'failed'; stage: 'generating' | 'reviewing' | null; message: string; metrics: ReportMetrics; stale: boolean; summary?: { overview: ReportClaim; records: ReportClaim[]; observations: ReportClaim[]; nextSteps: ReportClaim[] }; evidence?: ReportEvidence[]; coverage?: { factDates: string[]; missingDates: string[]; partialDates: string[] } }
+-export type ReportOverview = { range: { from: string; to: string }; metrics: ReportMetrics; coverage: { factDates: string[]; missingDates: string[]; partialDates: string[] }; reflection?: ReportReflection; report: LearningReport | null; history: LearningReport[] }
 +type SubjectExercise = { id: number; question: string; options: string[]; answer: string; explanation: string }
 +export type SubjectReview = { title: string; cover: string; sections: (ReportClaim & { title: string })[]; exercises: SubjectExercise[] }
-+export type LearningReport = { id: string; range: { from: string; to: string }; subject?: ReportSubject; created_at: number; state: 'pending' | 'ready' | 'failed'; stage: 'generating' | 'reviewing' | null; message: string; metrics: ReportMetrics; stale: boolean; summary?: { overview: ReportClaim; records: ReportClaim[]; observations: ReportClaim[]; nextSteps: ReportClaim[] } | null; subject_review?: SubjectReview; result_level?: 'records' | 'full'; evidence?: ReportEvidence[]; coverage?: { factDates: string[]; missingDates: string[]; partialDates: string[] } }
- export type ReportOverview = { range: { from: string; to: string }; metrics: ReportMetrics; coverage: { factDates: string[]; missingDates: string[]; partialDates: string[] }; reflection?: ReportReflection; report: LearningReport | null; history: LearningReport[] }
++export type LearningReport = { id: string; range: { from: string; to: string }; subject?: ReportSubject; extra_session_count?: number; created_at: number; state: 'pending' | 'ready' | 'failed'; stage: 'generating' | 'reviewing' | null; message: string; metrics: ReportMetrics; stale: boolean; summary?: { overview: ReportClaim; records: ReportClaim[]; observations: ReportClaim[]; nextSteps: ReportClaim[] } | null; subject_review?: SubjectReview; result_level?: 'records' | 'full'; evidence?: ReportEvidence[]; coverage?: { factDates: string[]; missingDates: string[]; partialDates: string[] } }
++export type ReportOverview = { range: { from: string; to: string }; metrics: ReportMetrics; coverage: { factDates: string[]; missingDates: string[]; partialDates: string[] }; reflection?: ReportReflection; report: LearningReport | null; history: LearningReport[]; missing_extra_sessions?: number }
  
  export function beijingDate(now = new Date()) {
-@@ -27,6 +31,9 @@ export async function generateReport(period: ReportPeriod): Promise<LearningRepo
+   return new Date(now.getTime() + 8 * 3600_000).toISOString().slice(0, 10)
+@@ -19,7 +27,14 @@ export function presetPeriod(days: number, now = new Date(), yesterday = false):
+ }
+ 
+ export async function getReports(period: ReportPeriod, signal?: AbortSignal): Promise<ReportOverview> {
+-  return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports?' + new URLSearchParams(period)), { signal }))
++  const params = new URLSearchParams({ from_date: period.from_date, to_date: period.to_date })
++  if (period.subject) params.set('subject', period.subject)
++  for (const session of period.extra_sessions ?? []) params.append('extra_session', reportSessionKey(session))
++  return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports?' + params), { signal }))
++}
++export async function getReportSessions(subject: ReportSubject, offset: number, signal: AbortSignal): Promise<{ sessions: ReportSessionChoice[]; next_offset: number | null }> {
++  const params = new URLSearchParams({ subject, offset: String(offset) })
++  return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports/sessions?' + params), { signal }))
+ }
+ export async function generateReport(period: ReportPeriod): Promise<LearningReport> {
+   return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(period) }))
+@@ -27,14 +42,39 @@ export async function generateReport(period: ReportPeriod): Promise<LearningRepo
  export async function getReport(id: string, signal?: AbortSignal): Promise<LearningReport> {
    return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports/' + encodeURIComponent(id)), { signal }))
  }
@@ -5482,10 +5959,12 @@ index e8f8270..f98796a 100644
  export async function removeReport(id: string): Promise<void> {
    await asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports/' + encodeURIComponent(id)), { method: 'DELETE' }))
  }
-@@ -34,7 +41,28 @@ export async function saveReflection(period: ReportPeriod, revision: number, ans
-   return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports/reflection'), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...period, revision, ...answers }) }))
- }
- 
+ export async function saveReflection(period: ReportPeriod, revision: number, answers: ReflectionAnswers): Promise<ReportReflection> {
+-  return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports/reflection'), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...period, revision, ...answers }) }))
++  const { from_date, to_date, subject } = period
++  return asJsonOrThrow(await apiFetch(apiUrl('/api/student/reports/reflection'), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from_date, to_date, subject, revision, ...answers }) }))
++}
++
 +export function subjectSectionMarkdown(review: SubjectReview, subject: ReportSubject, index: number) {
 +  const section = review.sections[index]
 +  const exerciseIndex = subject === 'english' ? 5 : 6
@@ -5499,8 +5978,8 @@ index e8f8270..f98796a 100644
 +    return [section.text, ...review.exercises.map(e => `#### ${e.id}. 参考答案\n\n${e.answer}\n\n${e.explanation}`)].join('\n\n')
 +  }
 +  return section.text
-+}
-+
+ }
+ 
  export function reportMarkdown(report: LearningReport, parent: boolean) {
 +  if (report.subject && report.subject_review) {
 +    const review = report.subject_review
