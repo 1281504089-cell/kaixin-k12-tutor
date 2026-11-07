@@ -4,7 +4,7 @@
 
 - **装好就能翻 136 册教材。** 课本随安装包一起带上，可以按学段和科目找书。
 - **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
-- **九科有各自的 AI 老师。** 语文到物理、历史等九科都有自己的学习项目，做题时可以按科目选老师，先要个提示，算到哪一步再问哪一步。
+- **九科有各自的 AI 老师。** 每科都有自己的学习项目。做题卡住时可以选对应科目的老师，先要个提示，自己做下去。
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
 
