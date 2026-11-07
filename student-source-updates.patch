@@ -2015,7 +2015,7 @@ index 6cb1d7d..f10c82d 100644
        />
        {active && onRegionSelect && <PdfRegionPicker locator={locator} onSelect={onRegionSelect} />}
 diff --git a/web/components/reading/ReaderPane.tsx b/web/components/reading/ReaderPane.tsx
-index f530ffa..373b8b9 100644
+index f530ffa..6404676 100644
 --- a/web/components/reading/ReaderPane.tsx
 +++ b/web/components/reading/ReaderPane.tsx
 @@ -3,6 +3,10 @@
@@ -2188,7 +2188,34 @@ index f530ffa..373b8b9 100644
                  }}
                />
              )}
-@@ -1317,6 +1362,7 @@ export function ReaderPane({
+@@ -1127,12 +1172,6 @@ export function ReaderPane({
+         )}
+       </ReaderHead>
+ 
+-      {regionActive && (
+-        <p role="status" className="border-b border-[var(--border)] px-3 py-1.5 text-xs text-[var(--muted-foreground)]">
+-          {t("Drag over the page to select an area")}
+-        </p>
+-      )}
+-
+       {showMoreTools && material && !menuHosted && (
+         <div
+           ref={moreToolsMenuRef}
+@@ -1270,7 +1309,12 @@ export function ReaderPane({
+       )}
+ 
+       <div className="relative flex min-h-0 flex-1">
+-        <div className="min-w-0 flex-1">
++        <div className="relative min-w-0 flex-1">
++          {regionActive && (
++            <p role="status" className="pointer-events-none absolute bottom-3 left-1/2 z-20 w-max max-w-[90%] -translate-x-1/2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-center text-xs text-[var(--muted-foreground)] shadow-sm">
++              {t("Drag over the page to select an area")}
++            </p>
++          )}
+           {loadingMaterial ? (
+             <div className="flex h-full items-center justify-center gap-2 text-[12px] text-[var(--muted-foreground)]">
+               <Loader2 size={14} className="animate-spin" />
+@@ -1317,6 +1361,7 @@ export function ReaderPane({
                jump={materialJump}
                highlightedAnnotationId={activeAnnotationId}
                onSelection={openSelection}
@@ -2196,7 +2223,7 @@ index f530ffa..373b8b9 100644
                onRegionSelect={regionActive ? openRegionSelection : undefined}
                selectedRegion={selection?.region && popoverOpen ? selection : undefined}
                onAnnotationClick={(annotation) =>
-@@ -1366,16 +1412,59 @@ export function ReaderPane({
+@@ -1366,16 +1411,59 @@ export function ReaderPane({
        {/* `popoverOpen` and not just `selection`: dismissal now leaves the
            selection in place for the toolbar, so gating the mount on the
            selection alone would make Escape and outside-click stop working. */}
@@ -3736,10 +3763,10 @@ index dfb17c1..ffe5431 100644
    if (!found) return null;
  
 diff --git a/web/lib/reading-selection.ts b/web/lib/reading-selection.ts
-index bd967be..afd4447 100644
+index bd967be..aaab82a 100644
 --- a/web/lib/reading-selection.ts
 +++ b/web/lib/reading-selection.ts
-@@ -100,6 +100,36 @@ export function normaliseRects(rects: Box[], container: Box): NormalisedRect[] {
+@@ -100,6 +100,40 @@ export function normaliseRects(rects: Box[], container: Box): NormalisedRect[] {
      .filter(([x0, y0, x1, y1]) => x1 - x0 > 0.001 && y1 - y0 > 0.001);
  }
  
@@ -3769,14 +3796,18 @@ index bd967be..afd4447 100644
 +export function pdfQuoteNeedsImage(text: string): boolean {
 +  // Some textbook fonts map Latin maths to lookalike Han characters or
 +  // private codes. A reference to these glyphs is safer as original pixels.
-+  return /[\p{Co}\uFFFD\u0000-\u0008\u000E-\u001F]/u.test(text) ||
-+    /[犃犅犆犇犈犉犌犎犗犘犪犫狓狔狆狇]/.test(text);
++  if (/[\p{Co}\uFFFD\u0000-\u0008\u000E-\u001F]/u.test(text) ||
++      /[犃犅犆犇犈犉犌犎犗犘犪犫狓狔狆狇]/.test(text)) return true;
++  // Subscripts and reaction arrows may be drawn separately, with no
++  // replacement character to warn us (e.g. “2H2 + O2 2H2O”).
++  return /\b(?:H|O|N|Cl|Br|F|I)2\b/.test(text) ||
++    (text.match(/\b\d*(?:[A-Z][a-z]?\d*){2,}\b/g) ?? []).some(item => /\d/.test(item));
 +}
 +
  /** Union of normalised rects, for positioning a popover over a selection. */
  export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
    if (!rects.length) return null;
-@@ -112,15 +142,15 @@ export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
+@@ -112,15 +146,15 @@ export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
  }
  
  /** Keep fraction bars, superscripts and diagrams that PDF text selection loses. */
@@ -4260,7 +4291,7 @@ index 842a517..a98b180 100644
 +  expect(live.services.llm.active_model_id).toBe("one");
 +});
 diff --git a/web/tests/reading-selection.test.ts b/web/tests/reading-selection.test.ts
-index 3887d1d..1106a57 100644
+index 3887d1d..394c718 100644
 --- a/web/tests/reading-selection.test.ts
 +++ b/web/tests/reading-selection.test.ts
 @@ -5,6 +5,7 @@ import {
@@ -4271,7 +4302,7 @@ index 3887d1d..1106a57 100644
    unionRect,
  } from "../lib/reading-selection";
  
-@@ -109,3 +110,9 @@ test("a cross-page selection is attributed to where it started", () => {
+@@ -109,3 +110,12 @@ test("a cross-page selection is attributed to where it started", () => {
    assert.equal(locatorOfSelection([null, null]), null);
    assert.equal(locatorOfSelection([0, 2]), 2);
  });
@@ -4279,7 +4310,10 @@ index 3887d1d..1106a57 100644
 +test("uses the source image for misencoded geometry while keeping ordinary quotes", () => {
 +  assert.equal(pdfQuoteNeedsImage("设 犗犃 = 犪，犗犅 = 犫"), true);
 +  assert.equal(pdfQuoteNeedsImage("角度 \uE123 关系"), true);
++  assert.equal(pdfQuoteNeedsImage("2H2 + O2 2H2O"), true);
++  assert.equal(pdfQuoteNeedsImage("Fe + CuSO4 Cu + FeSO4"), true);
 +  assert.equal(pdfQuoteNeedsImage("向量 a、b 的夹角和数量积"), false);
++  assert.equal(pdfQuoteNeedsImage("见图 A2，说明如下"), false);
 +});
 diff --git a/web/tests/reading-toolbar-selection.spec.tsx b/web/tests/reading-toolbar-selection.spec.tsx
 index 3b47500..944d835 100644
