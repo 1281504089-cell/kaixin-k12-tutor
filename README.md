@@ -1,14 +1,18 @@
-# 开心动力超级学霸 · K–12 专属学习搭子
+# 开心动力超级学霸 · K–12 九科 AI 学习搭子
 
-基于 [DeepTutor](https://github.com/HKUDS/DeepTutor) 为 K–12 学科重新优化的本地桌面学习应用。首次启动自动导入当前收录的 **136 册主科教材**，覆盖小学、初中和高中。打开「教材 · 边读边问」就能翻原页、选段落、圈公式，随读随问。
+**读到哪一页，就问哪一页。卡住哪一步，就从哪一步讲起。**
 
-Kaixin K12 Tutor is a DeepTutor-based desktop study companion for primary through high school.
+基于 [DeepTutor](https://github.com/HKUDS/DeepTutor) 二次开发，专为使用中文教材的**小学、初中和高中学生**优化。桌面版首次启动自动导入当前收录的 **136 册主科教材**。预习时边读边问，作业卡住时拍题找思路，考前打开自己的错题本复盘。
 
-[下载安装](#下载安装) · [学习功能](#学习功能) · [开发者指南](DEVELOPMENT.md)
+[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
+
+[查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
+
+Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaking students from primary through high school.
 
 ## 下载安装
 
-当前学生体验版 **1.7.1 · `77f2ba387`**。安装包已带本机运行环境和教材，新电脑安装后在设置中填写自己的聊天 API。
+当前学生体验版 **1.7.1**。安装包已带本机运行环境和教材。安装后在设置中填写自己的聊天 API，即可开始 AI 问答。
 
 | 电脑 | 安装文件 | 自动试装 |
 | --- | --- | --- |
@@ -22,6 +26,10 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for primary throug
 4. 预留至少 30 GB 空间。安装校验和首次启动解压都可能需要几分钟。
 
 ## 学习功能
+
+- **读不懂课本的一段。** 划选原文或圈出公式，直接问「这一步为什么能这么变？」问答可以引用当前页和选区，翻到下一页还能接着问。
+- **题做了一半卡住。** 拍下题目，选对应学科的 AI 老师，可以先要一个提示，自己算下去，再回来追问卡住的那一步。
+- **复习时想找回做错的题。** 把错题按学科收好，把讲解存进笔记，再用学习报告和「四问复盘」回顾最近学了什么。家长和老师也能用这些记录陪学生复盘。
 
 | 学习场景 | 怎么用 |
 | --- | --- |
