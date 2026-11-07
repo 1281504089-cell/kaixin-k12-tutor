@@ -9,11 +9,11 @@
 ```sh
 git clone --depth 1 https://github.com/1281504089-cell/kaixin-k12-tutor.git
 cd kaixin-k12-tutor
-python3 bootstrap_source.py
+python3 bootstrap_source.py --with-updates
 cd student-source
 ```
 
-Windows 可用 `py -3.12 bootstrap_source.py`。脚本会按清单校验两个分卷与合并归档的 SHA-256，然后解包到新的 `student-source/` 目录。归档的源码版本记录在 `student-source/SOURCE_FREEZE.json`。 [源码清单](source-manifest.json) · [解包脚本](bootstrap_source.py)
+Windows 可用 `py -3.12 bootstrap_source.py --with-updates`。脚本会按清单校验两个分卷与合并归档的 SHA-256，然后解包到新的 `student-source/` 目录。归档的源码版本记录在 `student-source/SOURCE_FREEZE.json`。`--with-updates` 还会校验并应用[学生版源码修复](student-source-updates.patch)，可在解包目录用 `git log -2` 查看。省略该参数可取回与当前安装包一致的冻结源码。 [源码清单](source-manifest.json) · [解包脚本](bootstrap_source.py)
 
 ## 本地运行
 

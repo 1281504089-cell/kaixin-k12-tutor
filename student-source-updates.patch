@@ -1,0 +1,1392 @@
+diff --git a/deeptutor/agents/chat/prompts/en/agentic_chat.yaml b/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
+index 2eb1e4b2e346e9a604a76995b942830a5188eb5d..c88273b3d116aa4024a1062e6a0c9f667bfbd9bf 100644
+--- a/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
++++ b/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
+@@ -87,6 +87,15 @@ loop:
+     assumptions and state them in the answer. After each round you see the
+     results and may call more tools.
+ 
++    Interactive tutoring is an exception: when the learner asks to take a
++    multiple-choice exercise, use ask_user if available, with the full question
++    and clickable choices. Do not reveal or recommend the right choice. After
++    the learner answers, check it and explain why. Printable worksheets and
++    answer keys are ordinary output. When a concept, misconception, or review
++    warrants a quick check, finish the explanation first, then optionally offer
++    one short question with a Skip choice. Do not quiz repeatedly or when
++    asked for a direct answer. Use mastery_quiz for formal Mastery assessments.
++
+     Before you call a tool, say what you are about to do and why, in a
+     sentence or two of plain language. The reader sees that text as you write
+     it, with the tool's own row underneath it, so it is how they follow the
+diff --git a/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml b/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml
+index 8cff1dcfc5e3ca2547c368832c48662aa28bfcee..576449019c79bdcb1a99834ab5924ec693a54381 100644
+--- a/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml
++++ b/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml
+@@ -63,6 +63,13 @@ loop:
+     你在一个循环里回答每个用户请求。每一轮你都可以调用工具（检索、读取来源、搜索、脚本、文件、笔记本，
+     或用 ask_user 向用户澄清）。默认直接动手：只有缺少关键信息、确实无法合理继续时才用 ask_user，
+     而且一次问全；其余情况用合理假设直接做，并在回答里说明你的假设。
++
++    互动学习是例外：学生要求你出选择题让他做时，有 ask_user 就用可点击答题卡，
++    不把选项写成让他手输字母的正文。每题给完整题干和明确选项，单选/多选按题意设置，
++    不提前标出答案。学生选完后，按题干核对并解释关键理由。学生要可打印或带答案的试卷
++    时正常交付。平时在讲完难点、发现常见误区或复习收尾时，可先完成讲解，再出一道
++    有用的可跳过小题（加「先跳过」选项）；不要连续考，也不要在学生只要直接答案时插题。
++    精通之路的正式测验继续用 mastery_quiz。
+     每轮结束后你会看到工具结果，可以继续调用。
+ 
+     调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
+diff --git a/deeptutor/services/model_selection/llm.py b/deeptutor/services/model_selection/llm.py
+index d1d73638afd6d301850276de0c01411d2e3b1dbb..6435b22c6654ffd92a7367b5f7ba38a417750f4a 100644
+--- a/deeptutor/services/model_selection/llm.py
++++ b/deeptutor/services/model_selection/llm.py
+@@ -142,6 +142,8 @@ def list_llm_options(catalog: dict[str, Any]) -> dict[str, Any]:
+                     profile_id == active_profile_id and model_id == active_model_id
+                 ),
+             }
++            if isinstance(model.get("show_in_chat"), bool):
++                option["show_in_chat"] = model["show_in_chat"]
+             context_window = _coerce_int(model.get("context_window"))
+             official_name = model.get("official_name")
+             if isinstance(official_name, str) and official_name:
+diff --git a/deeptutor/services/settings/connection_setup.py b/deeptutor/services/settings/connection_setup.py
+index a06dd2ab205d7a9dde8d05fa2c72db358711aba9..f9c0b4eb6316002524d58399e7c53f038d38aeaf 100644
+--- a/deeptutor/services/settings/connection_setup.py
++++ b/deeptutor/services/settings/connection_setup.py
+@@ -138,7 +138,11 @@ async def complete_connections(
+             if isinstance(old_models, list)
+             else set()
+         )
+-        for item in discovery["models"]:
++        discovered_models = discovery["models"]
++        preferred_kimi = "kimi-k3.1-pro" if spec.name == "moonshot" else None
++        if preferred_kimi:
++            discovered_models = sorted(discovered_models, key=lambda item: item["id"] != preferred_kimi)
++        for item in discovered_models:
+             # Large provider catalogs must not starve desktop health checks.
+             await asyncio.sleep(0)
+             services = item.get("services") or (
+@@ -192,7 +196,7 @@ async def complete_connections(
+                 if (
+                     service == "llm"
+                     and choose_vision_default
+-                    and model.get("capabilities", {}).get("vision") is True
++                    and (item["id"] == preferred_kimi or model.get("capabilities", {}).get("vision") is True)
+                 ):
+                     result = merge_registry_edit(
+                         result,
+diff --git a/deeptutor/tools/builtin/__init__.py b/deeptutor/tools/builtin/__init__.py
+index 505cc9d0d0c89ecdd11f1896b3678ff3fce111d7..d75e94859b71dd3b4bfef69e22b7d12d0e2056ce 100644
+--- a/deeptutor/tools/builtin/__init__.py
++++ b/deeptutor/tools/builtin/__init__.py
+@@ -1812,8 +1812,12 @@ class AskUserTool(_PromptHintsMixin, BaseTool):
+             description=(
+                 "Pause the conversation to ask the user 1-4 clarifying "
+                 "questions in one batch, rendered as a card with "
+-                "clickable options. Use ONLY when you are blocked on a "
+-                "decision that is genuinely the user's to make — one "
++                "clickable options. Also use it for a requested interactive "
++                "multiple-choice exercise or a short, optional understanding "
++                "check during tutoring; include the actual answer choices and "
++                "never mark the correct answer as recommended. For ordinary "
++                "clarification, use only when blocked on a decision genuinely "
++                "the user's to make — one "
+                 "you cannot resolve from the request, the conversation, "
+                 "the attached material, or sensible defaults. Never use "
+                 "it to ask 'should I proceed?', to confirm what the "
+diff --git a/web/app/globals.css b/web/app/globals.css
+index 457ab097e434f89beac8269ac7c133fc60f4b256..68ee70bc9fec0577fd5b1dc9acee5991b7b9aa45 100644
+--- a/web/app/globals.css
++++ b/web/app/globals.css
+@@ -1225,25 +1225,25 @@ body[data-picker-open] .dt-breathing-text {
+    reading the answer, not in the two seconds after the page moved. A highlight
+    that vanished on a timer was simply missed. */
+ .dt-reader-flash {
+-  background: rgb(96 165 250 / 0.3);
++  background: rgb(245 191 34 / 0.3);
+   animation: dt-reader-flash 1.5s ease-out forwards;
+   mix-blend-mode: multiply;
+ }
+ @keyframes dt-reader-flash {
+   0%,
+   22% {
+-    background: rgb(96 165 250 / 0.62);
+-    box-shadow: 0 0 0 3px rgb(96 165 250 / 0.55);
++    background: rgb(245 191 34 / 0.62);
++    box-shadow: 0 0 0 3px rgb(245 191 34 / 0.55);
+   }
+   100% {
+-    background: rgb(96 165 250 / 0.3);
+-    box-shadow: 0 0 0 1px rgb(96 165 250 / 0.28);
++    background: rgb(245 191 34 / 0.3);
++    box-shadow: 0 0 0 1px rgb(245 191 34 / 0.28);
+   }
+ }
+ @media (prefers-reduced-motion: reduce) {
+   .dt-reader-flash {
+     animation: none;
+-    box-shadow: 0 0 0 1px rgb(96 165 250 / 0.28);
++    box-shadow: 0 0 0 1px rgb(245 191 34 / 0.28);
+   }
+ }
+ 
+diff --git a/web/components/chat/home/ComposerInput.tsx b/web/components/chat/home/ComposerInput.tsx
+index b78c53c95954f6543c70258dbebd195bfa5ee874..531a5f7cb45b48fe45b253b3a73ec04452dbc5e3 100644
+--- a/web/components/chat/home/ComposerInput.tsx
++++ b/web/components/chat/home/ComposerInput.tsx
+@@ -367,6 +367,30 @@ export const ComposerInput = memo(
+       [clearTrailingMention, onSelectAgent],
+     );
+ 
++    const acceptPrediction = useCallback(() => {
++      if (!placeholderCompletion || inputRef.current.trim() || isStreaming || isComposingRef.current) return false;
++      setInputBoth(placeholderCompletion);
++      onInputChange(placeholderCompletion);
++      textareaRef.current?.focus({ preventScroll: true });
++      return true;
++    }, [placeholderCompletion, isStreaming, isComposingRef, setInputBoth, onInputChange, textareaRef]);
++
++    useEffect(() => {
++      if (!placeholderCompletion || isStreaming) return;
++      const onTab = (event: KeyboardEvent) => {
++        // After a reply, focus can be back on the document. Never intercept
++        // Tab from another control, dialog, or a selection in the transcript.
++        if (document.activeElement !== document.body || document.querySelector('[role="dialog"][aria-modal="true"]') ||
++            window.getSelection()?.isCollapsed === false || event.defaultPrevented ||
++            event.key !== "Tab" || event.shiftKey || event.ctrlKey || event.altKey ||
++            event.metaKey || event.isComposing || event.repeat ||
++            !textareaRef.current?.getClientRects().length) return;
++        if (acceptPrediction()) event.preventDefault();
++      };
++      document.addEventListener("keydown", onTab);
++      return () => document.removeEventListener("keydown", onTab);
++    }, [acceptPrediction, isStreaming, placeholderCompletion, textareaRef]);
++
+     const handleKeyDown = useCallback(
+       (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+         // Backspace before the first character reaches back into the lead:
+@@ -440,12 +464,11 @@ export const ComposerInput = memo(
+         if (
+           e.key === "Tab" &&
+           !e.shiftKey &&
+-          placeholderCompletion &&
+-          !inputRef.current.trim()
++          !e.ctrlKey && !e.altKey && !e.metaKey &&
++          !e.nativeEvent.isComposing && !e.repeat &&
++          acceptPrediction()
+         ) {
+           e.preventDefault();
+-          setInputBoth(placeholderCompletion);
+-          onInputChange(placeholderCompletion);
+           return;
+         }
+         if (shouldSubmitOnEnter(e, isComposingRef.current)) {
+@@ -473,9 +496,7 @@ export const ComposerInput = memo(
+         filteredAgents,
+         handleSelectAgentMention,
+         isComposingRef,
+-        onInputChange,
+-        placeholderCompletion,
+-        setInputBoth,
++        acceptPrediction,
+         lead,
+         armed,
+       ],
+@@ -572,7 +593,7 @@ export const ComposerInput = memo(
+     // textarea onto a second line and silently clip the very text that
+     // explains how to accept it; the hint span truncates with an ellipsis
+     // instead, while "→ Tab to complete" stays pinned and fully visible.
+-    const showHintOverlay = Boolean(placeholderCompletion) && !input.trim();
++    const showHintOverlay = Boolean(placeholderCompletion) && !input.trim() && !isStreaming;
+ 
+     return (
+       <div className="px-4 pt-3.5 pb-2">
+@@ -764,7 +785,7 @@ export const ComposerInput = memo(
+             // attachment path, not the composer body.
+             maxLength={32000}
+             suppressHydrationWarning
+-            placeholder={placeholderCompletion ? "" : basePlaceholder}
++            placeholder={showHintOverlay ? "" : basePlaceholder}
+             aria-haspopup={showSlashPopup || showLanguagePopup ? "listbox" : undefined}
+             aria-controls={showSlashPopup ? slashListId : showLanguagePopup ? languageListId : undefined}
+             aria-activedescendant={showSlashPopup
+@@ -778,7 +799,7 @@ export const ComposerInput = memo(
+             // accessible name — this restores one that reads the same as
+             // what's on screen.
+             aria-label={
+-              placeholderCompletion
++              showHintOverlay
+                 ? `${placeholderCompletion} — ${t("Tab to complete")}`
+                 : undefined
+             }
+@@ -789,10 +810,12 @@ export const ComposerInput = memo(
+             }}
+           />
+           {showHintOverlay ? (
+-            <div
+-              aria-hidden="true"
+-              className="pointer-events-none absolute inset-0 flex items-start gap-1 overflow-hidden text-[16px] leading-relaxed text-[var(--muted-foreground)]"
+-              style={{ paddingLeft: indent || undefined }}
++            <button
++              type="button"
++              tabIndex={-1}
++              onClick={acceptPrediction}
++              className="absolute inset-x-0 top-0 flex items-start gap-1 overflow-hidden text-start text-[16px] leading-relaxed text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
++              style={{ paddingInlineStart: indent || undefined }}
+             >
+               <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                 {placeholderCompletion}
+@@ -800,7 +823,7 @@ export const ComposerInput = memo(
+               <span className="shrink-0 whitespace-nowrap">
+                 → {t("Tab to complete")}
+               </span>
+-            </div>
++            </button>
+           ) : null}
+           {lead.length > 0 && (
+             <ComposerLead tokens={lead} armed={armed} hidden={scrolled} onWidth={setLeadWidth} />
+diff --git a/web/components/chat/home/ModelSelector.tsx b/web/components/chat/home/ModelSelector.tsx
+index 8a9f78217d4c4d475e11a569f0b705e3293f106d..12516bafc7f605609b77077a7ca969d5ea7df24b 100644
+--- a/web/components/chat/home/ModelSelector.tsx
++++ b/web/components/chat/home/ModelSelector.tsx
+@@ -12,6 +12,7 @@ import type { LLMSelection } from "@/features/chat/model/protocol";
+ import {
+   llmSelectionKey,
+   sameLLMSelection,
++  showModelInChat,
+   type LLMOption,
+   type RefreshLLMOptions,
+ } from "@/lib/llm-options";
+@@ -83,11 +84,10 @@ function ModelOptionRow({
+       type="button"
+       aria-label={`${modelLabel === option.model ? option.model_name : modelLabel} | ${option.profile_name}`}
+       aria-describedby={guideId}
+-      title={modelLabel !== option.model ? option.model : undefined}
+       onClick={onSelect}
+       onMouseEnter={() => {
+         const el = nameRef.current;
+-        setRevealFull(!!el && el.scrollWidth > el.clientWidth + 1);
++        setRevealFull(modelLabel !== option.model || (!!el && el.scrollWidth > el.clientWidth + 1));
+       }}
+       onMouseLeave={() => setRevealFull(false)}
+       className={`relative flex w-full items-center gap-2 px-3 py-2 text-left transition-colors active:bg-[var(--muted)]/70 ${
+@@ -139,7 +139,7 @@ function ModelOptionRow({
+       )}
+       {revealFull && (
+         <span className="pointer-events-none absolute inset-x-1.5 top-1/2 z-10 -translate-y-1/2 break-all rounded-lg border border-[var(--border)] bg-[var(--popover)] px-2 py-1 text-[12px] font-medium text-[var(--foreground)] shadow-md">
+-          {modelLabel}
++          {modelLabel === option.model ? modelLabel : option.model}
+         </span>
+       )}
+     </button>
+@@ -189,6 +189,11 @@ export default function ModelSelector({
+     ? value
+     : (value ?? activeDefault);
+   const selectedKey = llmSelectionKey(selectedSelection);
++  const visibleOptions = options.filter((option) => showModelInChat(option) ||
++    // A configured default always has a visible entry. An older chat can
++    // continue using a hidden override without making it a new choice.
++    option.is_active_default);
++
+   const selectedOption = useMemo(
+     () =>
+       options.find((option) => sameLLMSelection(option, selectedSelection)) ??
+@@ -207,7 +212,7 @@ export default function ModelSelector({
+   const canRefresh = error && Boolean(onRefresh);
+   const disabled =
+     loading ||
+-    (!canRefresh && (error || (options.length === 0 && !allowSystemDefault)));
++    (!canRefresh && (error || (visibleOptions.length === 0 && !allowSystemDefault)));
+   const label = loading
+     ? t("Loading models")
+     : error
+@@ -308,7 +313,7 @@ export default function ModelSelector({
+                 )}
+               </button>
+             )}
+-            {options.map((option) => {
++            {visibleOptions.map((option) => {
+               const optionSelection = {
+                 profile_id: option.profile_id,
+                 model_id: option.model_id,
+diff --git a/web/components/common/AssistantResponse.tsx b/web/components/common/AssistantResponse.tsx
+index e97bde2745d03c2fb26e5f400761664969f40b31..1e17f9d3f56a399cf131610019e4f8ff03d13078 100644
+--- a/web/components/common/AssistantResponse.tsx
++++ b/web/components/common/AssistantResponse.tsx
+@@ -15,6 +15,7 @@ import {
+ import {
+   linkifyLocatorCitations,
+   verifiedReadingLocators,
++  verifiedReadingQuotes,
+ } from "@/lib/reading-citations";
+ import { linkifyMediaTimestamps } from "@/lib/reading-media-citations";
+ import { parseModelThinkingSegments } from "@/lib/think-segments";
+@@ -76,6 +77,7 @@ function AssistantResponseImpl({
+           materialId: readingMaterialId,
+           materialRevision: readingMaterialRevision,
+           allowedLocators: verifiedLocators,
++          quotes: verifiedReadingQuotes(events, readingMaterialId, readingMaterialRevision),
+           ...(material?.material_id === readingMaterialId &&
+           (!readingMaterialRevision ||
+             material.revision === readingMaterialRevision)
+@@ -85,6 +87,7 @@ function AssistantResponseImpl({
+       : displayContent;
+   }, [
+     displayContent,
++    events,
+     material,
+     readingMaterialId,
+     readingMaterialRevision,
+diff --git a/web/components/reading/AnnotationPopover.tsx b/web/components/reading/AnnotationPopover.tsx
+index 037fdda64729ed4526b686e8fc40843e68641fd7..9ebcd8ae3246b27778681f0d7b4e9673099deb13 100644
+--- a/web/components/reading/AnnotationPopover.tsx
++++ b/web/components/reading/AnnotationPopover.tsx
+@@ -18,11 +18,13 @@ import { ANNOTATION_COLORS, ANNOTATION_SWATCH, type AnnotationColor } from '@/li
+ 
+ const AddToNote = dynamic(() => import('@/features/notes/components/AddToNote'), { ssr: false })
+ 
++export type ReadingNoteSource = { title: string; url: string; id: string; markdown: string; image?: string }
++
+ export interface AnnotationPopoverProps {
+   /** Viewport coordinates of the selection's end. */
+   anchor: { x: number; y: number }
+   quote: string
+-  noteSource?: { title: string; url: string; id: string }
++  noteSource?: ReadingNoteSource
+   onHighlight: (color: AnnotationColor) => void
+   onUnderline: (color: AnnotationColor) => void
+   onNote: (note: string, color: AnnotationColor) => void
+@@ -211,7 +213,8 @@ export function AnnotationPopover({
+       {noteSource && (
+         <AddToNote
+           title={noteSource.title}
+-          markdown={quote}
++          markdown={noteSource.markdown}
++          image={noteSource.image}
+           sourceUrl={noteSource.url}
+           sourceId={noteSource.id}
+         />
+diff --git a/web/components/reading/PdfDocumentView.tsx b/web/components/reading/PdfDocumentView.tsx
+index 38afc3a32f905af7343de74ca691f67b350190df..37f07ed9d1d283ebf74470cc4d22eb2e3f599658 100644
+--- a/web/components/reading/PdfDocumentView.tsx
++++ b/web/components/reading/PdfDocumentView.tsx
+@@ -47,6 +47,7 @@ export interface SelectionPayload {
+    * into it (margin line numbers). Questions carry this; marks keep `quote`.
+    */
+   text?: string;
++  noteMarkdown?: string;
+   image?: string;
+   region?: true;
+   rects: NormalisedRect[];
+@@ -59,6 +60,7 @@ export interface SelectionPayload {
+ export interface JumpRequest {
+   locator: number;
+   quote?: string;
++  citation?: { rect?: NormalisedRect };
+   /** Changes on every request so repeats of the same target still fire. */
+   nonce: number;
+ }
+@@ -373,6 +375,7 @@ export function PdfDocumentView({
+     const locator = Math.min(Math.max(1, jump.locator), unitCount);
+     const nonce = jump.nonce;
+     const quote = jump.quote;
++    const citation = jump.citation;
+     let cancelled = false;
+     let timer: number | undefined;
+ 
+@@ -389,7 +392,24 @@ export function PdfDocumentView({
+         if (scrollTries <= 20) timer = window.setTimeout(run, 120);
+         return;
+       }
+-      if (!quote) return;
++      const flashPassage = (rects: NormalisedRect[], page: HTMLElement) => {
++        setFlash({ nonce, locator, rects });
++        const root = scrollRef.current;
++        if (citation && root && rects.length) {
++          const box = page.getBoundingClientRect();
++          root.scrollTop += box.top + box.height * rects[0][1] -
++            root.getBoundingClientRect().top - Math.min(root.clientHeight / 3, 150);
++        }
++      };
++      const page = scrollRef.current?.querySelector<HTMLElement>(`[data-reader-unit="${locator}"]`);
++      if (page && citation?.rect) {
++        flashPassage([citation.rect], page);
++        return;
++      }
++      if (!quote) {
++        if (citation) setFlash({ nonce, locator, rects: [] });
++        return;
++      }
+       let attempts = 0;
+       const findQuote = () => {
+         if (cancelled) return;
+@@ -400,7 +420,7 @@ export function PdfDocumentView({
+         );
+         const layer = page?.querySelector<HTMLElement>(".textLayer");
+         if (layer && layer.childElementCount > 0) {
+-          const range = domRangeForQuote(layer, quote);
++          const range = domRangeForQuote(layer, quote, Boolean(citation));
+           const box = page?.getBoundingClientRect();
+           if (range && box) {
+             const rects = normaliseRects([...range.getClientRects()], {
+@@ -409,8 +429,8 @@ export function PdfDocumentView({
+               width: box.width,
+               height: box.height,
+             });
+-            if (rects.length) {
+-              setFlash({ nonce, locator, rects });
++            if (rects.length && page) {
++              flashPassage(rects, page);
+               return;
+             }
+           }
+@@ -423,6 +443,7 @@ export function PdfDocumentView({
+         // polling; the page is still scrolled into view, which is the useful
+         // part of the request.
+         if (attempts < 25) timer = window.setTimeout(findQuote, 120);
++        else if (citation) setFlash({ nonce, locator, rects: [] });
+       };
+       timer = window.setTimeout(findQuote, 140);
+     };
+@@ -434,10 +455,15 @@ export function PdfDocumentView({
+     };
+   }, [jump, doc, unitCount, scrollToLocator]);
+ 
+-  // Tagged with the nonce that produced it, so the previous jump's highlight is
+-  // superseded by derivation — no timer, and no way for a stale highlight to
+-  // outlive the request behind it. The mark itself persists until then; see the
+-  // `dt-reader-flash` rules for why it does not fade out.
++  // A clicked reference clears after a few seconds; automatic reading
++  // guidance keeps its mark until the next jump.
++  useEffect(() => {
++    if (!jump?.citation || !flash || flash.nonce !== jump.nonce) return;
++    const timer = window.setTimeout(() => {
++      setFlash((current) => current?.nonce === flash.nonce ? null : current);
++    }, 3600);
++    return () => window.clearTimeout(timer);
++  }, [flash, jump]);
+   const activeFlash =
+     flash && jump && flash.nonce === jump.nonce ? flash : null;
+ 
+@@ -494,6 +520,9 @@ export function PdfDocumentView({
+       locator,
+       quote,
+       ...(text ? { text } : {}),
++      // A PDF's private glyphs or replacement characters have no reliable
++      // plain-text meaning. The cropped original remains readable.
++      noteMarkdown: /[\p{Co}\uFFFD]/u.test(text || quote) ? "" : text || quote,
+       rects,
+       image: pdfSelectionImage(page, rects),
+       anchor: { x: last.left + last.width / 2, y: last.top },
+@@ -527,6 +556,13 @@ export function PdfDocumentView({
+       // token for exactly this: one step back from the page.
+       className="dt-reader-scroll h-full overflow-auto overscroll-contain bg-[var(--secondary)] px-6 py-4"
+     >
++      {jump?.citation && activeFlash && (
++        <div className="pointer-events-none sticky top-2 z-20 h-0 text-center" role="status">
++          <span className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs text-amber-950 shadow-sm">
++            {t(activeFlash.rects.length ? "Highlighted source on page {{page}}" : "Citation points to page {{page}} only", { page: activeFlash.locator })}
++          </span>
++        </div>
++      )}
+       {!doc ? (
+         <div className="flex h-full items-center justify-center gap-2 text-[12px] text-[var(--muted-foreground)]">
+           <Loader2 size={14} className="animate-spin" />
+diff --git a/web/components/reading/ReaderPane.tsx b/web/components/reading/ReaderPane.tsx
+index f530ffac79b1e288ab0a0a01b046ef3d04ce4583..c86e25c777fd2448fddd3e2dbbe1c389c13901c7 100644
+--- a/web/components/reading/ReaderPane.tsx
++++ b/web/components/reading/ReaderPane.tsx
+@@ -29,6 +29,7 @@ import {
+   READER_TURN_END_EVENT,
+   type ReaderActionPayload,
+ } from "@/lib/reading-reader-action";
++import { unionRect } from "@/lib/reading-selection";
+ import { scopedUrl } from "@/lib/workspace-scope";
+ import { citationTargetFromHref, readingPassageHref } from "@/lib/reading-citations";
+ import {
+@@ -427,9 +428,9 @@ export function ReaderPane({
+   // -- reader actions from the assistant -----------------------------------
+ 
+   const requestJump = useCallback(
+-    (locator: number, quote?: string, targetMaterialId?: string) => {
++    (locator: number, quote?: string, targetMaterialId?: string, citation?: JumpRequest["citation"]) => {
+       nonceRef.current += 1;
+-      setJump({ locator, quote, nonce: nonceRef.current });
++      setJump({ locator, quote, citation, nonce: nonceRef.current });
+       jumpMaterialIdRef.current =
+         targetMaterialId ?? material?.material_id ?? null;
+     },
+@@ -606,7 +607,7 @@ export function ReaderPane({
+   );
+ 
+   const navigateCitation = useCallback(
+-    async (href: string | null | undefined) => {
++    async (href: string | null | undefined, clicked = false) => {
+       const target = citationTargetFromHref(href);
+       if (!target) return false;
+       if (target.materialId && target.materialId !== material?.material_id) {
+@@ -622,7 +623,7 @@ export function ReaderPane({
+             return true;
+           }
+           const entry = locationEntry(candidate, target.locator);
+-          await openHistoryEntry(entry, "push", false, candidate);
++          if (!(await openHistoryEntry(entry, "push", false, candidate))) return true;
+         } catch (caught) {
+           setError(
+             caught instanceof Error
+@@ -640,8 +641,10 @@ export function ReaderPane({
+         );
+         return true;
+       }
+-      rememberExplicitLocation(target.locator);
+-      requestJump(target.locator);
++      if (!target.materialId || target.materialId === material?.material_id) {
++        rememberExplicitLocation(target.locator);
++      }
++      requestJump(target.locator, target.quote, target.materialId, clicked ? { rect: target.rect } : undefined);
+       return true;
+     },
+     [
+@@ -660,7 +663,7 @@ export function ReaderPane({
+       const href = window.location.hash;
+       if (!material || !citationTargetFromHref(href) || followedSource.current === href) return;
+       followedSource.current = href;
+-      void navigateCitation(href);
++      void navigateCitation(href, true);
+     };
+     follow();
+     window.addEventListener('hashchange', follow);
+@@ -769,7 +772,7 @@ export function ReaderPane({
+       if (!citation) return;
+       event.preventDefault();
+       event.stopPropagation();
+-      void navigateCitation(anchor?.getAttribute("href"));
++      void navigateCitation(anchor?.getAttribute("href"), true);
+     };
+     document.addEventListener("click", onClick, true);
+     return () => document.removeEventListener("click", onClick, true);
+@@ -825,6 +828,18 @@ export function ReaderPane({
+   // what re-anchors them on the page.
+   const selectionText = selection ? selection.text || selection.quote : "";
+ 
++  const noteSource = useMemo(() => material && selection ? {
++    title: `${material.title} · ${t(unitLabel(material.unit))} ${selection.locator}`.slice(0, 200),
++    url: scopedUrl(window.location.pathname + window.location.search) + readingPassageHref(
++      material.material_id, selection.locator, material.revision,
++      selection.region ? undefined : selection.quote,
++      selection.image ? unionRect(selection.rects) ?? undefined : undefined,
++    ),
++    id: `${material.material_id}:${selection.locator}`,
++    markdown: selection.noteMarkdown ?? selection.text ?? selection.quote,
++    image: selection.image,
++  } : undefined, [material, selection, t]);
++
+   const askAboutSelection = useCallback(
+     (prompt?: string) => {
+       if (!selection || !material) return;
+@@ -833,6 +848,7 @@ export function ReaderPane({
+           detail: {
+             quote: selectionText,
+             image: selection.image,
++            noteSource,
+             locator: selection.locator,
+             unit: material.unit,
+             ...(prompt ? { prompt } : {}),
+@@ -842,7 +858,7 @@ export function ReaderPane({
+       clearSelection();
+       window.getSelection()?.removeAllRanges();
+     },
+-    [selection, selectionText, material, clearSelection],
++    [selection, selectionText, material, noteSource, clearSelection],
+   );
+ 
+   // Inside a workspace the selection's AI actions sit on the popover, next to
+@@ -1370,7 +1386,7 @@ export function ReaderPane({
+         <AnnotationPopover
+           anchor={selection.anchor}
+           quote={selection.quote}
+-          noteSource={{title: `${material.title} · ${unitLabel(material.unit)} ${selection.locator}`, url: scopedUrl(window.location.pathname + window.location.search) + readingPassageHref(material.material_id, selection.locator, material.revision), id: `${material.material_id}:${selection.locator}`}}
++          noteSource={noteSource}
+           onHighlight={(color) => commitSelection("highlight", color)}
+           onUnderline={(color) => commitSelection("underline", color)}
+           onNote={(note, color) => commitSelection("note", color, note)}
+diff --git a/web/components/reading/TextUnitView.tsx b/web/components/reading/TextUnitView.tsx
+index a5b665d89430498d5e4c8b8ca0dec0ef7d355985..b28c30b43677996132283532a54076c5a7c312e0 100644
+--- a/web/components/reading/TextUnitView.tsx
++++ b/web/components/reading/TextUnitView.tsx
+@@ -41,6 +41,7 @@ import {
+   readerLinesWithHeadings,
+   type ReaderHeading,
+ } from "@/lib/reading-outline";
++import { textFromDomSelection } from "@/lib/selection-text";
+ import { cleanQuote } from "@/lib/reading-selection";
+ import {
+   imageMarkerNames,
+@@ -435,6 +436,7 @@ export function TextUnitView({
+     onSelection({
+       locator,
+       quote,
++      noteMarkdown: textFromDomSelection(selection),
+       // No geometry: a reflowing text view has none worth storing.
+       rects: [],
+       selectors:
+diff --git a/web/components/reading/workspace/ReadingCompanion.tsx b/web/components/reading/workspace/ReadingCompanion.tsx
+index 6d437f2a0cf00fce6e522e46dda2665a4b8401ad..e20a06954dec79cb2a96be14c78f0e936e5a9cf1 100644
+--- a/web/components/reading/workspace/ReadingCompanion.tsx
++++ b/web/components/reading/workspace/ReadingCompanion.tsx
+@@ -45,6 +45,8 @@ import { useChatAutoScroll } from "@/hooks/useChatAutoScroll";
+ import { useMeasuredHeight } from "@/hooks/useMeasuredHeight";
+ import { useResearchOutlineContinuation } from "@/hooks/useResearchOutlineContinuation";
+ import { buildChatOutline, scrollToChatTurn } from "@/lib/chat-outline";
++import AddToNote from "@/features/notes/components/AddToNote";
++import { textFromDomSelection } from "@/lib/selection-text";
+ import { copyText } from "@/lib/clipboard";
+ import { buildConversationNotebookSave } from "@/lib/conversation-notebook-save";
+ import { setReadingViewport } from "@/lib/reading-turn-state";
+@@ -53,6 +55,7 @@ import {
+   type ReadingConversation,
+   type ReadingLibraryMaterial,
+ } from "@/lib/reading-workspace-api";
++import type { ReadingNoteSource } from "@/components/reading/AnnotationPopover";
+ import { READER_ASK_EVENT } from "@/components/reading/ReaderPane";
+ import {
+   focusReadingComposer,
+@@ -95,7 +98,7 @@ export function ReadingCompanion({
+   linkedSessionIds: string[];
+   /** Where the reader is, used to write a placeholder about this page. */
+   activeLocator: number;
+-  selection: { quote: string; locator: number } | null;
++  selection: { quote: string; locator: number; image?: string; noteSource?: ReadingNoteSource } | null;
+   onClearSelection: () => void;
+   onOpenLinker: () => void;
+   prefillInputRef: React.MutableRefObject<((text: string) => void) | null>;
+@@ -121,6 +124,18 @@ export function ReadingCompanion({
+   const readingActions = useReadingActions();
+   const [turnsOpen, setTurnsOpen] = useState(false);
+   const [showSaveModal, setShowSaveModal] = useState(false);
++  const [noteExcerpt, setNoteExcerpt] = useState<{ sessionId: string | null; text: string } | null>(null);
++  const captureNoteExcerpt = useCallback((root: HTMLDivElement) => {
++    const selected = window.getSelection();
++    const inMessage = (node: Node | null) => {
++      const element = node instanceof Element ? node : node?.parentElement;
++      return element?.closest("[data-chat-message-id]");
++    };
++    const first = inMessage(selected?.anchorNode ?? null);
++    const last = inMessage(selected?.focusNode ?? null);
++    setNoteExcerpt(first && last && root.contains(first) && root.contains(last)
++      ? { sessionId: state.sessionId, text: textFromDomSelection(selected) } : null);
++  }, [state.sessionId]);
+   const [viewerOpen, setViewerOpen] = useState(false);
+   const viewerPanelRef = useRef<SessionViewerPanelHandle | null>(null);
+ 
+@@ -231,7 +246,7 @@ export function ReadingCompanion({
+   const [askHint, setAskHint] = useState("");
+   const messageCount = state.messages.length;
+   useEffect(() => {
+-    if (!workspaceId) return;
++    if (!workspaceId || state.isStreaming) return;
+     const controller = new AbortController();
+     let cancelled = false;
+     void fetchReadingAskHint(
+@@ -256,6 +271,7 @@ export function ReadingCompanion({
+     messageCount,
+     selection?.quote,
+     state.sessionId,
++    state.isStreaming,
+     workspaceId,
+   ]);
+ 
+@@ -409,6 +425,8 @@ export function ReadingCompanion({
+         // without it the browser's own scroll anchoring fights the pin every
+         // time a code block or KaTeX span reflows.
+         data-chat-scroll-root="true"
++        onMouseUp={(event) => captureNoteExcerpt(event.currentTarget)}
++        onKeyUp={(event) => captureNoteExcerpt(event.currentTarget)}
+         onScroll={() => {
+           const container = messagesContainerRef.current;
+           if (!container) return;
+@@ -488,6 +506,18 @@ export function ReadingCompanion({
+         data-reading-composer=""
+         className="shrink-0 pt-1"
+       >
++        {noteExcerpt?.sessionId === state.sessionId && noteExcerpt.text && (
++          <div className="mx-4 mb-1 flex items-start gap-1 rounded-lg border border-[var(--border)] text-xs">
++            <AddToNote
++              className="min-w-0 flex-1 p-1"
++              title={(material?.title || t("Reading conversation")).slice(0, 200)}
++              markdown={noteExcerpt.text}
++              onSaved={() => { setNoteExcerpt(null); window.getSelection()?.removeAllRanges(); }}
++            />
++            <button type="button" className="p-2 text-[var(--muted-foreground)]" aria-label={t("Close")}
++              onClick={() => { setNoteExcerpt(null); window.getSelection()?.removeAllRanges(); }}>×</button>
++          </div>
++        )}
+         {!!linkedSessionIds.length && (
+           <div className="mx-4 mb-2 flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
+             <Link2 size={11} />
+diff --git a/web/components/reading/workspace/ReadingComposer.tsx b/web/components/reading/workspace/ReadingComposer.tsx
+index 48e0f0a8ab9242885b33e40959e9767c2b3fc39c..264ef4e2c93ee91c99785a647552df92536fb50f 100644
+--- a/web/components/reading/workspace/ReadingComposer.tsx
++++ b/web/components/reading/workspace/ReadingComposer.tsx
+@@ -16,6 +16,8 @@ import { useCallback, useRef } from "react";
+ import { COMMAND_CONFIRMATION_FAILED } from "@/features/chat/transport/command-delivery";
+ import { useTranslation } from "react-i18next";
+ 
++import type { ReadingNoteSource } from "@/components/reading/AnnotationPopover";
++import AddToNote from "@/features/notes/components/AddToNote";
+ import { QuotedPassage } from "@/components/chat/home/QuotedPassage";
+ import StandaloneComposer, {
+   type StandaloneComposerSubmission,
+@@ -44,7 +46,7 @@ export function ReadingComposer({
+   placeholder: string;
+   /** Offered question the composer lets the learner take with Tab. */
+   placeholderCompletion?: string;
+-  selection: { quote: string; locator: number; image?: string } | null;
++  selection: { quote: string; locator: number; image?: string; noteSource?: ReadingNoteSource } | null;
+   /** Clears the pending selection once the message is on its way. */
+   onSent: () => void;
+   /** The learner dropped the quoted passage before sending. */
+@@ -166,11 +168,23 @@ export function ReadingComposer({
+       inputPlaceholderCompletion={placeholderCompletion}
+       inputHeader={
+         selection ? (
+-          <QuotedPassage
+-            quote={selection.quote}
+-            image={selection.image}
+-            onRemove={onRemoveSelection}
+-          />
++          <>
++            <QuotedPassage
++              quote={selection.quote}
++              image={selection.image}
++              onRemove={onRemoveSelection}
++            />
++            {selection.noteSource && (
++              <AddToNote
++                className="mb-1 px-1 text-xs"
++                title={selection.noteSource.title}
++                markdown={selection.noteSource.markdown}
++                image={selection.noteSource.image}
++                sourceUrl={selection.noteSource.url}
++                sourceId={selection.noteSource.id}
++              />
++            )}
++          </>
+         ) : null
+       }
+       prefillInputRef={replyInputRef}
+diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
+index ffff540512f2fd2bf58f30f4eaac391240e491cf..403b6f93cecaae118ab623ae7eaa4ca3d1667ac7 100644
+--- a/web/components/reading/workspace/ReadingWorkspace.tsx
++++ b/web/components/reading/workspace/ReadingWorkspace.tsx
+@@ -20,6 +20,7 @@ import {
+ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ import { useTranslation } from "react-i18next";
+ 
++import type { ReadingNoteSource } from "@/components/reading/AnnotationPopover";
+ import type { JumpRequest } from "@/components/reading/PdfDocumentView";
+ import { READER_ASK_EVENT, ReaderPane } from "@/components/reading/ReaderPane";
+ import { ReadingActionsProvider } from "@/components/reading/ReadingActionsProvider";
+@@ -122,6 +123,7 @@ const AddMaterialsDialog = dynamic(
+ interface ReaderAskDetail {
+   quote?: string;
+   image?: string;
++  noteSource?: ReadingNoteSource;
+   locator?: number;
+   unit?: string;
+   /** Send this about the passage now, instead of waiting for a question. */
+@@ -181,6 +183,7 @@ export function ReadingWorkspacePage() {
+     quote: string;
+     locator: number;
+     image?: string;
++    noteSource?: ReadingNoteSource;
+   } | null>(null);
+   const prefillInputRef = useRef<((text: string) => void) | null>(null);
+   const [isDesktopWide, setIsDesktopWide] = useState(false);
+@@ -324,7 +327,7 @@ export function ReadingWorkspacePage() {
+         window.setTimeout(() => setReadingViewport({ selection: "" }), 0);
+         return;
+       }
+-      setSelection({ quote, locator, image: detail.image });
++      setSelection({ quote, locator, image: detail.image, noteSource: detail.noteSource });
+       setReadingViewport({ locator, selection: quote });
+       if (prompt) {
+         window.requestAnimationFrame(() => prefillInputRef.current?.(prompt));
+diff --git a/web/components/settings/ModelsWorkspace.tsx b/web/components/settings/ModelsWorkspace.tsx
+index bbabeddedbb4c16aad4552a07dcdcf432c17cba9..50a77e73f156af08b6b03c330b50906fe57fc5a5 100644
+--- a/web/components/settings/ModelsWorkspace.tsx
++++ b/web/components/settings/ModelsWorkspace.tsx
+@@ -51,6 +51,7 @@ import {
+   workspaceCardClass,
+ } from "./WorkspaceShell";
+ 
++import { showModelInChat } from "@/lib/llm-options";
+ import { randomUuid } from "@/lib/random-uuid";
+ type ModelPage = "llm" | "embedding" | "search" | "voice" | "multimodal";
+ const PAGE_SERVICES: Record<ModelPage, ServiceName[]> = {
+@@ -966,19 +967,37 @@ function ModelEditor({
+           {t("settings.serviceConfig.tools")} {" "}
+           <Link href="/settings/tools" className="underline underline-offset-4">{t("settings.serviceConfig.openTools")}</Link>
+         </p>}
++        {service === "llm" && model && (
++          <details className={`p-3.5 ${subPanelClass}`}>
++            <summary className="cursor-pointer text-[13px] font-medium">{t("Advanced model settings")}</summary>
++            <label className="mt-3 flex items-center gap-2 text-[13px]">
++              <input
++                type="checkbox"
++                checked={Boolean(active) || showModelInChat({ provider: provider?.provider || profile.binding || "", model: model.model, show_in_chat: model.show_in_chat })}
++                disabled={applying || Boolean(active)}
++                onChange={(event) => update("show_in_chat", event.target.checked)}
++              />
++              {t("Show in model menu")}
++            </label>
++            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
++              {t("To hide the default model, set another model as default first.")}
++            </p>
++          </details>
++        )}
+         <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-4">
+ 
+           <button
+             type="button"
+             disabled={applying || !savedModel || Boolean(active) || modelIdMissing}
+-            onClick={() =>
++            onClick={() => {
++              if (service === "llm" && model) update("show_in_chat", true);
+               void stageRegistry({
+                 kind: "default",
+                 service,
+                 profile_id: profile.id,
+                 model_id: model?.id,
+-              })
+-            }
++              });
++            }}
+             className={registryButton}
+           >
+             {active && <Check size={13} />}{" "}
+diff --git a/web/features/chat/messages/ChatMessageList.tsx b/web/features/chat/messages/ChatMessageList.tsx
+index de5ee55b3f47b5bf796b86df2a7969cee248eacb..8c3b9d915a0fc67cdb83f8ce7bbb8062d362cdec 100644
+--- a/web/features/chat/messages/ChatMessageList.tsx
++++ b/web/features/chat/messages/ChatMessageList.tsx
+@@ -2016,6 +2016,7 @@ export const UserMessage = memo(function UserMessage({
+                         snap.readingMaterialId,
+                         snap.readingSelection.locator,
+                         snap.readingMaterialRevision,
++                        snap.readingSelection.quote,
+                       )
+                     : undefined
+                 }
+diff --git a/web/features/notes/components/AddToNote.tsx b/web/features/notes/components/AddToNote.tsx
+index d2b985d6d41eadf3909619bca71e58f4d0ea7dee..b7d7f52b35012c8787f4141198e16e5dedf04881 100644
+--- a/web/features/notes/components/AddToNote.tsx
++++ b/web/features/notes/components/AddToNote.tsx
+@@ -10,12 +10,14 @@ import {
+   getNote,
+   saveNote,
+   noteRequest,
++  uploadNoteAsset,
+   type NoteSummary,
+ } from '@/lib/notes-api'
+ import { notifyCoWriterChanged } from '@/lib/co-writer-events'
+ export default function AddToNote({
+   title,
+   markdown,
++  image,
+   sourceUrl = '',
+   sourceId = '',
+   onSaved,
+@@ -24,6 +26,7 @@ export default function AddToNote({
+ }: {
+   title: string
+   markdown: string
++  image?: string
+   sourceUrl?: string
+   sourceId?: string
+   onSaved?: () => void
+@@ -56,9 +59,17 @@ export default function AddToNote({
+           expected_revision: page.revision,
+         })
+       }
++      let content = markdown
++      if (image) {
++        const prefix = 'data:image/png;base64,'
++        if (!image.startsWith(prefix)) throw new Error(t('Upload failed'))
++        const bytes = Uint8Array.from(atob(image.slice(prefix.length)), char => char.charCodeAt(0))
++        const url = await uploadNoteAsset(id, new File([bytes], 'source.png', { type: 'image/png' }))
++        content = [markdown, `![${t('Original page selection')}](${url})`].filter(Boolean).join('\n\n')
++      }
+       await noteRequest(`/${id}/clips`, {
+         title,
+-        markdown,
++        markdown: content,
+         source_url: sourceUrl,
+         source_id: sourceId,
+         favorite_type: favorite?.type || '',
+@@ -108,7 +119,7 @@ export default function AddToNote({
+           </select>
+           <button
+             className="rounded px-2 py-1.5 hover:bg-[var(--secondary)]"
+-            disabled={busy || saved || !markdown.trim()}
++            disabled={busy || saved || (!markdown.trim() && !image)}
+             onClick={() => void save()}
+           >
+             {t(saved ? 'Added to note' : busy ? 'Saving…' : 'Add to a note')}
+diff --git a/web/features/notes/components/NoteEditor.tsx b/web/features/notes/components/NoteEditor.tsx
+index 78778493c48724888bbb09c92e870e4e52c2ef5d..d1394d2072a8c86385e35462e18b469bf3194dc1 100644
+--- a/web/features/notes/components/NoteEditor.tsx
++++ b/web/features/notes/components/NoteEditor.tsx
+@@ -85,8 +85,7 @@ import Tooltip from '@/shared/ui/Tooltip'
+ import { subscribeToThemeChanges } from '@/lib/theme'
+ import { parseNoteMarkdown } from '../model/markdown'
+ import { insertNoteClips, type NoteClipInput } from '../model/clip-editing'
+-import { listNotes, type NoteBlock, type NotePage, type NoteSuggestion } from '@/lib/notes-api'
+-import { apiFetch, apiUrl } from '@/lib/api'
++import { listNotes, uploadNoteAsset, type NoteBlock, type NotePage, type NoteSuggestion } from '@/lib/notes-api'
+ import { inputRules, InputRule } from '@tiptap/pm/inputrules'
+ import { closeHistory } from '@tiptap/pm/history'
+ import '@blocknote/core/style.css'
+@@ -807,19 +806,7 @@ export default function NoteEditor({
+             typeof schema.styleSchema
+           >[])
+         : undefined,
+-      uploadFile: async file => {
+-        const body = new FormData()
+-        body.append('file', file)
+-        const res = await apiFetch(apiUrl(`/api/documents/${page.id}/assets`), {
+-          method: 'POST',
+-          body,
+-        })
+-        if (!res.ok) {
+-          const error = await res.json().catch(() => ({}))
+-          throw new Error(t(error.detail || 'Upload failed'))
+-        }
+-        return (await res.json()).url as string
+-      },
++      uploadFile: file => uploadNoteAsset(page.id, file),
+     },
+     [page.id]
+   )
+diff --git a/web/lib/llm-options.ts b/web/lib/llm-options.ts
+index 805e72d6d382d8aa8871d2e2153a3cd89eda78b6..1847ea3266cde3b8b891a76d7fee8760509333cc 100644
+--- a/web/lib/llm-options.ts
++++ b/web/lib/llm-options.ts
+@@ -20,6 +20,7 @@ export interface LLMOption extends LLMSelection {
+   declared_vision?: boolean;
+   declared_reasoning?: boolean;
+   is_active_default: boolean;
++  show_in_chat?: boolean;
+ }
+ 
+ export interface LLMOptionsResponse {
+@@ -33,6 +34,13 @@ export type RefreshLLMOptions = {
+   synchronize?: boolean;
+ };
+ 
++export function showModelInChat(option: Pick<LLMOption, "provider" | "model" | "show_in_chat">): boolean {
++  return option.show_in_chat ?? (
++    option.provider.toLowerCase() !== "moonshot" ||
++    option.model.toLowerCase() === "kimi-k3.1-pro"
++  );
++}
++
+ export function llmSelectionKey(selection: LLMSelection | null | undefined) {
+   if (!selection?.profile_id || !selection.model_id) return "";
+   return `${selection.profile_id}:${selection.model_id}`;
+diff --git a/web/lib/model-catalog-types.ts b/web/lib/model-catalog-types.ts
+index eac3421792be19ce8b61d5f349116950e9f90003..23edac066e8bbedd938ba79b757bcdc158a442af 100644
+--- a/web/lib/model-catalog-types.ts
++++ b/web/lib/model-catalog-types.ts
+@@ -41,6 +41,7 @@ export type ApiFormat =
+   "auto" | "openai_chat" | "openai_responses" | "anthropic";
+ 
+ export type CatalogModel = {
++  show_in_chat?: boolean;
+   user_name?: string;
+   provider_ref?: ProviderRef;
+   id: string;
+diff --git a/web/lib/notes-api.ts b/web/lib/notes-api.ts
+index 09876e7ac28fa9f46c6c09780d40e2c60a4edbee..4a6c6c663da7104ba141d9863e564ff0869501b6 100644
+--- a/web/lib/notes-api.ts
++++ b/web/lib/notes-api.ts
+@@ -53,6 +53,20 @@ export async function noteRequest<T>(path: string, body?: unknown, method = 'POS
+   return response.json()
+ }
+ 
++export async function uploadNoteAsset(id: string, file: File): Promise<string> {
++  const body = new FormData()
++  body.append('file', file)
++  const response = await apiFetch(apiUrl(`/api/documents/${encodeURIComponent(id)}/assets`), {
++    method: 'POST', body,
++  })
++  if (!response.ok) {
++    const { detail } = await response.json().catch(() => ({}))
++    throw new Error(typeof detail === 'string' ? detail : 'Upload failed')
++  }
++  const { url } = await response.json()
++  return url
++}
++
+ export async function exportNoteFlashcards(docId?: string): Promise<Blob> {
+   const path = docId
+     ? `/api/documents/${encodeURIComponent(docId)}/flashcards/export`
+diff --git a/web/lib/reading-citations.ts b/web/lib/reading-citations.ts
+index d7f41d6abfbde95b8887f3e6f52f39636cfab154..47e4a2296248bd6f13fa0c9b71bee10247df2c2d 100644
+--- a/web/lib/reading-citations.ts
++++ b/web/lib/reading-citations.ts
+@@ -1,3 +1,4 @@
++import type { NormalisedRect } from "@/lib/reading-api";
+ import { toolResultMetadata } from "@/lib/tool-event";
+ /**
+  * Locator citations in assistant prose: `[p.12]`, `[p.12,17]`, `[p.12-14]`.
+@@ -49,6 +50,8 @@ export interface ReadingCitationTarget {
+   materialId?: string;
+   materialRevision?: number;
+   locator: number;
++  quote?: string;
++  rect?: NormalisedRect;
+ }
+ 
+ interface ReadingEvidenceEvent {
+@@ -241,6 +244,7 @@ export function linkifyLocatorCitations(
+     materialId?: string;
+     materialRevision?: number;
+     allowedLocators?: Iterable<number>;
++    quotes?: ReadonlyMap<number, string>;
+   } = {},
+ ): string {
+   const citations = findLocatorCitations(text);
+@@ -275,7 +279,7 @@ export function linkifyLocatorCitations(
+           ? `-revision-${materialRevision}`
+           : "";
+       return materialId
+-        ? `${MATERIAL_LOCATOR_HREF_PREFIX}${encodeURIComponent(materialId)}${revisionAddress}-locator-${locator}`
++        ? readingPassageHref(materialId, locator, revisionAddress ? materialRevision : undefined, options.quotes?.get(locator))
+         : `${LOCATOR_HREF_PREFIX}${locator}`;
+     };
+ 
+@@ -350,9 +354,15 @@ export function readingPassageHref(
+   materialId: string,
+   locator: number,
+   materialRevision?: number,
++  quote?: string,
++  rect?: NormalisedRect,
+ ): string {
+   const revision = materialRevision ? `-revision-${materialRevision}` : "";
+-  return `${MATERIAL_LOCATOR_HREF_PREFIX}${materialId}${revision}-locator-${locator}`;
++  const params = new URLSearchParams();
++  if (quote?.trim()) params.set("quote", Array.from(quote.trim()).slice(0, 120).join(""));
++  if (rect) params.set("area", rect.map((n) => n.toFixed(4)).join(","));
++  const suffix = params.toString();
++  return `${MATERIAL_LOCATOR_HREF_PREFIX}${materialId}${revision}-locator-${locator}${suffix ? `?${suffix}` : ""}`;
+ }
+ 
+ export function citationTargetFromHref(
+@@ -364,11 +374,12 @@ export function citationTargetFromHref(
+     return Number.isInteger(locator) && locator >= 1 ? { locator } : null;
+   }
+   if (!href.startsWith(MATERIAL_LOCATOR_HREF_PREFIX)) return null;
++  const [address, query] = href.split("?", 2);
+   // Material ids are content hashes or catalog-minted rm_ ids, matching the
+   // id shape the server-side citation generator can emit.
+   const match =
+     /^#dt-material-((?:[0-9a-f]{8,64}|rm_[0-9a-f]{12}))(?:-revision-(\d+))?-locator-(\d+)$/i.exec(
+-      href,
++      address,
+     );
+   if (!match) return null;
+   const materialRevision = match[2] ? Number(match[2]) : undefined;
+@@ -381,8 +392,15 @@ export function citationTargetFromHref(
+   ) {
+     return null;
+   }
++  const params = new URLSearchParams(query);
++  const quote = params.get("quote")?.trim().slice(0, 240);
++  const values = params.get("area")?.split(",").map((value) => value.trim() ? Number(value) : NaN);
++  const rect = values?.length === 4 && values.every((value) => Number.isFinite(value) && value >= 0 && value <= 1) &&
++    values[0] < values[2] && values[1] < values[3] ? values as NormalisedRect : undefined;
+   return {
+     materialId: materialId.toLowerCase(),
++    ...(quote ? { quote } : {}),
++    ...(rect ? { rect } : {}),
+     ...(materialRevision !== undefined ? { materialRevision } : {}),
+     locator,
+   };
+@@ -429,6 +447,32 @@ export function verifiedReadingLocators(
+   return verified;
+ }
+ 
++/** Only an unambiguous, verified source passage can narrow a page citation. */
++export function verifiedReadingQuotes(
++  events: ReadingEvidenceEvent[] | undefined,
++  materialId: string | undefined,
++  revision: number | undefined,
++): Map<number, string> {
++  const quotes = new Map<number, Set<string>>();
++  if (materialId) for (const event of events ?? []) {
++    if (event.type !== "tool_result") continue;
++    const outer = event.metadata as Record<string, unknown> | undefined;
++    if ((outer?.tool ?? outer?.tool_name) !== "reader_goto" || outer?.success === false) continue;
++    const data = toolResultMetadata(outer);
++    if (data?.reader_action !== "goto" || data.material_id !== materialId ||
++        (revision && Number(data.material_revision) !== revision)) continue;
++    const quote = typeof data.quote === "string" ? data.quote.trim() : "";
++    const page = Number(data.locator);
++    if (quote.length < 4 || !Number.isSafeInteger(page) || page < 1) continue;
++    const onPage = quotes.get(page) ?? new Set<string>();
++    onPage.add(quote);
++    quotes.set(page, onPage);
++  }
++  const verified = new Map<number, string>();
++  for (const [page, matches] of quotes) if (matches.size === 1) verified.set(page, [...matches][0]);
++  return verified;
++}
++
+ /** Human label for a locator, using the material's own unit word. */
+ export function locatorLabel(unit: string, locator: number): string {
+   const word = unit || "page";
+diff --git a/web/lib/reading-quote-locator.ts b/web/lib/reading-quote-locator.ts
+index dfb17c19588767f8b4de56d3ff6d5be469383a86..ffe543197525063d867f13645894892598b62f32 100644
+--- a/web/lib/reading-quote-locator.ts
++++ b/web/lib/reading-quote-locator.ts
+@@ -150,6 +150,7 @@ function rangeFrom(
+ export function findQuoteRange(
+   segments: string[],
+   quote: string,
++  exact = false,
+ ): QuoteRange | null {
+   const needleRaw = (quote || "").trim();
+   if (!needleRaw || !segments.length) return null;
+@@ -174,9 +175,14 @@ export function findQuoteRange(
+     const needle = projectQuote(needleRaw, pass);
+     if (!needle) continue;
+     const at = haystack.text.indexOf(needle);
+-    if (at >= 0) return rangeFrom(haystack, at, needle.length, pass.mode);
++    if (at >= 0) {
++      if (exact && haystack.text.indexOf(needle, at + 1) >= 0) continue;
++      return rangeFrom(haystack, at, needle.length, pass.mode);
++    }
+   }
+ 
++  if (exact) return null;
++
+   // Last resort: the longest prefix of the quote that does appear. A model often
+   // quotes a sentence and then keeps writing its own words, so the head is the
+   // reliable part — but a *fixed* head length is not, because it may itself run
+@@ -306,12 +312,14 @@ export function collectTextNodes(container: Element): Text[] {
+ export function domRangeForQuote(
+   container: Element,
+   quote: string,
++  exact = false,
+ ): Range | null {
+   const nodes = collectTextNodes(container);
+   if (!nodes.length) return null;
+   const found = findQuoteRange(
+     nodes.map((node) => node.textContent ?? ""),
+     quote,
++    exact,
+   );
+   if (!found) return null;
+ 
+diff --git a/web/locales/en/app.json b/web/locales/en/app.json
+index 613b5fa382106cd2d9a81bf5eb216dd0331b3d00..0ecf0b15a8e0e486717681558fb3259ee657d936 100644
+--- a/web/locales/en/app.json
++++ b/web/locales/en/app.json
+@@ -1,4 +1,9 @@
+ {
++  "Original page selection": "Original page selection",
++  "Show in model menu": "Show in model menu",
++  "To hide the default model, set another model as default first.": "To hide the default model, set another model as default first.",
++  "Highlighted source on page {{page}}": "Highlighted source on page {{page}}",
++  "Citation points to page {{page}} only": "Citation points to page {{page}} only",
+   "Speech synthesis and transcription models with saved providers.": "Speech synthesis and transcription models with saved providers.",
+   "Image and video generation models with saved providers.": "Image and video generation models with saved providers.",
+   "Manage provider names, addresses, credentials, and connectivity.": "Manage provider names, addresses, credentials, and connectivity.",
+diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
+index 6c4afd4902c1d825b001b1dc9e0fec3076fc5ce1..e83357268e0e0f4309b2986896535efb89535a8b 100644
+--- a/web/locales/zh/app.json
++++ b/web/locales/zh/app.json
+@@ -1,4 +1,9 @@
+ {
++  "Original page selection": "教材原页选区",
++  "Show in model menu": "在模型菜单中显示",
++  "To hide the default model, set another model as default first.": "要隐藏默认模型，请先将另一个模型设为默认。",
++  "Highlighted source on page {{page}}": "已标亮第 {{page}} 页的原文",
++  "Citation points to page {{page}} only": "这条引用仅定位到第 {{page}} 页",
+   "Speech synthesis and transcription models with saved providers.": "使用已配置的提供方管理语音合成与语音识别模型。",
+   "Image and video generation models with saved providers.": "使用已配置的提供方管理图片与视频生成模型。",
+   "Manage provider names, addresses, credentials, and connectivity.": "管理提供方的名称、地址、密钥并测试连接。",
+diff --git a/web/tests/add-favorite-to-note.spec.tsx b/web/tests/add-favorite-to-note.spec.tsx
+index a34a8c5ff6b5b162b6824de092cd88bee367dc45..6e6357f118031c9f0de01ef80615341003216565 100644
+--- a/web/tests/add-favorite-to-note.spec.tsx
++++ b/web/tests/add-favorite-to-note.spec.tsx
+@@ -3,12 +3,12 @@ import { beforeEach, expect, it, vi } from 'vitest'
+ import AddToNote from '@/features/notes/components/AddToNote'
+ 
+ const mocks = vi.hoisted(() => ({
+-  get: vi.fn(), save: vi.fn(), request: vi.fn(), parse: vi.fn(),
++  get: vi.fn(), save: vi.fn(), request: vi.fn(), parse: vi.fn(), upload: vi.fn(),
+ }))
+ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
+ vi.mock('@/lib/notes-api', () => ({
+   listNotes: async () => ({ documents: [{ id: 'legacy', title: 'Legacy page' }] }),
+-  createNote: vi.fn(), getNote: mocks.get, saveNote: mocks.save, noteRequest: mocks.request,
++  createNote: vi.fn(), getNote: mocks.get, saveNote: mocks.save, noteRequest: mocks.request, uploadNoteAsset: mocks.upload,
+ }))
+ vi.mock('@/features/notes/components/NoteEditor', () => ({ parseLegacyNoteContent: mocks.parse }))
+ vi.mock('@/lib/co-writer-events', () => ({ notifyCoWriterChanged: vi.fn() }))
+@@ -40,3 +40,19 @@ it('does not append to or overwrite a page that changed during legacy migration'
+   expect(mocks.request).not.toHaveBeenCalled()
+   expect(screen.queryByRole('link', { name: 'Open note' })).not.toBeInTheDocument()
+ })
++
++it('keeps the original PDF crop even when there is no trustworthy extracted text', async () => {
++  mocks.get.mockResolvedValue({ id: 'legacy', blocks: [], revision: 7 })
++  mocks.upload.mockResolvedValue('/api/documents/legacy/assets/source.png')
++  render(<AddToNote title="Textbook · 6" markdown="" image="data:image/png;base64,iVBORw0KGgo=" sourceUrl="/learning/reading/book#dt-locator-6" />)
++  fireEvent.click(screen.getByRole('button', { name: 'Add to a note' }))
++  await screen.findByRole('option', { name: 'Legacy page' })
++  fireEvent.change(screen.getByRole('combobox', { name: 'Target page' }), { target: { value: 'legacy' } })
++  fireEvent.click(screen.getByRole('button', { name: 'Add to a note' }))
++  await screen.findByRole('link', { name: 'Open note' })
++  expect(mocks.upload).toHaveBeenCalledWith('legacy', expect.any(File))
++  expect(mocks.request).toHaveBeenCalledWith('/legacy/clips', expect.objectContaining({
++    markdown: '![Original page selection](/api/documents/legacy/assets/source.png)',
++    source_url: '/learning/reading/book#dt-locator-6',
++  }))
++})
+diff --git a/web/tests/co-writer-model-selection.spec.tsx b/web/tests/co-writer-model-selection.spec.tsx
+index cb36f3fe3d430d4dc8cbae89bd305ec2c450edaf..9de72211cf51090b1ec8ec82b08a49af4ba6c506 100644
+--- a/web/tests/co-writer-model-selection.spec.tsx
++++ b/web/tests/co-writer-model-selection.spec.tsx
+@@ -1,4 +1,4 @@
+-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
++import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
+ import { expect, it, vi } from "vitest";
+ import CoWriterWorkspace from "@/features/co-writer/components/CoWriterWorkspace";
+@@ -101,7 +101,8 @@ it("sends the selected model with a full-draft edit", async () => {
+       "Detailed STEM help · Tricky problems and long reading · Reads images",
+     );
+     const flash = screen.getByRole("button", { name: "DeepSeek-V4.1-Flash | DeepSeek" });
+-    expect(flash).toHaveAttribute("title", "deepseek-flash");
++    fireEvent.mouseEnter(flash);
++    expect(within(flash).getByText("deepseek-flash")).toBeVisible();
+     expect(flash).toHaveAccessibleDescription("Speed first · Quick questions, routine exercises · Reads images");
+     const writingModel = screen.getByRole("button", { name: "Writing model | Writing profile" });
+     expect(writingModel).toHaveAccessibleDescription("General questions · Reasoning supported");
+diff --git a/web/tests/composer-language-command.spec.tsx b/web/tests/composer-language-command.spec.tsx
+index 46c0f1709312f646a608fd138db5937b537de808..6ffdf586082896c5413ef44463b85cd95c38bdec 100644
+--- a/web/tests/composer-language-command.spec.tsx
++++ b/web/tests/composer-language-command.spec.tsx
+@@ -18,11 +18,13 @@ function renderComposer({
+   language = true,
+   disabled = false,
+   override = null,
++  prediction,
+ }: {
+   persona?: boolean;
+   language?: boolean;
+   disabled?: boolean;
+   override?: string | null;
++  prediction?: string;
+ } = {}) {
+   const onSend = vi.fn();
+   const onInputChange = vi.fn();
+@@ -33,6 +35,7 @@ function renderComposer({
+     <ComposerInput
+       textareaRef={createRef<HTMLTextAreaElement>()}
+       isVisualizeMode={false}
++      placeholderCompletion={prediction}
+       canSendEmpty={false}
+       onSend={onSend}
+       onInputChange={onInputChange}
+@@ -160,3 +163,21 @@ it("keeps persona available while the reply-language command is disabled", () =>
+   fireEvent.change(input, { target: { value: "/language" } });
+   expect(screen.queryByRole("listbox", { name: "Commands" })).not.toBeInTheDocument();
+ });
++
++it("fills a predicted question on Tab without sending it or replacing a draft", () => {
++  const prediction = "Why does this rule work?";
++  const { input, onSend } = renderComposer({ prediction });
++  vi.spyOn(input, "getClientRects").mockReturnValue({ length: 1 } as DOMRectList);
++  fireEvent.keyDown(document.body, { key: "Tab", shiftKey: true });
++  expect(input).toHaveValue("");
++  fireEvent.keyDown(document.body, { key: "Tab" });
++  expect(input).toHaveValue(prediction);
++  expect(input).toHaveFocus();
++  fireEvent.change(input, { target: { value: "my own question" } });
++  fireEvent.keyDown(input, { key: "Tab" });
++  expect(input).toHaveValue("my own question");
++  fireEvent.change(input, { target: { value: "" } });
++  fireEvent.click(screen.getByRole("button", { name: /Why does this rule work/ }));
++  expect(input).toHaveValue(prediction);
++  expect(onSend).not.toHaveBeenCalled();
++});
+diff --git a/web/tests/pdf-reading-resize.spec.tsx b/web/tests/pdf-reading-resize.spec.tsx
+index e134153e58713c38ecc08e07cd1aa0e3103efbe2..6f319b460098dd696be4ce0ebcae1a9ebcbdd1c5 100644
+--- a/web/tests/pdf-reading-resize.spec.tsx
++++ b/web/tests/pdf-reading-resize.spec.tsx
+@@ -252,6 +252,21 @@ describe("PDF reading position during layout changes", () => {
+     );
+   });
+ 
++  it("brings a cited region into view and clears it when another citation is clicked", async () => {
++    const view = await openReader();
++    view.rerender(<PdfDocumentView {...view.props} jump={{
++      locator: 6, nonce: 1, citation: { rect: [0.2, 0.65, 0.4, 0.72] },
++    }} />);
++    await waitFor(() => {
++      expect(view.getByRole("status")).toHaveTextContent("Highlighted source");
++      expect(pageAt(view.root, 6).querySelector(".dt-reader-flash")).not.toBeNull();
++      expect(positionWithin(view.root, 6)).toBeGreaterThan(0.3);
++    });
++    view.rerender(<PdfDocumentView {...view.props} jump={{ locator: 8, nonce: 2, citation: {} }} />);
++    await waitFor(() => expect(view.getByRole("status")).toHaveTextContent("Citation points to page"));
++    expect(pageAt(view.root, 6).querySelector(".dt-reader-flash")).toBeNull();
++  });
++
+   it("clamps restoration at the document end", async () => {
+     const { root } = await openReader();
+     await scrollTo(root, 160, 0.6);
+diff --git a/web/tests/student-citation-and-models.spec.ts b/web/tests/student-citation-and-models.spec.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..512baa9d2f1a51570b7259a7ddff86e8118e38e2
+--- /dev/null
++++ b/web/tests/student-citation-and-models.spec.ts
+@@ -0,0 +1,35 @@
++import { expect, it } from "vitest";
++import { showModelInChat } from "@/lib/llm-options";
++import { citationTargetFromHref, linkifyLocatorCitations, readingPassageHref, verifiedReadingQuotes } from "@/lib/reading-citations";
++import { findQuoteRange } from "@/lib/reading-quote-locator";
++
++it("uses the exact verified passage for a source jump and leaves ambiguous pages as page-only", () => {
++  const id = "a".repeat(64);
++  const goto = (quote: string, revision = 2) => ({
++    type: "tool_result",
++    metadata: { tool: "reader_goto", tool_metadata: {
++      material_id: id, material_revision: revision, reader_action: "goto", locator: 6, quote,
++    } },
++  });
++  const quote = "空间向量既有大小，又有方向。";
++  const quotes = verifiedReadingQuotes([goto(quote), goto("另一个版本中的段落", 1)], id, 2);
++  const text = linkifyLocatorCitations("原文 [p.6]", { materialId: id, materialRevision: 2, quotes });
++  const href = text.match(/\((#dt-material-[^)]+)\)/)?.[1];
++  expect(citationTargetFromHref(href)).toEqual({ materialId: id, materialRevision: 2, locator: 6, quote });
++  expect(verifiedReadingQuotes([goto(quote), goto("同一页另一个段落")], id, 2).size).toBe(0);
++  expect(findQuoteRange([quote, quote], quote, true)).toBeNull();
++  expect(findQuoteRange(["第六页", quote], quote, true)?.start.segment).toBe(1);
++  const region = readingPassageHref(id, 6, 2, undefined, [0.1, 0.2, 0.3, 0.4]);
++  expect(citationTargetFromHref(region)?.rect).toEqual([0.1, 0.2, 0.3, 0.4]);
++  expect(citationTargetFromHref(region.replace("0.1000", "-0.1000"))?.rect).toBeUndefined();
++});
++
++it("defaults to ordinary Kimi Pro and allows explicit visibility overrides", () => {
++  const pro = { provider: "moonshot", model: "kimi-k3.1-pro" };
++  const fast = { provider: "moonshot", model: "kimi-k3.1-pro-highspeed" };
++  expect(showModelInChat(pro)).toBe(true);
++  expect(showModelInChat(fast)).toBe(false);
++  expect(showModelInChat({ ...fast, show_in_chat: true })).toBe(true);
++  expect(showModelInChat({ ...pro, show_in_chat: false })).toBe(false);
++  expect(showModelInChat({ provider: "deepseek", model: "deepseek-flash" })).toBe(true);
++});
