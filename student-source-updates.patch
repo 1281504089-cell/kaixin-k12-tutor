@@ -1120,10 +1120,20 @@ index 037fdda..9ebcd8a 100644
            sourceId={noteSource.id}
          />
 diff --git a/web/components/reading/PdfDocumentView.tsx b/web/components/reading/PdfDocumentView.tsx
-index 38afc3a..37f07ed 100644
+index 38afc3a..037e7aa 100644
 --- a/web/components/reading/PdfDocumentView.tsx
 +++ b/web/components/reading/PdfDocumentView.tsx
-@@ -47,6 +47,7 @@ export interface SelectionPayload {
+@@ -8,7 +8,8 @@ import {
+   useRef,
+   useState,
+ } from "react";
+-import { Loader2 } from "lucide-react";
++import { createPortal } from "react-dom";
++import { Loader2, Scan } from "lucide-react";
+ import { useTranslation } from "react-i18next";
+ import {
+   loadPdfjs,
+@@ -47,6 +48,7 @@ export interface SelectionPayload {
     * into it (margin line numbers). Questions carry this; marks keep `quote`.
     */
    text?: string;
@@ -1131,7 +1141,7 @@ index 38afc3a..37f07ed 100644
    image?: string;
    region?: true;
    rects: NormalisedRect[];
-@@ -59,6 +60,7 @@ export interface SelectionPayload {
+@@ -59,6 +61,7 @@ export interface SelectionPayload {
  export interface JumpRequest {
    locator: number;
    quote?: string;
@@ -1139,7 +1149,23 @@ index 38afc3a..37f07ed 100644
    /** Changes on every request so repeats of the same target still fire. */
    nonce: number;
  }
-@@ -373,6 +375,7 @@ export function PdfDocumentView({
+@@ -74,6 +77,7 @@ export interface PdfDocumentViewProps {
+   highlightedAnnotationId?: string | null;
+   onSelection: (payload: SelectionPayload | null) => void;
+   onRegionSelect?: (payload: SelectionPayload) => void;
++  onRequestRegion?: () => void;
+   selectedRegion?: Pick<SelectionPayload, "locator" | "rects">;
+   onAnnotationClick?: (annotation: AnnotationItem) => void;
+   onVisibleLocatorChange?: (locator: number) => void;
+@@ -99,6 +103,7 @@ export function PdfDocumentView({
+   highlightedAnnotationId,
+   onSelection,
+   onRegionSelect,
++  onRequestRegion,
+   selectedRegion,
+   onAnnotationClick,
+   onVisibleLocatorChange,
+@@ -373,6 +378,7 @@ export function PdfDocumentView({
      const locator = Math.min(Math.max(1, jump.locator), unitCount);
      const nonce = jump.nonce;
      const quote = jump.quote;
@@ -1147,7 +1173,7 @@ index 38afc3a..37f07ed 100644
      let cancelled = false;
      let timer: number | undefined;
  
-@@ -389,7 +392,24 @@ export function PdfDocumentView({
+@@ -389,7 +395,24 @@ export function PdfDocumentView({
          if (scrollTries <= 20) timer = window.setTimeout(run, 120);
          return;
        }
@@ -1173,7 +1199,7 @@ index 38afc3a..37f07ed 100644
        let attempts = 0;
        const findQuote = () => {
          if (cancelled) return;
-@@ -400,7 +420,7 @@ export function PdfDocumentView({
+@@ -400,7 +423,7 @@ export function PdfDocumentView({
          );
          const layer = page?.querySelector<HTMLElement>(".textLayer");
          if (layer && layer.childElementCount > 0) {
@@ -1182,7 +1208,7 @@ index 38afc3a..37f07ed 100644
            const box = page?.getBoundingClientRect();
            if (range && box) {
              const rects = normaliseRects([...range.getClientRects()], {
-@@ -409,8 +429,8 @@ export function PdfDocumentView({
+@@ -409,8 +432,8 @@ export function PdfDocumentView({
                width: box.width,
                height: box.height,
              });
@@ -1193,7 +1219,7 @@ index 38afc3a..37f07ed 100644
                return;
              }
            }
-@@ -423,6 +443,7 @@ export function PdfDocumentView({
+@@ -423,6 +446,7 @@ export function PdfDocumentView({
          // polling; the page is still scrolled into view, which is the useful
          // part of the request.
          if (attempts < 25) timer = window.setTimeout(findQuote, 120);
@@ -1201,7 +1227,7 @@ index 38afc3a..37f07ed 100644
        };
        timer = window.setTimeout(findQuote, 140);
      };
-@@ -434,10 +455,15 @@ export function PdfDocumentView({
+@@ -434,10 +458,15 @@ export function PdfDocumentView({
      };
    }, [jump, doc, unitCount, scrollToLocator]);
  
@@ -1221,7 +1247,7 @@ index 38afc3a..37f07ed 100644
    const activeFlash =
      flash && jump && flash.nonce === jump.nonce ? flash : null;
  
-@@ -494,6 +520,9 @@ export function PdfDocumentView({
+@@ -494,12 +523,59 @@ export function PdfDocumentView({
        locator,
        quote,
        ...(text ? { text } : {}),
@@ -1231,10 +1257,106 @@ index 38afc3a..37f07ed 100644
        rects,
        image: pdfSelectionImage(page, rects),
        anchor: { x: last.left + last.width / 2, y: last.top },
-@@ -527,6 +556,13 @@ export function PdfDocumentView({
+     });
+   }, [onSelection]);
+ 
++  const [captureMenu, setCaptureMenu] = useState<{ x: number; y: number } | null>(null);
++  const menuRef = useRef<HTMLButtonElement>(null);
++  const press = useRef<{ id: number; x: number; y: number; timer: number } | null>(null);
++  const suppressTextSelection = useRef(false);
++
++  const stopPress = useCallback(() => {
++    if (press.current) window.clearTimeout(press.current.timer);
++    press.current = null;
++  }, []);
++
++  function openCaptureMenu(x: number, y: number) {
++    stopPress();
++    suppressTextSelection.current = true;
++    window.getSelection()?.removeAllRanges();
++    onSelection(null);
++    setCaptureMenu({ x, y });
++  }
++
++  useEffect(() => {
++    const root = scrollRef.current;
++    const dismiss = () => { stopPress(); setCaptureMenu(null); };
++    root?.addEventListener("scroll", dismiss, { passive: true });
++    return () => {
++      root?.removeEventListener("scroll", dismiss);
++      stopPress();
++    };
++  }, [stopPress]);
++
++  useEffect(() => {
++    if (!captureMenu) return;
++    const outside = (event: globalThis.PointerEvent) => {
++      if (!menuRef.current?.contains(event.target as Node)) setCaptureMenu(null);
++    };
++    const escape = (event: KeyboardEvent) => {
++      if (event.key === "Escape") setCaptureMenu(null);
++    };
++    document.addEventListener("pointerdown", outside);
++    document.addEventListener("keydown", escape);
++    return () => {
++      document.removeEventListener("pointerdown", outside);
++      document.removeEventListener("keydown", escape);
++    };
++  }, [captureMenu]);
++
+   // -- render --------------------------------------------------------------
+ 
+   if (error) {
+@@ -519,7 +595,30 @@ export function PdfDocumentView({
+     <div
+       ref={scrollRef}
+       data-preview-scroll
+-      onMouseUp={onRegionSelect ? undefined : handlePointerUp}
++      onMouseUp={() => {
++        if (!onRegionSelect && !suppressTextSelection.current) handlePointerUp();
++        suppressTextSelection.current = false;
++      }}
++      onPointerDown={(event) => {
++        if (onRegionSelect || !onRequestRegion || !event.isPrimary || event.button !== 0
++          || !(event.target as Element).closest("[data-reader-unit]")) return;
++        stopPress();
++        suppressTextSelection.current = false;
++        const { clientX: x, clientY: y, pointerId: id } = event;
++        press.current = { id, x, y, timer: window.setTimeout(() => openCaptureMenu(x, y), 520) };
++      }}
++      onPointerMove={(event) => {
++        const start = press.current;
++        if (start?.id === event.pointerId && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) stopPress();
++      }}
++      onPointerUp={stopPress}
++      onPointerLeave={stopPress}
++      onPointerCancel={stopPress}
++      onContextMenu={(event) => {
++        if (!onRequestRegion || onRegionSelect || !(event.target as Element).closest("[data-reader-unit]")) return;
++        event.preventDefault();
++        openCaptureMenu(event.clientX, event.clientY);
++      }}
+       // The desk the pages lie on. This was `bg-[var(--muted)]/40`, which
+       // compiles to nothing here — a var() colour has no channels for the
+       // `/NN` modifier to reach into, so the rule was dropped and the desk
+@@ -527,6 +626,27 @@ export function PdfDocumentView({
        // token for exactly this: one step back from the page.
        className="dt-reader-scroll h-full overflow-auto overscroll-contain bg-[var(--secondary)] px-6 py-4"
      >
++      {captureMenu && onRequestRegion && !onRegionSelect && createPortal(
++        <button
++          ref={menuRef}
++          type="button"
++          className="fixed z-[75] flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--popover)] px-3 py-2 text-sm text-[var(--foreground)] shadow-lg hover:bg-[var(--secondary)]"
++          style={{
++            left: Math.max(8, Math.min(captureMenu.x, window.innerWidth - 170)),
++            top: Math.max(8, Math.min(captureMenu.y + 10, window.innerHeight - 52)),
++          }}
++          onClick={() => { setCaptureMenu(null); onRequestRegion(); }}
++        >
++          <Scan size={16} aria-hidden />{t("Screenshot quote")}
++        </button>, document.body,
++      )}
 +      {jump?.citation && activeFlash && (
 +        <div className="pointer-events-none sticky top-2 z-20 h-0 text-center" role="status">
 +          <span className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs text-amber-950 shadow-sm">
@@ -1245,11 +1367,43 @@ index 38afc3a..37f07ed 100644
        {!doc ? (
          <div className="flex h-full items-center justify-center gap-2 text-[12px] text-[var(--muted-foreground)]">
            <Loader2 size={14} className="animate-spin" />
+diff --git a/web/components/reading/PdfPage.tsx b/web/components/reading/PdfPage.tsx
+index 6cb1d7d..08bebc4 100644
+--- a/web/components/reading/PdfPage.tsx
++++ b/web/components/reading/PdfPage.tsx
+@@ -85,7 +85,7 @@ function PdfRegionPicker({ locator, onSelect }: {
+           quote: t("Selected area on page {{page}}", { page: locator }),
+           region: true,
+           rects: [rect],
+-          image: pdfSelectionImage(page, [rect]),
++          image: pdfSelectionImage(page, [rect], 0),
+           anchor: { x: box.left + (x0 + x1) * box.width / 2, y: box.top + y0 * box.height },
+         });
+       }}
+@@ -297,7 +297,7 @@ export function PdfPage({
+       className="relative mx-auto shrink-0 overflow-hidden rounded-[10px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.10),0_8px_24px_-12px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.06]"
+       style={{ width, height }}
+     >
+-      <canvas ref={canvasRef} className="block h-full w-full" />
++      <canvas ref={canvasRef} width={0} height={0} className="block h-full w-full" />
+       <div
+         ref={textLayerRef}
+         className="textLayer"
 diff --git a/web/components/reading/ReaderPane.tsx b/web/components/reading/ReaderPane.tsx
-index f530ffa..c86e25c 100644
+index f530ffa..92c929c 100644
 --- a/web/components/reading/ReaderPane.tsx
 +++ b/web/components/reading/ReaderPane.tsx
-@@ -29,6 +29,7 @@ import {
+@@ -3,6 +3,9 @@
+ import dynamic from "next/dynamic";
+ import { browserStorage } from "@/shared/storage";
+ import Tooltip from "@/shared/ui/Tooltip";
++import { Dialog } from "@/shared/ui/Dialog";
++import AddToNote from "@/features/notes/components/AddToNote";
++import { notify } from "@/lib/notifications";
+ 
+ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+ import { createPortal } from "react-dom";
+@@ -29,6 +32,7 @@ import {
    READER_TURN_END_EVENT,
    type ReaderActionPayload,
  } from "@/lib/reading-reader-action";
@@ -1257,7 +1411,30 @@ index f530ffa..c86e25c 100644
  import { scopedUrl } from "@/lib/workspace-scope";
  import { citationTargetFromHref, readingPassageHref } from "@/lib/reading-citations";
  import {
-@@ -427,9 +428,9 @@ export function ReaderPane({
+@@ -237,10 +241,21 @@ export function ReaderPane({
+     setSelection(null);
+     setPopoverOpen(false);
+   }, []);
++  const startRegion = useCallback(() => {
++    if (!material) return;
++    clearSelection();
++    window.getSelection()?.removeAllRanges();
++    setRegionMaterialId(material.material_id);
++  }, [clearSelection, material]);
++
+   const openRegionSelection = useCallback((payload: SelectionPayload) => {
++    if (!payload.image) {
++      notify(t("Screenshot not ready. Wait for the page to render and try again."), { tone: "error" });
++      return;
++    }
+     setRegionMaterialId(null);
+     openSelection(payload);
+-  }, [openSelection]);
++  }, [openSelection, t]);
+   useEffect(() => {
+     if (!regionActive) return;
+     function cancelRegion(event: KeyboardEvent) {
+@@ -427,9 +442,9 @@ export function ReaderPane({
    // -- reader actions from the assistant -----------------------------------
  
    const requestJump = useCallback(
@@ -1269,7 +1446,7 @@ index f530ffa..c86e25c 100644
        jumpMaterialIdRef.current =
          targetMaterialId ?? material?.material_id ?? null;
      },
-@@ -606,7 +607,7 @@ export function ReaderPane({
+@@ -606,7 +621,7 @@ export function ReaderPane({
    );
  
    const navigateCitation = useCallback(
@@ -1278,7 +1455,7 @@ index f530ffa..c86e25c 100644
        const target = citationTargetFromHref(href);
        if (!target) return false;
        if (target.materialId && target.materialId !== material?.material_id) {
-@@ -622,7 +623,7 @@ export function ReaderPane({
+@@ -622,7 +637,7 @@ export function ReaderPane({
              return true;
            }
            const entry = locationEntry(candidate, target.locator);
@@ -1287,7 +1464,7 @@ index f530ffa..c86e25c 100644
          } catch (caught) {
            setError(
              caught instanceof Error
-@@ -640,8 +641,10 @@ export function ReaderPane({
+@@ -640,8 +655,10 @@ export function ReaderPane({
          );
          return true;
        }
@@ -1300,7 +1477,7 @@ index f530ffa..c86e25c 100644
        return true;
      },
      [
-@@ -660,7 +663,7 @@ export function ReaderPane({
+@@ -660,7 +677,7 @@ export function ReaderPane({
        const href = window.location.hash;
        if (!material || !citationTargetFromHref(href) || followedSource.current === href) return;
        followedSource.current = href;
@@ -1309,7 +1486,7 @@ index f530ffa..c86e25c 100644
      };
      follow();
      window.addEventListener('hashchange', follow);
-@@ -769,7 +772,7 @@ export function ReaderPane({
+@@ -769,7 +786,7 @@ export function ReaderPane({
        if (!citation) return;
        event.preventDefault();
        event.stopPropagation();
@@ -1318,7 +1495,7 @@ index f530ffa..c86e25c 100644
      };
      document.addEventListener("click", onClick, true);
      return () => document.removeEventListener("click", onClick, true);
-@@ -825,6 +828,18 @@ export function ReaderPane({
+@@ -825,6 +842,18 @@ export function ReaderPane({
    // what re-anchors them on the page.
    const selectionText = selection ? selection.text || selection.quote : "";
  
@@ -1337,7 +1514,7 @@ index f530ffa..c86e25c 100644
    const askAboutSelection = useCallback(
      (prompt?: string) => {
        if (!selection || !material) return;
-@@ -833,6 +848,7 @@ export function ReaderPane({
+@@ -833,6 +862,7 @@ export function ReaderPane({
            detail: {
              quote: selectionText,
              image: selection.image,
@@ -1345,7 +1522,7 @@ index f530ffa..c86e25c 100644
              locator: selection.locator,
              unit: material.unit,
              ...(prompt ? { prompt } : {}),
-@@ -842,7 +858,7 @@ export function ReaderPane({
+@@ -842,7 +872,7 @@ export function ReaderPane({
        clearSelection();
        window.getSelection()?.removeAllRanges();
      },
@@ -1354,7 +1531,69 @@ index f530ffa..c86e25c 100644
    );
  
    // Inside a workspace the selection's AI actions sit on the popover, next to
-@@ -1370,7 +1386,7 @@ export function ReaderPane({
+@@ -1085,12 +1115,11 @@ export function ReaderPane({
+             {material.has_raw_view && !isEpub && (
+               <HeaderButton
+                 icon={Scan}
+-                label={t("Select page area")}
++                label={t("Screenshot quote")}
+                 active={regionActive}
+                 onClick={() => {
+-                  clearSelection();
+-                  window.getSelection()?.removeAllRanges();
+-                  setRegionMaterialId(regionActive ? null : material.material_id);
++                  if (regionActive) setRegionMaterialId(null);
++                  else startRegion();
+                 }}
+               />
+             )}
+@@ -1317,6 +1346,7 @@ export function ReaderPane({
+               jump={materialJump}
+               highlightedAnnotationId={activeAnnotationId}
+               onSelection={openSelection}
++              onRequestRegion={startRegion}
+               onRegionSelect={regionActive ? openRegionSelection : undefined}
+               selectedRegion={selection?.region && popoverOpen ? selection : undefined}
+               onAnnotationClick={(annotation) =>
+@@ -1366,11 +1396,44 @@ export function ReaderPane({
+       {/* `popoverOpen` and not just `selection`: dismissal now leaves the
+           selection in place for the toolbar, so gating the mount on the
+           selection alone would make Escape and outside-click stop working. */}
+-      {popoverOpen && selection && material && (
++      {popoverOpen && selection?.region && selection.image && noteSource && (
++        <Dialog
++          open
++          title={t("Confirm screenshot quote")}
++          description={selection.quote}
++          onClose={clearSelection}
++          closeLabel={t("Close")}
++          footer={
++            <div className="flex w-full flex-wrap items-center justify-end gap-2">
++              <button type="button" className="rounded-lg px-3 py-2 text-sm hover:bg-[var(--secondary)]" onClick={startRegion}>
++                {t("Retake screenshot")}
++              </button>
++              <AddToNote
++                className="text-sm"
++                title={noteSource.title}
++                markdown={noteSource.markdown}
++                image={noteSource.image}
++                sourceUrl={noteSource.url}
++                sourceId={noteSource.id}
++              />
++              <button type="button" className="rounded-lg bg-[var(--primary)] px-3 py-2 text-sm text-[var(--primary-foreground)]"
++                onClick={() => askAboutSelection()}>
++                {t("Quote in question")}
++              </button>
++            </div>
++          }
++        >
++          {/* The captured pixels are local and keep fractions/diagrams intact. */}
++          {/* eslint-disable-next-line @next/next/no-img-element */}
++          <img src={selection.image} alt={t("Original page selection")}
++            className="mx-auto max-h-[48dvh] max-w-full rounded-md border border-[var(--border)] object-contain" />
++        </Dialog>
++      )}
++      {popoverOpen && selection && !selection.region && material && (
          <AnnotationPopover
            anchor={selection.anchor}
            quote={selection.quote}
@@ -1478,7 +1717,7 @@ index 6d437f2..e20a069 100644
            <div className="mx-4 mb-2 flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
              <Link2 size={11} />
 diff --git a/web/components/reading/workspace/ReadingComposer.tsx b/web/components/reading/workspace/ReadingComposer.tsx
-index 48e0f0a..264ef4e 100644
+index 48e0f0a..a5df5bd 100644
 --- a/web/components/reading/workspace/ReadingComposer.tsx
 +++ b/web/components/reading/workspace/ReadingComposer.tsx
 @@ -16,6 +16,8 @@ import { useCallback, useRef } from "react";
@@ -1499,6 +1738,15 @@ index 48e0f0a..264ef4e 100644
    /** Clears the pending selection once the message is on its way. */
    onSent: () => void;
    /** The learner dropped the quoted passage before sending. */
+@@ -110,7 +112,7 @@ export function ReadingComposer({
+           submission.memoryReferences,
+         );
+         onSent();
+-        window.setTimeout(() => setReadingViewport({ selection: "" }), 0);
++        setReadingViewport({ selection: "" });
+       };
+ 
+       // A turn paused on a question: what the reader typed is their answer,
 @@ -166,11 +168,23 @@ export function ReadingComposer({
        inputPlaceholderCompletion={placeholderCompletion}
        inputHeader={
@@ -1529,10 +1777,18 @@ index 48e0f0a..264ef4e 100644
        }
        prefillInputRef={replyInputRef}
 diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
-index ffff540..403b6f9 100644
+index ffff540..c1451d5 100644
 --- a/web/components/reading/workspace/ReadingWorkspace.tsx
 +++ b/web/components/reading/workspace/ReadingWorkspace.tsx
-@@ -20,6 +20,7 @@ import {
+@@ -9,6 +9,7 @@ import {
+   useParams,
+   usePathname,
+   useRouter,
++  useSearchParams,
+ } from "next/navigation";
+ import {
+   CircleAlert,
+@@ -20,6 +21,7 @@ import {
  import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  import { useTranslation } from "react-i18next";
  
@@ -1540,7 +1796,16 @@ index ffff540..403b6f9 100644
  import type { JumpRequest } from "@/components/reading/PdfDocumentView";
  import { READER_ASK_EVENT, ReaderPane } from "@/components/reading/ReaderPane";
  import { ReadingActionsProvider } from "@/components/reading/ReadingActionsProvider";
-@@ -122,6 +123,7 @@ const AddMaterialsDialog = dynamic(
+@@ -28,7 +30,7 @@ import { useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
+ import type { ReaderHeading } from "@/lib/reading-outline";
+ import { setReadingViewport } from "@/lib/reading-turn-state";
+ import { selectionImageAttachments } from "@/lib/reading-selection";
+-import { workspaceActionNeedsConfiguration } from "@/lib/workspace-mode";
++import { READING_WORKSPACE_MODE, workspaceActionNeedsConfiguration } from "@/lib/workspace-mode";
+ import {
+   PAGE_QUIZ_CAPABILITY,
+   PAGE_QUIZ_CONFIG,
+@@ -122,6 +124,7 @@ const AddMaterialsDialog = dynamic(
  interface ReaderAskDetail {
    quote?: string;
    image?: string;
@@ -1548,7 +1813,43 @@ index ffff540..403b6f9 100644
    locator?: number;
    unit?: string;
    /** Send this about the passage now, instead of waiting for a question. */
-@@ -181,6 +183,7 @@ export function ReadingWorkspacePage() {
+@@ -131,16 +134,18 @@ interface ReaderAskDetail {
+ export function ReadingWorkspacePage() {
+   const params = useParams<{ workspaceId: string }>();
+   const workspaceId = params.workspaceId;
+-  // From the path, not from route params: the first turn binds its session id
+-  // with the native history API so the workspace is not torn down mid-answer,
+-  // and `useParams` does not follow that — `usePathname` does.
+-  const sessionIdParam = readingSessionIdFromPath(usePathname());
++  const pathname = usePathname();
++  // Existing conversation links still work. A fresh turn binds on this same
++  // route segment so the document, composer and pending reply stay mounted.
++  const searchParams = useSearchParams();
++  const sessionIdParam = readingSessionIdFromPath(pathname)
++    ?? (searchParams.get("readingSession")?.trim() || null);
+   const router = useRouter();
+   const { t } = useTranslation();
+   // The shell only needs to *send* (guided one-click prompts). Rendering the
+   // transcript, editing, branching and cancelling all belong to the companion,
+   // which reads them off the same context.
+-  const { state, sendMessage } = useChatStateAdapter();
++  const { state, sendMessage, prepareReadingConnection } = useChatStateAdapter();
+ 
+   const {
+     workspace,
+@@ -175,12 +180,19 @@ export function ReadingWorkspacePage() {
+     reportViewport,
+   } = useReadingWorkspace(workspaceId, sessionIdParam);
+ 
++  const readingWorkspaceReady = Boolean(workspace) && !loading;
++  useEffect(() => {
++    if (!readingWorkspaceReady || state.workspaceMode !== READING_WORKSPACE_MODE) return;
++    return prepareReadingConnection(state.sessionKey);
++  }, [prepareReadingConnection, readingWorkspaceReady, state.sessionKey, state.workspaceMode, workspaceId]);
++
+   // View-only state: what the reader is pointing at and which panels are open.
+   const [transcriptSearch, setTranscriptSearch] = useState("");
+   const [selection, setSelection] = useState<{
      quote: string;
      locator: number;
      image?: string;
@@ -1556,8 +1857,12 @@ index ffff540..403b6f9 100644
    } | null>(null);
    const prefillInputRef = useRef<((text: string) => void) | null>(null);
    const [isDesktopWide, setIsDesktopWide] = useState(false);
-@@ -324,7 +327,7 @@ export function ReadingWorkspacePage() {
-         window.setTimeout(() => setReadingViewport({ selection: "" }), 0);
+@@ -321,10 +333,10 @@ export function ReadingWorkspacePage() {
+         setReadingViewport({ locator, selection: quote });
+         sendMessage(prompt, selectionImageAttachments(detail.image, locator), undefined, undefined, linkedSessionIds);
+         setSelection(null);
+-        window.setTimeout(() => setReadingViewport({ selection: "" }), 0);
++        setReadingViewport({ selection: "" });
          return;
        }
 -      setSelection({ quote, locator, image: detail.image });
@@ -1565,6 +1870,76 @@ index ffff540..403b6f9 100644
        setReadingViewport({ locator, selection: quote });
        if (prompt) {
          window.requestAnimationFrame(() => prefillInputRef.current?.(prompt));
+diff --git a/web/components/reading/workspace/useReadingWorkspace.ts b/web/components/reading/workspace/useReadingWorkspace.ts
+index b281995..5574ff2 100644
+--- a/web/components/reading/workspace/useReadingWorkspace.ts
++++ b/web/components/reading/workspace/useReadingWorkspace.ts
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { readingCollectionRoute, readingSessionRoute } from "@/lib/learning-routes";
++import { readingCollectionRoute } from "@/lib/learning-routes";
+ 
+ import { useRouter } from "next/navigation";
+ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+@@ -85,8 +85,9 @@ export function useReadingWorkspace(
+   }, [workspaceId]);
+ 
+   const refresh = useCallback(async () => {
+-    const result = await getReadingWorkspace(workspaceId);
+-    const sessionRows = await refreshConversations();
++    const [result, sessionRows] = await Promise.all([
++      getReadingWorkspace(workspaceId), refreshConversations(),
++    ]);
+     setWorkspace(result.workspace);
+     setConversations(sessionRows);
+     return { workspace: result.workspace, sessions: sessionRows };
+@@ -425,40 +426,15 @@ export function useReadingWorkspace(
+     workspace,
+   ]);
+ 
+-  // When the first turn assigns a session id, put it in the URL and let the
+-  // conversation menu see the row the backend just attached. Without it a
+-  // draft conversation would stay on the bare collection URL and a refresh
+-  // would silently start over.
+-  //
+-  // The URL is written with the native history API rather than `router.replace`
+-  // on purpose. `/reading/<ws>` and `/reading/<ws>/sessions/<id>` are different
+-  // route matches, and App Router treats moving between them — even within one
+-  // catch-all segment, which was tried — as a navigation: it unmounted the
+-  // whole workspace and mounted it again mid-answer. Measured, that meant the
+-  // reader's subtree left the DOM, "Opening collection…" painted for a frame,
+-  // the material was re-fetched and the page the learner was on reset to 1.
+-  // Asking the first question of a conversation blinked the entire screen.
+-  //
+-  // Nothing about that navigation was real: the learner stayed exactly where
+-  // they were and the conversation they are watching stream is the one being
+-  // named. So the address bar is corrected in place and `usePathname` — which
+-  // does follow the native API — keeps `sessionIdParam` honest for refreshes,
+-  // links and the back button.
+-  //
+-  // Only once this collection has started its own draft. Until the boot above
+-  // runs, `state.sessionId` is still whatever conversation was open before the
+-  // learner came here (a /chat thread, say); naming it in the URL made the boot
+-  // take it for this collection's conversation and keep it, so the reader's
+-  // questions went to that unrelated thread without the page or selection.
++  // Keep the pathname and its mounted route segment. Changing it while the
++  // first turn binds can make the reader reload before the reply appears.
+   useEffect(() => {
+     if (!state.sessionId || sessionIdParam) return;
+     if (sessionBootRef.current !== `${workspaceId}:new`) return;
+     if (state.sessionId === inheritedSessionRef.current) return;
+-    window.history.replaceState(
+-      null,
+-      "",
+-      readingSessionRoute(workspaceId, state.sessionId),
+-    );
++    const url = new URL(window.location.href);
++    url.searchParams.set("readingSession", state.sessionId);
++    window.history.replaceState(null, "", url);
+     void listReadingConversations(workspaceId)
+       .then(setConversations)
+       .catch(() => {});
 diff --git a/web/components/settings/ModelsWorkspace.tsx b/web/components/settings/ModelsWorkspace.tsx
 index bbabedd..50a77e7 100644
 --- a/web/components/settings/ModelsWorkspace.tsx
@@ -1618,6 +1993,62 @@ index bbabedd..50a77e7 100644
              className={registryButton}
            >
              {active && <Check size={13} />}{" "}
+diff --git a/web/features/chat/ChatStateAdapter.tsx b/web/features/chat/ChatStateAdapter.tsx
+index d77223e..b291fcf 100644
+--- a/web/features/chat/ChatStateAdapter.tsx
++++ b/web/features/chat/ChatStateAdapter.tsx
+@@ -103,6 +103,7 @@ import {
+ } from "@/lib/book-references";
+ import {
+   normalizeWorkspaceMode,
++  READING_WORKSPACE_MODE,
+   type WorkspaceMode,
+ } from "@/lib/workspace-mode";
+ import {
+@@ -1722,6 +1723,7 @@ interface ChatContextValue {
+   setCreateTarget: (createTarget: string | null) => void;
+   setLanguage: (lang: string) => void;
+   setReplyLanguageOverride: (language: string | null) => Promise<void>;
++  prepareReadingConnection: (sessionKey: string) => (() => void) | undefined;
+   sendMessage: (
+     content: string,
+     attachments?: OutgoingAttachment[],
+@@ -2540,6 +2542,19 @@ export function ChatStateAdapterProvider({
+     [handleRunnerEvent],
+   );
+ 
++  const prepareReadingConnection = useCallback((key: string) => {
++    const current = stateRef.current;
++    if (!key || current.selectedKey !== key ||
++      current.sessions[key]?.workspaceMode !== READING_WORKSPACE_MODE || runnersRef.current.has(key)) return;
++    const runner = ensureRunner(key);
++    // This only opens the transport. No turn is submitted until Send.
++    return () => {
++      if (runnersRef.current.get(key) !== runner || stateRef.current.sessions[key]?.isStreaming) return;
++      runnersRef.current.delete(key);
++      runner.client.disconnect();
++    };
++  }, [ensureRunner]);
++
+   const sendThroughRunner = useCallback(
+     function dispatchToRunner(
+       key: string,
+@@ -4290,6 +4305,7 @@ export function ChatStateAdapterProvider({
+       setCreateTarget,
+       setLanguage,
+       setReplyLanguageOverride,
++      prepareReadingConnection,
+       sendMessage,
+       queueMessage,
+       withdrawQueuedMessage,
+@@ -4327,6 +4343,7 @@ export function ChatStateAdapterProvider({
+       setCreateTarget,
+       setLanguage,
+       setReplyLanguageOverride,
++      prepareReadingConnection,
+       sendMessage,
+       queueMessage,
+       withdrawQueuedMessage,
 diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
 index 70f5dd9..0aa7ef1 100644
 --- a/web/features/chat/components/ChatWorkspace.tsx
@@ -2034,8 +2465,33 @@ index dfb17c1..ffe5431 100644
    );
    if (!found) return null;
  
+diff --git a/web/lib/reading-selection.ts b/web/lib/reading-selection.ts
+index bd967be..27a74d3 100644
+--- a/web/lib/reading-selection.ts
++++ b/web/lib/reading-selection.ts
+@@ -112,15 +112,15 @@ export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
+ }
+ 
+ /** Keep fraction bars, superscripts and diagrams that PDF text selection loses. */
+-export function pdfSelectionImage(page: HTMLElement, rects: NormalisedRect[]): string | undefined {
++export function pdfSelectionImage(page: HTMLElement, rects: NormalisedRect[], padding = 12): string | undefined {
+   const source = page.querySelector("canvas");
+   const bounds = unionRect(rects);
+   if (!source?.width || !source.height || !bounds) return;
+   const [x0, y0, x1, y1] = bounds;
+-  const left = Math.max(0, Math.floor(x0 * source.width) - 12);
+-  const top = Math.max(0, Math.floor(y0 * source.height) - 12);
+-  const width = Math.min(source.width, Math.ceil(x1 * source.width) + 12) - left;
+-  const height = Math.min(source.height, Math.ceil(y1 * source.height) + 12) - top;
++  const left = Math.max(0, Math.floor(x0 * source.width) - padding);
++  const top = Math.max(0, Math.floor(y0 * source.height) - padding);
++  const width = Math.min(source.width, Math.ceil(x1 * source.width) + padding) - left;
++  const height = Math.min(source.height, Math.ceil(y1 * source.height) + padding) - top;
+   if (width <= 0 || height <= 0) return;
+   const crop = document.createElement("canvas");
+   const scale = Math.min(1, 1600 / Math.max(width, height));
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa..0ecf0b1 100644
+index 613b5fa..a939095 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
 @@ -1,4 +1,9 @@
@@ -2048,8 +2504,24 @@ index 613b5fa..0ecf0b1 100644
    "Speech synthesis and transcription models with saved providers.": "Speech synthesis and transcription models with saved providers.",
    "Image and video generation models with saved providers.": "Image and video generation models with saved providers.",
    "Manage provider names, addresses, credentials, and connectivity.": "Manage provider names, addresses, credentials, and connectivity.",
+@@ -3038,9 +3043,14 @@
+   "Underline": "Underline",
+   "Add note": "Add note",
+   "Save citation": "Save citation",
++  "Screenshot quote": "Screenshot quote",
++  "Confirm screenshot quote": "Confirm screenshot quote",
++  "Retake screenshot": "Retake screenshot",
++  "Quote in question": "Quote in question",
++  "Screenshot not ready. Wait for the page to render and try again.": "Screenshot not ready. Wait for the page to render and try again.",
+   "Select page area": "Select page area",
+   "Selected area on page {{page}}": "Selected area on page {{page}}",
+-  "Drag over the page to select an area": "Drag over the page to select an area",
++  "Drag over the page to select an area": "Drag over the page, then choose whether to save the screenshot or quote it in a question.",
+   "Ask about this": "Ask about this",
+   "Your note…": "Your note…",
+   "Save note": "Save note",
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..e833572 100644
+index 6c4afd4..c3d92e2 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
 @@ -1,4 +1,9 @@
@@ -2062,6 +2534,22 @@ index 6c4afd4..e833572 100644
    "Speech synthesis and transcription models with saved providers.": "使用已配置的提供方管理语音合成与语音识别模型。",
    "Image and video generation models with saved providers.": "使用已配置的提供方管理图片与视频生成模型。",
    "Manage provider names, addresses, credentials, and connectivity.": "管理提供方的名称、地址、密钥并测试连接。",
+@@ -3038,9 +3043,14 @@
+   "Underline": "下划线",
+   "Add note": "添加批注",
+   "Save citation": "保存引用",
++  "Screenshot quote": "截图引用",
++  "Confirm screenshot quote": "确认截图用途",
++  "Retake screenshot": "重新截图",
++  "Quote in question": "引用到提问",
++  "Screenshot not ready. Wait for the page to render and try again.": "原页还没准备好，请等页面显示后再截图。",
+   "Select page area": "框选原页",
+   "Selected area on page {{page}}": "第 {{page}} 页选区",
+-  "Drag over the page to select an area": "在原页上拖出选区，可引用或标注图片、公式和扫描内容。",
++  "Drag over the page to select an area": "在原页拖出选区，松开后可加入笔记或引用到提问。",
+   "Ask about this": "就此提问",
+   "Your note…": "写下你的批注…",
+   "Save note": "保存批注",
 diff --git a/web/tests/add-favorite-to-note.spec.tsx b/web/tests/add-favorite-to-note.spec.tsx
 index a34a8c5..6e6357f 100644
 --- a/web/tests/add-favorite-to-note.spec.tsx
@@ -2170,9 +2658,15 @@ index 46c0f17..6ffdf58 100644
 +  expect(onSend).not.toHaveBeenCalled();
 +});
 diff --git a/web/tests/pdf-reading-resize.spec.tsx b/web/tests/pdf-reading-resize.spec.tsx
-index e134153..6f319b4 100644
+index e134153..d238446 100644
 --- a/web/tests/pdf-reading-resize.spec.tsx
 +++ b/web/tests/pdf-reading-resize.spec.tsx
+@@ -1,4 +1,4 @@
+-import { act, fireEvent, render, waitFor } from "@testing-library/react";
++import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import {
+   PdfDocumentView,
 @@ -252,6 +252,21 @@ describe("PDF reading position during layout changes", () => {
      );
    });
@@ -2195,6 +2689,151 @@ index e134153..6f319b4 100644
    it("clamps restoration at the document end", async () => {
      const { root } = await openReader();
      await scrollTo(root, 160, 0.6);
+@@ -261,3 +276,25 @@ describe("PDF reading position during layout changes", () => {
+     expect(lastRect.bottom + GAP).toBeCloseTo(ROOT_TOP + viewportHeight, 5);
+   });
+ });
++
++
++it("opens screenshot capture after a stationary press, but not after dragging to select text", async () => {
++  const onRequestRegion = vi.fn();
++  const { root } = await openReader({ onRequestRegion });
++  const page = pageAt(root, 1);
++  vi.useFakeTimers();
++  try {
++    fireEvent.pointerDown(page, { isPrimary: true, button: 0, pointerId: 1, clientX: 200, clientY: 200 });
++    fireEvent.pointerMove(page, { isPrimary: true, pointerId: 1, clientX: 240, clientY: 200 });
++    act(() => vi.advanceTimersByTime(600));
++    expect(screen.queryByRole("button", { name: "Screenshot quote" })).toBeNull();
++
++    fireEvent.pointerDown(page, { isPrimary: true, button: 0, pointerId: 1, clientX: 200, clientY: 200 });
++    act(() => vi.advanceTimersByTime(600));
++    fireEvent.pointerUp(page, { isPrimary: true, button: 0, pointerId: 1 });
++    fireEvent.click(screen.getByRole("button", { name: "Screenshot quote" }));
++    expect(onRequestRegion).toHaveBeenCalledOnce();
++  } finally {
++    vi.useRealTimers();
++  }
++});
+diff --git a/web/tests/reading-toolbar-selection.spec.tsx b/web/tests/reading-toolbar-selection.spec.tsx
+index 3b47500..944d835 100644
+--- a/web/tests/reading-toolbar-selection.spec.tsx
++++ b/web/tests/reading-toolbar-selection.spec.tsx
+@@ -46,6 +46,7 @@ const api = vi.hoisted(() => ({
+ /** The document view is stubbed down to "report this selection upward". */
+ const view = vi.hoisted(() => ({
+   select: null as null | ((payload: unknown) => void),
++  capture: null as null | ((payload: unknown) => void),
+   locate: null as null | ((locator: number) => void),
+   progress: null as null | ((percentage: number | null) => void),
+ }));
+@@ -61,17 +62,27 @@ vi.mock("@/lib/reading-api", async (importOriginal) => ({
+ 
+ vi.mock("@/components/reading/PdfDocumentView", () => ({
+   PdfDocumentView: ({
+-    onSelection,
++    onSelection, onRegionSelect,
+   }: {
+     onSelection: (payload: unknown) => void;
++    onRegionSelect?: (payload: unknown) => void;
+   }) => {
+     view.select = onSelection;
++    view.capture = onRegionSelect ?? null;
+     return <div data-testid="doc" />;
+   },
+ }));
+ 
+ // The workspace provider asks who the learner is; an adult reader is the
+ // case under test, so there is no learner policy to find.
++const notes = vi.hoisted(() => ({
++  listNotes: vi.fn(async () => ({ documents: [{ id: "note-1", title: "Geometry" }] })),
++  getNote: vi.fn(async () => ({ blocks: [] })),
++  uploadNoteAsset: vi.fn(async () => "/api/notes/note-1/assets/source.png"),
++  noteRequest: vi.fn(async () => undefined),
++}));
++vi.mock("@/lib/notes-api", () => notes);
++
+ vi.mock("@/lib/auth", () => ({
+   fetchAuthStatus: vi.fn(async () => null),
+ }));
+@@ -179,6 +190,46 @@ describe("reading toolbar with a live selection", () => {
+     expect(body.locator).toBe(4);
+   });
+ 
++  it("asks what to do with a crop, and carries the same pixels into a question or a note", async () => {
++    const user = userEvent.setup();
++    const onAsk = vi.fn();
++    window.addEventListener(READER_ASK_EVENT, onAsk);
++    try {
++      render(<ReaderPane onClose={() => undefined} />);
++      const image = "data:image/png;base64,cGl4ZWxz";
++      const chooseCrop = async () => {
++        await user.click(screen.getByRole("button", { name: "Screenshot quote" }));
++        act(() => view.capture?.({
++          locator: 4, quote: "Selected area on page 4", region: true,
++          image, rects: [[0.1, 0.2, 0.4, 0.5]], anchor: { x: 100, y: 200 },
++        }));
++        const dialog = await screen.findByRole("dialog", { name: "Confirm screenshot quote" });
++        expect(within(dialog).getByRole("img")).toHaveAttribute("src", image);
++        return dialog;
++      };
++      const quote = await chooseCrop();
++      expect(onAsk).not.toHaveBeenCalled();
++      expect(notes.uploadNoteAsset).not.toHaveBeenCalled();
++      await user.click(within(quote).getByRole("button", { name: "Quote in question" }));
++      expect(onAsk.mock.calls[0][0].detail).toMatchObject({ locator: 4, image });
++      expect(onAsk.mock.calls[0][0].detail.prompt).toBeUndefined();
++      expect(screen.queryByRole("dialog", { name: "Confirm screenshot quote" })).toBeNull();
++
++      const note = await chooseCrop();
++      await user.click(within(note).getByRole("button", { name: "Add to a note" }));
++      await user.selectOptions(await within(note).findByRole("combobox"), "note-1");
++      expect(notes.uploadNoteAsset).not.toHaveBeenCalled();
++      await user.click(within(note).getByRole("button", { name: "Add to a note" }));
++      await waitFor(() => expect(notes.noteRequest).toHaveBeenCalledWith("/note-1/clips", expect.objectContaining({
++        markdown: expect.stringContaining("/api/notes/note-1/assets/source.png"),
++      })));
++      expect(notes.uploadNoteAsset).toHaveBeenCalledWith("note-1", expect.any(File));
++      expect(onAsk).toHaveBeenCalledTimes(1);
++    } finally {
++      window.removeEventListener(READER_ASK_EVENT, onAsk);
++    }
++  });
++
+   it("keeps secondary reading tools behind the more menu", async () => {
+     const user = userEvent.setup();
+     render(
+diff --git a/web/tests/reading-v2-surface.test.ts b/web/tests/reading-v2-surface.test.ts
+index 04dc46a..d2f8f41 100644
+--- a/web/tests/reading-v2-surface.test.ts
++++ b/web/tests/reading-v2-surface.test.ts
+@@ -224,9 +224,9 @@ test("naming the first turn's conversation does not remount the reader", () => {
+   assert.match(binding[0], /window\.history\.replaceState/);
+   assert.doesNotMatch(binding[0], /router\.(?:replace|push)/);
+ 
+-  // And the workspace has to read the URL the same way it wrote it: route
+-  // params do not follow the native history API, only the pathname does.
+-  assert.match(page, /readingSessionIdFromPath\(usePathname\(\)\)/);
++  assert.match(binding[0], /searchParams\.set\("readingSession", state\.sessionId\)/);
++  assert.match(page, /readingSessionIdFromPath\(pathname\)/);
++  assert.match(page, /searchParams\.get\("readingSession"\)/);
+   assert.doesNotMatch(page, /params\.sessionId/);
+ });
+ 
+diff --git a/web/tests/reading-workspace-session-lifecycle.spec.tsx b/web/tests/reading-workspace-session-lifecycle.spec.tsx
+index 0c0c354..a34ec7d 100644
+--- a/web/tests/reading-workspace-session-lifecycle.spec.tsx
++++ b/web/tests/reading-workspace-session-lifecycle.spec.tsx
+@@ -40,7 +40,8 @@ it("does not adopt an inherited chat before or after asynchronous collection hyd
+   rerender();
+   mocks.state.sessionId = "reading-new";
+   rerender();
+-  expect(window.location.pathname).toBe("/learning/reading/collection/sessions/reading-new");
++  expect(window.location.pathname).toBe("/learning/reading/collection");
++  expect(window.location.search).toBe("?readingSession=reading-new");
+   expect(mocks.loadSession).not.toHaveBeenCalled();
+ });
+ it("loads an explicitly linked reading session instead of starting a draft", async () => {
 diff --git a/web/tests/student-citation-and-models.spec.ts b/web/tests/student-citation-and-models.spec.ts
 new file mode 100644
 index 0000000..512baa9

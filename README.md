@@ -8,7 +8,7 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
 
-[查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
+[下载图文操作手册 PDF](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
 
 Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaking students from primary through high school.
 
@@ -37,7 +37,7 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 | 学习场景 | 怎么用 |
 | --- | --- |
-| 教材随读随问 | 按学段、学科筛选或搜索年级、册名，打开整册原页。划选文字或用「框选原页」标注和提问，公式、图形和上下标随选区截图引用。翻页后可在同一阅读会话继续追问。 |
+| 教材随读随问 | 按学段、学科筛选或搜索年级、册名，打开整册原页。划选文字可标注或提问。遇到公式、图形和扫描页，长按原页选择「截图引用」，拖框后把原图加入笔记或引用到提问。翻页后可在同一阅读会话继续追问。 |
 | 九科学习项目 | 语文、数学、英语、物理、化学、生物、历史、地理、政治各预置三个对话。选学科老师做专项练习，可分别设置项目指令和对话指令。 |
 | 拍题与资料问答 | 拍照和一至两页的短 PDF 可交给支持读图的模型先看原图。需要全文时在后台解析。输入框和右侧预览共用临时附件。 |
 | 错题、笔记和复盘 | 按学科整理错题，把对话选段添加到笔记，按日期查看学习报告，可展开「四问复盘」。 |
