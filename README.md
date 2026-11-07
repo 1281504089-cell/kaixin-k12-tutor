@@ -4,9 +4,9 @@
 
 | 电脑 | 下载文件 | 验证 |
 | --- | --- | --- |
-| Apple 芯片 Mac | [下载安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-e8bfcb87d-macos-arm64) | 分卷完整性、打包应用首次启动、UI/API、教材与退出清理通过 |
-| Intel Mac | [下载新版安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-e8bfcb87d-macos-x64) | 原生试装通过，重新下载后在 macOS 15.7.9 挂载及签名验证通过 |
-| Windows x64 | [下载新版安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-e8bfcb87d-windows-x64) | 原生安装、启动、退出、卸载保留用户资料通过 |
+| Apple 芯片 Mac | [下载安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-77f2ba387-macos-arm64) | 分卷挂载、全新目录启动、UI/API、教材与退出清理通过 |
+| Intel Mac | [下载新版安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-77f2ba387-macos-x64) | 分卷挂载、全新目录启动、UI/API、教材与退出清理通过 |
+| Windows x64 | [下载新版安装文件](https://github.com/1281504089-cell/kaixin-super-scholar-desktop/releases/tag/student-77f2ba387-windows-x64) | 原生安装、启动、退出、卸载保留用户资料通过 |
 
 仓库已于 2026-11-07 按拥有者确认改为公开。Agent 和学生无需 GitHub 登录即可访问源码、历史记录与 Releases 安装资源；下载安装文件请使用上表的平台链接，并下载该平台全部分卷。安装包仍不含 API Key、个人学习记录或签名私钥。
 
@@ -15,14 +15,17 @@
 ## 安装
 
 1. 只下载对应电脑的平台文件，不用下载 Source code。每个平台的全部分卷放入同一文件夹，保留原名。
-2. Mac：在一个新建文件夹里存放同一发布页下载的四个原名文件，包括一个 `.dmg` 和三个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。若曾下载旧版，请另用一个空文件夹，避免同名分卷混用。
+2. Mac：在一个新建文件夹里存放同一发布页下载的四个原名文件，包括一个 `.dmg` 和三个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。下载文件名已带发行标识。每批分卷请使用单独的文件夹。
 3. Windows：一个 `Setup.exe` 和四个 `*-Runtime.001` 至 `*-Runtime.004` 分卷，双击 Setup 即可自动校验合并。
 4. 建议预留至少 30GB 空间。安装时校验资源，首次启动还会解压环境，两阶段均可能需要数分钟。
 5. 新电脑在设置中填写自己的有效聊天接口；旧用户升级保留本机配置与学习记录。
 
 ## 本次交付
 
-- 新版在设置中选择平台、填写 API Key 并应用后，自动添加接口列出的受支持模型。新版冻结源码为 `e8bfcb87db1b60b9325ee09abe5e724f738c789b`。
+- 模型选择显示简短用途。DeepSeek V4.1 Flash 适合快速问答和常规练习，Kimi K3.1 Pro 适合难题验算和长文精读，DeepSeek V4 Pro 适合纯文字推导和代码排错。
+- 设置里填写 API Key 并应用后，自动添加接口列出的受支持模型。打开模型菜单可后台更新官方列表，保留已选默认模型和推理强度。
+- 边读边问支持直接选中文字，也能通过「框选原页」在扫描教材中标注或引用区域。提问时带上原页选区图，保留公式、图形和上下标的视觉依据。
+- 本次冻结源码为 `77f2ba387713d23ef6af9897d393d24d84e421be`。
 - 保留老师技能、九科各三个默认对话、项目与对话指令、昵称头像、学习报告、错题本、笔记及横屏布局。
 - 照片直接读图；一至两页 PDF 先用页图回答，全文解析在后台进行。公式引用带原页选区图；两个上传入口共用临时附件。
 - 配齐文档/OCR、检索、本机 STT 与 Embedding 模型、Manim、FFmpeg、LaTeX、字体、Remotion 与 GeoGebra 资源。
