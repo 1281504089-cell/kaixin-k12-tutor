@@ -1,6 +1,6 @@
 diff --git a/apps/desktop/scripts/package-update-launcher.mjs b/apps/desktop/scripts/package-update-launcher.mjs
 new file mode 100644
-index 0000000..7f0bd15
+index 0000000..8bd7728
 --- /dev/null
 +++ b/apps/desktop/scripts/package-update-launcher.mjs
 @@ -0,0 +1,53 @@
@@ -47,7 +47,7 @@ index 0000000..7f0bd15
 +    },
 +  } : {}),
 +});
-+const zip = path.join(out, `Kaixin-Updater-${target}.zip`);
++const zip = path.join(out, `Kaixin-Updater-20261107.2-${target}.zip`);
 +if (isMac) {
 +  const app = path.join(built, '开心动力超级学霸.app');
 +  execFileSync('codesign', ['--force', '--deep', '--sign', '-', app], { stdio: 'inherit' });
@@ -325,12 +325,11 @@ index efb0ebb..e8dde5b 100644
    "hideOthers": "Diğerlerini gizle",
    "showAll": "Tümünü göster",
 diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
-index d2ac8dd..ed43578 100644
+index d2ac8dd..6ef107d 100644
 --- a/apps/desktop/src/main.mjs
 +++ b/apps/desktop/src/main.mjs
 @@ -1,7 +1,7 @@
--import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme } from 'electron';
-+import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme, net } from 'electron';
+ import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme } from 'electron';
  import { fork } from 'node:child_process';
  import { watch } from 'node:fs';
 -import { mkdir, readFile, writeFile, rename, appendFile } from 'node:fs/promises';
@@ -455,7 +454,7 @@ index d2ac8dd..ed43578 100644
 +  let temporary;
 +  let downloading = false;
 +  try {
-+    const next = await findReleaseUpdate(targetId(), active.manifest, publicKey, net.fetch, request.signal);
++    const next = await findReleaseUpdate(targetId(), active.manifest, publicKey, fetch, request.signal);
 +    if (!next) {
 +      if (interactive) await updateNotice('releaseCurrent');
 +      return;
@@ -483,7 +482,7 @@ index d2ac8dd..ed43578 100644
 +    window.setProgressBar(2);
 +    const file = await downloadReleaseUpdate(next, temporary, progress => {
 +      if (!window.isDestroyed()) window.setProgressBar(progress);
-+    }, net.fetch, request.signal);
++    }, fetch, request.signal);
 +    if (quitting) return;
 +    await applyCoreUpdate(file);
 +    await updateNotice('releaseInstalled', next.runtimeId);
