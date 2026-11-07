@@ -1552,6 +1552,38 @@ index e97bde2..1e17f9d 100644
      material,
      readingMaterialId,
      readingMaterialRevision,
+diff --git a/web/components/reading/AnnotationLayer.tsx b/web/components/reading/AnnotationLayer.tsx
+index 3e7e2de..934c520 100644
+--- a/web/components/reading/AnnotationLayer.tsx
++++ b/web/components/reading/AnnotationLayer.tsx
+@@ -21,6 +21,7 @@ export interface AnnotationLayerProps {
+   annotations: AnnotationItem[];
+   highlightedAnnotationId?: string | null;
+   flashRects?: NormalisedRect[];
++  preserveTextSelection?: boolean;
+   onAnnotationClick?: (annotation: AnnotationItem) => void;
+ }
+ 
+@@ -41,6 +42,7 @@ export function AnnotationLayer({
+   annotations,
+   highlightedAnnotationId,
+   flashRects,
++  preserveTextSelection,
+   onAnnotationClick,
+ }: AnnotationLayerProps) {
+   const { t } = useTranslation();
+@@ -66,7 +68,10 @@ export function AnnotationLayer({
+             <span
+               key={`${annotation.annotation_id}-${index}`}
+               className={[
+-                "pointer-events-auto absolute cursor-pointer transition-[box-shadow,filter] duration-150 [&>span]:h-full [&>span]:w-full [&>span>button]:h-full [&>span>button]:w-full",
++                "absolute transition-[box-shadow,filter] duration-150",
++                preserveTextSelection
++                  ? "[&>span]:absolute [&>span]:-bottom-0.5 [&>span]:right-0 [&>span>button]:pointer-events-auto [&>span>button]:h-1 [&>span>button]:w-3"
++                  : "pointer-events-auto cursor-pointer [&>span]:h-full [&>span]:w-full [&>span>button]:h-full [&>span>button]:w-full",
+                 isUnderline ? "" : "mix-blend-multiply",
+                 isFocused ? "ring-2 ring-[var(--ring)] ring-offset-1" : "",
+               ]
 diff --git a/web/components/reading/AnnotationPopover.tsx b/web/components/reading/AnnotationPopover.tsx
 index 037fdda..4dd5c24 100644
 --- a/web/components/reading/AnnotationPopover.tsx
@@ -1627,7 +1659,7 @@ index 037fdda..4dd5c24 100644
          <div className="mt-1.5 flex items-center gap-1 border-t border-[var(--border)] pt-1.5">
            <Tooltip label={t('Ask about this')} side="bottom">
 diff --git a/web/components/reading/PdfDocumentView.tsx b/web/components/reading/PdfDocumentView.tsx
-index 38afc3a..037e7aa 100644
+index 38afc3a..b3f0547 100644
 --- a/web/components/reading/PdfDocumentView.tsx
 +++ b/web/components/reading/PdfDocumentView.tsx
 @@ -8,7 +8,8 @@ import {
@@ -1640,7 +1672,17 @@ index 38afc3a..037e7aa 100644
  import { useTranslation } from "react-i18next";
  import {
    loadPdfjs,
-@@ -47,6 +48,7 @@ export interface SelectionPayload {
+@@ -27,7 +28,8 @@ import {
+   cleanQuote,
+   selectionTextWithoutLineNumbers,
+   locatorOfSelection,
+-  normaliseRects,
++  pdfRangeRects,
++  pdfQuoteNeedsImage,
+   pdfSelectionImage,
+ } from "@/lib/reading-selection";
+ import { PdfPage } from "./PdfPage";
+@@ -47,6 +49,7 @@ export interface SelectionPayload {
     * into it (margin line numbers). Questions carry this; marks keep `quote`.
     */
    text?: string;
@@ -1648,7 +1690,7 @@ index 38afc3a..037e7aa 100644
    image?: string;
    region?: true;
    rects: NormalisedRect[];
-@@ -59,6 +61,7 @@ export interface SelectionPayload {
+@@ -59,6 +62,7 @@ export interface SelectionPayload {
  export interface JumpRequest {
    locator: number;
    quote?: string;
@@ -1656,7 +1698,7 @@ index 38afc3a..037e7aa 100644
    /** Changes on every request so repeats of the same target still fire. */
    nonce: number;
  }
-@@ -74,6 +77,7 @@ export interface PdfDocumentViewProps {
+@@ -74,6 +78,7 @@ export interface PdfDocumentViewProps {
    highlightedAnnotationId?: string | null;
    onSelection: (payload: SelectionPayload | null) => void;
    onRegionSelect?: (payload: SelectionPayload) => void;
@@ -1664,7 +1706,7 @@ index 38afc3a..037e7aa 100644
    selectedRegion?: Pick<SelectionPayload, "locator" | "rects">;
    onAnnotationClick?: (annotation: AnnotationItem) => void;
    onVisibleLocatorChange?: (locator: number) => void;
-@@ -99,6 +103,7 @@ export function PdfDocumentView({
+@@ -99,6 +104,7 @@ export function PdfDocumentView({
    highlightedAnnotationId,
    onSelection,
    onRegionSelect,
@@ -1672,7 +1714,7 @@ index 38afc3a..037e7aa 100644
    selectedRegion,
    onAnnotationClick,
    onVisibleLocatorChange,
-@@ -373,6 +378,7 @@ export function PdfDocumentView({
+@@ -373,6 +379,7 @@ export function PdfDocumentView({
      const locator = Math.min(Math.max(1, jump.locator), unitCount);
      const nonce = jump.nonce;
      const quote = jump.quote;
@@ -1680,7 +1722,7 @@ index 38afc3a..037e7aa 100644
      let cancelled = false;
      let timer: number | undefined;
  
-@@ -389,7 +395,24 @@ export function PdfDocumentView({
+@@ -389,7 +396,24 @@ export function PdfDocumentView({
          if (scrollTries <= 20) timer = window.setTimeout(run, 120);
          return;
        }
@@ -1706,27 +1748,29 @@ index 38afc3a..037e7aa 100644
        let attempts = 0;
        const findQuote = () => {
          if (cancelled) return;
-@@ -400,7 +423,7 @@ export function PdfDocumentView({
+@@ -400,17 +424,11 @@ export function PdfDocumentView({
          );
          const layer = page?.querySelector<HTMLElement>(".textLayer");
          if (layer && layer.childElementCount > 0) {
 -          const range = domRangeForQuote(layer, quote);
+-          const box = page?.getBoundingClientRect();
+-          if (range && box) {
+-            const rects = normaliseRects([...range.getClientRects()], {
+-              left: box.left,
+-              top: box.top,
+-              width: box.width,
+-              height: box.height,
+-            });
 +          const range = domRangeForQuote(layer, quote, Boolean(citation));
-           const box = page?.getBoundingClientRect();
-           if (range && box) {
-             const rects = normaliseRects([...range.getClientRects()], {
-@@ -409,8 +432,8 @@ export function PdfDocumentView({
-               width: box.width,
-               height: box.height,
-             });
--            if (rects.length) {
++          if (range && page) {
++            const rects = pdfRangeRects(range, page);
+             if (rects.length) {
 -              setFlash({ nonce, locator, rects });
-+            if (rects.length && page) {
 +              flashPassage(rects, page);
                return;
              }
            }
-@@ -423,6 +446,7 @@ export function PdfDocumentView({
+@@ -423,6 +441,7 @@ export function PdfDocumentView({
          // polling; the page is still scrolled into view, which is the useful
          // part of the request.
          if (attempts < 25) timer = window.setTimeout(findQuote, 120);
@@ -1734,7 +1778,7 @@ index 38afc3a..037e7aa 100644
        };
        timer = window.setTimeout(findQuote, 140);
      };
-@@ -434,10 +458,15 @@ export function PdfDocumentView({
+@@ -434,10 +453,15 @@ export function PdfDocumentView({
      };
    }, [jump, doc, unitCount, scrollToLocator]);
  
@@ -1754,19 +1798,70 @@ index 38afc3a..037e7aa 100644
    const activeFlash =
      flash && jump && flash.nonce === jump.nonce ? flash : null;
  
-@@ -494,12 +523,59 @@ export function PdfDocumentView({
+@@ -449,18 +473,12 @@ export function PdfDocumentView({
+       onSelection(null);
+       return;
+     }
+-    const range = selection.getRangeAt(0);
++    const range = selection.getRangeAt(0).cloneRange();
+     const root = scrollRef.current;
+     if (!root || !root.contains(range.commonAncestorContainer)) {
+       onSelection(null);
+       return;
+     }
+-    const quote = cleanQuote(selection.toString());
+-    if (!quote) {
+-      onSelection(null);
+-      return;
+-    }
+-
+     // Attribute the selection to the page it started on, and measure against
+     // that page's box so the rects are in its own normalised space.
+     const startElement =
+@@ -476,29 +494,71 @@ export function PdfDocumentView({
+       return;
+     }
+ 
+-    const box = page.getBoundingClientRect();
+-    const clientRects = [...range.getClientRects()];
+-    const rects = normaliseRects(clientRects, {
+-      left: box.left,
+-      top: box.top,
+-      width: box.width,
+-      height: box.height,
+-    });
+-    if (!rects.length) {
+-      onSelection(null);
+-      return;
+-    }
+-    const last = clientRects[clientRects.length - 1];
+-    const text = selectionTextWithoutLineNumbers(range);
++    const layer = page.querySelector(".textLayer");
++    if (!layer) return onSelection(null);
++    // Geometry and quote refer to the same page, including drags through its bottom.
++    if (!page.contains(range.endContainer)) range.setEnd(layer, layer.childNodes.length);
++    const quote = cleanQuote(range.toString());
++    const rects = pdfRangeRects(range, page);
++    if (!quote || !rects.length) return onSelection(null);
++    const last = range.getBoundingClientRect();
++    const text = selectionTextWithoutLineNumbers(range) || quote;
++    const image = pdfSelectionImage(page, rects);
++    const useImage = Boolean(image && pdfQuoteNeedsImage(text));
+     onSelection({
        locator,
        quote,
-       ...(text ? { text } : {}),
-+      // A PDF's private glyphs or replacement characters have no reliable
-+      // plain-text meaning. The cropped original remains readable.
-+      noteMarkdown: /[\p{Co}\uFFFD]/u.test(text || quote) ? "" : text || quote,
+-      ...(text ? { text } : {}),
++      text: useImage ? t("Selected area on page {{page}}", { page: locator }) : text,
++      noteMarkdown: useImage ? "" : text,
        rects,
-       image: pdfSelectionImage(page, rects),
-       anchor: { x: last.left + last.width / 2, y: last.top },
+-      image: pdfSelectionImage(page, rects),
+-      anchor: { x: last.left + last.width / 2, y: last.top },
++      image,
++      anchor: { x: last.right, y: last.bottom },
      });
-   }, [onSelection]);
- 
+-  }, [onSelection]);
++  }, [onSelection, t]);
++
 +  const [captureMenu, setCaptureMenu] = useState<{ x: number; y: number } | null>(null);
 +  const menuRef = useRef<HTMLButtonElement>(null);
 +  const press = useRef<{ id: number; x: number; y: number; timer: number } | null>(null);
@@ -1810,11 +1905,10 @@ index 38afc3a..037e7aa 100644
 +      document.removeEventListener("keydown", escape);
 +    };
 +  }, [captureMenu]);
-+
+ 
    // -- render --------------------------------------------------------------
  
-   if (error) {
-@@ -519,7 +595,30 @@ export function PdfDocumentView({
+@@ -519,7 +579,30 @@ export function PdfDocumentView({
      <div
        ref={scrollRef}
        data-preview-scroll
@@ -1846,7 +1940,7 @@ index 38afc3a..037e7aa 100644
        // The desk the pages lie on. This was `bg-[var(--muted)]/40`, which
        // compiles to nothing here — a var() colour has no channels for the
        // `/NN` modifier to reach into, so the rule was dropped and the desk
-@@ -527,6 +626,27 @@ export function PdfDocumentView({
+@@ -527,6 +610,27 @@ export function PdfDocumentView({
        // token for exactly this: one step back from the page.
        className="dt-reader-scroll h-full overflow-auto overscroll-contain bg-[var(--secondary)] px-6 py-4"
      >
@@ -1875,7 +1969,7 @@ index 38afc3a..037e7aa 100644
          <div className="flex h-full items-center justify-center gap-2 text-[12px] text-[var(--muted-foreground)]">
            <Loader2 size={14} className="animate-spin" />
 diff --git a/web/components/reading/PdfPage.tsx b/web/components/reading/PdfPage.tsx
-index 6cb1d7d..08bebc4 100644
+index 6cb1d7d..f10c82d 100644
 --- a/web/components/reading/PdfPage.tsx
 +++ b/web/components/reading/PdfPage.tsx
 @@ -85,7 +85,7 @@ function PdfRegionPicker({ locator, onSelect }: {
@@ -1887,7 +1981,23 @@ index 6cb1d7d..08bebc4 100644
            anchor: { x: box.left + (x0 + x1) * box.width / 2, y: box.top + y0 * box.height },
          });
        }}
-@@ -297,7 +297,7 @@ export function PdfPage({
+@@ -216,6 +216,15 @@ export function PdfPage({
+           });
+           textLayer = layer as unknown as { cancel: () => void };
+           await layer.render();
++          if (cancelled) return;
++          let index = 0;
++          for (const item of textContent.items) {
++            if (!("str" in item)) continue;
++            const span = layer.textDivs[index++];
++            if (!span || !item.str || viewport.rotation !== 0 || Math.abs(item.transform[1]) > 0.001) continue;
++            const [, y] = viewport.convertToViewportPoint(item.transform[4], item.transform[5]);
++            span.dataset.pdfBaseline = String(y / viewport.height);
++          }
+         };
+ 
+         // allSettled: a canvas failure must not cost the page its text layer,
+@@ -297,7 +306,7 @@ export function PdfPage({
        className="relative mx-auto shrink-0 overflow-hidden rounded-[10px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.10),0_8px_24px_-12px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.06]"
        style={{ width, height }}
      >
@@ -1896,8 +2006,16 @@ index 6cb1d7d..08bebc4 100644
        <div
          ref={textLayerRef}
          className="textLayer"
+@@ -309,6 +318,7 @@ export function PdfPage({
+         annotations={pageAnnotations}
+         highlightedAnnotationId={highlightedAnnotationId}
+         flashRects={flashRects}
++        preserveTextSelection
+         onAnnotationClick={onAnnotationClick}
+       />
+       {active && onRegionSelect && <PdfRegionPicker locator={locator} onSelect={onRegionSelect} />}
 diff --git a/web/components/reading/ReaderPane.tsx b/web/components/reading/ReaderPane.tsx
-index f530ffa..34ce835 100644
+index f530ffa..373b8b9 100644
 --- a/web/components/reading/ReaderPane.tsx
 +++ b/web/components/reading/ReaderPane.tsx
 @@ -3,6 +3,10 @@
@@ -2078,7 +2196,7 @@ index f530ffa..34ce835 100644
                onRegionSelect={regionActive ? openRegionSelection : undefined}
                selectedRegion={selection?.region && popoverOpen ? selection : undefined}
                onAnnotationClick={(annotation) =>
-@@ -1366,16 +1412,55 @@ export function ReaderPane({
+@@ -1366,16 +1412,59 @@ export function ReaderPane({
        {/* `popoverOpen` and not just `selection`: dismissal now leaves the
            selection in place for the toolbar, so gating the mount on the
            selection alone would make Escape and outside-click stop working. */}
@@ -2094,6 +2212,10 @@ index f530ffa..34ce835 100644
 +            <div className="flex w-full flex-wrap items-center justify-end gap-2">
 +              <button type="button" className="rounded-lg px-3 py-2 text-sm hover:bg-[var(--secondary)]" onClick={startRegion}>
 +                {t("Retake screenshot")}
++              </button>
++              <button type="button" className="rounded-lg px-3 py-2 text-sm hover:bg-[var(--secondary)]"
++                onClick={() => commitSelection("underline", "yellow")}>
++                {t("Underline bottom of selection")}
 +              </button>
 +              <AddToNote
 +                className="text-sm"
@@ -2559,18 +2681,26 @@ index b281995..5574ff2 100644
        .then(setConversations)
        .catch(() => {});
 diff --git a/web/components/settings/ModelsWorkspace.tsx b/web/components/settings/ModelsWorkspace.tsx
-index bbabedd..50a77e7 100644
+index bbabedd..50bc969 100644
 --- a/web/components/settings/ModelsWorkspace.tsx
 +++ b/web/components/settings/ModelsWorkspace.tsx
-@@ -51,6 +51,7 @@ import {
+@@ -51,6 +51,8 @@ import {
    workspaceCardClass,
  } from "./WorkspaceShell";
  
++import { modelDefaultEffortOptions } from "@/lib/reasoning-effort";
 +import { showModelInChat } from "@/lib/llm-options";
  import { randomUuid } from "@/lib/random-uuid";
  type ModelPage = "llm" | "embedding" | "search" | "voice" | "multimodal";
  const PAGE_SERVICES: Record<ModelPage, ServiceName[]> = {
-@@ -966,19 +967,37 @@ function ModelEditor({
+@@ -960,25 +962,43 @@ function ModelEditor({
+         {model && (service === "tts" || service === "stt") ? (
+           <VoiceModelFields service={service} provider={speechProvider} model={model}
+             options={speechOptions} preset={speechPreset} update={update} disabled={managed} />
+-        ) : model && <ModelParameters service={service} model={model} update={update} managed={managed} />}
++        ) : model && <ModelParameters service={service} model={model} update={update} managed={managed} provider={provider?.provider || profile.binding} />}
+         {service === "tts" && model ? <VoicePreviewPanel profileId={profile.id} modelId={model.id} maxChars={Math.min(500, speechPreset?.max_input_chars ?? 500)} /> : (service === "search" || service === "stt" || service === "imagegen" || service === "videogen") ? <ServicePreviewPanel service={service} profile={profile} model={model} /> : <ModelTestPanel service={service} profile={profile} model={model} />}
+         {(service === "search" || service === "imagegen" || service === "videogen") && <p className="text-[13px] leading-relaxed text-[var(--muted-foreground)]">
            {t("settings.serviceConfig.tools")} {" "}
            <Link href="/settings/tools" className="underline underline-offset-4">{t("settings.serviceConfig.openTools")}</Link>
          </p>}
@@ -2611,6 +2741,147 @@ index bbabedd..50a77e7 100644
              className={registryButton}
            >
              {active && <Check size={13} />}{" "}
+@@ -1006,13 +1026,16 @@ function ModelParameters({
+   model,
+   update,
+   managed,
++  provider,
+ }: {
+   service: ServiceName;
+   model: CatalogModel;
+   update: (field: keyof CatalogModel, value: unknown) => void;
+   managed: boolean;
++  provider?: string;
+ }) {
+   const { t } = useTranslation();
++  const efforts = modelDefaultEffortOptions(provider, model);
+   const contextId = useId();
+   const language = service === "llm" || service === "task";
+   const fields: [keyof CatalogModel, string][] =
+@@ -1092,35 +1115,17 @@ function ModelParameters({
+             </div>
+             <div className="space-y-1.5">
+               <p className="flex min-h-5 items-center text-[13px] font-medium">
+-                {t("Reasoning effort")}
++                {t("Default reasoning effort")}
+               </p>
+-              <select
+-                aria-label={t("Reasoning effort")}
++              {efforts.length ? <select
++                aria-label={t("Default reasoning effort")}
+                 className={selectClass}
+                 value={model.reasoning_effort || ""}
+                 onChange={(e) => update("reasoning_effort", e.target.value)}
+               >
+-                <option value="">{t("Default")}</option>
+-                {[
+-                  ...new Set([
+-                    ...(model.codex_supported_reasoning_levels || [
+-                      "none",
+-                      "minimal",
+-                      "low",
+-                      "medium",
+-                      "high",
+-                      "xhigh",
+-                      "max",
+-                    ]),
+-                    ...(model.reasoning_effort ? [model.reasoning_effort] : []),
+-                  ]),
+-                ].map((v) => (
+-                  <option key={v} value={v}>
+-                    {v}
+-                  </option>
+-                ))}
+-              </select>
+-            </div>
++                {efforts.map(({ value, label }) => <option key={value} value={value}>{t(label)}</option>)}
++              </select> : <p className="text-[13px] text-[var(--muted-foreground)]">{t("Effort managed by provider")}</p>}
++          </div>
+           </div>
+           <details className={`p-3.5 ${subPanelClass}`}>
+             <summary className="cursor-pointer select-none rounded text-[13px] font-medium marker:text-[var(--muted-foreground)]">
+diff --git a/web/components/settings/ProvidersWorkspace.tsx b/web/components/settings/ProvidersWorkspace.tsx
+index 9f0f36d..b4b588b 100644
+--- a/web/components/settings/ProvidersWorkspace.tsx
++++ b/web/components/settings/ProvidersWorkspace.tsx
+@@ -19,6 +19,9 @@ import {
+ } from "@/features/settings/store/SettingsStore";
+ import {
+   providerRegistry,
++  flattenModels,
++  modelProviderRef,
++  providerIdentity,
+   providerUsage,
+   providerProbeInput,
+   updateProvider,
+@@ -39,7 +42,8 @@ import { ProviderServices } from "./ProviderServices";
+ import { AddProviderPanel, ProviderProtocol, type CustomProviderInput } from "./AddProviderPanel";
+ import { CodexOAuthCard } from "./CodexOAuthCard";
+ import { CodeBuddyAuthCard } from "./CodeBuddyAuthCard";
+-import { stringifyExtraHeaders, subPanelClass } from "./shared";
++import { modelDefaultEffortOptions, setModelReasoningEffort } from "@/lib/reasoning-effort";
++import { selectClass, stringifyExtraHeaders, subPanelClass } from "./shared";
+ import {
+   WorkspaceDetailEmpty,
+   WorkspaceRail,
+@@ -121,6 +125,9 @@ export function ProvidersWorkspace() {
+   const addableOptions = options.filter((p) => p.status !== "legacy");
+   const optionLabel = (provider: string) => formatProviderLabel(provider, options.find(p => p.value === provider)?.label ?? provider, uiLanguage);
+   const source = sources.find((p) => p.id === selected);
++  const languageModels = source ? flattenModels(draft, ["llm"]).filter(row =>
++    providerIdentity(modelProviderRef("llm", row.profile, row.model)) === source.id
++  ) : [];
+   const option = options.find((p) => p.value === source?.provider);
+   const managed = source?.provider === "openai_codex";
+   const connection = source?.source;
+@@ -398,6 +405,47 @@ export function ProvidersWorkspace() {
+                       />
+                     </>
+                   )}
++                  {STUDENT_EDITION && languageModels.length > 0 && <section className={`space-y-3 p-4 ${subPanelClass}`} aria-label={t("Chat model defaults")}>
++                    <div>
++                      <h3 className="text-sm font-medium">{t("Chat model defaults")}</h3>
++                      <p className="mt-1 text-[13px] text-[var(--muted-foreground)]">{t("Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.")}</p>
++                    </div>
++                    {languageModels.map(({ key, profile, model }) => {
++                      if (!model) return null;
++                      const name = model.name || model.model;
++                      const active = draft.services.llm.active_profile_id === profile.id && draft.services.llm.active_model_id === model.id;
++                      const efforts = modelDefaultEffortOptions(source.provider, model);
++                      return <div key={key} className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-2">
++                        <Link className="min-w-40 flex-1 break-words text-sm underline-offset-4 hover:underline" href={`/settings/llm?profile=${encodeURIComponent(profile.id)}&model=${encodeURIComponent(model.id)}`}>{name}</Link>
++                        {efforts.length ? <select
++                          aria-label={`${name} · ${t("Default reasoning effort")}`}
++                          className={`${selectClass} w-auto text-[13px]`}
++                          disabled={applying}
++                          value={model.reasoning_effort || ""}
++                          onChange={event => {
++                            const effort = event.target.value;
++                            mutateCatalog(next => {
++                              const target = next.services.llm.profiles.find(row => row.id === profile.id)?.models.find(row => row.id === model.id);
++                              if (target) setModelReasoningEffort(target, effort);
++                            });
++                          }}
++                        >
++                          {efforts.map(({ value, label }) => <option key={value} value={value}>{t(label)}</option>)}
++                        </select> : <span className="text-xs text-[var(--muted-foreground)]">{t("Effort managed by provider")}</span>}
++                        <button type="button" className={registryButton} disabled={active || applying || !model.model.trim()}
++                          aria-label={`${name} · ${t(active ? "Default model" : "Set as default")}`}
++                          onClick={() => mutateCatalog(next => {
++                            const target = next.services.llm.profiles.find(row => row.id === profile.id)?.models.find(row => row.id === model.id);
++                            if (!target) return;
++                            target.show_in_chat = true;
++                            stageRegistryAction(next, { kind: "default", service: "llm", profile_id: profile.id, model_id: model.id });
++                          })}>
++                          {t(active ? "Default model" : "Set as default")}
++                        </button>
++                      </div>;
++                    })}
++                    <Link href="/settings/llm" className="inline-flex items-center gap-1 text-[13px] text-[var(--primary)]">{t("Manage language models")} <ArrowRight size={14} aria-hidden /></Link>
++                  </section>}
+                   <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-4">
+ 
+                       <Tooltip label={
 diff --git a/web/components/student/MistakeNotebook.tsx b/web/components/student/MistakeNotebook.tsx
 index ed07760..6818b71 100644
 --- a/web/components/student/MistakeNotebook.tsx
@@ -3216,6 +3487,33 @@ index 7406dc8..06c2485 100644
    const { t, i18n } = useTranslation();
    const [status, setStatus] = useState<AppUpdateStatus | null>(null);
    const [job, setJob] = useState<UpdateJob | null>(null);
+diff --git a/web/lib/latex-normalize.ts b/web/lib/latex-normalize.ts
+index 42c5d7a..811bede 100644
+--- a/web/lib/latex-normalize.ts
++++ b/web/lib/latex-normalize.ts
+@@ -189,6 +189,11 @@ function plausibleMathBody(body: string, tight: boolean): boolean {
+ 
+   if (value.length > 60) return false;
+ 
++  // Geometry point/face labels and variable lists are often emitted with
++  // typographic primes or a Chinese comma inside explicit math delimiters.
++  if (/^[A-Z](?:['′″]?[A-Z]){0,7}['′″]*$/.test(value)) return tight;
++  if (/^\p{L}(?:\s*[,，、]\s*\p{L})+$/u.test(value) && !/\p{Script=Han}/u.test(value)) return tight;
++
+   if (CJK_RE.test(value)) {
+     // "速度 = 路程/时间" is a formula a Chinese tutor writes; "5 和 " is the gap
+     // between two prices. Require the shape of an equation, tightly delimited,
+@@ -562,7 +567,9 @@ function escapeStrayDollars(text: string): string {
+       continue;
+     }
+ 
+-    out += `$${body.trim()}$`;
++    const math = body.trim();
++    const list = /^\p{L}(?:\s*[,，、]\s*\p{L})+$/u.test(math);
++    out += `$${list ? math.replace(/[，、]/g, ",") : math}$`;
+     i = close + 1;
+   }
+ 
 diff --git a/web/lib/llm-options.ts b/web/lib/llm-options.ts
 index 805e72d..1847ea3 100644
 --- a/web/lib/llm-options.ts
@@ -3438,10 +3736,47 @@ index dfb17c1..ffe5431 100644
    if (!found) return null;
  
 diff --git a/web/lib/reading-selection.ts b/web/lib/reading-selection.ts
-index bd967be..27a74d3 100644
+index bd967be..afd4447 100644
 --- a/web/lib/reading-selection.ts
 +++ b/web/lib/reading-selection.ts
-@@ -112,15 +112,15 @@ export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
+@@ -100,6 +100,36 @@ export function normaliseRects(rects: Box[], container: Box): NormalisedRect[] {
+     .filter(([x0, y0, x1, y1]) => x1 - x0 > 0.001 && y1 - y0 > 0.001);
+ }
+ 
++/** PDF range boxes can include whole span elements and line breaks. Use
++ * only selected glyph widths, with their vertical extent anchored to PDF.js. */
++export function pdfRangeRects(range: Range, page: HTMLElement): NormalisedRect[] {
++  const box = page.getBoundingClientRect();
++  const boxes: Box[] = [];
++  for (const span of page.querySelectorAll<HTMLElement>(".textLayer span[role=presentation]")) {
++    const node = span.firstChild;
++    if (!node || node.nodeType !== Node.TEXT_NODE || !range.intersectsNode(node)) continue;
++    const part = document.createRange();
++    part.setStart(node, node === range.startContainer ? range.startOffset : 0);
++    part.setEnd(node, node === range.endContainer ? range.endOffset : node.textContent?.length ?? 0);
++    if (!part.toString().trim()) continue;
++    const baseline = Number(span.dataset.pdfBaseline);
++    const font = span.getBoundingClientRect().height;
++    for (const rect of part.getClientRects()) {
++      boxes.push(Number.isFinite(baseline) && font > 0
++        ? { left: rect.left, width: rect.width, top: box.top + box.height * baseline - font * 0.76, height: font * 0.94 }
++        : rect);
++    }
++  }
++  return normaliseRects(boxes, box);
++}
++
++export function pdfQuoteNeedsImage(text: string): boolean {
++  // Some textbook fonts map Latin maths to lookalike Han characters or
++  // private codes. A reference to these glyphs is safer as original pixels.
++  return /[\p{Co}\uFFFD\u0000-\u0008\u000E-\u001F]/u.test(text) ||
++    /[犃犅犆犇犈犉犌犎犗犘犪犫狓狔狆狇]/.test(text);
++}
++
+ /** Union of normalised rects, for positioning a popover over a selection. */
+ export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
+   if (!rects.length) return null;
+@@ -112,15 +142,15 @@ export function unionRect(rects: NormalisedRect[]): NormalisedRect | null {
  }
  
  /** Keep fraction bars, superscripts and diagrams that PDF text selection loses. */
@@ -3462,6 +3797,40 @@ index bd967be..27a74d3 100644
    if (width <= 0 || height <= 0) return;
    const crop = document.createElement("canvas");
    const scale = Math.min(1, 1600 / Math.max(width, height));
+diff --git a/web/lib/reasoning-effort.ts b/web/lib/reasoning-effort.ts
+index 21e9f61..d1206f3 100644
+--- a/web/lib/reasoning-effort.ts
++++ b/web/lib/reasoning-effort.ts
+@@ -168,6 +168,14 @@ function tableReasoningEffortOptions(
+     return options(["low", "high", "max"], current);
+   }
+ 
++  if (provider === "moonshot" && /^kimi-k3\.1-pro(?:-highspeed)?$/.test(modelName)) {
++    return options(["low", "high", "max"], current);
++  }
++
++  if (provider === "deepseek" && /^deepseek-(?:flash|v4(?:\.1)?-(?:pro|flash(?:-vision-exp)?))$/.test(modelName)) {
++    return options(["low", "high", "max", "none"], current);
++  }
++
+   if (provider === "custom") {
+     // A user-supplied OpenAI-compatible endpoint may route to any upstream
+     // model, so expose the common cross-gateway levels and let Auto handle
+@@ -248,3 +256,14 @@ export function setModelReasoningEffort(
+     delete model.reasoning_effort;
+   }
+ }
++
++/** Catalog and provider settings must offer the same choices for each model. */
++export function modelDefaultEffortOptions(
++  provider: string | undefined,
++  model: { model: string; reasoning_effort?: string; capabilities?: { reasoning?: boolean }; codex_supported_reasoning_levels?: string[] },
++): ReasoningEffortOption[] {
++  if (model.codex_supported_reasoning_levels?.length) {
++    return options(model.codex_supported_reasoning_levels, model.reasoning_effort || "");
++  }
++  return reasoningEffortOptions(provider, model.model, model.reasoning_effort || "", model.capabilities?.reasoning);
++}
 diff --git a/web/lib/selection-text.ts b/web/lib/selection-text.ts
 index 2772a8e..1a9be3b 100644
 --- a/web/lib/selection-text.ts
@@ -3558,11 +3927,17 @@ index 3376a0f..a35a223 100644
 +  return row.analysis?.verdict === 'incorrect' ? '已分析 · 可复习' : '已分析'
  }
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa..afc126c 100644
+index 613b5fa..8346cfb 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
-@@ -1,4 +1,9 @@
+@@ -1,4 +1,15 @@
  {
++  "Chat model defaults": "Chat model defaults",
++  "Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.": "Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.",
++  "Default reasoning effort": "Default reasoning effort",
++  "Effort managed by provider": "Effort managed by provider",
++  "Manage language models": "Manage language models",
++  "Underline bottom of selection": "Underline bottom of selection",
 +  "Original page selection": "Original page selection",
 +  "Show in model menu": "Show in model menu",
 +  "To hide the default model, set another model as default first.": "To hide the default model, set another model as default first.",
@@ -3571,7 +3946,7 @@ index 613b5fa..afc126c 100644
    "Speech synthesis and transcription models with saved providers.": "Speech synthesis and transcription models with saved providers.",
    "Image and video generation models with saved providers.": "Image and video generation models with saved providers.",
    "Manage provider names, addresses, credentials, and connectivity.": "Manage provider names, addresses, credentials, and connectivity.",
-@@ -3038,9 +3043,14 @@
+@@ -3038,9 +3049,14 @@
    "Underline": "Underline",
    "Add note": "Add note",
    "Save citation": "Save citation",
@@ -3587,7 +3962,7 @@ index 613b5fa..afc126c 100644
    "Ask about this": "Ask about this",
    "Your note…": "Your note…",
    "Save note": "Save note",
-@@ -3173,6 +3183,9 @@
+@@ -3173,6 +3189,9 @@
    "The tutor thread could not be detached.": "The tutor thread could not be detached.",
    "Ask Little Tutor": "Ask Little Tutor",
    "Ask about selected text": "Ask about selected text",
@@ -3598,11 +3973,17 @@ index 613b5fa..afc126c 100644
    "Ask anything about the selected text.": "Ask anything about the selected text.",
    "Choose color": "Choose color",
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..175b450 100644
+index 6c4afd4..f5528f4 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
-@@ -1,4 +1,9 @@
+@@ -1,4 +1,15 @@
  {
++  "Chat model defaults": "对话模型默认设置",
++  "Choose the default for new chats and each model’s default reasoning effort. Apply changes to save.": "选择新对话默认用哪个模型，并单独设置每个模型的推理强度。点击「应用更改」保存。",
++  "Default reasoning effort": "默认推理强度",
++  "Effort managed by provider": "强度由提供方决定",
++  "Manage language models": "管理语言模型",
++  "Underline bottom of selection": "在选区下方划线",
 +  "Original page selection": "教材原页选区",
 +  "Show in model menu": "在模型菜单中显示",
 +  "To hide the default model, set another model as default first.": "要隐藏默认模型，请先将另一个模型设为默认。",
@@ -3611,7 +3992,7 @@ index 6c4afd4..175b450 100644
    "Speech synthesis and transcription models with saved providers.": "使用已配置的提供方管理语音合成与语音识别模型。",
    "Image and video generation models with saved providers.": "使用已配置的提供方管理图片与视频生成模型。",
    "Manage provider names, addresses, credentials, and connectivity.": "管理提供方的名称、地址、密钥并测试连接。",
-@@ -3038,9 +3043,14 @@
+@@ -3038,9 +3049,14 @@
    "Underline": "下划线",
    "Add note": "添加批注",
    "Save citation": "保存引用",
@@ -3627,7 +4008,7 @@ index 6c4afd4..175b450 100644
    "Ask about this": "就此提问",
    "Your note…": "写下你的批注…",
    "Save note": "保存批注",
-@@ -3173,6 +3183,9 @@
+@@ -3173,6 +3189,9 @@
    "The tutor thread could not be detached.": "无法解除这条小老师追问的关联。",
    "Ask Little Tutor": "问小老师",
    "Ask about selected text": "针对选中内容提问",
@@ -3772,6 +4153,31 @@ index 46c0f17..6ffdf58 100644
 +  expect(input).toHaveValue(prediction);
 +  expect(onSend).not.toHaveBeenCalled();
 +});
+diff --git a/web/tests/latex-normalize.test.ts b/web/tests/latex-normalize.test.ts
+index e11711e..04df6d8 100644
+--- a/web/tests/latex-normalize.test.ts
++++ b/web/tests/latex-normalize.test.ts
+@@ -1,5 +1,6 @@
+ import test from "node:test";
+ import assert from "node:assert/strict";
++import katex from "katex";
+ import {
+   hasBareLatexTrigger,
+   hasInlineMathCandidate,
+@@ -210,3 +211,13 @@ test("the routing predicates answer on their own terms", () => {
+   assert.equal(hasBareLatexTrigger("C:\\Users\\frank"), false);
+   assert.equal(hasBareLatexTrigger("no backslash"), false);
+ });
++
++test("renders Chinese variable lists, primed geometry and physics quantities", () => {
++  const input = "已知 $M， N$，求 $x， y$，$DCC'D'$ 为侧面，且 $\\vec{F}=m\\vec{a}$，$a=9.8\\,\\mathrm{m\\,s^{-2}}$。";
++  const output = normalizeMathMarkup(input);
++  assert.equal(output, input.replace("$M， N$", "$M, N$").replace("$x， y$", "$x, y$"));
++  assert.equal(hasMarkdownMath("点在 $DCC'D'$ 上。"), true);
++  for (const [, formula] of output.matchAll(/\$([^$]+)\$/g)) {
++    assert.match(katex.renderToString(formula, { throwOnError: true }), /application\/x-tex/);
++  }
++});
 diff --git a/web/tests/pdf-reading-resize.spec.tsx b/web/tests/pdf-reading-resize.spec.tsx
 index e134153..d238446 100644
 --- a/web/tests/pdf-reading-resize.spec.tsx
@@ -3829,6 +4235,51 @@ index e134153..d238446 100644
 +  } finally {
 +    vi.useRealTimers();
 +  }
++});
+diff --git a/web/tests/provider-registry-workflow.spec.tsx b/web/tests/provider-registry-workflow.spec.tsx
+index 842a517..a98b180 100644
+--- a/web/tests/provider-registry-workflow.spec.tsx
++++ b/web/tests/provider-registry-workflow.spec.tsx
+@@ -703,3 +703,18 @@ it("restores a model draft before a provider has been selected", () => {
+   expect((screen.getByLabelText("Configured provider") as HTMLSelectElement).value).toBe("");
+   expect((screen.getByLabelText("Model ID") as HTMLInputElement).value).toBe("custom-unsaved");
+ });
++
++it("stages the new-chat default and each model's reasoning separately from the provider page", () => {
++  const profile = live.services.llm.profiles[0];
++  profile.binding = "moonshot";
++  profile.models[0].model = "kimi-k3.1-pro";
++  profile.models[1].model = "kimi-k3.1-pro-highspeed";
++  render(<Harness page="providers" />);
++  fireEvent.click(screen.getByRole("button", { name: /My account/ }));
++  fireEvent.change(screen.getByRole("combobox", { name: "One · Default reasoning effort" }), { target: { value: "max" } });
++  fireEvent.change(screen.getByRole("combobox", { name: "Two · Default reasoning effort" }), { target: { value: "high" } });
++  fireEvent.click(screen.getByRole("button", { name: "Two · Set as default" }));
++  expect(mocks.settings.draft.services.llm.active_model_id).toBe("two");
++  expect(mocks.settings.draft.services.llm.profiles[0].models.map(model => model.reasoning_effort)).toEqual(["max", "high"]);
++  expect(live.services.llm.active_model_id).toBe("one");
++});
+diff --git a/web/tests/reading-selection.test.ts b/web/tests/reading-selection.test.ts
+index 3887d1d..1106a57 100644
+--- a/web/tests/reading-selection.test.ts
++++ b/web/tests/reading-selection.test.ts
+@@ -5,6 +5,7 @@ import {
+   locatorOfSelection,
+   mergeRectsByLine,
+   normaliseRects,
++  pdfQuoteNeedsImage,
+   unionRect,
+ } from "../lib/reading-selection";
+ 
+@@ -109,3 +110,9 @@ test("a cross-page selection is attributed to where it started", () => {
+   assert.equal(locatorOfSelection([null, null]), null);
+   assert.equal(locatorOfSelection([0, 2]), 2);
+ });
++
++test("uses the source image for misencoded geometry while keeping ordinary quotes", () => {
++  assert.equal(pdfQuoteNeedsImage("设 犗犃 = 犪，犗犅 = 犫"), true);
++  assert.equal(pdfQuoteNeedsImage("角度 \uE123 关系"), true);
++  assert.equal(pdfQuoteNeedsImage("向量 a、b 的夹角和数量积"), false);
 +});
 diff --git a/web/tests/reading-toolbar-selection.spec.tsx b/web/tests/reading-toolbar-selection.spec.tsx
 index 3b47500..944d835 100644
@@ -3949,6 +4400,20 @@ index 0c0c354..a34ec7d 100644
    expect(mocks.loadSession).not.toHaveBeenCalled();
  });
  it("loads an explicitly linked reading session instead of starting a draft", async () => {
+diff --git a/web/tests/reasoning-effort.test.ts b/web/tests/reasoning-effort.test.ts
+index d76b676..9464cb1 100644
+--- a/web/tests/reasoning-effort.test.ts
++++ b/web/tests/reasoning-effort.test.ts
+@@ -214,3 +214,9 @@ test("GLM effort choices follow the documented model family and retain invalid v
+   assert.deepEqual(values("openai", "glm-5.3", "medium"), ["", "low", "high", "max", "medium"]);
+   assert.deepEqual(values("openai", "glm-4.7", "vendor-level"), ["", "vendor-level"]);
+ });
++
++test("direct Kimi and DeepSeek models expose their documented effort choices", () => {
++  assert.deepEqual(values("moonshot", "kimi-k3.1-pro"), ["", "low", "high", "max"]);
++  assert.deepEqual(values("deepseek", "deepseek-flash"), ["", "low", "high", "max", "none"]);
++  assert.deepEqual(values("deepseek", "deepseek-v4-pro"), ["", "low", "high", "max", "none"]);
++});
 diff --git a/web/tests/student-citation-and-models.spec.ts b/web/tests/student-citation-and-models.spec.ts
 new file mode 100644
 index 0000000..512baa9
