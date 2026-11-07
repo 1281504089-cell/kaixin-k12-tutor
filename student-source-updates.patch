@@ -1,5 +1,759 @@
+diff --git a/apps/desktop/scripts/package-update-launcher.mjs b/apps/desktop/scripts/package-update-launcher.mjs
+new file mode 100644
+index 0000000..7f0bd15
+--- /dev/null
++++ b/apps/desktop/scripts/package-update-launcher.mjs
+@@ -0,0 +1,53 @@
++import { packager } from '@electron/packager';
++import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
++import { execFileSync } from 'node:child_process';
++import path from 'node:path';
++import { appRoot } from './lib/target.mjs';
++import { PACKAGER } from './lib/stage.mjs';
++import { verifyManifest } from '../src/bundles.mjs';
++
++const [target, baselineFile, publicKeyFile, zipDir, output] = process.argv.slice(2);
++if (!['macos-x64', 'macos-arm64', 'windows-x64'].includes(target) || !output) {
++  throw new Error('Usage: package-update-launcher.mjs <target> <baseline-manifest> <public-key> <electron-zip-dir> <new-output-dir>');
++}
++const isMac = target.startsWith('macos-');
++const platform = isMac ? 'darwin' : 'win32';
++const arch = target.endsWith('arm64') ? 'arm64' : 'x64';
++const baseline = JSON.parse(await readFile(baselineFile, 'utf8'));
++const key = await readFile(publicKeyFile);
++verifyManifest(baseline, key, arch, platform);
++const out = path.resolve(output);
++const stage = path.join(out, 'shell');
++const seed = path.join(out, 'seed');
++await mkdir(out);
++await mkdir(stage);
++await mkdir(seed);
++await writeFile(path.join(seed, 'runtime.json'), JSON.stringify(baseline));
++for (const file of ['src', 'assets', 'README.md']) await cp(path.join(appRoot, file), path.join(stage, file), { recursive: true });
++await writeFile(path.join(stage, 'assets/runtime-public.pem'), key);
++const pkg = JSON.parse(await readFile(path.join(appRoot, 'package.json'), 'utf8'));
++await writeFile(path.join(stage, 'package.json'), JSON.stringify({ ...pkg, author: '开心动力', version: baseline.coreVersion }));
++await cp(path.join(appRoot, '../../LICENSE'), path.join(stage, 'LICENSE'));
++
++const [built] = await packager({
++  ...PACKAGER, electronZipDir: path.resolve(zipDir), dir: stage, out, platform, arch,
++  electronVersion: pkg.devDependencies.electron, appVersion: baseline.coreVersion, extraResource: [seed],
++  ...(isMac ? {
++    icon: path.join(appRoot, 'assets/icon.icns'), appCategoryType: 'public.app-category.education',
++    extendInfo: {
++      NSMicrophoneUsageDescription: '开心动力超级学霸 uses the microphone when you speak to your tutor.',
++      NSCameraUsageDescription: '开心动力超级学霸 uses the camera when you capture learning material.',
++      NSLocalNetworkUsageDescription: '开心动力超级学霸 runs its learning services on this Mac.',
++    },
++  } : {}),
++});
++const zip = path.join(out, `Kaixin-Updater-${target}.zip`);
++if (isMac) {
++  const app = path.join(built, '开心动力超级学霸.app');
++  execFileSync('codesign', ['--force', '--deep', '--sign', '-', app], { stdio: 'inherit' });
++  execFileSync('codesign', ['--verify', '--deep', '--strict', app], { stdio: 'inherit' });
++  execFileSync('ditto', ['-c', '-k', '--sequesterRsrc', '--keepParent', app, zip]);
++} else {
++  execFileSync('ditto', ['-c', '-k', built, zip]);
++}
++console.log(zip);
+diff --git a/apps/desktop/src/bundles.mjs b/apps/desktop/src/bundles.mjs
+index 1aecf27..becc947 100644
+--- a/apps/desktop/src/bundles.mjs
++++ b/apps/desktop/src/bundles.mjs
+@@ -12,10 +12,15 @@ export function canonicalManifest(manifest) {
+   return JSON.stringify(Object.fromEntries(Object.entries(manifest).filter(([key]) => key !== 'signature').sort(([a], [b]) => a.localeCompare(b))));
+ }
+ 
++function runtimeIdValid(value) {
++  return typeof value === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]{0,100}$/.test(value);
++}
++
+ export function verifyManifest(manifest, publicKey, architecture = process.arch, platform = process.platform) {
+   if (!manifest || manifest.formatVersion !== 1 || manifest.protocolVersion !== 1
+     || manifest.platform !== platform || manifest.arch !== architecture
+-    || !/^[a-zA-Z0-9][a-zA-Z0-9.+_-]{0,100}$/.test(manifest.runtimeId)
++    || !runtimeIdValid(manifest.runtimeId)
++    || (manifest.baseRuntimeId !== undefined && (!runtimeIdValid(manifest.baseRuntimeId) || manifest.baseRuntimeId === manifest.runtimeId))
+     || !/^[a-zA-Z0-9][a-zA-Z0-9.+_-]*\.tar\.gz$/.test(manifest.archive)
+     || !/^[a-f0-9]{64}$/.test(manifest.sha256)
+     || (manifest.builtAt !== undefined && (!Number.isSafeInteger(manifest.builtAt) || manifest.builtAt <= 0))) throw new Error('This core bundle is not compatible with this app or this computer');
+@@ -40,10 +45,16 @@ export async function sha256(filename) {
+ export async function installBundle(manifestFile, root, publicKey, progress = () => {}) {
+   const manifest = verifyManifest(JSON.parse(await readFile(manifestFile, 'utf8')), publicKey);
+   const destination = path.join(root, 'runtimes', manifest.runtimeId);
++  const base = manifest.baseRuntimeId ? path.join(root, 'runtimes', manifest.baseRuntimeId) : null;
++  if (base) {
++    const installedBase = verifyManifest(JSON.parse(await readFile(path.join(base, 'installed.json'), 'utf8')), publicKey);
++    if (installedBase.runtimeId !== manifest.baseRuntimeId || installedBase.baseRuntimeId) throw new Error('The required base runtime is missing');
++    await checkLayout(base);
++  }
+   try {
+     const existing = JSON.parse(await readFile(path.join(destination, 'installed.json'), 'utf8'));
+     if (existing.sha256 === manifest.sha256 && existing.signature === manifest.signature) {
+-      await checkLayout(destination);
++      await checkLayout(destination, base);
+       return { manifest, destination };
+     }
+     throw new Error('A different core is already installed under this runtime ID; use a new runtime ID');
+@@ -66,7 +77,7 @@ export async function installBundle(manifestFile, root, publicKey, progress = ()
+     ]);
+     if (result.status === 'rejected') throw result.reason;
+     if (input.status === 'rejected') throw input.reason;
+-    await checkLayout(staging);
++    await checkLayout(staging, base);
+     await writeFile(path.join(staging, 'installed.json'), JSON.stringify(manifest, null, 2));
+     await rename(staging, destination);
+     return { manifest, destination };
+@@ -76,20 +87,20 @@ export async function installBundle(manifestFile, root, publicKey, progress = ()
+   }
+ }
+ 
+-async function checkLayout(root) {
++async function checkLayout(root, base = root) {
+   const { python, node } = runtimeLayout();
+-  for (const relative of [python, node, 'core/deeptutor_cli/main.py', 'web/server.js']) {
+-    await access(path.join(root, relative));
+-  }
++  await Promise.all([path.join(base ?? root, python), path.join(base ?? root, node),
++    path.join(root, 'core/deeptutor_cli/main.py'), path.join(root, 'web/server.js')].map(file => access(file)));
+ }
+ 
+-export function bundleConfig(destination, runtimeHome, runtimeId) {
++export function bundleConfig(destination, runtimeHome, runtimeId, baseRuntimeId) {
+   const { python, node } = runtimeLayout();
++  const basePath = baseRuntimeId ? path.join(path.dirname(destination), baseRuntimeId) : destination;
+   return {
+     schemaVersion: 1, mode: 'bundled', runtimeId,
+     sourcePath: path.join(destination, 'core'),
+-    pythonPath: path.join(destination, python),
+-    nodePath: path.join(destination, node),
+-    webPath: path.join(destination, 'web'), runtimeHome,
++    pythonPath: path.join(basePath, python),
++    nodePath: path.join(basePath, node),
++    webPath: path.join(destination, 'web'), basePath, runtimeHome,
+   };
+ }
+diff --git a/apps/desktop/src/config.mjs b/apps/desktop/src/config.mjs
+index 5b41cda..7ddd0eb 100644
+--- a/apps/desktop/src/config.mjs
++++ b/apps/desktop/src/config.mjs
+@@ -35,6 +35,12 @@ export function validateConfig(value) {
+   if (value.mode === 'bundled') {
+     if (typeof value.webPath !== 'string' || !path.isAbsolute(value.webPath)) throw new Error('Invalid web interface path');
+     result.webPath = path.resolve(value.webPath);
++    if (value.basePath !== undefined) {
++      if (typeof value.basePath !== 'string' || !path.isAbsolute(value.basePath) || value.basePath.includes('\0')) {
++        throw new Error('Invalid bundled resources path');
++      }
++      result.basePath = path.resolve(value.basePath);
++    }
+     result.runtimeId = String(value.runtimeId ?? '');
+   }
+   const relative = path.relative(result.sourcePath, result.runtimeHome);
+diff --git a/apps/desktop/src/i18n.mjs b/apps/desktop/src/i18n.mjs
+index efb0ebb..e8dde5b 100644
+--- a/apps/desktop/src/i18n.mjs
++++ b/apps/desktop/src/i18n.mjs
+@@ -2,6 +2,15 @@
+ // language chosen in 开心动力超级学霸's own Settings and starts in English.
+ 
+ const en = {
++  checkRelease: "Check for Updates…",
++  releaseBusy: "The updater is busy. Try again in a moment.",
++  releaseCurrent: "No newer signed update is available for this computer.",
++  releaseBaseMissing: "This update requires the current full student installation.",
++  releaseAvailable: "A student update is available",
++  releaseDetail: "Build {build}. The update downloads from GitHub. Your learning data is backed up before switching cores. Finish any active work before continuing.",
++  releaseInstall: "Download and Update",
++  releaseInstalled: "Update installed",
++  releaseCheckFailed: "Could not check GitHub for updates",
+   connectionBusy: "Local service is not responding; reconnecting…",
+   tagline: 'Your personal learning space',
+   errorTitle: "开心动力超级学霸 couldn't start",
+@@ -26,7 +35,7 @@ const en = {
+   pageGone: 'The page stopped unexpectedly. Restart to continue.',
+   workerExited: 'The runtime manager exited ({code}). Restart to continue.',
+   about: 'About 开心动力超级学霸',
+-  aboutDetail: 'Core {core}\nBuild {runtime}\n\nThe app and its core update independently. This preview installs signed core updates; automatic updates are not connected yet.',
++  aboutDetail: 'Core {core}\nBuild {runtime}\n\nUse Core → Check for Updates to install signed core updates from GitHub.',
+   hide: 'Hide 开心动力超级学霸',
+   hideOthers: 'Hide Others',
+   showAll: 'Show All',
+@@ -55,6 +64,15 @@ const en = {
+ };
+ 
+ const zh = {
++  checkRelease: "检查更新…",
++  releaseBusy: "正在启动或处理更新，请稍后再试。",
++  releaseCurrent: "这台电脑目前没有可用的新版签名更新。",
++  releaseBaseMissing: "这份更新需要当前完整版的运行环境。",
++  releaseAvailable: "发现开心动力超级学霸新版",
++  releaseDetail: "构建 {build}。将从 GitHub 下载对应的更新包。切换前会备份学习数据，请先完成正在进行的学习任务。",
++  releaseInstall: "下载并更新",
++  releaseInstalled: "更新已安装",
++  releaseCheckFailed: "无法连接 GitHub 检查更新",
+   connectionBusy: "本机服务暂未响应，正在重连…",
+   tagline: '你的个人学习空间',
+   errorTitle: '开心动力超级学霸 未能启动',
+@@ -79,7 +97,7 @@ const zh = {
+   pageGone: '页面意外退出，请重新启动。',
+   workerExited: '运行时管理进程已退出（{code}），请重新启动。',
+   about: '关于 开心动力超级学霸',
+-  aboutDetail: '核心 {core}\n构建 {runtime}\n\n应用与核心独立更新。此预览版支持安装已签名的核心更新包，尚未连接自动更新服务。',
++  aboutDetail: '核心 {core}\n构建 {runtime}\n\n通过「核心 → 检查更新」从 GitHub 安装签名核心更新包。',
+   hide: '隐藏 开心动力超级学霸',
+   hideOthers: '隐藏其他',
+   showAll: '全部显示',
+@@ -108,6 +126,8 @@ const zh = {
+ };
+ 
+ const de = {
++  ...en,
++  aboutDetail: 'Kern {core}\nBuild {runtime}',
+   connectionBusy: "Lokaler Dienst antwortet nicht; Verbindung wird wiederhergestellt…",
+   tagline: 'Dein persönlicher Lernraum',
+   errorTitle: '开心动力超级学霸 konnte nicht starten',
+@@ -132,7 +152,6 @@ const de = {
+   pageGone: 'Die Seite wurde unerwartet beendet. Starte neu, um fortzufahren.',
+   workerExited: 'Der Laufzeitmanager wurde beendet ({code}). Starte neu, um fortzufahren.',
+   about: 'Über 开心动力超级学霸',
+-  aboutDetail: 'Kern {core}\nBuild {runtime}\n\nApp und Kern werden unabhängig aktualisiert. Diese Vorschau installiert signierte Kern-Updates; automatische Updates sind noch nicht verbunden.',
+   hide: '开心动力超级学霸 ausblenden',
+   hideOthers: 'Andere ausblenden',
+   showAll: 'Alle einblenden',
+@@ -161,6 +180,8 @@ const de = {
+ };
+ 
+ const fr = {
++  ...en,
++  aboutDetail: "Cœur {core}\nBuild {runtime}",
+   connectionBusy: "Le service local ne répond pas ; reconnexion…",
+   tagline: "Votre espace d'apprentissage personnel",
+   errorTitle: "开心动力超级学霸 n'a pas pu démarrer",
+@@ -185,7 +206,6 @@ const fr = {
+   pageGone: "La page s'est arrêtée de façon inattendue. Redémarrez pour continuer.",
+   workerExited: "Le gestionnaire d'exécution s'est arrêté ({code}). Redémarrez pour continuer.",
+   about: "À propos d'开心动力超级学霸",
+-  aboutDetail: "Cœur {core}\nBuild {runtime}\n\nL'application et son cœur se mettent à jour séparément. Cette préversion installe des mises à jour signées du cœur ; les mises à jour automatiques ne sont pas encore connectées.",
+   hide: 'Masquer 开心动力超级学霸',
+   hideOthers: 'Masquer les autres',
+   showAll: 'Tout afficher',
+@@ -214,6 +234,8 @@ const fr = {
+ };
+ 
+ const pl = {
++  ...en,
++  aboutDetail: 'Rdzeń {core}\nKompilacja {runtime}',
+   connectionBusy: "Usługa lokalna nie odpowiada; ponowne łączenie…",
+   tagline: 'Twoja osobista przestrzeń nauki',
+   errorTitle: 'Nie udało się uruchomić 开心动力超级学霸',
+@@ -238,7 +260,6 @@ const pl = {
+   pageGone: 'Strona nieoczekiwanie się zamknęła. Uruchom ponownie, aby kontynuować.',
+   workerExited: 'Menedżer środowiska zakończył działanie ({code}). Uruchom ponownie, aby kontynuować.',
+   about: '开心动力超级学霸 – informacje',
+-  aboutDetail: 'Rdzeń {core}\nKompilacja {runtime}\n\nAplikacja i rdzeń aktualizują się niezależnie. Ta wersja zapoznawcza instaluje podpisane aktualizacje rdzenia; automatyczne aktualizacje nie są jeszcze podłączone.',
+   hide: 'Ukryj 开心动力超级学霸',
+   hideOthers: 'Ukryj pozostałe',
+   showAll: 'Pokaż wszystkie',
+@@ -267,6 +288,8 @@ const pl = {
+ };
+ 
+ const uk = {
++  ...en,
++  aboutDetail: 'Ядро {core}\nЗбірка {runtime}',
+   connectionBusy: "Локальна служба не відповідає; повторне підключення…",
+   tagline: 'Ваш особистий простір навчання',
+   errorTitle: 'Не вдалося запустити 开心动力超级学霸',
+@@ -291,7 +314,6 @@ const uk = {
+   pageGone: 'Сторінка несподівано завершила роботу. Перезапустіть, щоб продовжити.',
+   workerExited: 'Менеджер середовища завершив роботу ({code}). Перезапустіть, щоб продовжити.',
+   about: 'Про 开心动力超级学霸',
+-  aboutDetail: 'Ядро {core}\nЗбірка {runtime}\n\nЗастосунок і ядро оновлюються незалежно. Ця попередня версія встановлює підписані оновлення ядра; автоматичні оновлення ще не підключено.',
+   hide: 'Сховати 开心动力超级学霸',
+   hideOthers: 'Сховати інші',
+   showAll: 'Показати всі',
+@@ -320,6 +342,8 @@ const uk = {
+ };
+ 
+ const vi = {
++  ...en,
++  aboutDetail: 'Lõi {core}\nBản dựng {runtime}',
+   connectionBusy: "Dịch vụ cục bộ không phản hồi; đang kết nối lại…",
+   tagline: 'Không gian học tập cá nhân của bạn',
+   errorTitle: 'Không thể khởi động 开心动力超级学霸',
+@@ -344,7 +368,6 @@ const vi = {
+   pageGone: 'Trang đã đóng đột ngột. Hãy khởi động lại để tiếp tục.',
+   workerExited: 'Trình quản lý môi trường đã thoát ({code}). Hãy khởi động lại để tiếp tục.',
+   about: 'Giới thiệu 开心动力超级学霸',
+-  aboutDetail: 'Lõi {core}\nBản dựng {runtime}\n\nỨng dụng và lõi được cập nhật độc lập. Bản xem trước này cài đặt các bản cập nhật lõi đã ký; cập nhật tự động chưa được kết nối.',
+   hide: 'Ẩn 开心动力超级学霸',
+   hideOthers: 'Ẩn các ứng dụng khác',
+   showAll: 'Hiện tất cả',
+@@ -373,6 +396,8 @@ const vi = {
+ };
+ 
+ const pt = {
++  ...en,
++  "aboutDetail": "Núcleo {core}\nCompilação {runtime}",
+   connectionBusy: "O serviço local não responde; reconectando…",
+   "tagline": "Seu espaço pessoal de aprendizado",
+   "errorTitle": "Não foi possível iniciar o 开心动力超级学霸",
+@@ -397,7 +422,6 @@ const pt = {
+   "pageGone": "A página parou inesperadamente. Reinicie para continuar.",
+   "workerExited": "O gerenciador do ambiente de execução foi encerrado ({code}). Reinicie para continuar.",
+   "about": "Sobre o 开心动力超级学霸",
+-  "aboutDetail": "Núcleo {core}\nCompilação {runtime}\n\nO aplicativo e seu núcleo são atualizados de forma independente. Esta versão de prévia instala atualizações assinadas do núcleo; as atualizações automáticas ainda não estão disponíveis.",
+   "hide": "Ocultar o 开心动力超级学霸",
+   "hideOthers": "Ocultar outros",
+   "showAll": "Mostrar tudo",
+@@ -440,6 +464,8 @@ const pt = {
+ };
+ 
+ const tr = {
++  ...en,
++  "aboutDetail": "Çekirdek {core}\nDerleme {runtime}",
+   connectionBusy: "Yerel hizmet yanıt vermiyor; yeniden bağlanılıyor…",
+   "tagline": "Kişisel öğrenme alanınız",
+   "errorTitle": "开心动力超级学霸 başlatılamadı",
+@@ -464,7 +490,6 @@ const tr = {
+   "pageGone": "Sayfa beklenmedik şekilde durdu. Devam etmek için yeniden başlatın.",
+   "workerExited": "Çalışma ortamı yöneticisi kapandı ({code}). Devam etmek için yeniden başlatın.",
+   "about": "开心动力超级学霸 hakkında",
+-  "aboutDetail": "Çekirdek {core}\nDerleme {runtime}\n\nUygulama ve çekirdeği birbirinden bağımsız güncellenir. Bu önizleme sürümü imzalı çekirdek güncellemelerini kurar; otomatik güncellemeler henüz etkin değildir.",
+   "hide": "开心动力超级学霸'ı gizle",
+   "hideOthers": "Diğerlerini gizle",
+   "showAll": "Tümünü göster",
+diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
+index d2ac8dd..ed43578 100644
+--- a/apps/desktop/src/main.mjs
++++ b/apps/desktop/src/main.mjs
+@@ -1,7 +1,7 @@
+-import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme } from 'electron';
++import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme, net } from 'electron';
+ import { fork } from 'node:child_process';
+ import { watch } from 'node:fs';
+-import { mkdir, readFile, writeFile, rename, appendFile } from 'node:fs/promises';
++import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access } from 'node:fs/promises';
+ import path from 'node:path';
+ import { fileURLToPath, pathToFileURL } from 'node:url';
+ import { installBundle, bundleConfig, verifyManifest, shouldUseBundledUpdate } from './bundles.mjs';
+@@ -10,6 +10,7 @@ import { resolveLanguage, translate } from './i18n.mjs';
+ import { WINDOWS, agentMarker, edition, targetId } from './platform.mjs';
+ import { killTree } from './processes.mjs';
+ import { snapshotWorkspace } from './workspace-snapshot.mjs';
++import { findReleaseUpdate, downloadReleaseUpdate } from './release-updates.mjs';
+ 
+ app.setName('开心动力超级学霸');
+ if (WINDOWS) app.setAppUserModelId('org.kaixindongli.super-scholar');
+@@ -42,6 +43,8 @@ let busy = false;
+ let quitting = false;
+ let exitAllowed = false;
+ let active;
++let releaseRequest;
++let releaseCheckScheduled = false;
+ 
+ const t = (key, values) => translate(ui.language, key, values);
+ 
+@@ -135,7 +138,7 @@ async function openContent(url) {
+   const origin = new URL(url).origin;
+   view = new WebContentsView({ webPreferences: {
+     contextIsolation: true, sandbox: true, nodeIntegration: false, webSecurity: true,
+-    partition: 'persist:deeptutor',
++    partition: 'persist:deeptutor', preload: path.join(sourceDirectory, 'update-bridge.cjs'),
+   } });
+   const content = view.webContents;
+   content.setWindowOpenHandler(({ url: target }) => {
+@@ -182,7 +185,7 @@ async function stopWorker() {
+ }
+ 
+ async function launchRuntime(installed) {
+-  const config = bundleConfig(installed.destination, runtimeHome, installed.manifest.runtimeId);
++  const config = bundleConfig(installed.destination, runtimeHome, installed.manifest.runtimeId, installed.manifest.baseRuntimeId);
+   const child = fork(path.join(sourceDirectory, 'supervisor.mjs'), [], {
+     execPath: config.nodePath, stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
+     env: { ...process.env, ELECTRON_RUN_AS_NODE: '',
+@@ -267,6 +270,10 @@ async function boot() {
+     watchInterface();
+     await refreshInterface();
+     await openContent(ready.url);
++    if (app.isPackaged && !releaseCheckScheduled) {
++      releaseCheckScheduled = true;
++      setTimeout(() => void checkRelease(false), 15000).unref();
++    }
+   } catch (error) {
+     await logStartupFailure(error);
+     status({ phase: 'error', step: null, message: error.message });
+@@ -280,20 +287,11 @@ async function boot() {
+   } finally { busy = false; }
+ }
+ 
+-async function installUpdate() {
+-  if (busy || quitting || !active) return;
+-  const choice = await dialog.showOpenDialog(window, { title: t('updateTitle'), properties: ['openFile'], filters: [{ name: t('updateFilter'), extensions: ['json'] }] });
+-  if (choice.canceled) return;
+-  const confirmation = await dialog.showMessageBox(window, {
+-    type: 'question', buttons: [t('cancel'), t('updateConfirm')], defaultId: 0, cancelId: 0,
+-    message: t('updateMessage'), detail: t('updateDetail'),
+-  });
+-  if (confirmation.response !== 1) return;
+-  busy = true;
++async function applyCoreUpdate(file) {
++  const next = await installBundle(file, userRoot, publicKey);
++  if (next.manifest.runtimeId === active.manifest.runtimeId) return;
+   let transaction;
+   try {
+-    const next = await installBundle(choice.filePaths[0], userRoot, publicKey);
+-    if (next.manifest.runtimeId === active.manifest.runtimeId) return;
+     status({ phase: 'starting', step: 'updating' });
+     await stopWorker();
+     transaction = await prepareUpgrade(next, active.manifest);
+@@ -307,10 +305,87 @@ async function installUpdate() {
+   } catch (error) {
+     await stopWorker();
+     if (transaction) await recoverInterruptedUpgrade();
+-    await dialog.showMessageBox(window, { type: 'error', message: t('updateFailed'), detail: error.message, buttons: [t('reopen')] });
+     busy = false;
+     await boot();
+-  } finally { busy = false; }
++    throw error;
++  }
++}
++
++async function updateNotice(key, detail = '', type = 'info') {
++  if (!quitting && window && !window.isDestroyed()) {
++    await dialog.showMessageBox(window, { type, message: t(key), detail });
++  }
++}
++
++async function installUpdate() {
++  if (busy || quitting || !active) return;
++  busy = true;
++  try {
++    const choice = await dialog.showOpenDialog(window, { title: t('updateTitle'), properties: ['openFile'], filters: [{ name: t('updateFilter'), extensions: ['json'] }] });
++    if (choice.canceled) return;
++    const confirmation = await dialog.showMessageBox(window, {
++      type: 'question', buttons: [t('cancel'), t('updateConfirm')], defaultId: 0, cancelId: 0,
++      message: t('updateMessage'), detail: t('updateDetail'),
++    });
++    if (confirmation.response === 1) await applyCoreUpdate(choice.filePaths[0]);
++  } catch (error) {
++    await updateNotice('updateFailed', error.message, 'error');
++  } finally {
++    busy = false;
++  }
++}
++
++async function checkRelease(interactive = true) {
++  if (busy || quitting || !active || state.phase !== 'ready') {
++    if (interactive) await updateNotice('releaseBusy');
++    return;
++  }
++  busy = true;
++  const request = new AbortController();
++  releaseRequest = request;
++  let temporary;
++  let downloading = false;
++  try {
++    const next = await findReleaseUpdate(targetId(), active.manifest, publicKey, net.fetch, request.signal);
++    if (!next) {
++      if (interactive) await updateNotice('releaseCurrent');
++      return;
++    }
++    if (!interactive) {
++      const transaction = await readJSON(transactionFile);
++      if (transaction?.phase === 'recovered' && transaction.candidate?.runtimeId === next.runtimeId) return;
++    }
++    if (next.baseRuntimeId) {
++      const base = path.join(userRoot, 'runtimes', next.baseRuntimeId, 'installed.json');
++      const present = await access(base).then(() => true, () => false);
++      if (!present) {
++        if (interactive) await updateNotice('releaseBaseMissing');
++        return;
++      }
++    }
++    if (quitting) return;
++    const confirmation = await dialog.showMessageBox(window, {
++      type: 'info', message: t('releaseAvailable'), detail: t('releaseDetail', { build: next.runtimeId }),
++      buttons: [t('cancel'), t('releaseInstall')], defaultId: 0, cancelId: 0,
++    });
++    if (confirmation.response !== 1 || quitting) return;
++    downloading = true;
++    temporary = await mkdtemp(path.join(userRoot, 'release-'));
++    window.setProgressBar(2);
++    const file = await downloadReleaseUpdate(next, temporary, progress => {
++      if (!window.isDestroyed()) window.setProgressBar(progress);
++    }, net.fetch, request.signal);
++    if (quitting) return;
++    await applyCoreUpdate(file);
++    await updateNotice('releaseInstalled', next.runtimeId);
++  } catch (error) {
++    if (interactive || downloading) await updateNotice(downloading ? 'updateFailed' : 'releaseCheckFailed', error.message, 'error');
++  } finally {
++    if (window && !window.isDestroyed()) window.setProgressBar(-1);
++    if (temporary) await rm(temporary, { recursive: true, force: true }).catch(() => {});
++    releaseRequest = undefined;
++    busy = false;
++  }
+ }
+ 
+ function buildMenu() {
+@@ -321,6 +396,7 @@ function buildMenu() {
+   Menu.setApplicationMenu(Menu.buildFromTemplate([
+     { label: '开心动力超级学霸', submenu: WINDOWS ? [about, { type: 'separator' }, { role: 'quit', label: t('quit') }] : [
+       about,
++      { label: t('checkRelease'), click: () => void checkRelease() },
+       { type: 'separator' },
+       { role: 'hide', label: t('hide') }, { role: 'hideOthers', label: t('hideOthers') }, { role: 'unhide', label: t('showAll') },
+       { type: 'separator' },
+@@ -345,6 +421,7 @@ function buildMenu() {
+         const choice = await dialog.showMessageBox(window, { message: t('restartConfirm'), buttons: [t('cancel'), t('restart')], defaultId: 0, cancelId: 0 });
+         if (choice.response === 1) void boot();
+       } },
++      { label: t('checkRelease'), click: () => void checkRelease() },
+       { label: t('installUpdate'), click: () => void installUpdate() }, { type: 'separator' },
+       { label: t('openData'), click: () => void shell.openPath(runtimeHome) },
+       { label: t('openLogs'), click: () => void shell.openPath(path.dirname(logPath)) },
+@@ -364,6 +441,7 @@ else {
+     event.preventDefault();
+     if (quitting) return;
+     quitting = true;
++    releaseRequest?.abort();
+     status({ phase: 'stopping', step: 'stopping' });
+     void stopWorker().finally(() => { exitAllowed = true; app.quit(); });
+   });
+@@ -398,6 +476,13 @@ else {
+     restart: () => { void boot(); },
+     logs: async () => { await mkdir(path.dirname(logPath), { recursive: true }); await shell.openPath(path.dirname(logPath)); },
+   })) ipcMain.handle(`desktop:${channel}`, (event, ...args) => { trustedShell(event); return handler(...args); });
++  ipcMain.handle('desktop:check-release', async event => {
++    if (!view || event.sender !== view.webContents || event.senderFrame !== view.webContents.mainFrame
++      || !state.url || new URL(event.senderFrame.url).origin !== state.url) {
++      throw new Error('Untrusted desktop update caller');
++    }
++    await checkRelease();
++  });
+   buildMenu();
+   watchInterface();
+   await window.loadURL(shellURL);
+diff --git a/apps/desktop/src/release-updates.mjs b/apps/desktop/src/release-updates.mjs
+new file mode 100644
+index 0000000..ab15c7f
+--- /dev/null
++++ b/apps/desktop/src/release-updates.mjs
+@@ -0,0 +1,68 @@
++import { createWriteStream } from 'node:fs';
++import { writeFile } from 'node:fs/promises';
++import path from 'node:path';
++import { Readable, Transform } from 'node:stream';
++import { pipeline } from 'node:stream/promises';
++import { verifyManifest } from './bundles.mjs';
++
++const RELEASE = 'https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/';
++const MANIFEST_LIMIT = 16 * 1024;
++const ARCHIVE_LIMIT = 2 * 1024 ** 3;
++const HOSTS = new Set(['github.com', 'release-assets.githubusercontent.com', 'objects.githubusercontent.com']);
++
++async function getAsset(name, fetchAsset, signal) {
++  let url = new URL(name, RELEASE);
++  for (let hop = 0; hop < 5; hop++) {
++    if (url.protocol !== 'https:' || !HOSTS.has(url.hostname) || url.port || url.username || url.password) {
++      throw new Error('Invalid GitHub update download location');
++    }
++    const response = await fetchAsset(url, { redirect: 'manual', cache: 'no-store', credentials: 'omit', signal });
++    if (![301, 302, 303, 307, 308].includes(response.status)) return response;
++    const location = response.headers.get('location');
++    await response.body?.cancel();
++    if (!location) throw new Error('Missing GitHub update redirect');
++    url = new URL(location, url);
++  }
++  throw new Error('Too many GitHub update redirects');
++}
++
++export async function findReleaseUpdate(target, current, publicKey, fetchAsset = fetch, signal) {
++  const response = await getAsset(`runtime-${target}.json`, fetchAsset,
++    signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000));
++  if (response.status === 404) return null;
++  if (!response.ok || !response.body) throw new Error(`GitHub HTTP ${response.status}`);
++  const chunks = [];
++  let size = 0;
++  for await (const chunk of response.body) {
++    size += chunk.length;
++    if (size > MANIFEST_LIMIT) throw new Error('GitHub update manifest is too large');
++    chunks.push(chunk);
++  }
++  const manifest = verifyManifest(JSON.parse(Buffer.concat(chunks).toString('utf8')), publicKey);
++  if (!manifest.builtAt || manifest.builtAt <= (current.builtAt ?? 0) || manifest.runtimeId === current.runtimeId) return null;
++  return manifest;
++}
++
++export async function downloadReleaseUpdate(manifest, directory, onProgress, fetchAsset = fetch, signal) {
++  const deadline = AbortSignal.timeout(30 * 60 * 1000);
++  signal = signal ? AbortSignal.any([signal, deadline]) : deadline;
++  const response = await getAsset(manifest.archive, fetchAsset, signal);
++  if (!response.ok || !response.body) throw new Error(`GitHub HTTP ${response.status}`);
++  const expected = Number(response.headers.get('content-length'));
++  if (expected > ARCHIVE_LIMIT) throw new Error('GitHub update archive is too large');
++  let received = 0;
++  const limit = new Transform({
++    transform(chunk, _encoding, callback) {
++      received += chunk.length;
++      if (received > ARCHIVE_LIMIT) return callback(new Error('GitHub update archive is too large'));
++      if (expected > 0) onProgress(Math.min(received / expected, 1));
++      callback(null, chunk);
++    },
++  });
++  await pipeline(Readable.fromWeb(response.body), limit,
++    createWriteStream(path.join(directory, manifest.archive), { mode: 0o600, flags: 'wx' }), { signal });
++  if (expected > 0 && expected !== received) throw new Error('GitHub update download was incomplete');
++  const file = path.join(directory, 'runtime.json');
++  await writeFile(file, JSON.stringify(manifest), { mode: 0o600, flag: 'wx' });
++  return file;
++}
+diff --git a/apps/desktop/src/runtime.mjs b/apps/desktop/src/runtime.mjs
+index 709eb8d..76f534b 100644
+--- a/apps/desktop/src/runtime.mjs
++++ b/apps/desktop/src/runtime.mjs
+@@ -10,13 +10,18 @@ import { studentEnvironment } from './student-runtime.mjs';
+ 
+ const SKIP = new Set(['node_modules', 'dist', 'out', 'coverage', 'playwright-report', 'test-results', '.git']);
+ 
+-export async function stageBundledWeb(source, cachePath, backendURL, authEnabled) {
++export async function stageBundledWeb(source, cachePath, backendURL, authEnabled, baseWeb) {
+   const target = path.join(cachePath, 'web');
+-  const marker = JSON.stringify({ source, backendURL, authEnabled });
++  const marker = JSON.stringify({ source, backendURL, authEnabled, baseWeb });
+   try {
+     if (await readFile(path.join(target, '.desktop-config'), 'utf8') === marker) return target;
+   } catch (error) { if (error.code !== 'ENOENT') throw error; }
+   await rm(target, { recursive: true, force: true });
++  if (baseWeb && source !== baseWeb) {
++    for (const name of ['node_modules', 'public']) {
++      await cp(path.join(baseWeb, name), path.join(target, name), { recursive: true, mode: constants.COPYFILE_FICLONE });
++    }
++  }
+   await cp(source, target, { recursive: true });
+   async function patch(file) {
+     if (!/\.(js|json|html|txt)$/.test(file)) return;
+@@ -113,7 +118,7 @@ export class SourceRuntime extends EventEmitter {
+       await this.group.run(config.pythonPath, ['-m', 'deeptutor_cli.main', 'init', '--non-interactive', '--home', config.runtimeHome],
+         { cwd: config.runtimeHome, env });
+       if (config.mode === 'bundled' && await access(path.join(config.sourcePath, 'deeptutor/services/student_learning/bootstrap.py')).then(() => true, () => false)) {
+-        await this.group.run(config.pythonPath, ['-m', 'deeptutor.services.student_learning.bootstrap', '--seed', path.join(config.sourcePath, '..', 'student-seed')],
++        await this.group.run(config.pythonPath, ['-m', 'deeptutor.services.student_learning.bootstrap', '--seed', path.join(config.basePath ?? path.dirname(config.sourcePath), 'student-seed')],
+           { cwd: config.runtimeHome, env }, 600000);
+       }
+       let auth = {};
+@@ -128,7 +133,7 @@ export class SourceRuntime extends EventEmitter {
+       this.controller.signal.throwIfAborted();
+       this.update({ step: 'preparingUi', url, backendURL });
+       const webPath = config.mode === 'bundled'
+-        ? await stageBundledWeb(config.webPath, cachePath, backendURL, authEnabled)
++        ? await stageBundledWeb(config.webPath, cachePath, backendURL, authEnabled, config.basePath && path.join(config.basePath, 'web'))
+         : await stageWeb(config.sourcePath, cachePath);
+       this.controller.signal.throwIfAborted();
+       if (config.mode === 'source') await this.group.run(config.nodePath, [path.join(webPath, 'scripts/copy-pdfjs-assets.mjs')], { cwd: webPath, env });
+diff --git a/apps/desktop/src/student-runtime.mjs b/apps/desktop/src/student-runtime.mjs
+index 7ffb5f9..60c6e66 100644
+--- a/apps/desktop/src/student-runtime.mjs
++++ b/apps/desktop/src/student-runtime.mjs
+@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
+ 
+ /** Optional components stay outside the chat process until a tool needs them. */
+ export function studentEnvironment(config, cachePath) {
+-  const root = path.resolve(process.env.DEEPTUTOR_STUDENT_RESOURCES || path.join(config.sourcePath, '..', 'support'));
++  const root = path.resolve(process.env.DEEPTUTOR_STUDENT_RESOURCES || path.join(config.basePath ?? path.dirname(config.sourcePath), 'support'));
+   if (!existsSync(root)) return {};
+   const tex = path.join(root, 'tex', 'bin', process.platform === 'win32' ? 'windows' : 'universal-darwin');
+   return {
+diff --git a/apps/desktop/src/update-bridge.cjs b/apps/desktop/src/update-bridge.cjs
+new file mode 100644
+index 0000000..0f747a4
+--- /dev/null
++++ b/apps/desktop/src/update-bridge.cjs
+@@ -0,0 +1,5 @@
++const { contextBridge, ipcRenderer } = require('electron');
++
++contextBridge.exposeInMainWorld('kaixinDesktop', {
++  checkForUpdates: () => ipcRenderer.invoke('desktop:check-release'),
++});
+diff --git a/apps/desktop/test/release-updates.test.mjs b/apps/desktop/test/release-updates.test.mjs
+new file mode 100644
+index 0000000..13b2c47
+--- /dev/null
++++ b/apps/desktop/test/release-updates.test.mjs
+@@ -0,0 +1,69 @@
++import assert from 'node:assert/strict';
++import { createHash, generateKeyPairSync, sign } from 'node:crypto';
++import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
++import { execFileSync } from 'node:child_process';
++import os from 'node:os';
++import path from 'node:path';
++import test from 'node:test';
++import { bundleConfig, canonicalManifest, installBundle } from '../src/bundles.mjs';
++import { systemTar, runtimeLayout, targetId } from '../src/platform.mjs';
++import { downloadReleaseUpdate, findReleaseUpdate } from '../src/release-updates.mjs';
++
++const { publicKey, privateKey } = generateKeyPairSync('ed25519');
++const current = { runtimeId: 'student-base', builtAt: 100 };
++function signed(values = {}) {
++  const result = { formatVersion: 1, protocolVersion: 1, arch: process.arch, platform: process.platform,
++    runtimeId: 'student-update', coreVersion: '1.7.1', builtAt: 200, archive: 'patch.tar.gz',
++    sha256: '0'.repeat(64), ...values };
++  result.signature = sign(null, Buffer.from(canonicalManifest(result)), privateKey).toString('base64');
++  return result;
++}
++
++test('GitHub feed only offers newer, verified updates for this machine', async () => {
++  const check = response => findReleaseUpdate(targetId(), current, publicKey, async url => {
++    assert.match(url.pathname, /\/core-updates\/runtime-.+\.json$/);
++    return response;
++  });
++  assert.equal((await check(Response.json(signed()))).runtimeId, 'student-update');
++  assert.equal(await check(Response.json(signed({ builtAt: 99 }))), null);
++  assert.equal(await check(new Response('', { status: 404 })), null);
++  await assert.rejects(check(Response.json(signed({ arch: 'bad' }))), /not compatible/);
++  const tampered = signed();
++  tampered.builtAt += 1;
++  await assert.rejects(check(Response.json(tampered)), /signature/);
++  await assert.rejects(check(Response.redirect('https://example.org/invalid')), /Invalid GitHub/);
++});
++
++test('signed update reuses original runtime without modifying it; wrong archive is rejected', async t => {
++  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-update-test-'));
++  t.after(() => rm(root, { recursive: true, force: true }));
++  const base = path.join(root, 'runtimes', current.runtimeId);
++  const tree = path.join(root, 'overlay');
++  const inbox = path.join(root, 'inbox');
++  const { node, python } = runtimeLayout();
++  for (const [directory, files] of [[base, [node, python, 'core/deeptutor_cli/main.py', 'web/server.js']],
++    [tree, ['core/deeptutor_cli/main.py', 'web/server.js']]]) {
++    for (const file of files) {
++      await mkdir(path.dirname(path.join(directory, file)), { recursive: true });
++      await writeFile(path.join(directory, file), directory === base ? 'original' : 'updated');
++    }
++  }
++  await mkdir(inbox);
++  await writeFile(path.join(base, 'installed.json'), JSON.stringify(signed(current)));
++  const archive = path.join(root, 'overlay.tar.gz');
++  execFileSync(systemTar(), ['-czf', archive, '-C', tree, 'core', 'web']);
++  const bytes = await readFile(archive);
++  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex'), baseRuntimeId: current.runtimeId });
++  let progress = 0;
++  const file = await downloadReleaseUpdate(manifest, inbox, value => { progress = value; }, async () =>
++    new Response(bytes, { headers: { 'Content-Length': String(bytes.length) } }));
++  assert.equal(progress, 1);
++  await writeFile(path.join(inbox, manifest.archive), 'wrong');
++  await assert.rejects(installBundle(file, root, publicKey), /checksum/);
++  await writeFile(path.join(inbox, manifest.archive), bytes);
++  const result = await installBundle(file, root, publicKey);
++  const config = bundleConfig(result.destination, path.join(root, 'workspace'), manifest.runtimeId, manifest.baseRuntimeId);
++  assert.equal(config.pythonPath, path.join(base, python));
++  assert.equal(await readFile(path.join(config.webPath, 'server.js'), 'utf8'), 'updated');
++  assert.equal(await readFile(path.join(base, 'web/server.js'), 'utf8'), 'original');
++});
 diff --git a/deeptutor/agents/chat/prompts/en/agentic_chat.yaml b/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
-index 2eb1e4b2e346e9a604a76995b942830a5188eb5d..c88273b3d116aa4024a1062e6a0c9f667bfbd9bf 100644
+index 2eb1e4b..c88273b 100644
 --- a/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
 +++ b/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
 @@ -87,6 +87,15 @@ loop:
@@ -19,7 +773,7 @@ index 2eb1e4b2e346e9a604a76995b942830a5188eb5d..c88273b3d116aa4024a1062e6a0c9f66
      sentence or two of plain language. The reader sees that text as you write
      it, with the tool's own row underneath it, so it is how they follow the
 diff --git a/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml b/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml
-index 8cff1dcfc5e3ca2547c368832c48662aa28bfcee..576449019c79bdcb1a99834ab5924ec693a54381 100644
+index 8cff1dc..5764490 100644
 --- a/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml
 +++ b/deeptutor/agents/chat/prompts/zh/agentic_chat.yaml
 @@ -63,6 +63,13 @@ loop:
@@ -37,7 +791,7 @@ index 8cff1dcfc5e3ca2547c368832c48662aa28bfcee..576449019c79bdcb1a99834ab5924ec6
  
      调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
 diff --git a/deeptutor/services/model_selection/llm.py b/deeptutor/services/model_selection/llm.py
-index d1d73638afd6d301850276de0c01411d2e3b1dbb..6435b22c6654ffd92a7367b5f7ba38a417750f4a 100644
+index d1d7363..6435b22 100644
 --- a/deeptutor/services/model_selection/llm.py
 +++ b/deeptutor/services/model_selection/llm.py
 @@ -142,6 +142,8 @@ def list_llm_options(catalog: dict[str, Any]) -> dict[str, Any]:
@@ -50,7 +804,7 @@ index d1d73638afd6d301850276de0c01411d2e3b1dbb..6435b22c6654ffd92a7367b5f7ba38a4
              official_name = model.get("official_name")
              if isinstance(official_name, str) and official_name:
 diff --git a/deeptutor/services/settings/connection_setup.py b/deeptutor/services/settings/connection_setup.py
-index a06dd2ab205d7a9dde8d05fa2c72db358711aba9..f9c0b4eb6316002524d58399e7c53f038d38aeaf 100644
+index a06dd2a..f9c0b4e 100644
 --- a/deeptutor/services/settings/connection_setup.py
 +++ b/deeptutor/services/settings/connection_setup.py
 @@ -138,7 +138,11 @@ async def complete_connections(
@@ -76,7 +830,7 @@ index a06dd2ab205d7a9dde8d05fa2c72db358711aba9..f9c0b4eb6316002524d58399e7c53f03
                      result = merge_registry_edit(
                          result,
 diff --git a/deeptutor/tools/builtin/__init__.py b/deeptutor/tools/builtin/__init__.py
-index 505cc9d0d0c89ecdd11f1896b3678ff3fce111d7..d75e94859b71dd3b4bfef69e22b7d12d0e2056ce 100644
+index 505cc9d..d75e948 100644
 --- a/deeptutor/tools/builtin/__init__.py
 +++ b/deeptutor/tools/builtin/__init__.py
 @@ -1812,8 +1812,12 @@ class AskUserTool(_PromptHintsMixin, BaseTool):
@@ -95,7 +849,7 @@ index 505cc9d0d0c89ecdd11f1896b3678ff3fce111d7..d75e94859b71dd3b4bfef69e22b7d12d
                  "the attached material, or sensible defaults. Never use "
                  "it to ask 'should I proceed?', to confirm what the "
 diff --git a/web/app/globals.css b/web/app/globals.css
-index 457ab097e434f89beac8269ac7c133fc60f4b256..68ee70bc9fec0577fd5b1dc9acee5991b7b9aa45 100644
+index 457ab09..68ee70b 100644
 --- a/web/app/globals.css
 +++ b/web/app/globals.css
 @@ -1225,25 +1225,25 @@ body[data-picker-open] .dt-breathing-text {
@@ -131,7 +885,7 @@ index 457ab097e434f89beac8269ac7c133fc60f4b256..68ee70bc9fec0577fd5b1dc9acee5991
  }
  
 diff --git a/web/components/chat/home/ComposerInput.tsx b/web/components/chat/home/ComposerInput.tsx
-index b78c53c95954f6543c70258dbebd195bfa5ee874..531a5f7cb45b48fe45b253b3a73ec04452dbc5e3 100644
+index b78c53c..531a5f7 100644
 --- a/web/components/chat/home/ComposerInput.tsx
 +++ b/web/components/chat/home/ComposerInput.tsx
 @@ -367,6 +367,30 @@ export const ComposerInput = memo(
@@ -246,7 +1000,7 @@ index b78c53c95954f6543c70258dbebd195bfa5ee874..531a5f7cb45b48fe45b253b3a73ec044
            {lead.length > 0 && (
              <ComposerLead tokens={lead} armed={armed} hidden={scrolled} onWidth={setLeadWidth} />
 diff --git a/web/components/chat/home/ModelSelector.tsx b/web/components/chat/home/ModelSelector.tsx
-index 8a9f78217d4c4d475e11a569f0b705e3293f106d..12516bafc7f605609b77077a7ca969d5ea7df24b 100644
+index 8a9f782..12516ba 100644
 --- a/web/components/chat/home/ModelSelector.tsx
 +++ b/web/components/chat/home/ModelSelector.tsx
 @@ -12,6 +12,7 @@ import type { LLMSelection } from "@/features/chat/model/protocol";
@@ -310,7 +1064,7 @@ index 8a9f78217d4c4d475e11a569f0b705e3293f106d..12516bafc7f605609b77077a7ca969d5
                  profile_id: option.profile_id,
                  model_id: option.model_id,
 diff --git a/web/components/common/AssistantResponse.tsx b/web/components/common/AssistantResponse.tsx
-index e97bde2745d03c2fb26e5f400761664969f40b31..1e17f9d3f56a399cf131610019e4f8ff03d13078 100644
+index e97bde2..1e17f9d 100644
 --- a/web/components/common/AssistantResponse.tsx
 +++ b/web/components/common/AssistantResponse.tsx
 @@ -15,6 +15,7 @@ import {
@@ -338,7 +1092,7 @@ index e97bde2745d03c2fb26e5f400761664969f40b31..1e17f9d3f56a399cf131610019e4f8ff
      readingMaterialId,
      readingMaterialRevision,
 diff --git a/web/components/reading/AnnotationPopover.tsx b/web/components/reading/AnnotationPopover.tsx
-index 037fdda64729ed4526b686e8fc40843e68641fd7..9ebcd8ae3246b27778681f0d7b4e9673099deb13 100644
+index 037fdda..9ebcd8a 100644
 --- a/web/components/reading/AnnotationPopover.tsx
 +++ b/web/components/reading/AnnotationPopover.tsx
 @@ -18,11 +18,13 @@ import { ANNOTATION_COLORS, ANNOTATION_SWATCH, type AnnotationColor } from '@/li
@@ -367,7 +1121,7 @@ index 037fdda64729ed4526b686e8fc40843e68641fd7..9ebcd8ae3246b27778681f0d7b4e9673
            sourceId={noteSource.id}
          />
 diff --git a/web/components/reading/PdfDocumentView.tsx b/web/components/reading/PdfDocumentView.tsx
-index 38afc3a32f905af7343de74ca691f67b350190df..37f07ed9d1d283ebf74470cc4d22eb2e3f599658 100644
+index 38afc3a..37f07ed 100644
 --- a/web/components/reading/PdfDocumentView.tsx
 +++ b/web/components/reading/PdfDocumentView.tsx
 @@ -47,6 +47,7 @@ export interface SelectionPayload {
@@ -493,7 +1247,7 @@ index 38afc3a32f905af7343de74ca691f67b350190df..37f07ed9d1d283ebf74470cc4d22eb2e
          <div className="flex h-full items-center justify-center gap-2 text-[12px] text-[var(--muted-foreground)]">
            <Loader2 size={14} className="animate-spin" />
 diff --git a/web/components/reading/ReaderPane.tsx b/web/components/reading/ReaderPane.tsx
-index f530ffac79b1e288ab0a0a01b046ef3d04ce4583..c86e25c777fd2448fddd3e2dbbe1c389c13901c7 100644
+index f530ffa..c86e25c 100644
 --- a/web/components/reading/ReaderPane.tsx
 +++ b/web/components/reading/ReaderPane.tsx
 @@ -29,6 +29,7 @@ import {
@@ -611,7 +1365,7 @@ index f530ffac79b1e288ab0a0a01b046ef3d04ce4583..c86e25c777fd2448fddd3e2dbbe1c389
            onUnderline={(color) => commitSelection("underline", color)}
            onNote={(note, color) => commitSelection("note", color, note)}
 diff --git a/web/components/reading/TextUnitView.tsx b/web/components/reading/TextUnitView.tsx
-index a5b665d89430498d5e4c8b8ca0dec0ef7d355985..b28c30b43677996132283532a54076c5a7c312e0 100644
+index a5b665d..b28c30b 100644
 --- a/web/components/reading/TextUnitView.tsx
 +++ b/web/components/reading/TextUnitView.tsx
 @@ -41,6 +41,7 @@ import {
@@ -631,7 +1385,7 @@ index a5b665d89430498d5e4c8b8ca0dec0ef7d355985..b28c30b43677996132283532a54076c5
        rects: [],
        selectors:
 diff --git a/web/components/reading/workspace/ReadingCompanion.tsx b/web/components/reading/workspace/ReadingCompanion.tsx
-index 6d437f2a0cf00fce6e522e46dda2665a4b8401ad..e20a06954dec79cb2a96be14c78f0e936e5a9cf1 100644
+index 6d437f2..e20a069 100644
 --- a/web/components/reading/workspace/ReadingCompanion.tsx
 +++ b/web/components/reading/workspace/ReadingCompanion.tsx
 @@ -45,6 +45,8 @@ import { useChatAutoScroll } from "@/hooks/useChatAutoScroll";
@@ -725,7 +1479,7 @@ index 6d437f2a0cf00fce6e522e46dda2665a4b8401ad..e20a06954dec79cb2a96be14c78f0e93
            <div className="mx-4 mb-2 flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
              <Link2 size={11} />
 diff --git a/web/components/reading/workspace/ReadingComposer.tsx b/web/components/reading/workspace/ReadingComposer.tsx
-index 48e0f0a8ab9242885b33e40959e9767c2b3fc39c..264ef4e2c93ee91c99785a647552df92536fb50f 100644
+index 48e0f0a..264ef4e 100644
 --- a/web/components/reading/workspace/ReadingComposer.tsx
 +++ b/web/components/reading/workspace/ReadingComposer.tsx
 @@ -16,6 +16,8 @@ import { useCallback, useRef } from "react";
@@ -776,7 +1530,7 @@ index 48e0f0a8ab9242885b33e40959e9767c2b3fc39c..264ef4e2c93ee91c99785a647552df92
        }
        prefillInputRef={replyInputRef}
 diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
-index ffff540512f2fd2bf58f30f4eaac391240e491cf..403b6f93cecaae118ab623ae7eaa4ca3d1667ac7 100644
+index ffff540..403b6f9 100644
 --- a/web/components/reading/workspace/ReadingWorkspace.tsx
 +++ b/web/components/reading/workspace/ReadingWorkspace.tsx
 @@ -20,6 +20,7 @@ import {
@@ -813,7 +1567,7 @@ index ffff540512f2fd2bf58f30f4eaac391240e491cf..403b6f93cecaae118ab623ae7eaa4ca3
        if (prompt) {
          window.requestAnimationFrame(() => prefillInputRef.current?.(prompt));
 diff --git a/web/components/settings/ModelsWorkspace.tsx b/web/components/settings/ModelsWorkspace.tsx
-index bbabeddedbb4c16aad4552a07dcdcf432c17cba9..50a77e73f156af08b6b03c330b50906fe57fc5a5 100644
+index bbabedd..50a77e7 100644
 --- a/web/components/settings/ModelsWorkspace.tsx
 +++ b/web/components/settings/ModelsWorkspace.tsx
 @@ -51,6 +51,7 @@ import {
@@ -866,13 +1620,15 @@ index bbabeddedbb4c16aad4552a07dcdcf432c17cba9..50a77e73f156af08b6b03c330b50906f
            >
              {active && <Check size={13} />}{" "}
 diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
-index 70f5dd930a3e93cef9b0d520ccf715324b83b078..9adbd8dc48aa450e6814d47549b20ca8087f76bd 100644
+index 70f5dd9..0aa7ef1 100644
 --- a/web/features/chat/components/ChatWorkspace.tsx
 +++ b/web/features/chat/components/ChatWorkspace.tsx
-@@ -2638,14 +2638,30 @@ export default function ChatWorkspace() {
+@@ -2636,17 +2636,30 @@ export default function ChatWorkspace() {
+               ) : !hasMessages ? (
+                 // Clipped rather than pushed under the header when a short
                  // window leaves the greeting no room.
-                 <div className="flex w-full flex-1 min-h-0 items-end justify-center overflow-hidden pb-14 animate-fade-in px-6">
-                   <div className="w-full max-w-[960px] flex items-center justify-center gap-4">
+-                <div className="flex w-full flex-1 min-h-0 items-end justify-center overflow-hidden pb-14 animate-fade-in px-6">
+-                  <div className="w-full max-w-[960px] flex items-center justify-center gap-4">
 -                    <img
 -                      src="/brand/black-logo.png"
 -                      alt="开心动力超级学霸"
@@ -881,35 +1637,36 @@ index 70f5dd930a3e93cef9b0d520ccf715324b83b078..9adbd8dc48aa450e6814d47549b20ca8
 -                      className="h-10 w-10 select-none"
 -                      draggable={false}
 -                    />
-+                    <svg
+-                    <h1 className="font-serif text-[40px] font-medium leading-[1.1] tracking-[-0.015em] text-[var(--foreground)]">
++                <div className="flex w-full flex-1 min-h-0 items-end justify-center overflow-hidden px-6 pb-[clamp(1rem,5vh,2.75rem)] animate-fade-in">
++                  <div className="flex w-full max-w-[960px] flex-col items-center gap-3 text-center sm:gap-4">
++                    <div
 +                      role="img"
 +                      aria-label="KAIXINDONGLI · 开心动力"
-+                      viewBox="0 0 144 54"
-+                      className="h-auto w-24 shrink-0 text-[var(--foreground)] lg:w-[7.5rem]"
++                      className="inline-flex shrink-0 items-center gap-2.5 text-[var(--foreground)]"
 +                    >
-+                      <path
-+                        d="M12 7h5v12L29 7h7L23 21l14 14h-7L17 23v12h-5z
-+                           M44 7h6l8 10 8-10h6L61 21l12 14h-6l-9-10-9 10h-6l12-14z
-+                           M82 7h10c9 0 15 5 15 14s-6 14-15 14H82zm5 5v18h5c6 0 10-3 10-9s-4-9-10-9z
-+                           M116 7h5v23h14v5h-19z"
-+                        fill="currentColor"
-+                        fillRule="evenodd"
-+                      />
-+                      <text
-+                        x="72"
-+                        y="50"
-+                        fill="currentColor"
-+                        textAnchor="middle"
-+                        className="font-sans text-[11px] font-semibold tracking-[0.18em]"
-+                      >
++                      <svg aria-hidden="true" viewBox="0 0 36 36" className="size-9">
++                        <rect width="36" height="36" rx="11" fill="currentColor" />
++                        <path
++                          d="M12 11.5v13m0-6.5c4.5 0 7-2.1 10.5-6.5m-8.4 6.4c3.9.5 6 2.9 8.8 6.6"
++                          fill="none"
++                          stroke="var(--background)"
++                          strokeWidth="2.1"
++                          strokeLinecap="round"
++                          strokeLinejoin="round"
++                        />
++                        <circle cx="25.2" cy="11.4" r="1.65" fill="#e8a464" />
++                      </svg>
++                      <span aria-hidden="true" className="font-sans text-sm font-semibold leading-none tracking-[0.06em]">
 +                        KAIXINDONGLI
-+                      </text>
-+                    </svg>
-                     <h1 className="font-serif text-[40px] font-medium leading-[1.1] tracking-[-0.015em] text-[var(--foreground)]">
++                      </span>
++                    </div>
++                    <h1 className="text-balance font-serif text-[clamp(1.65rem,3vw,2.5rem)] font-medium leading-[1.16] text-[var(--foreground)]">
                        {t(welcomeGreeting)}
                      </h1>
+                   </div>
 diff --git a/web/features/chat/messages/ChatMessageList.tsx b/web/features/chat/messages/ChatMessageList.tsx
-index de5ee55b3f47b5bf796b86df2a7969cee248eacb..8c3b9d915a0fc67cdb83f8ce7bbb8062d362cdec 100644
+index de5ee55..8c3b9d9 100644
 --- a/web/features/chat/messages/ChatMessageList.tsx
 +++ b/web/features/chat/messages/ChatMessageList.tsx
 @@ -2016,6 +2016,7 @@ export const UserMessage = memo(function UserMessage({
@@ -921,7 +1678,7 @@ index de5ee55b3f47b5bf796b86df2a7969cee248eacb..8c3b9d915a0fc67cdb83f8ce7bbb8062
                      : undefined
                  }
 diff --git a/web/features/notes/components/AddToNote.tsx b/web/features/notes/components/AddToNote.tsx
-index d2b985d6d41eadf3909619bca71e58f4d0ea7dee..b7d7f52b35012c8787f4141198e16e5dedf04881 100644
+index d2b985d..b7d7f52 100644
 --- a/web/features/notes/components/AddToNote.tsx
 +++ b/web/features/notes/components/AddToNote.tsx
 @@ -10,12 +10,14 @@ import {
@@ -976,7 +1733,7 @@ index d2b985d6d41eadf3909619bca71e58f4d0ea7dee..b7d7f52b35012c8787f4141198e16e5d
            >
              {t(saved ? 'Added to note' : busy ? 'Saving…' : 'Add to a note')}
 diff --git a/web/features/notes/components/NoteEditor.tsx b/web/features/notes/components/NoteEditor.tsx
-index 78778493c48724888bbb09c92e870e4e52c2ef5d..d1394d2072a8c86385e35462e18b469bf3194dc1 100644
+index 7877849..d1394d2 100644
 --- a/web/features/notes/components/NoteEditor.tsx
 +++ b/web/features/notes/components/NoteEditor.tsx
 @@ -85,8 +85,7 @@ import Tooltip from '@/shared/ui/Tooltip'
@@ -1010,8 +1767,55 @@ index 78778493c48724888bbb09c92e870e4e52c2ef5d..d1394d2072a8c86385e35462e18b469b
      },
      [page.id]
    )
+diff --git a/web/features/settings/sections/AboutSettingsSection.tsx b/web/features/settings/sections/AboutSettingsSection.tsx
+index 7406dc8..06c2485 100644
+--- a/web/features/settings/sections/AboutSettingsSection.tsx
++++ b/web/features/settings/sections/AboutSettingsSection.tsx
+@@ -57,6 +57,42 @@ function jobTone(status: UpdateJobStatus) {
+ }
+ 
+ export default function AboutSettingsPage() {
++  const [bridge, setBridge] = useState<(() => Promise<void>) | null>(null);
++  const [ready, setReady] = useState(false);
++  useEffect(() => {
++    const desktop = (window as Window & { kaixinDesktop?: { checkForUpdates(): Promise<void> } }).kaixinDesktop;
++    if (desktop) setBridge(() => () => desktop.checkForUpdates());
++    setReady(true);
++  }, []);
++  if (!ready) return null;
++  return bridge ? <DesktopAbout check={bridge} /> : <WebAbout />;
++}
++
++function DesktopAbout({ check }: { check: () => Promise<void> }) {
++  const { t } = useTranslation();
++  const [busy, setBusy] = useState(false);
++  const [failed, setFailed] = useState(false);
++  const edition = clientEdition();
++  return (
++    <>
++      <SettingsPageHeader title={t("About")} />
++      <SettingSection title={edition.full}>
++        <SettingRow title={t("Check for updates")} control={
++          <Button disabled={busy} onClick={async () => {
++            setBusy(true);
++            setFailed(false);
++            try { await check(); } catch { setFailed(true); } finally { setBusy(false); }
++          }}>{busy ? t("Preparing update…") : t("Check for updates")}</Button>
++        } />
++        {failed && <p role="alert">{t("Unable to check for updates.")}</p>}
++        <ResourceRow title="GitHub" description={t("Source code, issues, and contributions")}
++          href="https://github.com/1281504089-cell/kaixin-k12-tutor/releases" icon={<Github className="h-4 w-4" />} />
++      </SettingSection>
++    </>
++  );
++}
++
++function WebAbout() {
+   const { t, i18n } = useTranslation();
+   const [status, setStatus] = useState<AppUpdateStatus | null>(null);
+   const [job, setJob] = useState<UpdateJob | null>(null);
 diff --git a/web/lib/llm-options.ts b/web/lib/llm-options.ts
-index 805e72d6d382d8aa8871d2e2153a3cd89eda78b6..1847ea3266cde3b8b891a76d7fee8760509333cc 100644
+index 805e72d..1847ea3 100644
 --- a/web/lib/llm-options.ts
 +++ b/web/lib/llm-options.ts
 @@ -20,6 +20,7 @@ export interface LLMOption extends LLMSelection {
@@ -1037,7 +1841,7 @@ index 805e72d6d382d8aa8871d2e2153a3cd89eda78b6..1847ea3266cde3b8b891a76d7fee8760
    if (!selection?.profile_id || !selection.model_id) return "";
    return `${selection.profile_id}:${selection.model_id}`;
 diff --git a/web/lib/model-catalog-types.ts b/web/lib/model-catalog-types.ts
-index eac3421792be19ce8b61d5f349116950e9f90003..23edac066e8bbedd938ba79b757bcdc158a442af 100644
+index eac3421..23edac0 100644
 --- a/web/lib/model-catalog-types.ts
 +++ b/web/lib/model-catalog-types.ts
 @@ -41,6 +41,7 @@ export type ApiFormat =
@@ -1049,7 +1853,7 @@ index eac3421792be19ce8b61d5f349116950e9f90003..23edac066e8bbedd938ba79b757bcdc1
    provider_ref?: ProviderRef;
    id: string;
 diff --git a/web/lib/notes-api.ts b/web/lib/notes-api.ts
-index 09876e7ac28fa9f46c6c09780d40e2c60a4edbee..4a6c6c663da7104ba141d9863e564ff0869501b6 100644
+index 09876e7..4a6c6c6 100644
 --- a/web/lib/notes-api.ts
 +++ b/web/lib/notes-api.ts
 @@ -53,6 +53,20 @@ export async function noteRequest<T>(path: string, body?: unknown, method = 'POS
@@ -1074,7 +1878,7 @@ index 09876e7ac28fa9f46c6c09780d40e2c60a4edbee..4a6c6c663da7104ba141d9863e564ff0
    const path = docId
      ? `/api/documents/${encodeURIComponent(docId)}/flashcards/export`
 diff --git a/web/lib/reading-citations.ts b/web/lib/reading-citations.ts
-index d7f41d6abfbde95b8887f3e6f52f39636cfab154..47e4a2296248bd6f13fa0c9b71bee10247df2c2d 100644
+index d7f41d6..47e4a22 100644
 --- a/web/lib/reading-citations.ts
 +++ b/web/lib/reading-citations.ts
 @@ -1,3 +1,4 @@
@@ -1189,7 +1993,7 @@ index d7f41d6abfbde95b8887f3e6f52f39636cfab154..47e4a2296248bd6f13fa0c9b71bee102
  export function locatorLabel(unit: string, locator: number): string {
    const word = unit || "page";
 diff --git a/web/lib/reading-quote-locator.ts b/web/lib/reading-quote-locator.ts
-index dfb17c19588767f8b4de56d3ff6d5be469383a86..ffe543197525063d867f13645894892598b62f32 100644
+index dfb17c1..ffe5431 100644
 --- a/web/lib/reading-quote-locator.ts
 +++ b/web/lib/reading-quote-locator.ts
 @@ -150,6 +150,7 @@ function rangeFrom(
@@ -1232,7 +2036,7 @@ index dfb17c19588767f8b4de56d3ff6d5be469383a86..ffe543197525063d867f136458948925
    if (!found) return null;
  
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa382106cd2d9a81bf5eb216dd0331b3d00..0ecf0b15a8e0e486717681558fb3259ee657d936 100644
+index 613b5fa..0ecf0b1 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
 @@ -1,4 +1,9 @@
@@ -1246,7 +2050,7 @@ index 613b5fa382106cd2d9a81bf5eb216dd0331b3d00..0ecf0b15a8e0e486717681558fb3259e
    "Image and video generation models with saved providers.": "Image and video generation models with saved providers.",
    "Manage provider names, addresses, credentials, and connectivity.": "Manage provider names, addresses, credentials, and connectivity.",
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4902c1d825b001b1dc9e0fec3076fc5ce1..e83357268e0e0f4309b2986896535efb89535a8b 100644
+index 6c4afd4..e833572 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
 @@ -1,4 +1,9 @@
@@ -1260,7 +2064,7 @@ index 6c4afd4902c1d825b001b1dc9e0fec3076fc5ce1..e83357268e0e0f4309b2986896535efb
    "Image and video generation models with saved providers.": "使用已配置的提供方管理图片与视频生成模型。",
    "Manage provider names, addresses, credentials, and connectivity.": "管理提供方的名称、地址、密钥并测试连接。",
 diff --git a/web/tests/add-favorite-to-note.spec.tsx b/web/tests/add-favorite-to-note.spec.tsx
-index a34a8c5ff6b5b162b6824de092cd88bee367dc45..6e6357f118031c9f0de01ef80615341003216565 100644
+index a34a8c5..6e6357f 100644
 --- a/web/tests/add-favorite-to-note.spec.tsx
 +++ b/web/tests/add-favorite-to-note.spec.tsx
 @@ -3,12 +3,12 @@ import { beforeEach, expect, it, vi } from 'vitest'
@@ -1299,7 +2103,7 @@ index a34a8c5ff6b5b162b6824de092cd88bee367dc45..6e6357f118031c9f0de01ef806153410
 +  }))
 +})
 diff --git a/web/tests/co-writer-model-selection.spec.tsx b/web/tests/co-writer-model-selection.spec.tsx
-index cb36f3fe3d430d4dc8cbae89bd305ec2c450edaf..9de72211cf51090b1ec8ec82b08a49af4ba6c506 100644
+index cb36f3f..9de7221 100644
 --- a/web/tests/co-writer-model-selection.spec.tsx
 +++ b/web/tests/co-writer-model-selection.spec.tsx
 @@ -1,4 +1,4 @@
@@ -1319,7 +2123,7 @@ index cb36f3fe3d430d4dc8cbae89bd305ec2c450edaf..9de72211cf51090b1ec8ec82b08a49af
      const writingModel = screen.getByRole("button", { name: "Writing model | Writing profile" });
      expect(writingModel).toHaveAccessibleDescription("General questions · Reasoning supported");
 diff --git a/web/tests/composer-language-command.spec.tsx b/web/tests/composer-language-command.spec.tsx
-index 46c0f1709312f646a608fd138db5937b537de808..6ffdf586082896c5413ef44463b85cd95c38bdec 100644
+index 46c0f17..6ffdf58 100644
 --- a/web/tests/composer-language-command.spec.tsx
 +++ b/web/tests/composer-language-command.spec.tsx
 @@ -18,11 +18,13 @@ function renderComposer({
@@ -1367,7 +2171,7 @@ index 46c0f1709312f646a608fd138db5937b537de808..6ffdf586082896c5413ef44463b85cd9
 +  expect(onSend).not.toHaveBeenCalled();
 +});
 diff --git a/web/tests/pdf-reading-resize.spec.tsx b/web/tests/pdf-reading-resize.spec.tsx
-index e134153e58713c38ecc08e07cd1aa0e3103efbe2..6f319b460098dd696be4ce0ebcae1a9ebcbdd1c5 100644
+index e134153..6f319b4 100644
 --- a/web/tests/pdf-reading-resize.spec.tsx
 +++ b/web/tests/pdf-reading-resize.spec.tsx
 @@ -252,6 +252,21 @@ describe("PDF reading position during layout changes", () => {
@@ -1394,7 +2198,7 @@ index e134153e58713c38ecc08e07cd1aa0e3103efbe2..6f319b460098dd696be4ce0ebcae1a9e
      await scrollTo(root, 160, 0.6);
 diff --git a/web/tests/student-citation-and-models.spec.ts b/web/tests/student-citation-and-models.spec.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..512baa9d2f1a51570b7259a7ddff86e8118e38e2
+index 0000000..512baa9
 --- /dev/null
 +++ b/web/tests/student-citation-and-models.spec.ts
 @@ -0,0 +1,35 @@

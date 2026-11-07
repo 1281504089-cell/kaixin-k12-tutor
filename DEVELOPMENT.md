@@ -51,6 +51,12 @@ deeptutor start --dev --home data/dev-home
 
 改网页时可运行 `npm --prefix web run typecheck`。桌面外壳安装 npm 依赖后可运行 `npm --prefix apps/desktop test`。原生打包使用对应平台的运行时及自有签名密钥。 [三平台学生版构建流程](.github/workflows/student-delivery.yml)
 
+## 桌面核心更新
+
+桌面端只从 GitHub 的 `core-updates` 发布标签读取当前系统的 `runtime-<target>.json`。签名清单绑定平台、芯片、兼容的完整运行时、归档文件名、SHA-256 和构建时间。用于替换应用代码的增量包可包含 `core/` 和 `web/`，原生模块、Python、Node.js 和教材继续来自清单中指定的已安装完整运行时。构建前应核对 npm 锁定版本和原生依赖兼容性。涉及运行环境版本变化时需另行打包并验证兼容的完整底座。
+
+`apps/desktop/scripts/package-update-launcher.mjs` 可以打包供已安装用户使用的轻量启动器。它只包含应用外壳和原版签名清单。参数依次为平台、该平台完整运行时清单、发布公钥、经校验的 Electron zip 目录和新的输出目录。在 Mac 上可生成两个 Mac 版本及 Windows 便携启动器。发布时先上传新的带版本号归档，再更新对应平台的签名清单。签名私钥只在维护者本机使用。
+
 ## 复用与归属
 
 源码归档内的 `LICENSE` 为 Apache 2.0，第三方源码和素材归属见归档内的 `THIRD_PARTY_NOTICES.md`。GitHub 侧栏的 GPL-3.0 标识来自 [dvisvgm 的许可证文件](dvisvgm-LICENSE.txt)。使用或分发教材及打包组件时请核对各自的条款。 [接口与许可说明](delivery-notes.md)

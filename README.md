@@ -27,6 +27,12 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 3. Windows 下载 1 个 `Setup.exe` 和 4 个 `Runtime.001` 至 `Runtime.004`。双击 Setup，安装器会校验并合并分卷。
 4. 预留至少 30 GB 空间。安装校验和首次启动解压都可能需要几分钟。
 
+## 已安装用户更新
+
+已使用 1.7.1 完整学生版的电脑，可以从[客户端更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/core-updates)下载对应系统的一次性更新启动器。先退出原程序。Mac 解压后用新版应用替换「应用程序」里的旧版。Windows 解压到一个文件夹，从里面打开开心动力超级学霸，后续使用这个程序入口。
+
+新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。发现新版本时点「下载并更新」。客户端根据系统和芯片取对应的签名清单，复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
+
 ## 学习功能
 
 | 学习场景 | 怎么用 |
