@@ -955,6 +955,39 @@ index 8cff1dc..5764490 100644
      每轮结束后你会看到工具结果，可以继续调用。
  
      调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
+diff --git a/deeptutor/api/main.py b/deeptutor/api/main.py
+index f48dde2..5ab6e8b 100644
+--- a/deeptutor/api/main.py
++++ b/deeptutor/api/main.py
+@@ -297,11 +297,25 @@ async def lifespan(app: FastAPI):
+     except Exception as e:
+         logger.warning(f"v1 memory migration failed: {e}")
+ 
++    from deeptutor.services.local_ai import close_stt_worker
++    from deeptutor.services.voice import warm_local_stt
++
++    async def prepare_voice() -> None:
++        try:
++            await warm_local_stt()
++        except Exception:
++            logger.debug("Local STT startup warmup unavailable", exc_info=True)
++
+     app.state.ready = True
+-    yield
++    voice_warmup = asyncio.create_task(prepare_voice())
++    try:
++        yield
++    finally:
++        app.state.ready = False
++        voice_warmup.cancel()
++        await asyncio.gather(voice_warmup, return_exceptions=True)
++        await close_stt_worker()
+ 
+-    # Execute on shutdown
+-    app.state.ready = False
+     logger.info("Application shutdown")
+ 
+     if module_enabled("knowledge"):
 diff --git a/deeptutor/api/routers/memory.py b/deeptutor/api/routers/memory.py
 index 916b690..04c5739 100644
 --- a/deeptutor/api/routers/memory.py
@@ -1215,6 +1248,36 @@ index b5c804d..fe1ccb4 100644
          return {"deleted": True}
      except (ValueError, LookupError) as exc:
          raise _error(exc) from None
+diff --git a/deeptutor/api/routers/voice.py b/deeptutor/api/routers/voice.py
+index e31f7b2..71a58e6 100644
+--- a/deeptutor/api/routers/voice.py
++++ b/deeptutor/api/routers/voice.py
+@@ -17,6 +17,7 @@ from deeptutor.services.voice import (
+     VoiceProviderError,
+     synthesize_speech,
+     transcribe_audio,
++    warm_local_stt,
+ )
+ from deeptutor.services.voice.audio import _parse_pcm_content_type, _pcm16_to_wav
+ from deeptutor.services.voice.base import VoiceProviderTimeout
+@@ -65,6 +66,17 @@ async def text_to_speech(payload: TTSRequest) -> Response:
+     )
+ 
+ 
++@router.post("/stt/warmup", status_code=status.HTTP_204_NO_CONTENT)
++async def prepare_local_speech() -> Response:
++    """Let recording and local model initialization happen in parallel."""
++    try:
++        await warm_local_stt()
++    except (ValueError, VoiceProviderError, OSError, RuntimeError, TimeoutError):
++        # The actual transcription route reports actionable configuration errors.
++        logger.debug("Local STT warmup unavailable", exc_info=True)
++    return Response(status_code=status.HTTP_204_NO_CONTENT)
++
++
+ @router.post("/stt")
+ async def speech_to_text(
+     file: UploadFile = File(...),
 diff --git a/deeptutor/reading/catalog_models.py b/deeptutor/reading/catalog_models.py
 index 3ca7f07..f81fef7 100644
 --- a/deeptutor/reading/catalog_models.py
@@ -1287,6 +1350,211 @@ index 289ffb7..09fc04a 100644
              active_material_id=row["active_material_id"],
              created_at=float(row["created_at"]),
              updated_at=float(row["updated_at"]),
+diff --git a/deeptutor/services/local_ai/__init__.py b/deeptutor/services/local_ai/__init__.py
+index eb29b07..d1180fb 100644
+--- a/deeptutor/services/local_ai/__init__.py
++++ b/deeptutor/services/local_ai/__init__.py
+@@ -1,4 +1,4 @@
+-"""On-demand CPU inference in disposable workers; no listener or cloud fallback."""
++"""On-demand CPU inference in private workers; no listener or cloud fallback."""
+ 
+ from __future__ import annotations
+ 
+@@ -6,10 +6,76 @@ import asyncio
+ import json
+ import os
+ from pathlib import Path
++import struct
+ import sys
+ import threading
+ 
+ _worker_lock = threading.Lock()
++_STT_IDLE_SECONDS = 195  # Keep a prepared worker through a maximum-length recording.
++_stt_process: asyncio.subprocess.Process | None = None
++_stt_language: str | None = None
++_stt_idle: asyncio.TimerHandle | None = None
++
++
++def _detach_stt() -> asyncio.subprocess.Process | None:
++    global _stt_process, _stt_language, _stt_idle
++    if _stt_idle is not None:
++        _stt_idle.cancel()
++        _stt_idle = None
++    process, _stt_process = _stt_process, None
++    _stt_language = None
++    if process is not None and process.returncode is None:
++        try:
++            process.kill()
++        except ProcessLookupError:
++            pass
++    return process
++
++
++async def close_stt_worker() -> None:
++    process = _detach_stt()
++    if process is not None:
++        await process.wait()
++
++
++async def _start_worker(kind: str, language: str) -> asyncio.subprocess.Process:
++    return await asyncio.create_subprocess_exec(
++        sys.executable,
++        "-m",
++        "deeptutor.services.local_ai.worker",
++        kind,
++        "--language",
++        language,
++        stdin=asyncio.subprocess.PIPE,
++        stdout=asyncio.subprocess.PIPE,
++        stderr=asyncio.subprocess.DEVNULL,
++        env={**os.environ, "OMP_NUM_THREADS": "2", "OPENBLAS_NUM_THREADS": "2"},
++    )
++
++
++async def _request_stt(payload: bytes, language: str) -> bytes:
++    global _stt_process, _stt_language, _stt_idle
++    if _stt_idle is not None:
++        _stt_idle.cancel()
++        _stt_idle = None
++    try:
++        if _stt_process is None or _stt_process.returncode is not None or _stt_language != language:
++            await close_stt_worker()
++            _stt_process = await _start_worker("stt-session", language)
++            _stt_language = language
++        process = _stt_process
++        assert process.stdin is not None and process.stdout is not None
++        process.stdin.write(struct.pack(">I", len(payload)) + payload)
++        await process.stdin.drain()
++        result = await process.stdout.readline()
++        if not result:
++            raise RuntimeError("本机识别进程未返回结果。")
++    except BaseException:
++        # A cancelled request must not leave a response for the next recording.
++        await close_stt_worker()
++        raise
++    _stt_idle = asyncio.get_running_loop().call_later(_STT_IDLE_SECONDS, _detach_stt)
++    return result
+ 
+ 
+ def assets_root() -> Path:
+@@ -31,27 +97,19 @@ def model_files(kind: str) -> list[Path]:
+ 
+ async def run_worker(kind: str, payload: bytes, *, language: str = "auto") -> dict:
+     model_files(kind)
+-    # One bounded CPU job at a time; workers exit so idle chat retains no model RAM.
++    # Serialize CPU inference so a voice request and embedding do not compete.
+     async with asyncio.timeout(180):
+         while not _worker_lock.acquire(blocking=False):
+             await asyncio.sleep(0.05)
+         process = None
+         try:
+-            process = await asyncio.create_subprocess_exec(
+-                sys.executable,
+-                "-m",
+-                "deeptutor.services.local_ai.worker",
+-                kind,
+-                "--language",
+-                language,
+-                stdin=asyncio.subprocess.PIPE,
+-                stdout=asyncio.subprocess.PIPE,
+-                stderr=asyncio.subprocess.DEVNULL,
+-                env={**os.environ, "OMP_NUM_THREADS": "2", "OPENBLAS_NUM_THREADS": "2"},
+-            )
+-            output, _ = await process.communicate(payload)
+-            if process.returncode:
+-                raise RuntimeError("本机识别失败，请确认运行环境完整后重试。")
++            if kind == "stt":
++                output = await _request_stt(payload, language)
++            else:
++                process = await _start_worker(kind, language)
++                output, _ = await process.communicate(payload)
++                if process.returncode:
++                    raise RuntimeError("本机识别失败，请确认运行环境完整后重试。")
+             result = json.loads(output)
+             if not isinstance(result, dict):
+                 raise ValueError("本机模型返回了无效结果。")
+diff --git a/deeptutor/services/local_ai/worker.py b/deeptutor/services/local_ai/worker.py
+index 2b602c1..f17703c 100644
+--- a/deeptutor/services/local_ai/worker.py
++++ b/deeptutor/services/local_ai/worker.py
+@@ -3,9 +3,11 @@
+ from __future__ import annotations
+ 
+ import argparse
++from functools import lru_cache
+ import io
+ import json
+ import re
++import struct
+ import sys
+ import wave
+ 
+@@ -20,20 +22,12 @@ def embedding_windows(token_ids: list[int]) -> list[list[int]]:
+     ]
+ 
+ 
+-def transcribe(audio: bytes, language: str) -> dict:
+-    import numpy as np
+-
+-    with wave.open(io.BytesIO(audio), "rb") as wav:
+-        if (wav.getframerate(), wav.getnchannels(), wav.getsampwidth()) != (16000, 1, 2):
+-            raise ValueError("Expected normalized PCM16 WAV")
+-        samples = np.frombuffer(wav.readframes(wav.getnframes()), dtype="<i2").astype(np.float32)
+-    # Digital silence must not become a hallucinated transcript.
+-    if not np.any(samples):
+-        return {"text": ""}
++@lru_cache(maxsize=1)
++def speech_recognizer(language: str):
+     import sherpa_onnx
+ 
+     model, tokens = model_files("stt")
+-    recognizer = sherpa_onnx.OfflineRecognizer.from_sense_voice(
++    return sherpa_onnx.OfflineRecognizer.from_sense_voice(
+         model=str(model),
+         tokens=str(tokens),
+         num_threads=2,
+@@ -41,6 +35,19 @@ def transcribe(audio: bytes, language: str) -> dict:
+         use_itn=True,
+         provider="cpu",
+     )
++
++
++def transcribe(audio: bytes, language: str) -> dict:
++    import numpy as np
++
++    with wave.open(io.BytesIO(audio), "rb") as wav:
++        if (wav.getframerate(), wav.getnchannels(), wav.getsampwidth()) != (16000, 1, 2):
++            raise ValueError("Expected normalized PCM16 WAV")
++        samples = np.frombuffer(wav.readframes(wav.getnframes()), dtype="<i2").astype(np.float32)
++    # Digital silence must not become a hallucinated transcript.
++    if not np.any(samples):
++        return {"text": ""}
++    recognizer = speech_recognizer(language)
+     stream = recognizer.create_stream()
+     stream.accept_waveform(16000, samples / 32768.0)
+     recognizer.decode_stream(stream)
+@@ -90,9 +97,20 @@ def embed(texts: list[str]) -> dict:
+ 
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument("kind", choices=("stt", "embedding"))
++    parser.add_argument("kind", choices=("stt", "stt-session", "embedding"))
+     parser.add_argument("--language", default="auto")
+     args = parser.parse_args()
++    if args.kind == "stt-session":
++        reader = sys.stdin.buffer
++        while header := reader.read(4):
++            size = struct.unpack(">I", header)[0]
++            if not size:
++                speech_recognizer(args.language)
++                result = {}
++            else:
++                result = transcribe(reader.read(size), args.language)
++            print(json.dumps(result, ensure_ascii=False), flush=True)
++        return
+     payload = sys.stdin.buffer.read()
+     result = (
+         transcribe(payload, args.language) if args.kind == "stt" else embed(json.loads(payload))
 diff --git a/deeptutor/services/model_selection/llm.py b/deeptutor/services/model_selection/llm.py
 index d1d7363..6435b22 100644
 --- a/deeptutor/services/model_selection/llm.py
@@ -3284,6 +3552,66 @@ index 85f6a7e..e9e6ea2 100644
          return ""
      from deeptutor.services.memory import get_memory_store
  
+diff --git a/deeptutor/services/voice/__init__.py b/deeptutor/services/voice/__init__.py
+index 100979a..5fc62e7 100644
+--- a/deeptutor/services/voice/__init__.py
++++ b/deeptutor/services/voice/__init__.py
+@@ -64,6 +64,22 @@ async def synthesize_speech(
+     return await synthesize_with_timeout(adapter, prepared, config)
+ 
+ 
++async def warm_local_stt() -> None:
++    """Prepare only the configured offline model; never contact a voice provider."""
++    import os
++
++    if not os.environ.get("DEEPTUTOR_LOCAL_AI"):
++        return
++
++    from deeptutor.services.config.provider_runtime import resolve_stt_runtime_config
++    from deeptutor.services.local_ai import run_worker
++    from deeptutor.services.voice.adapters.local import sensevoice_language
++
++    config = resolve_stt_runtime_config()
++    if config.adapter == "local_sensevoice":
++        await run_worker("stt", b"", language=sensevoice_language(config))
++
++
+ async def transcribe_audio(
+     audio: bytes,
+     *,
+diff --git a/deeptutor/services/voice/adapters/local.py b/deeptutor/services/voice/adapters/local.py
+index 17d225f..6a92e60 100644
+--- a/deeptutor/services/voice/adapters/local.py
++++ b/deeptutor/services/voice/adapters/local.py
+@@ -11,6 +11,15 @@ from deeptutor.services.voice.base import BaseSTTAdapter, VoiceProviderError
+ from deeptutor.services.voice.config import STTConfig
+ 
+ 
++def sensevoice_language(config: STTConfig) -> str:
++    if config.model != "sensevoice-small-int8":
++        raise VoiceProviderError("本机语音模型配置不正确，请修复本机运行环境。")
++    language = (config.language or "auto").split("-")[0].lower()
++    if language not in {"auto", "zh", "en", "ja", "ko", "yue"}:
++        raise VoiceProviderError("本机语音识别支持中文、英语、日语、韩语和粤语。")
++    return language
++
++
+ class LocalSTTAdapter(BaseSTTAdapter):
+     async def transcribe(
+         self,
+@@ -20,11 +29,7 @@ class LocalSTTAdapter(BaseSTTAdapter):
+         filename="audio.webm",
+         content_type="application/octet-stream",
+     ) -> str:
+-        if config.model != "sensevoice-small-int8":
+-            raise VoiceProviderError("本机语音模型配置不正确，请修复本机运行环境。")
+-        language = (config.language or "auto").split("-")[0].lower()
+-        if language not in {"auto", "zh", "en", "ja", "ko", "yue"}:
+-            raise VoiceProviderError("本机语音识别支持中文、英语、日语、韩语和粤语。")
++        language = sensevoice_language(config)
+         try:
+             wav_bytes = await normalize_wav(audio, max_seconds=180)
+             with wave.open(io.BytesIO(wav_bytes), "rb") as wav:
 diff --git a/deeptutor/tools/builtin/__init__.py b/deeptutor/tools/builtin/__init__.py
 index 505cc9d..d75e948 100644
 --- a/deeptutor/tools/builtin/__init__.py
@@ -5102,7 +5430,7 @@ index 7b831c0..2b856a0 100644
                      <InlineMarkdown content={value} />
                    ) : (
 diff --git a/web/components/chat/home/ChatComposer.tsx b/web/components/chat/home/ChatComposer.tsx
-index 46aaa0d..beb09d6 100644
+index 46aaa0d..c36786c 100644
 --- a/web/components/chat/home/ChatComposer.tsx
 +++ b/web/components/chat/home/ChatComposer.tsx
 @@ -311,6 +311,7 @@ export default memo(function ChatComposer({
@@ -5121,6 +5449,15 @@ index 46aaa0d..beb09d6 100644
    /**
     * Hide the capability chip. A surface that only ever runs one capability
     * — and names it in its own chrome — gains nothing from a picker that
+@@ -1065,7 +1067,7 @@ export default memo(function ChatComposer({
+         ]
+       : [];
+   const trayMode: TrayMode | undefined = modeInTray
+-    ? { capabilities, value: activeCap.value, onChange: handleSelectCapability }
++    ? { capabilities, hasKnowledgeBase: selectedKnowledgeBases.length > 0, value: activeCap.value, onChange: handleSelectCapability }
+     : undefined;
+   // Create mode's own chip reads "Create Skill" / "Create Persona" and comes
+   // before even the mode token: picking a kind already forced the mode back
 @@ -1437,6 +1439,8 @@ export default memo(function ChatComposer({
                    />
                  }
@@ -5217,6 +5554,76 @@ index b78c53c..3def6b2 100644
              >
                <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                  {placeholderCompletion}
+diff --git a/web/components/chat/home/ComposerTray.tsx b/web/components/chat/home/ComposerTray.tsx
+index 09b285b..de6151b 100644
+--- a/web/components/chat/home/ComposerTray.tsx
++++ b/web/components/chat/home/ComposerTray.tsx
+@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
+ import { Tooltip } from "@/shared/ui/Tooltip";
+ import { SPACE_MCP_SURFACE, loadMcpSurface } from "@/components/mcp/surface";
+ import { mcpRowStatus, type McpServerStatus, type McpStoreState } from "@/lib/mcp-api";
++import { useModules } from "@/hooks/useModules";
+ import type { ComposerResourceCatalog } from "@/hooks/useComposerResources";
+ import type { ResourceSelection } from "@/features/chat/ChatStateAdapter";
+ import type { WorkspaceResourceOption } from "@/lib/workspaces-api";
+@@ -100,6 +101,7 @@ export interface TrayResources {
+ /** The turn's mode; `""` is a plain conversation, which is no mode at all. */
+ export interface TrayMode {
+   capabilities: CapabilityDef[];
++  hasKnowledgeBase?: boolean;
+   value: string;
+   onChange: (value: string) => void;
+ }
+@@ -191,15 +193,27 @@ export function ComposerTray({
+   );
+ }
+ 
+-function ModeMenu({ capabilities, value, onChange, placement }: TrayMode & { placement: TrayPlacement }) {
++function ModeMenu({ capabilities, hasKnowledgeBase, value, onChange, placement }: TrayMode & { placement: TrayPlacement }) {
+   const { t } = useTranslation();
+   const capabilityLabel = useCapabilityLabel();
++  const { modules } = useModules();
+   const modes = capabilities.filter((cap) => cap.value !== "" && !cap.legacy && studentCapabilityVisible(cap.value));
+   const chosen = modes.find((cap) => cap.value === value);
+   const ChosenIcon = chosen && modeIcon(chosen);
++  const label = (cap: CapabilityDef) => cap.value === "audio_overview" ? t("Audio Overview") : capabilityLabel(cap);
+   const row = (cap: CapabilityDef, close: () => void) => {
+     const selected = cap.value === chosen?.value;
+     const Icon = modeIcon(cap);
++    const unavailable = STUDENT_EDITION && modules?.some((module) =>
++      module.capabilities?.includes(cap.value) && (!module.installed || !module.enabled || !module.ready),
++    );
++    const needsSource = STUDENT_EDITION && cap.value === "audio_overview" && !hasKnowledgeBase;
++    const description = unavailable ? t("Mode unavailable · check local runtime")
++      : needsSource ? t("Select a knowledge base or start from a note")
++      : cap.value === "audio_overview" ? t("Listen to a two-voice summary of your material")
++      : cap.value === "immersive_reading" ? t("Open a textbook or document to ask about its pages")
++      : cap.value === "math_animator" ? t("Create a math animation or storyboard")
++      : t(cap.description);
+     return (
+       <TrayOption
+         key={cap.value}
+@@ -210,8 +224,9 @@ function ModeMenu({ capabilities, value, onChange, placement }: TrayMode & { pla
+           close();
+         }}
+         leading={<Icon size={22} strokeWidth={1.5} />}
+-        title={capabilityLabel(cap)}
+-        meta={t(cap.description)}
++        title={label(cap)}
++        meta={description}
++        disabled={!selected && Boolean(unavailable || needsSource)}
+       />
+     );
+   };
+@@ -219,7 +234,7 @@ function ModeMenu({ capabilities, value, onChange, placement }: TrayMode & { pla
+     <TrayMenu
+       icon={<Shapes size={14} strokeWidth={1.7} className="shrink-0" />}
+       label={t("Mode")}
+-      value={chosen ? capabilityLabel(chosen) : undefined}
++      value={chosen ? label(chosen) : undefined}
+       valueIcon={ChosenIcon && createElement(ChosenIcon, { size: 15, strokeWidth: 1.7, className: "shrink-0" })}
+       active={Boolean(chosen)}
+       fold={Boolean(chosen)}
 diff --git a/web/components/chat/home/ModelSelector.tsx b/web/components/chat/home/ModelSelector.tsx
 index 8a9f782..12516ba 100644
 --- a/web/components/chat/home/ModelSelector.tsx
@@ -7052,6 +7459,26 @@ index 9f0f36d..7eab8e1 100644
                    <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-4">
  
                        <Tooltip label={
+diff --git a/web/components/settings/SettingsPageContent.tsx b/web/components/settings/SettingsPageContent.tsx
+index a271889..31847cd 100644
+--- a/web/components/settings/SettingsPageContent.tsx
++++ b/web/components/settings/SettingsPageContent.tsx
+@@ -23,6 +23,7 @@ const loading = () => (
+   />
+ );
+ const General = dynamic(() => import("./SettingsOverview"), { loading });
++const Progress = dynamic(() => import("@/features/settings/sections/LearningProgressSettingsSection"), { loading });
+ const Usage = dynamic(() => import("@/features/settings/sections/UsageSettingsSection"), { loading });
+ const DataMigration = dynamic(() => import("@/features/settings/sections/DataMigrationSettingsSection"), { loading });
+ const Status = dynamic(() => import("./SettingsRuntimePage"), { loading });
+@@ -176,6 +177,7 @@ const PAGES: Record<string, React.ComponentType> = {
+   general: General,
+   status: Status,
+   usage: Usage,
++  progress: Progress,
+   appearance: Appearance,
+   network: Network,
+   workspace: Workspace,
 diff --git a/web/components/student/LearningReports.module.css b/web/components/student/LearningReports.module.css
 index a839c2b..bee83f2 100644
 --- a/web/components/student/LearningReports.module.css
@@ -8169,6 +8596,49 @@ index 0000000..82c006a
 +    </details>
 +  );
 +}
+diff --git a/web/app/(utility)/settings/progress/page.tsx b/web/features/settings/sections/LearningProgressSettingsSection.tsx
+similarity index 94%
+rename from web/app/(utility)/settings/progress/page.tsx
+rename to web/features/settings/sections/LearningProgressSettingsSection.tsx
+index 9504fb3..ce2f28f 100644
+--- a/web/app/(utility)/settings/progress/page.tsx
++++ b/web/features/settings/sections/LearningProgressSettingsSection.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { FeaturePage, PageHeader } from '@/components/layout/FeaturePage'
++import { SettingsPageHeader } from "@/components/settings/shared";
+ import { useEffect, useState } from "react";
+ import { useTranslation } from "react-i18next";
+ 
+@@ -14,7 +14,7 @@ function percent(value: number): number {
+   return Math.round(value * 100);
+ }
+ 
+-export default function LearningProgressPage() {
++export default function LearningProgressSettingsSection() {
+   const { t } = useTranslation();
+   const [records, setRecords] = useState<LearningRecords | null>(null);
+   const [materialTitles, setMaterialTitles] = useState<Record<string, string>>({});
+@@ -38,8 +38,8 @@ export default function LearningProgressPage() {
+   const hasRecords = progress.length > 0 || activities.length > 0;
+ 
+   return (
+-    <FeaturePage>
+-      <PageHeader title={t("Learning progress")} description={t("Review your own reading and learning activity.")} />
++    <>
++      <SettingsPageHeader title={t("Learning progress")} description={t("Review your own reading and learning activity.")} />
+       {error ? (
+         <p className="mt-8 text-sm text-red-600">{t("Unable to load learning progress")}</p>
+       ) : records === null ? (
+@@ -109,6 +109,6 @@ export default function LearningProgressPage() {
+           </section>
+         </>
+       )}
+-    </FeaturePage>
++    </>
+   );
+ }
 diff --git a/web/features/settings/sections/MemorySettingsSection.tsx b/web/features/settings/sections/MemorySettingsSection.tsx
 index 190c783..778be33 100644
 --- a/web/features/settings/sections/MemorySettingsSection.tsx
@@ -8251,6 +8721,40 @@ index 2ab6edf..64a9427 100644
            )}
          >
            <SettingRow
+diff --git a/web/hooks/useModules.ts b/web/hooks/useModules.ts
+index 94a48c6..51f6baf 100644
+--- a/web/hooks/useModules.ts
++++ b/web/hooks/useModules.ts
+@@ -8,6 +8,7 @@ export interface ModuleStatus {
+   installed: boolean
+   enabled: boolean
+   ready: boolean
++  capabilities?: string[]
+   navigation: string[]
+   issues: string[]
+ }
+diff --git a/web/hooks/useVoiceRecorder.ts b/web/hooks/useVoiceRecorder.ts
+index d554444..f71f072 100644
+--- a/web/hooks/useVoiceRecorder.ts
++++ b/web/hooks/useVoiceRecorder.ts
+@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
+ import { useTranslation } from "react-i18next";
+ 
+ import { apiFetch, apiUrl } from "@/lib/api";
++import { STUDENT_EDITION } from "@/lib/student-edition";
+ import { stripAudioMimeParameters } from "@/lib/voice-mime";
+ 
+ export type RecorderState = "idle" | "starting" | "recording" | "transcribing";
+@@ -56,6 +57,9 @@ export function useVoiceRecorder(onTranscript: (text: string) => void, scopeKey
+     }
+     busyRef.current = true;
+     setState("starting");
++    if (STUDENT_EDITION) {
++      void apiFetch(apiUrl("/api/voice/stt/warmup"), { method: "POST" }).catch(() => undefined);
++    }
+     let stream: MediaStream;
+     try {
+       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 diff --git a/web/lib/latex-normalize.ts b/web/lib/latex-normalize.ts
 index 42c5d7a..811bede 100644
 --- a/web/lib/latex-normalize.ts
@@ -8889,11 +9393,17 @@ index 613b5fa..fecb5a8 100644
 +  "Control how much recent activity is used for suggestions. Saved learning preferences are used when learning habit memory is on.": "Control how much recent activity is used for suggestions. Saved learning preferences are used when learning habit memory is on."
  }
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..7860cc0 100644
+index 6c4afd4..663864d 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
-@@ -1,4 +1,18 @@
+@@ -1,4 +1,24 @@
  {
++  "Audio Overview": "雙人語音摘要",
++  "Mode unavailable · check local runtime": "暫不可用 · 請檢查本機執行環境",
++  "Select a knowledge base or start from a note": "先選知識庫，或從筆記啟動",
++  "Listen to a two-voice summary of your material": "用雙人對話講解你的資料",
++  "Open a textbook or document to ask about its pages": "打開教材或文件，即可按頁提問",
++  "Create a math animation or storyboard": "將數學概念做成動畫或分鏡",
 +  "Models shown in chat": "对话菜单展示的模型",
 +  "{{shown}} / {{total}} shown": "展示 {{shown}} / {{total}} 个",
 +  "Check the models you want in the chat menu, then apply changes. The default model is always shown.": "勾选要在对话菜单里显示的模型，再点「应用更改」。默认模型始终展示。",
@@ -8911,7 +9421,7 @@ index 6c4afd4..7860cc0 100644
    "Speech synthesis and transcription models with saved providers.": "使用已配置的提供方管理语音合成与语音识别模型。",
    "Image and video generation models with saved providers.": "使用已配置的提供方管理图片与视频生成模型。",
    "Manage provider names, addresses, credentials, and connectivity.": "管理提供方的名称、地址、密钥并测试连接。",
-@@ -3038,9 +3052,14 @@
+@@ -3038,9 +3058,14 @@
    "Underline": "下划线",
    "Add note": "添加批注",
    "Save citation": "保存引用",
@@ -8927,7 +9437,7 @@ index 6c4afd4..7860cc0 100644
    "Ask about this": "就此提问",
    "Your note…": "写下你的批注…",
    "Save note": "保存批注",
-@@ -3173,6 +3192,9 @@
+@@ -3173,6 +3198,9 @@
    "The tutor thread could not be detached.": "无法解除这条小老师追问的关联。",
    "Ask Little Tutor": "问小老师",
    "Ask about selected text": "针对选中内容提问",
@@ -8937,7 +9447,7 @@ index 6c4afd4..7860cc0 100644
    "Selected text": "选中内容",
    "Ask anything about the selected text.": "可以针对这段选中内容继续提问。",
    "Choose color": "选择颜色",
-@@ -6501,5 +6523,19 @@
+@@ -6501,5 +6529,19 @@
    "“{{title}}” and its practice records will be deleted. This cannot be undone.": "将删除「{{title}}」及其练习记录。此操作无法撤销。",
    "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "将删除「{{title}}」及其辅导对话。资料库原件保留。此操作无法撤销。",
    "Could not prepare attachment; sending will retry: {{name}}": "附件预处理未完成，发送时将重试：{{name}}",
@@ -9121,6 +9631,24 @@ index 46c0f17..fa5bd83 100644
 +  expect(input).toHaveValue(prediction);
 +  expect(onSend).not.toHaveBeenCalled();
 +});
+diff --git a/web/tests/e2e/learning-progress.audit.ts b/web/tests/e2e/learning-progress.audit.ts
+index 006e483..2600586 100644
+--- a/web/tests/e2e/learning-progress.audit.ts
++++ b/web/tests/e2e/learning-progress.audit.ts
+@@ -82,7 +82,12 @@ test("learning progress uses the account reading records contract", async ({
+     return json({});
+   });
+ 
+-  await page.goto("/settings/progress", { waitUntil: "domcontentloaded" });
++  await page.goto("/settings/general", { waitUntil: "domcontentloaded" });
++  const settings = page.locator("[data-settings-shell]");
++  await settings.getByRole("link", { name: "Learning progress", exact: true }).click();
++  await expect(page).toHaveURL(/\/settings\/progress(?:[?#]|$)/);
++  await expect(settings.getByRole("button", { name: "Back to app" })).toBeVisible();
++  await expect(settings.locator('[data-settings-page="progress"]')).toBeVisible();
+ 
+   await expect(page.getByRole("heading", { name: "Learning progress" })).toBeVisible();
+   await expect(page.getByText("rm_lesson").first()).toBeVisible();
 diff --git a/web/tests/integration/ask-user-trace-continuity.spec.tsx b/web/tests/integration/ask-user-trace-continuity.spec.tsx
 index 862328b..afb5010 100644
 --- a/web/tests/integration/ask-user-trace-continuity.spec.tsx
