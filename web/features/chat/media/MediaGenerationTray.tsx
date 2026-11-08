@@ -1,12 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Check, Clapperboard, List, LoaderCircle, Square, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
-import { activeWorkspaceId, scopedUrl } from "@/lib/workspace-scope";
 import type { MediaJob } from "./media-jobs";
 import { takeMediaSendOrigin } from "./send-origin";
 
@@ -14,17 +12,13 @@ const MathPlayer = dynamic(() => import("@/components/math-animator/MathAnimator
 const LessonPlayer = dynamic(() => import("@/components/video-lesson/VideoLessonViewer"), { ssr: false });
 
 export default function MediaGenerationTray() {
-  const { mediaJobs, state, newSession, stopMediaGeneration } = useChatStateAdapter();
+  const { mediaJobs, stopMediaGeneration } = useChatStateAdapter();
   if (!mediaJobs.length) return null;
-  const foregroundGeneration = mediaJobs.some(job => job.status === "running" && job.sessionKey === state.sessionKey);
-  return <MediaTray jobs={mediaJobs} foregroundGeneration={foregroundGeneration} stopJob={stopMediaGeneration}
-    startChat={() => newSession({ workspaceId: activeWorkspaceId() || null })} />;
+  return <MediaTray jobs={mediaJobs} stopJob={stopMediaGeneration} />;
 }
 
-function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
+function MediaTray({ jobs, stopJob }: {
   jobs: MediaJob[];
-  foregroundGeneration: boolean;
-  startChat: () => void;
   stopJob: (jobId: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
@@ -100,24 +94,17 @@ function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
         className="pointer-events-none fixed left-0 top-0 z-10 grid size-7 place-items-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] opacity-0">
         <Clapperboard size={14} />
       </span>
-      <div className="pointer-events-auto flex items-center gap-2">
-        {foregroundGeneration ? (
-          <Link href={scopedUrl("/chat")} onNavigate={startChat} className="rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
-            {t("student.media.newChat")}
-          </Link>
-        ) : null}
-        <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
-          aria-describedby={showGenerationHint ? "student-media-generation-hint" : undefined}
-          onClick={() => changeView(expanded ? null : runningCount ? "list" : latestReady?.id ?? "list")}
-          className="relative inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
-          {runningCount ? <LoaderCircle size={15} aria-hidden className="motion-safe:animate-spin" /> : <Clapperboard size={15} aria-hidden />}
-          <span role="status">
-            {runningCount ? t("student.media.running", { count: runningCount }) : t("student.media.jobs")}
-            {hasNewResult ? <span className="sr-only"> · {t("student.media.newResult")}</span> : null}
-          </span>
-          {hasNewResult ? <span aria-hidden className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--background)]" /> : null}
-        </button>
-      </div>
+      <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
+        aria-describedby={showGenerationHint ? "student-media-generation-hint" : undefined}
+        onClick={() => changeView(expanded ? null : runningCount ? "list" : latestReady?.id ?? "list")}
+        className="pointer-events-auto relative inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
+        {runningCount ? <LoaderCircle size={15} aria-hidden className="motion-safe:animate-spin" /> : <Clapperboard size={15} aria-hidden />}
+        <span role="status">
+          {runningCount ? t("student.media.running", { count: runningCount }) : t("student.media.jobs")}
+          {hasNewResult ? <span className="sr-only"> · {t("student.media.newResult")}</span> : null}
+        </span>
+        {hasNewResult ? <span aria-hidden className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--background)]" /> : null}
+      </button>
 
       {showGenerationHint ? (
         <p id="student-media-generation-hint"
