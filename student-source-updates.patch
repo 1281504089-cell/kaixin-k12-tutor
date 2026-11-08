@@ -224,26 +224,27 @@ index 5b41cda..7ddd0eb 100644
    }
    const relative = path.relative(result.sourcePath, result.runtimeHome);
 diff --git a/apps/desktop/src/i18n.mjs b/apps/desktop/src/i18n.mjs
-index efb0ebb..e8dde5b 100644
+index efb0ebb..9e8f353 100644
 --- a/apps/desktop/src/i18n.mjs
 +++ b/apps/desktop/src/i18n.mjs
-@@ -2,6 +2,15 @@
+@@ -2,6 +2,16 @@
  // language chosen in 开心动力超级学霸's own Settings and starts in English.
  
  const en = {
 +  checkRelease: "Check for Updates…",
 +  releaseBusy: "The updater is busy. Try again in a moment.",
-+  releaseCurrent: "No newer signed update is available for this computer.",
++  releaseCurrent: "You’re up to date.",
 +  releaseBaseMissing: "This update requires the current full student installation.",
 +  releaseAvailable: "A student update is available",
 +  releaseDetail: "Build {build}. The update downloads from GitHub. Your learning data is backed up before switching cores. Finish any active work before continuing.",
 +  releaseInstall: "Download and Update",
 +  releaseInstalled: "Update installed",
-+  releaseCheckFailed: "Could not check GitHub for updates",
++  releaseCheckFailed: "Could not check for updates",
++  releaseCheckRetry: "GitHub did not confirm the latest version. Please try again later.",
    connectionBusy: "Local service is not responding; reconnecting…",
    tagline: 'Your personal learning space',
    errorTitle: "开心动力超级学霸 couldn't start",
-@@ -26,7 +35,7 @@ const en = {
+@@ -26,7 +36,7 @@ const en = {
    pageGone: 'The page stopped unexpectedly. Restart to continue.',
    workerExited: 'The runtime manager exited ({code}). Restart to continue.',
    about: 'About 开心动力超级学霸',
@@ -252,23 +253,24 @@ index efb0ebb..e8dde5b 100644
    hide: 'Hide 开心动力超级学霸',
    hideOthers: 'Hide Others',
    showAll: 'Show All',
-@@ -55,6 +64,15 @@ const en = {
+@@ -55,6 +65,16 @@ const en = {
  };
  
  const zh = {
 +  checkRelease: "检查更新…",
 +  releaseBusy: "正在启动或处理更新，请稍后再试。",
-+  releaseCurrent: "这台电脑目前没有可用的新版签名更新。",
++  releaseCurrent: "已是最新版本",
 +  releaseBaseMissing: "这份更新需要当前完整版的运行环境。",
 +  releaseAvailable: "发现开心动力超级学霸新版",
 +  releaseDetail: "构建 {build}。将从 GitHub 下载对应的更新包。切换前会备份学习数据，请先完成正在进行的学习任务。",
 +  releaseInstall: "下载并更新",
 +  releaseInstalled: "更新已安装",
-+  releaseCheckFailed: "无法连接 GitHub 检查更新",
++  releaseCheckFailed: "暂时无法检查更新",
++  releaseCheckRetry: "暂时无法从 GitHub 确认最新版本，请稍后再试。",
    connectionBusy: "本机服务暂未响应，正在重连…",
    tagline: '你的个人学习空间',
    errorTitle: '开心动力超级学霸 未能启动',
-@@ -79,7 +97,7 @@ const zh = {
+@@ -79,7 +99,7 @@ const zh = {
    pageGone: '页面意外退出，请重新启动。',
    workerExited: '运行时管理进程已退出（{code}），请重新启动。',
    about: '关于 开心动力超级学霸',
@@ -277,7 +279,7 @@ index efb0ebb..e8dde5b 100644
    hide: '隐藏 开心动力超级学霸',
    hideOthers: '隐藏其他',
    showAll: '全部显示',
-@@ -108,6 +126,8 @@ const zh = {
+@@ -108,6 +128,8 @@ const zh = {
  };
  
  const de = {
@@ -286,7 +288,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "Lokaler Dienst antwortet nicht; Verbindung wird wiederhergestellt…",
    tagline: 'Dein persönlicher Lernraum',
    errorTitle: '开心动力超级学霸 konnte nicht starten',
-@@ -132,7 +152,6 @@ const de = {
+@@ -132,7 +154,6 @@ const de = {
    pageGone: 'Die Seite wurde unerwartet beendet. Starte neu, um fortzufahren.',
    workerExited: 'Der Laufzeitmanager wurde beendet ({code}). Starte neu, um fortzufahren.',
    about: 'Über 开心动力超级学霸',
@@ -294,7 +296,7 @@ index efb0ebb..e8dde5b 100644
    hide: '开心动力超级学霸 ausblenden',
    hideOthers: 'Andere ausblenden',
    showAll: 'Alle einblenden',
-@@ -161,6 +180,8 @@ const de = {
+@@ -161,6 +182,8 @@ const de = {
  };
  
  const fr = {
@@ -303,7 +305,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "Le service local ne répond pas ; reconnexion…",
    tagline: "Votre espace d'apprentissage personnel",
    errorTitle: "开心动力超级学霸 n'a pas pu démarrer",
-@@ -185,7 +206,6 @@ const fr = {
+@@ -185,7 +208,6 @@ const fr = {
    pageGone: "La page s'est arrêtée de façon inattendue. Redémarrez pour continuer.",
    workerExited: "Le gestionnaire d'exécution s'est arrêté ({code}). Redémarrez pour continuer.",
    about: "À propos d'开心动力超级学霸",
@@ -311,7 +313,7 @@ index efb0ebb..e8dde5b 100644
    hide: 'Masquer 开心动力超级学霸',
    hideOthers: 'Masquer les autres',
    showAll: 'Tout afficher',
-@@ -214,6 +234,8 @@ const fr = {
+@@ -214,6 +236,8 @@ const fr = {
  };
  
  const pl = {
@@ -320,7 +322,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "Usługa lokalna nie odpowiada; ponowne łączenie…",
    tagline: 'Twoja osobista przestrzeń nauki',
    errorTitle: 'Nie udało się uruchomić 开心动力超级学霸',
-@@ -238,7 +260,6 @@ const pl = {
+@@ -238,7 +262,6 @@ const pl = {
    pageGone: 'Strona nieoczekiwanie się zamknęła. Uruchom ponownie, aby kontynuować.',
    workerExited: 'Menedżer środowiska zakończył działanie ({code}). Uruchom ponownie, aby kontynuować.',
    about: '开心动力超级学霸 – informacje',
@@ -328,7 +330,7 @@ index efb0ebb..e8dde5b 100644
    hide: 'Ukryj 开心动力超级学霸',
    hideOthers: 'Ukryj pozostałe',
    showAll: 'Pokaż wszystkie',
-@@ -267,6 +288,8 @@ const pl = {
+@@ -267,6 +290,8 @@ const pl = {
  };
  
  const uk = {
@@ -337,7 +339,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "Локальна служба не відповідає; повторне підключення…",
    tagline: 'Ваш особистий простір навчання',
    errorTitle: 'Не вдалося запустити 开心动力超级学霸',
-@@ -291,7 +314,6 @@ const uk = {
+@@ -291,7 +316,6 @@ const uk = {
    pageGone: 'Сторінка несподівано завершила роботу. Перезапустіть, щоб продовжити.',
    workerExited: 'Менеджер середовища завершив роботу ({code}). Перезапустіть, щоб продовжити.',
    about: 'Про 开心动力超级学霸',
@@ -345,7 +347,7 @@ index efb0ebb..e8dde5b 100644
    hide: 'Сховати 开心动力超级学霸',
    hideOthers: 'Сховати інші',
    showAll: 'Показати всі',
-@@ -320,6 +342,8 @@ const uk = {
+@@ -320,6 +344,8 @@ const uk = {
  };
  
  const vi = {
@@ -354,7 +356,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "Dịch vụ cục bộ không phản hồi; đang kết nối lại…",
    tagline: 'Không gian học tập cá nhân của bạn',
    errorTitle: 'Không thể khởi động 开心动力超级学霸',
-@@ -344,7 +368,6 @@ const vi = {
+@@ -344,7 +370,6 @@ const vi = {
    pageGone: 'Trang đã đóng đột ngột. Hãy khởi động lại để tiếp tục.',
    workerExited: 'Trình quản lý môi trường đã thoát ({code}). Hãy khởi động lại để tiếp tục.',
    about: 'Giới thiệu 开心动力超级学霸',
@@ -362,7 +364,7 @@ index efb0ebb..e8dde5b 100644
    hide: 'Ẩn 开心动力超级学霸',
    hideOthers: 'Ẩn các ứng dụng khác',
    showAll: 'Hiện tất cả',
-@@ -373,6 +396,8 @@ const vi = {
+@@ -373,6 +398,8 @@ const vi = {
  };
  
  const pt = {
@@ -371,7 +373,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "O serviço local não responde; reconectando…",
    "tagline": "Seu espaço pessoal de aprendizado",
    "errorTitle": "Não foi possível iniciar o 开心动力超级学霸",
-@@ -397,7 +422,6 @@ const pt = {
+@@ -397,7 +424,6 @@ const pt = {
    "pageGone": "A página parou inesperadamente. Reinicie para continuar.",
    "workerExited": "O gerenciador do ambiente de execução foi encerrado ({code}). Reinicie para continuar.",
    "about": "Sobre o 开心动力超级学霸",
@@ -379,7 +381,7 @@ index efb0ebb..e8dde5b 100644
    "hide": "Ocultar o 开心动力超级学霸",
    "hideOthers": "Ocultar outros",
    "showAll": "Mostrar tudo",
-@@ -440,6 +464,8 @@ const pt = {
+@@ -440,6 +466,8 @@ const pt = {
  };
  
  const tr = {
@@ -388,7 +390,7 @@ index efb0ebb..e8dde5b 100644
    connectionBusy: "Yerel hizmet yanıt vermiyor; yeniden bağlanılıyor…",
    "tagline": "Kişisel öğrenme alanınız",
    "errorTitle": "开心动力超级学霸 başlatılamadı",
-@@ -464,7 +490,6 @@ const tr = {
+@@ -464,7 +492,6 @@ const tr = {
    "pageGone": "Sayfa beklenmedik şekilde durdu. Devam etmek için yeniden başlatın.",
    "workerExited": "Çalışma ortamı yöneticisi kapandı ({code}). Devam etmek için yeniden başlatın.",
    "about": "开心动力超级学霸 hakkında",
@@ -397,7 +399,7 @@ index efb0ebb..e8dde5b 100644
    "hideOthers": "Diğerlerini gizle",
    "showAll": "Tümünü göster",
 diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
-index d2ac8dd..6ef107d 100644
+index d2ac8dd..5905a38 100644
 --- a/apps/desktop/src/main.mjs
 +++ b/apps/desktop/src/main.mjs
 @@ -1,7 +1,7 @@
@@ -417,16 +419,17 @@ index d2ac8dd..6ef107d 100644
  
  app.setName('开心动力超级学霸');
  if (WINDOWS) app.setAppUserModelId('org.kaixindongli.super-scholar');
-@@ -42,6 +43,8 @@ let busy = false;
+@@ -42,6 +43,9 @@ let busy = false;
  let quitting = false;
  let exitAllowed = false;
  let active;
 +let releaseRequest;
++let releaseCheck;
 +let releaseCheckScheduled = false;
  
  const t = (key, values) => translate(ui.language, key, values);
  
-@@ -135,7 +138,7 @@ async function openContent(url) {
+@@ -135,7 +139,7 @@ async function openContent(url) {
    const origin = new URL(url).origin;
    view = new WebContentsView({ webPreferences: {
      contextIsolation: true, sandbox: true, nodeIntegration: false, webSecurity: true,
@@ -435,7 +438,7 @@ index d2ac8dd..6ef107d 100644
    } });
    const content = view.webContents;
    content.setWindowOpenHandler(({ url: target }) => {
-@@ -182,7 +185,7 @@ async function stopWorker() {
+@@ -182,7 +186,7 @@ async function stopWorker() {
  }
  
  async function launchRuntime(installed) {
@@ -444,7 +447,7 @@ index d2ac8dd..6ef107d 100644
    const child = fork(path.join(sourceDirectory, 'supervisor.mjs'), [], {
      execPath: config.nodePath, stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
      env: { ...process.env, ELECTRON_RUN_AS_NODE: '',
-@@ -267,6 +270,10 @@ async function boot() {
+@@ -267,6 +271,10 @@ async function boot() {
      watchInterface();
      await refreshInterface();
      await openContent(ready.url);
@@ -455,7 +458,7 @@ index d2ac8dd..6ef107d 100644
    } catch (error) {
      await logStartupFailure(error);
      status({ phase: 'error', step: null, message: error.message });
-@@ -280,20 +287,11 @@ async function boot() {
+@@ -280,20 +288,11 @@ async function boot() {
    } finally { busy = false; }
  }
  
@@ -479,7 +482,7 @@ index d2ac8dd..6ef107d 100644
      status({ phase: 'starting', step: 'updating' });
      await stopWorker();
      transaction = await prepareUpgrade(next, active.manifest);
-@@ -307,10 +305,87 @@ async function installUpdate() {
+@@ -307,10 +306,103 @@ async function installUpdate() {
    } catch (error) {
      await stopWorker();
      if (transaction) await recoverInterruptedUpgrade();
@@ -515,9 +518,20 @@ index d2ac8dd..6ef107d 100644
 +  }
 +}
 +
-+async function checkRelease(interactive = true) {
++function checkRelease(interactive = true) {
++  if (releaseCheck) {
++    if (interactive) releaseCheck.interactive = true;
++    return releaseCheck.promise;
++  }
++  const check = { interactive };
++  releaseCheck = check;
++  check.promise = performReleaseCheck(check).finally(() => { releaseCheck = undefined; });
++  return check.promise;
++}
++
++async function performReleaseCheck(check) {
 +  if (busy || quitting || !active || state.phase !== 'ready') {
-+    if (interactive) await updateNotice('releaseBusy');
++    if (check.interactive) await updateNotice('releaseBusy');
 +    return;
 +  }
 +  busy = true;
@@ -528,18 +542,18 @@ index d2ac8dd..6ef107d 100644
 +  try {
 +    const next = await findReleaseUpdate(targetId(), active.manifest, publicKey, fetch, request.signal);
 +    if (!next) {
-+      if (interactive) await updateNotice('releaseCurrent');
++      if (check.interactive) await updateNotice('releaseCurrent');
 +      return;
 +    }
-+    if (!interactive) {
++    if (!check.interactive) {
 +      const transaction = await readJSON(transactionFile);
-+      if (transaction?.phase === 'recovered' && transaction.candidate?.runtimeId === next.runtimeId) return;
++      if (!check.interactive && transaction?.phase === 'recovered' && transaction.candidate?.runtimeId === next.runtimeId) return;
 +    }
 +    if (next.baseRuntimeId) {
 +      const base = path.join(userRoot, 'runtimes', next.baseRuntimeId, 'installed.json');
 +      const present = await access(base).then(() => true, () => false);
 +      if (!present) {
-+        if (interactive) await updateNotice('releaseBaseMissing');
++        if (check.interactive) await updateNotice('releaseBaseMissing');
 +        return;
 +      }
 +    }
@@ -559,7 +573,12 @@ index d2ac8dd..6ef107d 100644
 +    await applyCoreUpdate(file);
 +    await updateNotice('releaseInstalled', next.runtimeId);
 +  } catch (error) {
-+    if (interactive || downloading) await updateNotice(downloading ? 'updateFailed' : 'releaseCheckFailed', error.message, 'error');
++    if (downloading) {
++      await updateNotice('updateFailed', error.message, 'error');
++    } else if (check.interactive) {
++      console.warn('GitHub update check failed', error);
++      await updateNotice('releaseCheckFailed', t('releaseCheckRetry'), 'warning');
++    }
 +  } finally {
 +    if (window && !window.isDestroyed()) window.setProgressBar(-1);
 +    if (temporary) await rm(temporary, { recursive: true, force: true }).catch(() => {});
@@ -569,7 +588,7 @@ index d2ac8dd..6ef107d 100644
  }
  
  function buildMenu() {
-@@ -321,6 +396,7 @@ function buildMenu() {
+@@ -321,6 +413,7 @@ function buildMenu() {
    Menu.setApplicationMenu(Menu.buildFromTemplate([
      { label: '开心动力超级学霸', submenu: WINDOWS ? [about, { type: 'separator' }, { role: 'quit', label: t('quit') }] : [
        about,
@@ -577,7 +596,7 @@ index d2ac8dd..6ef107d 100644
        { type: 'separator' },
        { role: 'hide', label: t('hide') }, { role: 'hideOthers', label: t('hideOthers') }, { role: 'unhide', label: t('showAll') },
        { type: 'separator' },
-@@ -345,6 +421,7 @@ function buildMenu() {
+@@ -345,6 +438,7 @@ function buildMenu() {
          const choice = await dialog.showMessageBox(window, { message: t('restartConfirm'), buttons: [t('cancel'), t('restart')], defaultId: 0, cancelId: 0 });
          if (choice.response === 1) void boot();
        } },
@@ -585,7 +604,7 @@ index d2ac8dd..6ef107d 100644
        { label: t('installUpdate'), click: () => void installUpdate() }, { type: 'separator' },
        { label: t('openData'), click: () => void shell.openPath(runtimeHome) },
        { label: t('openLogs'), click: () => void shell.openPath(path.dirname(logPath)) },
-@@ -364,6 +441,7 @@ else {
+@@ -364,6 +458,7 @@ else {
      event.preventDefault();
      if (quitting) return;
      quitting = true;
@@ -593,7 +612,7 @@ index d2ac8dd..6ef107d 100644
      status({ phase: 'stopping', step: 'stopping' });
      void stopWorker().finally(() => { exitAllowed = true; app.quit(); });
    });
-@@ -398,6 +476,13 @@ else {
+@@ -398,6 +493,13 @@ else {
      restart: () => { void boot(); },
      logs: async () => { await mkdir(path.dirname(logPath), { recursive: true }); await shell.openPath(path.dirname(logPath)); },
    })) ipcMain.handle(`desktop:${channel}`, (event, ...args) => { trustedShell(event); return handler(...args); });
@@ -609,10 +628,10 @@ index d2ac8dd..6ef107d 100644
    await window.loadURL(shellURL);
 diff --git a/apps/desktop/src/release-updates.mjs b/apps/desktop/src/release-updates.mjs
 new file mode 100644
-index 0000000..9a3280e
+index 0000000..bcb5818
 --- /dev/null
 +++ b/apps/desktop/src/release-updates.mjs
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,120 @@
 +import { createWriteStream } from 'node:fs';
 +import { writeFile } from 'node:fs/promises';
 +import path from 'node:path';
@@ -625,6 +644,7 @@ index 0000000..9a3280e
 +const RELEASE = `https://github.com/${REPOSITORY}/releases/download/${TAG}/`;
 +const API = `https://api.github.com/repos/${REPOSITORY}/releases/`;
 +const MANIFEST_LIMIT = 16 * 1024;
++const MANIFEST_ROUTE_TIMEOUT = 7000;
 +const RELEASE_METADATA_LIMIT = 2 * 1024 ** 2;
 +const ARCHIVE_LIMIT = 2 * 1024 ** 3;
 +const HOSTS = new Set(['github.com', 'api.github.com', 'release-assets.githubusercontent.com', 'objects.githubusercontent.com']);
@@ -660,17 +680,9 @@ index 0000000..9a3280e
 +  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 +}
 +
-+async function getAsset(name, fetchAsset, signal) {
-+  const direct = await fetchGitHub(new URL(name, RELEASE), fetchAsset, signal);
-+  if (direct.status !== 404 && direct.status !== 429 && direct.status < 500) return direct;
-+  await direct.body?.cancel();
-+  // The Releases page and its asset API use separate GitHub endpoints.
++async function getApiAsset(name, fetchAsset, signal) {
 +  const listing = await fetchGitHub(new URL(`tags/${TAG}`, API), fetchAsset, signal, 'application/vnd.github+json');
-+  if (!listing.ok) {
-+    await listing.body?.cancel();
-+    if (listing.status === 404 && direct.status === 404) return direct;
-+    throw new Error(`GitHub download HTTP ${direct.status}; release API HTTP ${listing.status}`);
-+  }
++  if (!listing.ok) return listing;
 +  const release = await boundedJSON(listing, RELEASE_METADATA_LIMIT, 'release metadata');
 +  if (release?.tag_name !== TAG || release.draft !== false || !Array.isArray(release.assets)) {
 +    throw new Error('Invalid GitHub update release metadata');
@@ -681,15 +693,35 @@ index 0000000..9a3280e
 +  return fetchGitHub(new URL(`assets/${asset.id}`, API), fetchAsset, signal, 'application/octet-stream');
 +}
 +
-+export async function findReleaseUpdate(target, current, publicKey, fetchAsset = fetch, signal) {
-+  const response = await getAsset(`runtime-${target}.json`, fetchAsset,
-+    signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000));
-+  if (response.status === 404) return null;
++async function getAsset(name, fetchAsset, signal) {
++  const direct = await fetchGitHub(new URL(name, RELEASE), fetchAsset, signal);
++  if (direct.status !== 404 && direct.status !== 429 && direct.status < 500) return direct;
++  await direct.body?.cancel();
++  return getApiAsset(name, fetchAsset, signal);
++}
++
++async function readManifestRoute(fetchManifest, signal) {
++  const timeout = AbortSignal.timeout(MANIFEST_ROUTE_TIMEOUT);
++  const routeSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
++  const response = await fetchManifest(routeSignal);
 +  if (!response.ok) {
 +    await response.body?.cancel();
 +    throw new Error(`GitHub HTTP ${response.status}`);
 +  }
-+  const manifest = verifyManifest(await boundedJSON(response, MANIFEST_LIMIT, 'update manifest'), publicKey);
++  return boundedJSON(response, MANIFEST_LIMIT, 'update manifest');
++}
++
++export async function findReleaseUpdate(target, current, publicKey, fetchAsset = fetch, signal) {
++  const name = `runtime-${target}.json`;
++  let data;
++  try {
++    // Version checks read a small signed manifest. Give each route a fresh budget.
++    data = await readManifestRoute(routeSignal => getApiAsset(name, fetchAsset, routeSignal), signal);
++  } catch {
++    signal?.throwIfAborted();
++    data = await readManifestRoute(routeSignal => fetchGitHub(new URL(name, RELEASE), fetchAsset, routeSignal), signal);
++  }
++  const manifest = verifyManifest(data, publicKey);
 +  if (!manifest.builtAt || manifest.builtAt <= (current.builtAt ?? 0) || manifest.runtimeId === current.runtimeId) return null;
 +  return manifest;
 +}
@@ -789,10 +821,10 @@ index 0000000..0f747a4
 +});
 diff --git a/apps/desktop/test/release-updates.test.mjs b/apps/desktop/test/release-updates.test.mjs
 new file mode 100644
-index 0000000..102d048
+index 0000000..945aaf8
 --- /dev/null
 +++ b/apps/desktop/test/release-updates.test.mjs
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,128 @@
 +import assert from 'node:assert/strict';
 +import { createHash, generateKeyPairSync, sign } from 'node:crypto';
 +import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -822,7 +854,7 @@ index 0000000..102d048
 +  });
 +  assert.equal((await check(Response.json(signed()))).runtimeId, 'student-update');
 +  assert.equal(await check(Response.json(signed({ builtAt: 99 }))), null);
-+  assert.equal(await check(new Response('', { status: 404 })), null);
++  await assert.rejects(check(new Response('', { status: 404 })), /HTTP 404/);
 +  await assert.rejects(check(Response.json(signed({ arch: 'bad' }))), /not compatible/);
 +  const tampered = signed();
 +  tampered.builtAt += 1;
@@ -830,7 +862,7 @@ index 0000000..102d048
 +  await assert.rejects(check(Response.redirect('https://example.org/invalid')), /Invalid GitHub/);
 +});
 +
-+test('HTTP 504 falls back to official binary assets for both the manifest and the archive', async t => {
++test('the manifest uses the GitHub API first and archive HTTP 504 falls back to the API', async t => {
 +  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-release-fallback-'));
 +  t.after(() => rm(root, { recursive: true, force: true }));
 +  const manifestName = `runtime-${targetId()}.json`;
@@ -865,6 +897,27 @@ index 0000000..102d048
 +  await downloadReleaseUpdate(next, root, () => {}, github);
 +  assert.deepEqual(await readFile(path.join(root, manifest.archive)), archiveBytes);
 +  assert.deepEqual(served, [11, 12]);
++});
++
++test('a stalled manifest route leaves time to verify the installed version on the other route', async t => {
++  const installed = signed(current);
++  const requests = [];
++  const apiDeadline = new AbortController();
++  const directDeadline = new AbortController();
++  t.mock.method(AbortSignal, 'timeout', () => requests.length ? directDeadline.signal : apiDeadline.signal);
++  const result = await findReleaseUpdate(targetId(), installed, publicKey, async (url, { signal }) => {
++    requests.push(url.hostname);
++    if (url.hostname === 'api.github.com') {
++      return new Promise((_, reject) => {
++        signal.addEventListener('abort', () => reject(signal.reason), { once: true });
++        queueMicrotask(() => apiDeadline.abort(new DOMException('Timed out', 'TimeoutError')));
++      });
++    }
++    assert.equal(signal.aborted, false);
++    return Response.json(installed);
++  });
++  assert.equal(result, null);
++  assert.deepEqual(requests, ['api.github.com', 'github.com']);
 +});
 +
 +test('signed update reuses original runtime without modifying it; wrong archive is rejected', async t => {
