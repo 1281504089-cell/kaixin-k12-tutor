@@ -861,6 +861,26 @@ index 8cff1dc..5764490 100644
      每轮结束后你会看到工具结果，可以继续调用。
  
      调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
+diff --git a/deeptutor/api/routers/reading.py b/deeptutor/api/routers/reading.py
+index 9e06183..72619b4 100644
+--- a/deeptutor/api/routers/reading.py
++++ b/deeptutor/api/routers/reading.py
+@@ -379,6 +379,7 @@ class WorkspaceUpdateRequest(BaseModel):
+     title: str | None = Field(default=None, max_length=300)
+     description: str | None = Field(default=None, max_length=2000)
+     color: str | None = Field(default=None, max_length=32)
++    learning_instruction: str | None = Field(default=None, max_length=2000)
+ 
+ 
+ class WorkspaceMaterialRequest(BaseModel):
+@@ -759,6 +760,7 @@ async def update_workspace(workspace_id: str, payload: WorkspaceUpdateRequest) -
+             title=payload.title,
+             description=payload.description,
+             color=payload.color,
++            learning_instruction=payload.learning_instruction,
+         )
+         return {"workspace": row.to_dict()}
+     except Exception as exc:
 diff --git a/deeptutor/api/routers/student_learning.py b/deeptutor/api/routers/student_learning.py
 index b5c804d..fe1ccb4 100644
 --- a/deeptutor/api/routers/student_learning.py
@@ -1032,6 +1052,78 @@ index b5c804d..fe1ccb4 100644
          return {"deleted": True}
      except (ValueError, LookupError) as exc:
          raise _error(exc) from None
+diff --git a/deeptutor/reading/catalog_models.py b/deeptutor/reading/catalog_models.py
+index 3ca7f07..f81fef7 100644
+--- a/deeptutor/reading/catalog_models.py
++++ b/deeptutor/reading/catalog_models.py
+@@ -99,6 +99,7 @@ class WorkspaceRecord:
+     created_at: float = 0.0
+     updated_at: float = 0.0
+     tabs: tuple[WorkspaceTab, ...] = field(default_factory=tuple)
++    learning_instruction: str = ""
+ 
+     def to_dict(self) -> dict[str, Any]:
+         return {
+@@ -106,6 +107,7 @@ class WorkspaceRecord:
+             "title": self.title,
+             "description": self.description,
+             "color": self.color,
++            "learning_instruction": self.learning_instruction,
+             "active_material_id": self.active_material_id,
+             "created_at": self.created_at,
+             "updated_at": self.updated_at,
+diff --git a/deeptutor/reading/catalog_store.py b/deeptutor/reading/catalog_store.py
+index 289ffb7..09fc04a 100644
+--- a/deeptutor/reading/catalog_store.py
++++ b/deeptutor/reading/catalog_store.py
+@@ -111,6 +111,7 @@ class ReadingCatalogStore:
+                     title TEXT NOT NULL,
+                     description TEXT NOT NULL DEFAULT '',
+                     color TEXT NOT NULL DEFAULT '',
++                    learning_instruction TEXT NOT NULL DEFAULT '',
+                     active_material_id TEXT REFERENCES reading_materials(material_id)
+                         ON DELETE SET NULL,
+                     created_at REAL NOT NULL,
+@@ -179,6 +180,13 @@ class ReadingCatalogStore:
+                 conn.execute(
+                     "ALTER TABLE reading_workspaces ADD COLUMN color TEXT NOT NULL DEFAULT ''"
+                 )
++            if "learning_instruction" not in collection_columns:
++                conn.execute("BEGIN IMMEDIATE")
++                if not any(row["name"] == "learning_instruction" for row in conn.execute("PRAGMA table_info(reading_workspaces)")):
++                    conn.execute(
++                        "ALTER TABLE reading_workspaces ADD COLUMN learning_instruction TEXT NOT NULL DEFAULT ''"
++                    )
++                conn.commit()
+             if self._content_id_is_unique(conn):
+                 self._remove_content_id_unique_constraint(conn)
+             conn.execute(
+@@ -664,6 +672,7 @@ class ReadingCatalogStore:
+         title: str | None = None,
+         description: str | None = None,
+         color: str | None = None,
++        learning_instruction: str | None = None,
+     ) -> WorkspaceRecord:
+         self._validate_id(workspace_id, "workspace")
+         assignments = ["updated_at = ?"]
+@@ -677,6 +686,9 @@ class ReadingCatalogStore:
+         if color is not None:
+             assignments.append("color = ?")
+             params.append(_collection_color(color))
++        if learning_instruction is not None:
++            assignments.append("learning_instruction = ?")
++            params.append(learning_instruction.strip()[:2000])
+         params.append(workspace_id)
+         with self._lock, self._connect() as conn:
+             changed = conn.execute(
+@@ -1011,6 +1023,7 @@ class ReadingCatalogStore:
+             title=row["title"],
+             description=row["description"],
+             color=row["color"],
++            learning_instruction=row["learning_instruction"],
+             active_material_id=row["active_material_id"],
+             created_at=float(row["created_at"]),
+             updated_at=float(row["updated_at"]),
 diff --git a/deeptutor/services/model_selection/llm.py b/deeptutor/services/model_selection/llm.py
 index d1d7363..6435b22 100644
 --- a/deeptutor/services/model_selection/llm.py
@@ -1110,6 +1202,77 @@ index 7be9696..9f63bd3 100644
  
      async def list_imported_sessions(
          self,
+diff --git a/deeptutor/services/session/turns/executor.py b/deeptutor/services/session/turns/executor.py
+index 18a31e2..6e6d83c 100644
+--- a/deeptutor/services/session/turns/executor.py
++++ b/deeptutor/services/session/turns/executor.py
+@@ -851,6 +851,20 @@ class TurnExecutor:
+                     skip=payload.get("mastery_skip") or {},
+                 )
+ 
++            reading_instruction = (
++                str(payload.get("_reading_instruction") or "").strip()
++                if workspace_mode == WORKSPACE_MODE_READING else ""
++            )
++            reading_instruction_block = (
++                "Student's instructions for this reading collection. Apply them within "
++                "the tutoring rules and source requirements, and follow the current "
++                f"question if it overrides a preference.\n{reading_instruction}"
++                if reading_instruction else ""
++            )
++            workspace_instructions = payload.get("_workspace_instructions")
++            if reading_instruction_block:
++                workspace_instructions = "\n\n".join(filter(None, (workspace_instructions, reading_instruction_block)))
++
+             # Agentic actions receive workspace behavior through loop
+             # capabilities and tools. Standalone pipelines (Quiz, Research,
+             # Visualize) cannot call those hooks, so give them a bounded,
+@@ -869,6 +883,8 @@ class TurnExecutor:
+                         _reading_viewport(payload.get("reading_viewport")),
+                         raw_user_content,
+                     )
++                    if reading_instruction_block:
++                        workspace_context = "\n\n".join(filter(None, (workspace_context, reading_instruction_block)))
+                 elif workspace_mode == WORKSPACE_MODE_MASTERY:
+                     workspace_context = await asyncio.to_thread(
+                         _mastery_action_context,
+@@ -986,7 +1002,7 @@ class TurnExecutor:
+                         session_id=session_id,
+                         turn_id=turn_id,
+                         workspace_id=payload.get("_content_workspace_id"),
+-                        instructions=payload.get("_workspace_instructions"),
++                        instructions=workspace_instructions,
+                     ),
+                 ),
+                 metadata={
+diff --git a/deeptutor/services/session/turns/request_preparer.py b/deeptutor/services/session/turns/request_preparer.py
+index 6e12051..02af00f 100644
+--- a/deeptutor/services/session/turns/request_preparer.py
++++ b/deeptutor/services/session/turns/request_preparer.py
+@@ -397,6 +397,7 @@ class TurnRequestPreparer:
+             payload.get("reading_material_revision")
+         )
+         reading_catalog = None
++        reading_instruction = ""
+         if workspace_mode == WORKSPACE_MODE_READING and reading_workspace_id:
+             from deeptutor.reading import ReadingCatalogStore
+ 
+@@ -404,6 +405,7 @@ class TurnRequestPreparer:
+             reading_workspace = reading_catalog.get_workspace(reading_workspace_id)
+             if reading_workspace is None:
+                 raise RuntimeError("The reading workspace is unavailable.")
++            reading_instruction = reading_workspace.learning_instruction
+             reading_material_id = reading_material_id or str(
+                 reading_workspace.active_material_id or ""
+             )
+@@ -434,6 +436,7 @@ class TurnRequestPreparer:
+                 "reading_workspace_id": reading_workspace_id,
+                 "reading_material_id": reading_material_id,
+                 "reading_material_revision": reading_material_revision,
++                "_reading_instruction": reading_instruction,
+             }
+         # A mastery path has a longer lifetime than any one conversation.
+         # Persist the explicit association on the session, and restore it on
 diff --git a/deeptutor/services/settings/connection_setup.py b/deeptutor/services/settings/connection_setup.py
 index a06dd2a..f9c0b4e 100644
 --- a/deeptutor/services/settings/connection_setup.py
@@ -4386,6 +4549,53 @@ index 293b762..755f2da 100644
 +    older = [entry("u1", "user", "旧题"), entry("a1", "assistant", "很长的旧答案" * 10000)]
 +    newer = [entry("u2", "user", "新题"), entry("a2", "assistant", "新答案")]
 +    assert reports.report_evidence(older + newer) == newer
+diff --git a/tests/reading/test_router.py b/tests/reading/test_router.py
+index 2a62f16..9c4fc5e 100644
+--- a/tests/reading/test_router.py
++++ b/tests/reading/test_router.py
+@@ -960,3 +960,15 @@ def test_collection_color_round_trips_through_create_and_patch(client: TestClien
+         json={"title": "Slow reading", "color": "green"},
+     ).json()["workspace"]
+     assert (patched["title"], patched["color"]) == ("Slow reading", "green")
++
++
++def test_learning_instruction_is_saved_only_in_the_selected_collection(client: TestClient) -> None:
++    first = client.post("/api/reading/workspaces", json={"title": "Fractions"}).json()["workspace"]
++    second = client.post("/api/reading/workspaces", json={"title": "Geometry"}).json()["workspace"]
++    route = f"/api/reading/workspaces/{first['workspace_id']}"
++    response = client.patch(route, json={"learning_instruction": "  Ask one follow-up.  "})
++    assert response.json()["workspace"]["learning_instruction"] == "Ask one follow-up."
++    assert client.get(route).json()["workspace"]["learning_instruction"] == "Ask one follow-up."
++    assert client.get(f"/api/reading/workspaces/{second['workspace_id']}").json()["workspace"]["learning_instruction"] == ""
++    assert client.patch(route, json={"learning_instruction": "x" * 2001}).status_code == 422
++    assert client.patch(route, json={"learning_instruction": ""}).json()["workspace"]["learning_instruction"] == ""
+diff --git a/tests/reading/test_turn_wiring.py b/tests/reading/test_turn_wiring.py
+index 0e5c82d..bdb3da9 100644
+--- a/tests/reading/test_turn_wiring.py
++++ b/tests/reading/test_turn_wiring.py
+@@ -252,7 +252,9 @@ async def test_empty_workspace_starts_in_no_material_mode(
+     monkeypatch.setenv("DEEPTUTOR_HOME", str(tmp_path))
+     PathService.reset_instance()
+     try:
+-        workspace = ReadingCatalogStore().create_workspace("Empty reading workspace")
++        catalog = ReadingCatalogStore()
++        workspace = catalog.create_workspace("Empty reading workspace")
++        catalog.update_workspace(workspace.workspace_id, learning_instruction="Use a short example.")
+         runtime = TurnRuntimeManager(SQLiteSessionStore(tmp_path / "turns.sqlite3"))
+ 
+         async def _noop_run_turn(_execution) -> None:
+@@ -275,6 +277,11 @@ async def test_empty_workspace_starts_in_no_material_mode(
+         )
+ 
+         assert runtime._executions[turn["id"]].payload["reading_material_id"] == ""
++        assert runtime._executions[turn["id"]].payload["_reading_instruction"] == "Use a short example."
++        _, chat_turn = await runtime.start_turn(
++            {"type": "start_turn", "capability": "chat", "content": "Explain this."}
++        )
++        assert "_reading_instruction" not in runtime._executions[chat_turn["id"]].payload
+         detail = await runtime.store.get_session(_session["id"])
+         assert detail is not None
+         assert detail["preferences"]["workspace_mode"] == "immersive_reading"
 diff --git a/web/app/globals.css b/web/app/globals.css
 index 457ab09..68ee70b 100644
 --- a/web/app/globals.css
@@ -4422,11 +4632,58 @@ index 457ab09..68ee70b 100644
    }
  }
  
+diff --git a/web/components/chat/home/AskUserOptions.tsx b/web/components/chat/home/AskUserOptions.tsx
+index 7b831c0..2b856a0 100644
+--- a/web/components/chat/home/AskUserOptions.tsx
++++ b/web/components/chat/home/AskUserOptions.tsx
+@@ -1606,11 +1606,8 @@ const ResolvedAskUserCard = memo(function ResolvedAskUserCard({
+     return n;
+   }, [payload.questions, byId]);
+ 
+-  // Same shell as the question it replaces (see ``AskUserOptions``): the
+-  // prompt drops to muted, the answer holds the foreground, and nothing else
+-  // is added — an answered exchange is history, not a panel. ``collapsible``
+-  // is research's alone: it needs the bubble back for the outline editor, so
+-  // there the card keeps a header row to fold from.
++  // Keep the original options in the read-only transcript. Research can
++  // still fold the whole exchange when the outline editor is open.
+   return (
+     <div
+       data-testid="ask-user-answers"
+@@ -1642,7 +1639,8 @@ const ResolvedAskUserCard = memo(function ResolvedAskUserCard({
+         </button>
+       ) : null}
+       {!collapsed && (
+-        <div className="space-y-2">
++        <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
++          {payload.intro && <div className="text-sm font-medium"><InlineMarkdown content={payload.intro} /></div>}
+           {payload.questions.map((q) => {
+             const value = (byId.get(q.id) ?? "").trim();
+             return (
+@@ -1650,7 +1648,18 @@ const ResolvedAskUserCard = memo(function ResolvedAskUserCard({
+                 <div className="text-[12.5px] leading-snug text-[var(--muted-foreground)]">
+                   <InlineMarkdown content={q.prompt} />
+                 </div>
++                {q.options.length > 1 && (
++                  <ul className="my-1.5 space-y-1 rounded-lg bg-[var(--secondary)] px-3 py-2 text-[13px]">
++                    {q.options.map((option) => (
++                      <li key={option.label}>
++                        <InlineMarkdown content={option.label} />
++                        {option.description && <div className="text-[12px] text-[var(--muted-foreground)]"><InlineMarkdown content={option.description} /></div>}
++                      </li>
++                    ))}
++                  </ul>
++                )}
+                 <div className="text-[14px] font-medium leading-snug text-[var(--foreground)]">
++                  {q.options.length > 1 && <span className="mr-2 text-[12px] text-[var(--muted-foreground)]">{t("Your answer")}</span>}
+                   {value ? (
+                     <InlineMarkdown content={value} />
+                   ) : (
 diff --git a/web/components/chat/home/ComposerInput.tsx b/web/components/chat/home/ComposerInput.tsx
-index b78c53c..531a5f7 100644
+index b78c53c..3def6b2 100644
 --- a/web/components/chat/home/ComposerInput.tsx
 +++ b/web/components/chat/home/ComposerInput.tsx
-@@ -367,6 +367,30 @@ export const ComposerInput = memo(
+@@ -367,6 +367,14 @@ export const ComposerInput = memo(
        [clearTrailingMention, onSelectAgent],
      );
  
@@ -4438,26 +4695,10 @@ index b78c53c..531a5f7 100644
 +      return true;
 +    }, [placeholderCompletion, isStreaming, isComposingRef, setInputBoth, onInputChange, textareaRef]);
 +
-+    useEffect(() => {
-+      if (!placeholderCompletion || isStreaming) return;
-+      const onTab = (event: KeyboardEvent) => {
-+        // After a reply, focus can be back on the document. Never intercept
-+        // Tab from another control, dialog, or a selection in the transcript.
-+        if (document.activeElement !== document.body || document.querySelector('[role="dialog"][aria-modal="true"]') ||
-+            window.getSelection()?.isCollapsed === false || event.defaultPrevented ||
-+            event.key !== "Tab" || event.shiftKey || event.ctrlKey || event.altKey ||
-+            event.metaKey || event.isComposing || event.repeat ||
-+            !textareaRef.current?.getClientRects().length) return;
-+        if (acceptPrediction()) event.preventDefault();
-+      };
-+      document.addEventListener("keydown", onTab);
-+      return () => document.removeEventListener("keydown", onTab);
-+    }, [acceptPrediction, isStreaming, placeholderCompletion, textareaRef]);
-+
      const handleKeyDown = useCallback(
        (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
          // Backspace before the first character reaches back into the lead:
-@@ -440,12 +464,11 @@ export const ComposerInput = memo(
+@@ -440,12 +448,12 @@ export const ComposerInput = memo(
          if (
            e.key === "Tab" &&
            !e.shiftKey &&
@@ -4465,6 +4706,7 @@ index b78c53c..531a5f7 100644
 -          !inputRef.current.trim()
 +          !e.ctrlKey && !e.altKey && !e.metaKey &&
 +          !e.nativeEvent.isComposing && !e.repeat &&
++          document.activeElement === e.currentTarget &&
 +          acceptPrediction()
          ) {
            e.preventDefault();
@@ -4473,7 +4715,7 @@ index b78c53c..531a5f7 100644
            return;
          }
          if (shouldSubmitOnEnter(e, isComposingRef.current)) {
-@@ -473,9 +496,7 @@ export const ComposerInput = memo(
+@@ -473,9 +481,7 @@ export const ComposerInput = memo(
          filteredAgents,
          handleSelectAgentMention,
          isComposingRef,
@@ -4484,7 +4726,7 @@ index b78c53c..531a5f7 100644
          lead,
          armed,
        ],
-@@ -572,7 +593,7 @@ export const ComposerInput = memo(
+@@ -572,7 +578,7 @@ export const ComposerInput = memo(
      // textarea onto a second line and silently clip the very text that
      // explains how to accept it; the hint span truncates with an ellipsis
      // instead, while "→ Tab to complete" stays pinned and fully visible.
@@ -4493,7 +4735,7 @@ index b78c53c..531a5f7 100644
  
      return (
        <div className="px-4 pt-3.5 pb-2">
-@@ -764,7 +785,7 @@ export const ComposerInput = memo(
+@@ -764,7 +770,7 @@ export const ComposerInput = memo(
              // attachment path, not the composer body.
              maxLength={32000}
              suppressHydrationWarning
@@ -4502,7 +4744,7 @@ index b78c53c..531a5f7 100644
              aria-haspopup={showSlashPopup || showLanguagePopup ? "listbox" : undefined}
              aria-controls={showSlashPopup ? slashListId : showLanguagePopup ? languageListId : undefined}
              aria-activedescendant={showSlashPopup
-@@ -778,7 +799,7 @@ export const ComposerInput = memo(
+@@ -778,7 +784,7 @@ export const ComposerInput = memo(
              // accessible name — this restores one that reads the same as
              // what's on screen.
              aria-label={
@@ -4511,32 +4753,19 @@ index b78c53c..531a5f7 100644
                  ? `${placeholderCompletion} — ${t("Tab to complete")}`
                  : undefined
              }
-@@ -789,10 +810,12 @@ export const ComposerInput = memo(
-             }}
+@@ -790,9 +796,9 @@ export const ComposerInput = memo(
            />
            {showHintOverlay ? (
--            <div
+             <div
 -              aria-hidden="true"
 -              className="pointer-events-none absolute inset-0 flex items-start gap-1 overflow-hidden text-[16px] leading-relaxed text-[var(--muted-foreground)]"
 -              style={{ paddingLeft: indent || undefined }}
-+            <button
-+              type="button"
-+              tabIndex={-1}
-+              onClick={acceptPrediction}
-+              className="absolute inset-x-0 top-0 flex items-start gap-1 overflow-hidden text-start text-[16px] leading-relaxed text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
++              aria-hidden
++              className="pointer-events-none absolute inset-x-0 top-0 flex items-start gap-1 overflow-hidden text-start text-[16px] leading-relaxed text-[var(--muted-foreground)]"
 +              style={{ paddingInlineStart: indent || undefined }}
              >
                <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                  {placeholderCompletion}
-@@ -800,7 +823,7 @@ export const ComposerInput = memo(
-               <span className="shrink-0 whitespace-nowrap">
-                 → {t("Tab to complete")}
-               </span>
--            </div>
-+            </button>
-           ) : null}
-           {lead.length > 0 && (
-             <ComposerLead tokens={lead} armed={armed} hidden={scrolled} onWidth={setLeadWidth} />
 diff --git a/web/components/chat/home/ModelSelector.tsx b/web/components/chat/home/ModelSelector.tsx
 index 8a9f782..12516ba 100644
 --- a/web/components/chat/home/ModelSelector.tsx
@@ -4736,7 +4965,7 @@ index 037fdda..4dd5c24 100644
          <div className="mt-1.5 flex items-center gap-1 border-t border-[var(--border)] pt-1.5">
            <Tooltip label={t('Ask about this')} side="bottom">
 diff --git a/web/components/reading/PdfDocumentView.tsx b/web/components/reading/PdfDocumentView.tsx
-index 38afc3a..b3f0547 100644
+index 38afc3a..bf742af 100644
 --- a/web/components/reading/PdfDocumentView.tsx
 +++ b/web/components/reading/PdfDocumentView.tsx
 @@ -8,7 +8,8 @@ import {
@@ -4895,7 +5124,7 @@ index 38afc3a..b3f0547 100644
      // Attribute the selection to the page it started on, and measure against
      // that page's box so the rects are in its own normalised space.
      const startElement =
-@@ -476,29 +494,71 @@ export function PdfDocumentView({
+@@ -476,29 +494,63 @@ export function PdfDocumentView({
        return;
      }
  
@@ -4957,15 +5186,7 @@ index 38afc3a..b3f0547 100644
 +    setCaptureMenu({ x, y });
 +  }
 +
-+  useEffect(() => {
-+    const root = scrollRef.current;
-+    const dismiss = () => { stopPress(); setCaptureMenu(null); };
-+    root?.addEventListener("scroll", dismiss, { passive: true });
-+    return () => {
-+      root?.removeEventListener("scroll", dismiss);
-+      stopPress();
-+    };
-+  }, [stopPress]);
++  useEffect(() => stopPress, [stopPress]);
 +
 +  useEffect(() => {
 +    if (!captureMenu) return;
@@ -4985,15 +5206,17 @@ index 38afc3a..b3f0547 100644
  
    // -- render --------------------------------------------------------------
  
-@@ -519,7 +579,30 @@ export function PdfDocumentView({
+@@ -519,7 +571,32 @@ export function PdfDocumentView({
      <div
        ref={scrollRef}
        data-preview-scroll
 -      onMouseUp={onRegionSelect ? undefined : handlePointerUp}
-+      onMouseUp={() => {
++      onMouseUp={(event) => {
++        if (event.button !== 0 || event.ctrlKey) return;
 +        if (!onRegionSelect && !suppressTextSelection.current) handlePointerUp();
 +        suppressTextSelection.current = false;
 +      }}
++      onWheel={() => { stopPress(); setCaptureMenu(null); }}
 +      onPointerDown={(event) => {
 +        if (onRegionSelect || !onRequestRegion || !event.isPrimary || event.button !== 0
 +          || !(event.target as Element).closest("[data-reader-unit]")) return;
@@ -5010,14 +5233,14 @@ index 38afc3a..b3f0547 100644
 +      onPointerLeave={stopPress}
 +      onPointerCancel={stopPress}
 +      onContextMenu={(event) => {
-+        if (!onRequestRegion || onRegionSelect || !(event.target as Element).closest("[data-reader-unit]")) return;
++        if (!doc || !onRequestRegion || onRegionSelect) return;
 +        event.preventDefault();
 +        openCaptureMenu(event.clientX, event.clientY);
 +      }}
        // The desk the pages lie on. This was `bg-[var(--muted)]/40`, which
        // compiles to nothing here — a var() colour has no channels for the
        // `/NN` modifier to reach into, so the rule was dropped and the desk
-@@ -527,6 +610,27 @@ export function PdfDocumentView({
+@@ -527,6 +604,27 @@ export function PdfDocumentView({
        // token for exactly this: one step back from the page.
        className="dt-reader-scroll h-full overflow-auto overscroll-contain bg-[var(--secondary)] px-6 py-4"
      >
@@ -5383,10 +5606,19 @@ index a5b665d..b28c30b 100644
        rects: [],
        selectors:
 diff --git a/web/components/reading/workspace/ReadingCompanion.tsx b/web/components/reading/workspace/ReadingCompanion.tsx
-index 6d437f2..16d835f 100644
+index 6d437f2..6bb1657 100644
 --- a/web/components/reading/workspace/ReadingCompanion.tsx
 +++ b/web/components/reading/workspace/ReadingCompanion.tsx
-@@ -45,6 +45,12 @@ import { useChatAutoScroll } from "@/hooks/useChatAutoScroll";
+@@ -28,7 +28,7 @@ import {
+   ListOrdered,
+   PanelRight,
+ } from "lucide-react";
+-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
++import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+ import { useTranslation } from "react-i18next";
+ 
+ import { ChatMessageList } from "@/features/chat/messages";
+@@ -45,6 +45,13 @@ import { useChatAutoScroll } from "@/hooks/useChatAutoScroll";
  import { useMeasuredHeight } from "@/hooks/useMeasuredHeight";
  import { useResearchOutlineContinuation } from "@/hooks/useResearchOutlineContinuation";
  import { buildChatOutline, scrollToChatTurn } from "@/lib/chat-outline";
@@ -5395,11 +5627,12 @@ index 6d437f2..16d835f 100644
 +import SelectionActions from "@/features/chat/components/SelectionActions";
 +import { captureMistake } from "@/lib/student-learning-api";
 +import { notify } from "@/lib/notifications";
++import { STUDENT_EDITION } from "@/lib/student-edition";
 +import { Dialog } from "@/shared/ui/Dialog";
  import { copyText } from "@/lib/clipboard";
  import { buildConversationNotebookSave } from "@/lib/conversation-notebook-save";
  import { setReadingViewport } from "@/lib/reading-turn-state";
-@@ -53,6 +59,7 @@ import {
+@@ -53,6 +60,7 @@ import {
    type ReadingConversation,
    type ReadingLibraryMaterial,
  } from "@/lib/reading-workspace-api";
@@ -5407,8 +5640,21 @@ index 6d437f2..16d835f 100644
  import { READER_ASK_EVENT } from "@/components/reading/ReaderPane";
  import {
    focusReadingComposer,
-@@ -95,7 +102,7 @@ export function ReadingCompanion({
+@@ -80,6 +88,8 @@ export function ReadingCompanion({
+   material,
+   activeConversation,
+   linkedSessionIds,
++  learningInstruction,
++  onSaveLearningInstruction,
+   activeLocator,
+   selection,
+   onClearSelection,
+@@ -93,9 +103,11 @@ export function ReadingCompanion({
+   activeConversation: ReadingConversation | null;
+   /** Conversations pinned as extra context for every turn. */
    linkedSessionIds: string[];
++  learningInstruction: string;
++  onSaveLearningInstruction: (instruction: string) => Promise<void>;
    /** Where the reader is, used to write a placeholder about this page. */
    activeLocator: number;
 -  selection: { quote: string; locator: number } | null;
@@ -5416,7 +5662,7 @@ index 6d437f2..16d835f 100644
    onClearSelection: () => void;
    onOpenLinker: () => void;
    prefillInputRef: React.MutableRefObject<((text: string) => void) | null>;
-@@ -121,6 +128,32 @@ export function ReadingCompanion({
+@@ -121,6 +133,32 @@ export function ReadingCompanion({
    const readingActions = useReadingActions();
    const [turnsOpen, setTurnsOpen] = useState(false);
    const [showSaveModal, setShowSaveModal] = useState(false);
@@ -5449,7 +5695,7 @@ index 6d437f2..16d835f 100644
    const [viewerOpen, setViewerOpen] = useState(false);
    const viewerPanelRef = useRef<SessionViewerPanelHandle | null>(null);
  
-@@ -231,7 +264,7 @@ export function ReadingCompanion({
+@@ -231,7 +269,7 @@ export function ReadingCompanion({
    const [askHint, setAskHint] = useState("");
    const messageCount = state.messages.length;
    useEffect(() => {
@@ -5458,7 +5704,7 @@ index 6d437f2..16d835f 100644
      const controller = new AbortController();
      let cancelled = false;
      void fetchReadingAskHint(
-@@ -256,6 +289,7 @@ export function ReadingCompanion({
+@@ -256,6 +294,7 @@ export function ReadingCompanion({
      messageCount,
      selection?.quote,
      state.sessionId,
@@ -5466,7 +5712,16 @@ index 6d437f2..16d835f 100644
      workspaceId,
    ]);
  
-@@ -409,9 +443,12 @@ export function ReadingCompanion({
+@@ -365,7 +404,7 @@ export function ReadingCompanion({
+   );
+ 
+   return (
+-    <aside className="dt-reading-companion absolute inset-y-0 right-0 z-30 flex w-[min(420px,100%)] min-h-0 min-w-0 flex-col bg-[var(--card)] shadow-[-18px_0_42px_rgba(0,0,0,.12)] dark:bg-[var(--background)] xl:static xl:row-span-2 xl:row-start-1 xl:w-auto xl:shadow-none xl:[grid-column:-2/-1]">
++    <aside className="dt-reading-companion absolute inset-y-0 right-0 z-30 flex w-[min(420px,100%)] min-h-0 min-w-0 flex-col overflow-x-clip bg-[var(--card)] shadow-[-18px_0_42px_rgba(0,0,0,.12)] dark:bg-[var(--background)] xl:static xl:row-span-2 xl:row-start-1 xl:w-auto xl:shadow-none xl:[grid-column:-2/-1]">
+       {head}
+       {/* Its own header on its own sheet: what the companion is doing and
+           its three controls sit with it, not across the page in the bar.
+@@ -409,9 +448,12 @@ export function ReadingCompanion({
          // without it the browser's own scroll anchoring fights the pin every
          // time a code block or KaTeX span reflows.
          data-chat-scroll-root="true"
@@ -5479,9 +5734,21 @@ index 6d437f2..16d835f 100644
            const distanceFromBottom =
              container.scrollHeight -
              container.scrollTop -
-@@ -488,6 +525,22 @@ export function ReadingCompanion({
+@@ -436,7 +478,7 @@ export function ReadingCompanion({
+         // No rule above the composer: the last lines fade out instead, so the
+         // composer floats over the conversation as it does on /chat. The
+         // bottom padding keeps that fade over empty space, not the last line.
+-        className="min-h-0 flex-1 overflow-y-auto px-4 pb-10 pt-4 [scrollbar-gutter:stable]"
++        className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-x-contain px-4 pb-10 pt-4 [overflow-wrap:anywhere] [scrollbar-gutter:stable]"
+         style={{
+           WebkitMaskImage: COMPOSER_FADE,
+           maskImage: COMPOSER_FADE,
+@@ -486,8 +528,24 @@ export function ReadingCompanion({
+       <div
+         ref={composerBoxRef}
          data-reading-composer=""
-         className="shrink-0 pt-1"
+-        className="shrink-0 pt-1"
++        className="w-full min-w-0 shrink-0 pt-1"
        >
 +        {selectedPassage && (
 +          <SelectionActions
@@ -5502,7 +5769,7 @@ index 6d437f2..16d835f 100644
          {!!linkedSessionIds.length && (
            <div className="mx-4 mb-2 flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
              <Link2 size={11} />
-@@ -502,6 +555,8 @@ export function ReadingCompanion({
+@@ -502,6 +560,8 @@ export function ReadingCompanion({
            placeholder={askHint || t("Ask about this material…")}
            placeholderCompletion={askHint}
            selection={selection}
@@ -5511,8 +5778,64 @@ index 6d437f2..16d835f 100644
            onSent={onClearSelection}
            onRemoveSelection={() => {
              onClearSelection();
+@@ -510,6 +570,7 @@ export function ReadingCompanion({
+           linkedSessionIds={linkedSessionIds}
+           prefillInputRef={prefillInputRef}
+         />
++        {STUDENT_EDITION && <ReadingInstructionForm key={workspaceId} saved={learningInstruction} onSave={onSaveLearningInstruction} />}
+       </div>
+ 
+       <SaveToNotebookModal
+@@ -534,3 +595,47 @@ export function ReadingCompanion({
+     </aside>
+   );
+ }
++
++
++function ReadingInstructionForm({ saved, onSave }: { saved: string; onSave: (value: string) => Promise<void> }) {
++  const { t } = useTranslation();
++  const id = useId();
++  const [draft, setDraft] = useState<string | null>(null);
++  const [saving, setSaving] = useState(false);
++  const [status, setStatus] = useState("");
++  const value = draft ?? saved;
++
++  return (
++    <form className="min-w-0 space-y-1.5 border-t border-[var(--border)] px-3 pb-3 pt-2 text-xs" onSubmit={async event => {
++      event.preventDefault();
++      if (saving || value.trim() === saved) return;
++      setSaving(true);
++      setStatus("");
++      try {
++        await onSave(value.trim());
++        setDraft(null);
++        setStatus(t("Reading instructions saved"));
++      } catch {
++        setStatus(t("Reading instructions could not be saved"));
++      } finally {
++        setSaving(false);
++      }
++    }}>
++      <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
++        <label htmlFor={id} className="font-medium">{t("Reading instructions")}</label>
++        <span className="text-[var(--muted-foreground)]">{t("Only for this learning session")}</span>
++      </div>
++      <div className="flex min-w-0 items-start gap-2">
++        <textarea id={id} rows={1} maxLength={2000} disabled={saving} value={value}
++          placeholder={t("For example, explain with a short example and then ask me a question")}
++          onChange={event => { setDraft(event.currentTarget.value); setStatus(""); }}
++          className="min-h-8 min-w-0 flex-1 resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-2.5 py-1.5 leading-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ring)]"
++        />
++        <button type="submit" disabled={saving || value.trim() === saved} className="h-8 shrink-0 rounded-lg bg-[var(--secondary)] px-2.5 font-medium hover:bg-[var(--accent)] disabled:opacity-50">
++          {saving ? t("Saving…") : t("Save")}
++        </button>
++      </div>
++      {status && <p role="status" className="text-[var(--muted-foreground)]">{status}</p>}
++    </form>
++  );
++}
 diff --git a/web/components/reading/workspace/ReadingComposer.tsx b/web/components/reading/workspace/ReadingComposer.tsx
-index 48e0f0a..b4048a2 100644
+index 48e0f0a..0d25f2b 100644
 --- a/web/components/reading/workspace/ReadingComposer.tsx
 +++ b/web/components/reading/workspace/ReadingComposer.tsx
 @@ -16,6 +16,8 @@ import { useCallback, useRef } from "react";
@@ -5588,7 +5911,15 @@ index 48e0f0a..b4048a2 100644
        onSent,
        selection,
        sendMessage,
-@@ -165,12 +178,25 @@ export function ReadingComposer({
+@@ -148,6 +161,7 @@ export function ReadingComposer({
+       activeCapValue={activeCapabilityValue}
+       onSelectCapability={selectCapability}
+       showCapabilityChip
++      docked
+       hasMessages={state.messages.length > 0}
+       isStreaming={state.isStreaming}
+       awaitingUserReply={awaitingUserReply}
+@@ -165,12 +179,25 @@ export function ReadingComposer({
        inputPlaceholder={placeholder}
        inputPlaceholderCompletion={placeholderCompletion}
        inputHeader={
@@ -5621,7 +5952,7 @@ index 48e0f0a..b4048a2 100644
        }
        prefillInputRef={replyInputRef}
 diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
-index ffff540..c1451d5 100644
+index ffff540..28ef9e5 100644
 --- a/web/components/reading/workspace/ReadingWorkspace.tsx
 +++ b/web/components/reading/workspace/ReadingWorkspace.tsx
 @@ -9,6 +9,7 @@ import {
@@ -5649,7 +5980,15 @@ index ffff540..c1451d5 100644
  import {
    PAGE_QUIZ_CAPABILITY,
    PAGE_QUIZ_CONFIG,
-@@ -122,6 +124,7 @@ const AddMaterialsDialog = dynamic(
+@@ -51,6 +53,7 @@ import {
+   linkReadingConversation,
+   retryReadingMaterial,
+   unlinkReadingConversation,
++  updateReadingWorkspace,
+   type ReadingLibraryMaterial,
+ } from "@/lib/reading-workspace-api";
+ import { SourceNavigator } from "./SourceNavigator";
+@@ -122,6 +125,7 @@ const AddMaterialsDialog = dynamic(
  interface ReaderAskDetail {
    quote?: string;
    image?: string;
@@ -5657,7 +5996,7 @@ index ffff540..c1451d5 100644
    locator?: number;
    unit?: string;
    /** Send this about the passage now, instead of waiting for a question. */
-@@ -131,16 +134,18 @@ interface ReaderAskDetail {
+@@ -131,16 +135,18 @@ interface ReaderAskDetail {
  export function ReadingWorkspacePage() {
    const params = useParams<{ workspaceId: string }>();
    const workspaceId = params.workspaceId;
@@ -5681,7 +6020,7 @@ index ffff540..c1451d5 100644
  
    const {
      workspace,
-@@ -175,12 +180,19 @@ export function ReadingWorkspacePage() {
+@@ -175,12 +181,19 @@ export function ReadingWorkspacePage() {
      reportViewport,
    } = useReadingWorkspace(workspaceId, sessionIdParam);
  
@@ -5701,7 +6040,7 @@ index ffff540..c1451d5 100644
    } | null>(null);
    const prefillInputRef = useRef<((text: string) => void) | null>(null);
    const [isDesktopWide, setIsDesktopWide] = useState(false);
-@@ -321,10 +333,10 @@ export function ReadingWorkspacePage() {
+@@ -321,10 +334,10 @@ export function ReadingWorkspacePage() {
          setReadingViewport({ locator, selection: quote });
          sendMessage(prompt, selectionImageAttachments(detail.image, locator), undefined, undefined, linkedSessionIds);
          setSelection(null);
@@ -5714,6 +6053,20 @@ index ffff540..c1451d5 100644
        setReadingViewport({ locator, selection: quote });
        if (prompt) {
          window.requestAnimationFrame(() => prefillInputRef.current?.(prompt));
+@@ -624,6 +637,13 @@ export function ReadingWorkspacePage() {
+             material={activeTab?.material ?? null}
+             activeConversation={activeConversation}
+             linkedSessionIds={linkedSessionIds}
++            learningInstruction={workspace.learning_instruction || ""}
++            onSaveLearningInstruction={async (instruction) => {
++              const saved = await updateReadingWorkspace(workspaceId, { learning_instruction: instruction });
++              setWorkspace(current => current?.workspace_id === saved.workspace_id
++                ? { ...current, learning_instruction: saved.learning_instruction }
++                : current);
++            }}
+             activeLocator={activeLocator}
+             selection={selection}
+             onClearSelection={() => setSelection(null)}
 diff --git a/web/components/reading/workspace/useReadingWorkspace.ts b/web/components/reading/workspace/useReadingWorkspace.ts
 index b281995..5574ff2 100644
 --- a/web/components/reading/workspace/useReadingWorkspace.ts
@@ -6845,10 +7198,41 @@ index c789249..c60a6cf 100644
    );
  }
 diff --git a/web/features/chat/messages/ChatMessageList.tsx b/web/features/chat/messages/ChatMessageList.tsx
-index de5ee55..8c3b9d9 100644
+index de5ee55..9b74045 100644
 --- a/web/features/chat/messages/ChatMessageList.tsx
 +++ b/web/features/chat/messages/ChatMessageList.tsx
-@@ -2016,6 +2016,7 @@ export const UserMessage = memo(function UserMessage({
+@@ -443,8 +443,8 @@ type MessageBlock =
+  * not commentary awaiting a later answer. Keep learner-facing text since the
+  * previous card outside the fold even when tool work separates its parts.
+  * Reasoning and tool payloads are trace segments and still fold normally.
+- * Answered clarifications belong to the same process as the
+- * work before and after them; only pending cards stand outside the fold.
++ * Completed choice questions stay in the transcript so students can review them.
++ * Answered free-text clarifications can still fold into the process.
+  */
+ function buildMessageBlocks(
+   segments: MessageSegment[],
+@@ -465,8 +465,10 @@ function buildMessageBlocks(
+       before -= 1;
+     }
+   };
++  const isChoice = (segment: MessageSegment) =>
++    segment.kind === "ask_user" && segment.data.payload.questions.some(question => question.options.length > 1);
+   segments.forEach((segment, index) => {
+-    if (segment.kind === "mastery_question") preserveTeachingBefore(index);
++    if (segment.kind === "mastery_question" || isChoice(segment)) preserveTeachingBefore(index);
+   });
+   // Keep Mastery teaching/feedback visible before an assessment arrives and
+   // when a turn ends with bookkeeping without posing an assessment at all.
+@@ -481,6 +483,7 @@ function buildMessageBlocks(
+   segments.slice(0, answerStart).forEach((segment, index) => {
+     if (
+       (segment.kind === "ask_user" && !segment.data.resolved) ||
++      isChoice(segment) ||
+       segment.kind === "mastery_question" ||
+       // A presented lesson page is part of the lesson, not working-out.
+       segment.kind === "source_view" ||
+@@ -2016,6 +2019,7 @@ export const UserMessage = memo(function UserMessage({
                          snap.readingMaterialId,
                          snap.readingSelection.locator,
                          snap.readingMaterialRevision,
@@ -7332,6 +7716,27 @@ index bd967be..aaab82a 100644
    if (width <= 0 || height <= 0) return;
    const crop = document.createElement("canvas");
    const scale = Math.min(1, 1600 / Math.max(width, height));
+diff --git a/web/lib/reading-workspace-api.ts b/web/lib/reading-workspace-api.ts
+index 3abd45b..125337a 100644
+--- a/web/lib/reading-workspace-api.ts
++++ b/web/lib/reading-workspace-api.ts
+@@ -83,6 +83,7 @@ export interface ReadingWorkspace extends LearningOrigin {
+   workspace_id: string;
+   title: string;
+   description: string;
++  learning_instruction?: string;
+   /** Folder tint: a palette key, or "" for the neutral default. */
+   color?: string;
+   active_material_id: string | null;
+@@ -238,7 +239,7 @@ export async function createReadingWorkspace(
+ 
+ export async function updateReadingWorkspace(
+   workspaceId: string,
+-  patch: { title?: string; description?: string; color?: string },
++  patch: { title?: string; description?: string; color?: string; learning_instruction?: string },
+   contentWorkspaceId = activeWorkspaceId(),
+ ): Promise<ReadingWorkspace> {
+   const result = await json<{ workspace: ReadingWorkspace }>(
 diff --git a/web/lib/reasoning-effort.ts b/web/lib/reasoning-effort.ts
 index 21e9f61..d1206f3 100644
 --- a/web/lib/reasoning-effort.ts
@@ -7553,7 +7958,7 @@ index e8f8270..a8f16ba 100644
    const { summary, metrics } = report
    const lines = [`# ${parent ? '孩子的学习近况' : '我的学习报告'}`, `${report.range.from} 至 ${report.range.to}`, summary.overview.text, `记录范围：${metrics.message_count}条对话记录，${metrics.conversation_count}段对话，${metrics.active_days}个有提问的日期。`, '学习时长、练习总数与正确率：未记录，不由聊天时长或讲解内容推算。']
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa..db12962 100644
+index 613b5fa..434f5ee 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
 @@ -1,4 +1,18 @@
@@ -7601,8 +8006,20 @@ index 613b5fa..db12962 100644
    "Selected text": "Selected text",
    "Ask anything about the selected text.": "Ask anything about the selected text.",
    "Choose color": "Choose color",
+@@ -6501,5 +6523,10 @@
+   "“{{title}}” and its practice records will be deleted. This cannot be undone.": "“{{title}}” and its practice records will be deleted. This cannot be undone.",
+   "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.",
+   "Could not prepare attachment; sending will retry: {{name}}": "Could not prepare attachment; sending will retry: {{name}}",
+-  "Quoted passage": "Quoted passage"
++  "Quoted passage": "Quoted passage",
++  "Reading instructions": "Reading instructions",
++  "Only for this learning session": "Only for this learning session",
++  "For example, explain with a short example and then ask me a question": "For example, explain with a short example and then ask me a question",
++  "Reading instructions saved": "Reading instructions saved",
++  "Reading instructions could not be saved": "Reading instructions could not be saved"
+ }
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..4b45d0d 100644
+index 6c4afd4..ad4ef32 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
 @@ -1,4 +1,18 @@
@@ -7650,6 +8067,18 @@ index 6c4afd4..4b45d0d 100644
    "Selected text": "选中内容",
    "Ask anything about the selected text.": "可以针对这段选中内容继续提问。",
    "Choose color": "选择颜色",
+@@ -6501,5 +6523,10 @@
+   "“{{title}}” and its practice records will be deleted. This cannot be undone.": "将删除「{{title}}」及其练习记录。此操作无法撤销。",
+   "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "将删除「{{title}}」及其辅导对话。资料库原件保留。此操作无法撤销。",
+   "Could not prepare attachment; sending will retry: {{name}}": "附件预处理未完成，发送时将重试：{{name}}",
+-  "Quoted passage": "引用原图"
++  "Quoted passage": "引用原图",
++  "Reading instructions": "学习默认指令",
++  "Only for this learning session": "仅对这次学习生效",
++  "For example, explain with a short example and then ask me a question": "例如：先用一个简短的例子讲解，再问我一道题",
++  "Reading instructions saved": "已保存学习指令",
++  "Reading instructions could not be saved": "暂时无法保存学习指令，请重试"
+ }
 diff --git a/web/tests/add-favorite-to-note.spec.tsx b/web/tests/add-favorite-to-note.spec.tsx
 index a34a8c5..6e6357f 100644
 --- a/web/tests/add-favorite-to-note.spec.tsx
@@ -7689,6 +8118,30 @@ index a34a8c5..6e6357f 100644
 +    source_url: '/learning/reading/book#dt-locator-6',
 +  }))
 +})
+diff --git a/web/tests/ask-user-card-form.spec.tsx b/web/tests/ask-user-card-form.spec.tsx
+index 2df63de..6d18918 100644
+--- a/web/tests/ask-user-card-form.spec.tsx
++++ b/web/tests/ask-user-card-form.spec.tsx
+@@ -188,8 +188,8 @@ describe("the answered card", () => {
+     const answered = screen.getByTestId("ask-user-answers");
+     expect(answered).toHaveTextContent("How fast should we go?");
+     expect(answered).toHaveTextContent("Deep dive");
+-    // Two lines are not worth a disclosure: nothing to expand, nothing to
+-    // count.
++    expect(answered).toHaveTextContent("Steady pace");
++    expect(answered).toHaveTextContent("Your answer");
+     expect(screen.queryByText("Your answers")).toBeNull();
+     expect(answered.querySelector("button")).toBeNull();
+   });
+@@ -228,6 +228,7 @@ describe("the answered card", () => {
+ 
+     expect(screen.queryByText("Deep dive")).toBeNull();
+     await user.click(screen.getByRole("button", { name: /Your answers/ }));
+-    expect(screen.getByText("Deep dive")).toBeVisible();
++    expect(screen.getByText("Steady pace")).toBeVisible();
++    expect(screen.getAllByText("Deep dive")).toHaveLength(2);
+   });
+ });
 diff --git a/web/tests/chat-selection-actions.spec.tsx b/web/tests/chat-selection-actions.spec.tsx
 index 2a271d8..8178ecc 100644
 --- a/web/tests/chat-selection-actions.spec.tsx
@@ -7738,7 +8191,7 @@ index cb36f3f..9de7221 100644
      const writingModel = screen.getByRole("button", { name: "Writing model | Writing profile" });
      expect(writingModel).toHaveAccessibleDescription("General questions · Reasoning supported");
 diff --git a/web/tests/composer-language-command.spec.tsx b/web/tests/composer-language-command.spec.tsx
-index 46c0f17..6ffdf58 100644
+index 46c0f17..fa5bd83 100644
 --- a/web/tests/composer-language-command.spec.tsx
 +++ b/web/tests/composer-language-command.spec.tsx
 @@ -18,11 +18,13 @@ function renderComposer({
@@ -7763,7 +8216,7 @@ index 46c0f17..6ffdf58 100644
        canSendEmpty={false}
        onSend={onSend}
        onInputChange={onInputChange}
-@@ -160,3 +163,21 @@ it("keeps persona available while the reply-language command is disabled", () =>
+@@ -160,3 +163,25 @@ it("keeps persona available while the reply-language command is disabled", () =>
    fireEvent.change(input, { target: { value: "/language" } });
    expect(screen.queryByRole("listbox", { name: "Commands" })).not.toBeInTheDocument();
  });
@@ -7771,20 +8224,66 @@ index 46c0f17..6ffdf58 100644
 +it("fills a predicted question on Tab without sending it or replacing a draft", () => {
 +  const prediction = "Why does this rule work?";
 +  const { input, onSend } = renderComposer({ prediction });
-+  vi.spyOn(input, "getClientRects").mockReturnValue({ length: 1 } as DOMRectList);
 +  fireEvent.keyDown(document.body, { key: "Tab", shiftKey: true });
 +  expect(input).toHaveValue("");
 +  fireEvent.keyDown(document.body, { key: "Tab" });
++  expect(input).toHaveValue("");
++  input.focus();
++  fireEvent.keyDown(input, { key: "Tab" });
 +  expect(input).toHaveValue(prediction);
 +  expect(input).toHaveFocus();
 +  fireEvent.change(input, { target: { value: "my own question" } });
 +  fireEvent.keyDown(input, { key: "Tab" });
 +  expect(input).toHaveValue("my own question");
 +  fireEvent.change(input, { target: { value: "" } });
-+  fireEvent.click(screen.getByRole("button", { name: /Why does this rule work/ }));
++  fireEvent.click(input);
++  expect(input).toHaveValue("");
++  fireEvent.keyDown(input, { key: "Tab" });
 +  expect(input).toHaveValue(prediction);
 +  expect(onSend).not.toHaveBeenCalled();
 +});
+diff --git a/web/tests/integration/ask-user-trace-continuity.spec.tsx b/web/tests/integration/ask-user-trace-continuity.spec.tsx
+index 862328b..afb5010 100644
+--- a/web/tests/integration/ask-user-trace-continuity.spec.tsx
++++ b/web/tests/integration/ask-user-trace-continuity.spec.tsx
+@@ -56,7 +56,7 @@ function asking(id: string, offset: number) {
+   );
+ }
+ 
+-function question(id: string, offset: number) {
++function question(id: string, offset: number, choice = false) {
+   return event("tool_result", {
+     tool_call_id: id,
+     assistant_content_offset: offset,
+@@ -66,7 +66,7 @@ function question(id: string, offset: number) {
+           {
+             id,
+             prompt: `Which goal (${id})?`,
+-            options: [{ label: "Continue learning" }],
++            options: [{ label: "Continue learning" }, ...(choice ? [{ label: "Review the last step" }] : [])],
+           },
+         ],
+       },
+@@ -132,6 +132,19 @@ function conversation(
+ }
+ 
+ describe("ask_user trace continuity", () => {
++  it("keeps a completed choice question and its original options outside the trace after reload", () => {
++    const complete = [
++      ...pending.slice(0, -1), question("q1", intro.length, true), resolved("q1"),
++      ...resumed.slice(pending.length + 1), event("content", {}, answer), event("done", { status: "completed" }),
++    ];
++    render(conversation(compactTracePreview(complete).events, intro + followup + answer, false));
++    const card = screen.getByTestId("ask-user-answers");
++    expect(card.closest(".grid")).toBeNull();
++    expect(card).toHaveTextContent("Which goal (q1)?");
++    expect(card).toHaveTextContent("Review the last step");
++    expect(card).toHaveTextContent("Your answer");
++  });
++
+   it("joins the answered card and resumed work under the original disclosure through completion and reload", async () => {
+     const user = userEvent.setup();
+     const submit = vi.fn(async () => true);
 diff --git a/web/tests/latex-normalize.test.ts b/web/tests/latex-normalize.test.ts
 index e11711e..04df6d8 100644
 --- a/web/tests/latex-normalize.test.ts
@@ -7811,7 +8310,7 @@ index e11711e..04df6d8 100644
 +  }
 +});
 diff --git a/web/tests/pdf-reading-resize.spec.tsx b/web/tests/pdf-reading-resize.spec.tsx
-index e134153..d238446 100644
+index e134153..5a92e5b 100644
 --- a/web/tests/pdf-reading-resize.spec.tsx
 +++ b/web/tests/pdf-reading-resize.spec.tsx
 @@ -1,4 +1,4 @@
@@ -7842,7 +8341,7 @@ index e134153..d238446 100644
    it("clamps restoration at the document end", async () => {
      const { root } = await openReader();
      await scrollTo(root, 160, 0.6);
-@@ -261,3 +276,25 @@ describe("PDF reading position during layout changes", () => {
+@@ -261,3 +276,37 @@ describe("PDF reading position during layout changes", () => {
      expect(lastRect.bottom + GAP).toBeCloseTo(ROOT_TOP + viewportHeight, 5);
    });
  });
@@ -7867,6 +8366,18 @@ index e134153..d238446 100644
 +  } finally {
 +    vi.useRealTimers();
 +  }
++});
++
++
++it("keeps the first right-click menu through a programmatic scroll and opens capture once", async () => {
++  const onRequestRegion = vi.fn();
++  const { root } = await openReader({ onRequestRegion });
++  const page = pageAt(root, 1);
++  fireEvent.contextMenu(page, { clientX: 200, clientY: 200, button: 2 });
++  fireEvent.mouseUp(page, { button: 2 });
++  fireEvent.scroll(root);
++  fireEvent.click(screen.getByRole("button", { name: "Screenshot quote" }));
++  expect(onRequestRegion).toHaveBeenCalledOnce();
 +});
 diff --git a/web/tests/provider-registry-workflow.spec.tsx b/web/tests/provider-registry-workflow.spec.tsx
 index 842a517..a98b180 100644
