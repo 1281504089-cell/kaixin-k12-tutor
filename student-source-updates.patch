@@ -823,6 +823,23 @@ index 0000000..13b2c47
 +  assert.equal(await readFile(path.join(config.webPath, 'server.js'), 'utf8'), 'updated');
 +  assert.equal(await readFile(path.join(base, 'web/server.js'), 'utf8'), 'original');
 +});
+diff --git a/deeptutor/agents/_shared/tool_composition.py b/deeptutor/agents/_shared/tool_composition.py
+index 2c23627..b575fb3 100644
+--- a/deeptutor/agents/_shared/tool_composition.py
++++ b/deeptutor/agents/_shared/tool_composition.py
+@@ -286,6 +286,12 @@ def _finalize(names: Iterable[str], forced: Iterable[str], suppressed: Iterable[
+     out = list(names)
+     out.extend(str(name) for name in forced if str(name).strip())
+     suppressed_set = {str(name) for name in suppressed}
++    memory_tools = {"read_memory", "write_memory"}
++    if memory_tools.intersection(out) - suppressed_set:
++        from deeptutor.services.settings.interface_settings import learning_habits_enabled
++
++        if not learning_habits_enabled():
++            suppressed_set.update(memory_tools)
+     return [name for name in _ordered_unique(out) if name not in suppressed_set]
+ 
+ 
 diff --git a/deeptutor/agents/chat/prompts/en/agentic_chat.yaml b/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
 index 2eb1e4b..c88273b 100644
 --- a/deeptutor/agents/chat/prompts/en/agentic_chat.yaml
@@ -861,6 +878,44 @@ index 8cff1dc..5764490 100644
      每轮结束后你会看到工具结果，可以继续调用。
  
      调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
+diff --git a/deeptutor/api/routers/memory.py b/deeptutor/api/routers/memory.py
+index 916b690..04c5739 100644
+--- a/deeptutor/api/routers/memory.py
++++ b/deeptutor/api/routers/memory.py
+@@ -616,19 +616,25 @@ async def get_memory_settings_endpoint():
+     """Return the current ``memory:`` subtree (defaults merged in)."""
+     from deeptutor.services.memory.settings import memory_settings_dict
+ 
+-    return memory_settings_dict()
++    from deeptutor.services.settings.interface_settings import learning_habits_enabled
++
++    return {**memory_settings_dict(), "learning_habits_enabled": learning_habits_enabled()}
+ 
+ 
+ @router.put("/settings")
+ async def put_memory_settings(payload: dict):
+     """Merge the payload into the ``memory:`` subtree and persist."""
+-    from deeptutor.services.memory.settings import (
+-        memory_settings_dict,
+-        save_memory_settings,
+-    )
+-
+-    save_memory_settings(payload)
+-    return memory_settings_dict()
++    from deeptutor.services.memory.settings import save_memory_settings
++    from deeptutor.services.settings.interface_settings import update_ui_settings
++
++    if "learning_habits_enabled" in payload and type(payload["learning_habits_enabled"]) is not bool:
++        raise HTTPException(status_code=422, detail="learning_habits_enabled must be a boolean")
++    memory_fields = {key: value for key, value in payload.items() if key != "learning_habits_enabled"}
++    if memory_fields:
++        save_memory_settings(memory_fields)
++    if "learning_habits_enabled" in payload:
++        update_ui_settings({"learning_habits_enabled": payload["learning_habits_enabled"]})
++    return await get_memory_settings_endpoint()
+ 
+ 
+ def _default_title(layer: str, key: str) -> str:
 diff --git a/deeptutor/api/routers/reading.py b/deeptutor/api/routers/reading.py
 index 9e06183..72619b4 100644
 --- a/deeptutor/api/routers/reading.py
@@ -1373,7 +1428,7 @@ index a06dd2a..f9c0b4e 100644
                      result = merge_registry_edit(
                          result,
 diff --git a/deeptutor/services/settings/interface_settings.py b/deeptutor/services/settings/interface_settings.py
-index 1684e37..0810371 100644
+index 1684e37..0fa7dfb 100644
 --- a/deeptutor/services/settings/interface_settings.py
 +++ b/deeptutor/services/settings/interface_settings.py
 @@ -20,6 +20,7 @@ from deeptutor.services.path_service import get_path_service
@@ -1384,15 +1439,16 @@ index 1684e37..0810371 100644
  
  DEFAULT_UI_SETTINGS: dict[str, Any] = {
      # "system" follows the OS. "snow" is the pure-white Default palette.
-@@ -28,6 +29,7 @@ DEFAULT_UI_SETTINGS: dict[str, Any] = {
+@@ -28,6 +29,8 @@ DEFAULT_UI_SETTINGS: dict[str, Any] = {
      "response_language": "en",
      "content_font_scale": 100,
      "content_line_spacing": "normal",
 +    "chat_history_range": "auto",
++    "learning_habits_enabled": True,
      # When true, TTS verbalizes LaTeX (fractions, powers, Greek). Dollar
      # delimiters are stripped either way so the voice never says "dollar".
      "voice_math_speak": True,
-@@ -208,6 +210,12 @@ def resolve_display_settings(saved: Mapping[str, Any]) -> dict[str, Any]:
+@@ -208,6 +211,12 @@ def resolve_display_settings(saved: Mapping[str, Any]) -> dict[str, Any]:
      }
  
  
@@ -1405,7 +1461,7 @@ index 1684e37..0810371 100644
  def get_ui_settings() -> dict[str, Any]:
      """
      Read UI settings from interface.json with defaults.
-@@ -226,6 +234,7 @@ def get_ui_settings() -> dict[str, Any]:
+@@ -226,6 +235,7 @@ def get_ui_settings() -> dict[str, Any]:
                  **saved,
                  **resolve_languages(saved),
                  **resolve_display_settings(saved),
@@ -1413,6 +1469,18 @@ index 1684e37..0810371 100644
              }
          except Exception:
              # On any parse error, fall back to defaults (safe)
+@@ -234,6 +244,11 @@ def get_ui_settings() -> dict[str, Any]:
+     return DEFAULT_UI_SETTINGS.copy()
+ 
+ 
++def learning_habits_enabled() -> bool:
++    """Whether new turns may use the account's automatic memory tools."""
++    return get_ui_settings().get("learning_habits_enabled") is not False
++
++
+ def sanitize_enabled_tools(value: Any) -> list[str]:
+     """Normalize saved optional-tool names against the runtime catalog."""
+ 
 diff --git a/deeptutor/services/student_learning/miniapp/reports/provenance.json b/deeptutor/services/student_learning/miniapp/reports/provenance.json
 index 4bc5131..a4a5794 100644
 --- a/deeptutor/services/student_learning/miniapp/reports/provenance.json
@@ -3124,6 +3192,21 @@ index d0412b9..833d372 100644
      finally:
          current_usage.reset(usage_token)
      updates["usage"] = usage.summary()
+diff --git a/deeptutor/services/suggestions.py b/deeptutor/services/suggestions.py
+index 85f6a7e..e9e6ea2 100644
+--- a/deeptutor/services/suggestions.py
++++ b/deeptutor/services/suggestions.py
+@@ -332,8 +332,9 @@ def _render_l3(cap: int) -> str:
+     would be a second place for that vocabulary to drift.
+     """
+     from deeptutor.modules.catalog import module_enabled
++    from deeptutor.services.settings.interface_settings import learning_habits_enabled
+ 
+-    if not module_enabled("memory"):
++    if not module_enabled("memory") or not learning_habits_enabled():
+         return ""
+     from deeptutor.services.memory import get_memory_store
+ 
 diff --git a/deeptutor/tools/builtin/__init__.py b/deeptutor/tools/builtin/__init__.py
 index 505cc9d..d75e948 100644
 --- a/deeptutor/tools/builtin/__init__.py
@@ -4367,6 +4450,60 @@ index 0000000..f6056fb
 +    "exercisePale": "F4F7FA"
 +  }
 +}
+diff --git a/tests/api/test_memory_router_contract.py b/tests/api/test_memory_router_contract.py
+index acb13a8..a8e80a5 100644
+--- a/tests/api/test_memory_router_contract.py
++++ b/tests/api/test_memory_router_contract.py
+@@ -231,7 +231,8 @@ def test_get_settings_returns_full_schema(
+     res = client.get("/api/memory/settings")
+     assert res.status_code == 200
+     body = res.json()
+-    assert set(body) == {"update", "audit", "dedup", "merge", "chunking", "reference"}
++    assert set(body) == {"update", "audit", "dedup", "merge", "chunking", "reference", "learning_habits_enabled"}
++    assert type(body["learning_habits_enabled"]) is bool
+     assert body["update"] == {"l2_budget": 20, "l3_budget": 10}
+     assert body["dedup"] == {"iterations": 3, "auto_after_update": True}
+ 
+@@ -380,6 +381,39 @@ def test_put_settings_roundtrip(
+     assert follow_up.json()["update"]["l2_budget"] == 55
+ 
+ 
++def test_learning_habits_switch_controls_new_turns_and_preserves_existing_memory(
++    client: TestClient, monkeypatch, tmp_path: Path,
++) -> None:
++    from types import SimpleNamespace
++
++    from deeptutor.agents._shared.tool_composition import ToolMountFlags, compose_enabled_tools
++    from deeptutor.services.settings import interface_settings
++    from deeptutor.services.suggestions import _render_l3
++
++    monkeypatch.setattr(interface_settings, "_interface_settings_file", lambda: tmp_path / "ui.json")
++    saved = "## Teaching preferences\n\n- Explain with an example first.\n"
++    assert client.put("/api/memory/doc/L3/preferences", json={"content": saved}).is_success
++
++    def tools():
++        return compose_enabled_tools(
++            registry=SimpleNamespace(get_enabled=lambda _: []),
++            requested_tools=[],
++            optional_whitelist=[],
++            mount_flags=ToolMountFlags(has_memory=True),
++        )
++
++    assert client.get("/api/memory/settings").json()["learning_habits_enabled"] is True
++    assert {"read_memory", "write_memory"}.issubset(tools())
++    assert client.put("/api/memory/settings", json={"learning_habits_enabled": "false"}).status_code == 422
++    assert client.put("/api/memory/settings", json={"learning_habits_enabled": False}).is_success
++    assert {"read_memory", "write_memory"}.isdisjoint(tools())
++    assert _render_l3(1000) == ""
++    assert client.put("/api/memory/settings", json={"update": {"l2_budget": 55}}).json()["learning_habits_enabled"] is False
++    assert client.get("/api/memory/doc/L3/preferences").json()["content"] == saved
++    assert client.put("/api/memory/settings", json={"learning_habits_enabled": True}).is_success
++    assert {"read_memory", "write_memory"}.issubset(tools())
++
++
+ def test_clear_trace_and_clear_day_consistent(client: TestClient, mem_root: Path) -> None:
+     _write_trace(mem_root, "chat", "2026-10-01", [_trace_event("2026-10-01", 1)])
+     _write_trace(mem_root, "chat", "2026-10-02", [_trace_event("2026-10-02", 1)])
 diff --git a/tests/api/test_student_mistake_capture.py b/tests/api/test_student_mistake_capture.py
 new file mode 100644
 index 0000000..2d5ca7a
@@ -4887,6 +5024,35 @@ index 7b831c0..2b856a0 100644
                    {value ? (
                      <InlineMarkdown content={value} />
                    ) : (
+diff --git a/web/components/chat/home/ChatComposer.tsx b/web/components/chat/home/ChatComposer.tsx
+index 46aaa0d..beb09d6 100644
+--- a/web/components/chat/home/ChatComposer.tsx
++++ b/web/components/chat/home/ChatComposer.tsx
+@@ -311,6 +311,7 @@ export default memo(function ChatComposer({
+   inputPlaceholder,
+   inputPlaceholderCompletion,
+   inputHeader,
++  inputToolbar,
+   showCapabilityChip = true,
+   docked = false,
+   trayEnd,
+@@ -485,6 +486,7 @@ export default memo(function ChatComposer({
+    * of the message being written instead of a card floating over it.
+    */
+   inputHeader?: ReactNode;
++  inputToolbar?: ReactNode;
+   /**
+    * Hide the capability chip. A surface that only ever runs one capability
+    * — and names it in its own chrome — gains nothing from a picker that
+@@ -1437,6 +1439,8 @@ export default memo(function ChatComposer({
+                   />
+                 }
+ 
++                {inputToolbar}
++
+                 {showCapabilityChip && !modeInTray && (
+                   <div className="relative min-w-0 max-w-full">
+                     <Tooltip label={capabilityLabel(activeCap)} suppressed={capMenuOpen} side="top">
 diff --git a/web/components/chat/home/ComposerInput.tsx b/web/components/chat/home/ComposerInput.tsx
 index b78c53c..3def6b2 100644
 --- a/web/components/chat/home/ComposerInput.tsx
@@ -5038,6 +5204,34 @@ index 8a9f782..12516ba 100644
                const optionSelection = {
                  profile_id: option.profile_id,
                  model_id: option.model_id,
+diff --git a/web/components/chat/home/StandaloneComposer.tsx b/web/components/chat/home/StandaloneComposer.tsx
+index fdf4c22..bf3d5c2 100644
+--- a/web/components/chat/home/StandaloneComposer.tsx
++++ b/web/components/chat/home/StandaloneComposer.tsx
+@@ -165,6 +165,7 @@ interface StandaloneComposerProps {
+   inputPlaceholderCompletion?: string;
+   /** Context shown inside the box above the text. See ChatComposer. */
+   inputHeader?: React.ReactNode;
++  inputToolbar?: React.ReactNode;
+   /**
+    * Capability chip contents. Defaults to a locked "Chat" entry — pass a
+    * one-entry list to relabel it, or several to make the chip a picker.
+@@ -237,6 +238,7 @@ function StandaloneComposerImpl({
+   inputPlaceholder,
+   inputPlaceholderCompletion,
+   inputHeader,
++  inputToolbar,
+   capabilities,
+   activeCapValue,
+   onSelectCapability,
+@@ -923,6 +925,7 @@ function StandaloneComposerImpl({
+         inputPlaceholder={inputPlaceholder}
+         inputPlaceholderCompletion={inputPlaceholderCompletion}
+         inputHeader={inputHeader}
++        inputToolbar={inputToolbar}
+       />
+ 
+       <NotebookRecordPicker
 diff --git a/web/components/common/AssistantResponse.tsx b/web/components/common/AssistantResponse.tsx
 index e97bde2..1e17f9d 100644
 --- a/web/components/common/AssistantResponse.tsx
@@ -5814,20 +6008,25 @@ index a5b665d..b28c30b 100644
        rects: [],
        selectors:
 diff --git a/web/components/reading/workspace/ReadingCompanion.tsx b/web/components/reading/workspace/ReadingCompanion.tsx
-index 6d437f2..9adfaa5 100644
+index 6d437f2..3068308 100644
 --- a/web/components/reading/workspace/ReadingCompanion.tsx
 +++ b/web/components/reading/workspace/ReadingCompanion.tsx
-@@ -28,7 +28,7 @@ import {
+@@ -27,8 +27,9 @@ import {
+   Link2,
    ListOrdered,
    PanelRight,
++  SlidersHorizontal,
  } from "lucide-react";
 -import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 +import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
  import { useTranslation } from "react-i18next";
  
  import { ChatMessageList } from "@/features/chat/messages";
-@@ -45,6 +45,13 @@ import { useChatAutoScroll } from "@/hooks/useChatAutoScroll";
+@@ -43,8 +44,17 @@ import {
+ } from "@/features/chat/ChatStateAdapter";
+ import { useChatAutoScroll } from "@/hooks/useChatAutoScroll";
  import { useMeasuredHeight } from "@/hooks/useMeasuredHeight";
++import { useOutsideClick } from "@/hooks/use-outside-click";
  import { useResearchOutlineContinuation } from "@/hooks/useResearchOutlineContinuation";
  import { buildChatOutline, scrollToChatTurn } from "@/lib/chat-outline";
 +import AddToNote from "@/features/notes/components/AddToNote";
@@ -5837,10 +6036,11 @@ index 6d437f2..9adfaa5 100644
 +import { notify } from "@/lib/notifications";
 +import { STUDENT_EDITION } from "@/lib/student-edition";
 +import { Dialog } from "@/shared/ui/Dialog";
++import { Tooltip } from "@/shared/ui/Tooltip";
  import { copyText } from "@/lib/clipboard";
  import { buildConversationNotebookSave } from "@/lib/conversation-notebook-save";
  import { setReadingViewport } from "@/lib/reading-turn-state";
-@@ -53,6 +60,7 @@ import {
+@@ -53,6 +63,7 @@ import {
    type ReadingConversation,
    type ReadingLibraryMaterial,
  } from "@/lib/reading-workspace-api";
@@ -5848,7 +6048,7 @@ index 6d437f2..9adfaa5 100644
  import { READER_ASK_EVENT } from "@/components/reading/ReaderPane";
  import {
    focusReadingComposer,
-@@ -80,6 +88,8 @@ export function ReadingCompanion({
+@@ -80,6 +91,8 @@ export function ReadingCompanion({
    material,
    activeConversation,
    linkedSessionIds,
@@ -5857,7 +6057,7 @@ index 6d437f2..9adfaa5 100644
    activeLocator,
    selection,
    onClearSelection,
-@@ -93,9 +103,11 @@ export function ReadingCompanion({
+@@ -93,9 +106,11 @@ export function ReadingCompanion({
    activeConversation: ReadingConversation | null;
    /** Conversations pinned as extra context for every turn. */
    linkedSessionIds: string[];
@@ -5870,7 +6070,7 @@ index 6d437f2..9adfaa5 100644
    onClearSelection: () => void;
    onOpenLinker: () => void;
    prefillInputRef: React.MutableRefObject<((text: string) => void) | null>;
-@@ -121,6 +133,32 @@ export function ReadingCompanion({
+@@ -121,6 +136,32 @@ export function ReadingCompanion({
    const readingActions = useReadingActions();
    const [turnsOpen, setTurnsOpen] = useState(false);
    const [showSaveModal, setShowSaveModal] = useState(false);
@@ -5903,7 +6103,7 @@ index 6d437f2..9adfaa5 100644
    const [viewerOpen, setViewerOpen] = useState(false);
    const viewerPanelRef = useRef<SessionViewerPanelHandle | null>(null);
  
-@@ -231,7 +269,7 @@ export function ReadingCompanion({
+@@ -231,7 +272,7 @@ export function ReadingCompanion({
    const [askHint, setAskHint] = useState("");
    const messageCount = state.messages.length;
    useEffect(() => {
@@ -5912,7 +6112,7 @@ index 6d437f2..9adfaa5 100644
      const controller = new AbortController();
      let cancelled = false;
      void fetchReadingAskHint(
-@@ -256,6 +294,7 @@ export function ReadingCompanion({
+@@ -256,6 +297,7 @@ export function ReadingCompanion({
      messageCount,
      selection?.quote,
      state.sessionId,
@@ -5920,7 +6120,7 @@ index 6d437f2..9adfaa5 100644
      workspaceId,
    ]);
  
-@@ -365,7 +404,7 @@ export function ReadingCompanion({
+@@ -365,7 +407,7 @@ export function ReadingCompanion({
    );
  
    return (
@@ -5929,7 +6129,7 @@ index 6d437f2..9adfaa5 100644
        {head}
        {/* Its own header on its own sheet: what the companion is doing and
            its three controls sit with it, not across the page in the bar.
-@@ -409,9 +448,12 @@ export function ReadingCompanion({
+@@ -409,9 +451,12 @@ export function ReadingCompanion({
          // without it the browser's own scroll anchoring fights the pin every
          // time a code block or KaTeX span reflows.
          data-chat-scroll-root="true"
@@ -5942,7 +6142,7 @@ index 6d437f2..9adfaa5 100644
            const distanceFromBottom =
              container.scrollHeight -
              container.scrollTop -
-@@ -436,58 +478,76 @@ export function ReadingCompanion({
+@@ -436,58 +481,76 @@ export function ReadingCompanion({
          // No rule above the composer: the last lines fade out instead, so the
          // composer floats over the conversation as it does on /chat. The
          // bottom padding keeps that fade over empty space, not the last line.
@@ -6057,7 +6257,7 @@ index 6d437f2..9adfaa5 100644
          {!!linkedSessionIds.length && (
            <div className="mx-4 mb-2 flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
              <Link2 size={11} />
-@@ -502,6 +562,8 @@ export function ReadingCompanion({
+@@ -502,6 +565,8 @@ export function ReadingCompanion({
            placeholder={askHint || t("Ask about this material…")}
            placeholderCompletion={askHint}
            selection={selection}
@@ -6066,64 +6266,127 @@ index 6d437f2..9adfaa5 100644
            onSent={onClearSelection}
            onRemoveSelection={() => {
              onClearSelection();
-@@ -510,6 +572,7 @@ export function ReadingCompanion({
+@@ -509,6 +574,13 @@ export function ReadingCompanion({
+           }}
            linkedSessionIds={linkedSessionIds}
            prefillInputRef={prefillInputRef}
++          inputToolbar={STUDENT_EDITION && (
++            <ReadingInstructionControl
++              key={workspaceId}
++              saved={learningInstruction}
++              onSave={onSaveLearningInstruction}
++            />
++          )}
          />
-+        {STUDENT_EDITION && <ReadingInstructionForm key={workspaceId} saved={learningInstruction} onSave={onSaveLearningInstruction} />}
        </div>
  
-       <SaveToNotebookModal
-@@ -534,3 +597,47 @@ export function ReadingCompanion({
+@@ -534,3 +606,104 @@ export function ReadingCompanion({
      </aside>
    );
  }
 +
-+
-+function ReadingInstructionForm({ saved, onSave }: { saved: string; onSave: (value: string) => Promise<void> }) {
++function ReadingInstructionControl({
++  saved,
++  onSave,
++}: {
++  saved: string;
++  onSave: (value: string) => Promise<void>;
++}) {
 +  const { t } = useTranslation();
 +  const id = useId();
++  const root = useRef<HTMLDivElement>(null);
++  const trigger = useRef<HTMLButtonElement>(null);
++  const field = useRef<HTMLTextAreaElement>(null);
++  const [open, setOpen] = useState(false);
 +  const [draft, setDraft] = useState<string | null>(null);
 +  const [saving, setSaving] = useState(false);
-+  const [status, setStatus] = useState("");
++  const [error, setError] = useState(false);
 +  const value = draft ?? saved;
++  const label = t("Reading instructions");
++
++  useOutsideClick(root, open && !saving, () => setOpen(false));
++  useEffect(() => {
++    if (open) field.current?.focus();
++  }, [open]);
++
++  function close() {
++    setOpen(false);
++    trigger.current?.focus();
++  }
 +
 +  return (
-+    <form className="min-w-0 space-y-1.5 border-t border-[var(--border)] px-3 pb-3 pt-2 text-xs" onSubmit={async event => {
-+      event.preventDefault();
-+      if (saving || value.trim() === saved) return;
-+      setSaving(true);
-+      setStatus("");
-+      try {
-+        await onSave(value.trim());
-+        setDraft(null);
-+        setStatus(t("Reading instructions saved"));
-+      } catch {
-+        setStatus(t("Reading instructions could not be saved"));
-+      } finally {
-+        setSaving(false);
++    <div ref={root} onKeyDown={event => {
++      if (open && !saving && event.key === "Escape") {
++        event.preventDefault();
++        event.stopPropagation();
++        close();
 +      }
 +    }}>
-+      <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-+        <label htmlFor={id} className="font-medium">{t("Reading instructions")}</label>
-+        <span className="text-[var(--muted-foreground)]">{t("Only for this learning session")}</span>
-+      </div>
-+      <div className="flex min-w-0 items-start gap-2">
-+        <textarea id={id} rows={1} maxLength={2000} disabled={saving} value={value}
-+          placeholder={t("For example, explain with a short example and then ask me a question")}
-+          onChange={event => { setDraft(event.currentTarget.value); setStatus(""); }}
-+          className="min-h-8 min-w-0 flex-1 resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-2.5 py-1.5 leading-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ring)]"
-+        />
-+        <button type="submit" disabled={saving || value.trim() === saved} className="h-8 shrink-0 rounded-lg bg-[var(--secondary)] px-2.5 font-medium hover:bg-[var(--accent)] disabled:opacity-50">
-+          {saving ? t("Saving…") : t("Save")}
++      <Tooltip label={label} side="top" suppressed={open}>
++        <button
++          ref={trigger}
++          type="button"
++          aria-label={label}
++          aria-expanded={open}
++          aria-controls={open ? id : undefined}
++          aria-disabled={saving}
++          onClick={() => { if (!saving) setOpen(current => !current); }}
++          className="relative grid size-8 place-items-center rounded-lg text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ring)]"
++        >
++          <SlidersHorizontal size={16} strokeWidth={1.7} aria-hidden="true" />
++          {saved && <span aria-hidden="true" className="absolute right-1 top-1 size-1.5 rounded-full bg-[var(--primary)]" />}
 +        </button>
-+      </div>
-+      {status && <p role="status" className="text-[var(--muted-foreground)]">{status}</p>}
-+    </form>
++      </Tooltip>
++      {open && (
++        <form
++          id={id}
++          className="dt-popup-up absolute inset-x-2 bottom-full z-50 mb-2 max-w-[320px] space-y-2 rounded-xl border border-[var(--border)] bg-[var(--popover)] p-3 text-xs shadow-lg [transform-origin:3rem_bottom]"
++          onSubmit={async event => {
++            event.preventDefault();
++            if (saving || value.trim() === saved) return;
++            setSaving(true);
++            setError(false);
++            try {
++              await onSave(value.trim());
++              setDraft(null);
++              close();
++              notify(t("Reading instructions saved"));
++            } catch {
++              setError(true);
++            } finally {
++              setSaving(false);
++            }
++          }}
++        >
++          <div className="flex flex-wrap items-baseline justify-between gap-1">
++            <label htmlFor={`${id}-field`} className="font-medium">{label}</label>
++            <span className="text-[var(--muted-foreground)]">{t("Only for this learning session")}</span>
++          </div>
++          <textarea
++            id={`${id}-field`}
++            ref={field}
++            rows={3}
++            maxLength={2000}
++            disabled={saving}
++            value={value}
++            placeholder={t("For example, explain with a short example and then ask me a question")}
++            onChange={event => { setDraft(event.currentTarget.value); setError(false); }}
++            className="block max-h-40 min-h-16 w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-2.5 py-1.5 leading-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ring)]"
++          />
++          {error && <p role="alert" className="text-[var(--destructive)]">{t("Reading instructions could not be saved")}</p>}
++          <div className="flex justify-end gap-2">
++            <button type="button" onClick={close} disabled={saving} className="rounded-lg px-2.5 py-1.5 hover:bg-[var(--secondary)]">{t("Close")}</button>
++            <button type="submit" disabled={saving || value.trim() === saved} className="rounded-lg bg-[var(--secondary)] px-2.5 py-1.5 font-medium hover:bg-[var(--accent)] disabled:opacity-50">
++              {saving ? t("Saving…") : t("Save")}
++            </button>
++          </div>
++        </form>
++      )}
++    </div>
 +  );
 +}
 diff --git a/web/components/reading/workspace/ReadingComposer.tsx b/web/components/reading/workspace/ReadingComposer.tsx
-index 48e0f0a..0d25f2b 100644
+index 48e0f0a..8ad2b1f 100644
 --- a/web/components/reading/workspace/ReadingComposer.tsx
 +++ b/web/components/reading/workspace/ReadingComposer.tsx
 @@ -16,6 +16,8 @@ import { useCallback, useRef } from "react";
@@ -6144,7 +6407,7 @@ index 48e0f0a..0d25f2b 100644
  import { selectionImageAttachments } from "@/lib/reading-selection";
  
  export function ReadingComposer({
-@@ -38,17 +42,21 @@ export function ReadingComposer({
+@@ -38,21 +42,27 @@ export function ReadingComposer({
    selection,
    onSent,
    onRemoveSelection,
@@ -6152,6 +6415,7 @@ index 48e0f0a..0d25f2b 100644
 +  onRemoveConversationQuote,
    linkedSessionIds,
    prefillInputRef,
++  inputToolbar,
  }: {
    placeholder: string;
    /** Offered question the composer lets the learner take with Tab. */
@@ -6167,7 +6431,12 @@ index 48e0f0a..0d25f2b 100644
    /** Reading-specific "reference these other reading conversations" links. */
    linkedSessionIds: string[];
    /** Lets the reader pane drop a quoted selection's focus into the box. */
-@@ -91,9 +99,11 @@ export function ReadingComposer({
+   prefillInputRef?: React.MutableRefObject<((text: string) => void) | null>;
++  inputToolbar?: React.ReactNode;
+ }) {
+   const {
+     state,
+@@ -91,9 +101,11 @@ export function ReadingComposer({
          const historyReferences = Array.from(
            new Set([...linkedSessionIds, ...submission.historyReferences]),
          );
@@ -6180,7 +6449,7 @@ index 48e0f0a..0d25f2b 100644
            // How many times the companion may consult the selected agent this
            // turn. Absent when no agent is picked, which is the ordinary case.
            submission.subagentBudget
-@@ -110,7 +120,8 @@ export function ReadingComposer({
+@@ -110,7 +122,8 @@ export function ReadingComposer({
            submission.memoryReferences,
          );
          onSent();
@@ -6190,7 +6459,7 @@ index 48e0f0a..0d25f2b 100644
        };
  
        // A turn paused on a question: what the reader typed is their answer,
-@@ -133,6 +144,8 @@ export function ReadingComposer({
+@@ -133,6 +146,8 @@ export function ReadingComposer({
      [
        awaitingUserReply,
        linkedSessionIds,
@@ -6199,7 +6468,7 @@ index 48e0f0a..0d25f2b 100644
        onSent,
        selection,
        sendMessage,
-@@ -148,6 +161,7 @@ export function ReadingComposer({
+@@ -148,6 +163,7 @@ export function ReadingComposer({
        activeCapValue={activeCapabilityValue}
        onSelectCapability={selectCapability}
        showCapabilityChip
@@ -6207,7 +6476,7 @@ index 48e0f0a..0d25f2b 100644
        hasMessages={state.messages.length > 0}
        isStreaming={state.isStreaming}
        awaitingUserReply={awaitingUserReply}
-@@ -165,12 +179,25 @@ export function ReadingComposer({
+@@ -165,15 +181,29 @@ export function ReadingComposer({
        inputPlaceholder={placeholder}
        inputPlaceholderCompletion={placeholderCompletion}
        inputHeader={
@@ -6239,6 +6508,10 @@ index 48e0f0a..0d25f2b 100644
          ) : null
        }
        prefillInputRef={replyInputRef}
++      inputToolbar={inputToolbar}
+     />
+   );
+ }
 diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
 index ffff540..28ef9e5 100644
 --- a/web/components/reading/workspace/ReadingWorkspace.tsx
@@ -7819,8 +8092,61 @@ index 0000000..82c006a
 +    </details>
 +  );
 +}
+diff --git a/web/features/settings/sections/MemorySettingsSection.tsx b/web/features/settings/sections/MemorySettingsSection.tsx
+index 190c783..778be33 100644
+--- a/web/features/settings/sections/MemorySettingsSection.tsx
++++ b/web/features/settings/sections/MemorySettingsSection.tsx
+@@ -14,6 +14,7 @@ import {
+ import { useSettings } from "@/features/settings/store/SettingsStore";
+ 
+ interface MemorySettingsDTO {
++  learning_habits_enabled?: boolean;
+   update: { l2_budget: number; l3_budget: number };
+   audit: { l2_budget: number; l3_budget: number };
+   dedup: { iterations: number; auto_after_update: boolean };
+@@ -56,7 +57,7 @@ export default function MemorySettingsPage() {
+         // the baseline dirtiness is measured against either way.
+         const pending = pendingExtensionPayload("memory") as
+           MemorySettingsDTO | undefined;
+-        setSettings(pending ?? data);
++        setSettings({ ...data, ...pending });
+         setServerSnapshot(data);
+         setError(null);
+       })
+@@ -99,7 +100,7 @@ export default function MemorySettingsPage() {
+     return () => registerExtension("memory", null);
+   }, [dirty, save, settings, registerExtension]);
+ 
+-  function patch<K extends keyof MemorySettingsDTO>(
++  function patch<K extends Exclude<keyof MemorySettingsDTO, "learning_habits_enabled">>(
+     key: K,
+     value: Partial<MemorySettingsDTO[K]>,
+   ) {
+@@ -130,6 +131,14 @@ export default function MemorySettingsPage() {
+           "Tune the chunk-based consolidator: how many LLM rounds per Update / Audit / Dedup, how aggressively to chunk, and how strictly to validate references.",
+         )}
+       />
++      <SettingSection title={t("Personalization")}>
++        <ToggleRow
++          label={t("Remember learning habits")}
++          help={t("Remember preferences you state, such as how you like explanations, and use them in future conversations. Turning this off pauses automatic use and keeps existing memories.")}
++          value={settings.learning_habits_enabled !== false}
++          onChange={learning_habits_enabled => setSettings({ ...settings, learning_habits_enabled })}
++        />
++      </SettingSection>
+       <SettingSection
+         title={t("Update mode")}
+         description={t(
+@@ -353,6 +362,7 @@ function ToggleRow({ label, help, value, onChange }: ToggleRowProps) {
+         <button
+           type="button"
+           role="switch"
++          aria-label={label}
+           aria-checked={value}
+           onClick={() => onChange(!value)}
+           className={
 diff --git a/web/features/settings/sections/StartersSettingsSection.tsx b/web/features/settings/sections/StartersSettingsSection.tsx
-index 2ab6edf..c78c8f8 100644
+index 2ab6edf..64a9427 100644
 --- a/web/features/settings/sections/StartersSettingsSection.tsx
 +++ b/web/features/settings/sections/StartersSettingsSection.tsx
 @@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -7839,6 +8165,15 @@ index 2ab6edf..c78c8f8 100644
  
        {loading && (
          <div className="flex items-center gap-2 text-[13px] text-[var(--muted-foreground)]">
+@@ -156,7 +158,7 @@ export default function StarterSettingsPage() {
+         <SettingSection
+           title={t("Starting points")}
+           description={t(
+-            "Your consolidated memory is always included. This controls how much raw recent activity goes with it — conversations, practice questions, searches, documents, in one list ordered by time.",
++            "Control how much recent activity is used for suggestions. Saved learning preferences are used when learning habit memory is on.",
+           )}
+         >
+           <SettingRow
 diff --git a/web/lib/latex-normalize.ts b/web/lib/latex-normalize.ts
 index 42c5d7a..811bede 100644
 --- a/web/lib/latex-normalize.ts
@@ -8407,7 +8742,7 @@ index e8f8270..a8f16ba 100644
    const { summary, metrics } = report
    const lines = [`# ${parent ? '孩子的学习近况' : '我的学习报告'}`, `${report.range.from} 至 ${report.range.to}`, summary.overview.text, `记录范围：${metrics.message_count}条对话记录，${metrics.conversation_count}段对话，${metrics.active_days}个有提问的日期。`, '学习时长、练习总数与正确率：未记录，不由聊天时长或讲解内容推算。']
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa..969f839 100644
+index 613b5fa..fecb5a8 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
 @@ -1,4 +1,18 @@
@@ -8455,7 +8790,7 @@ index 613b5fa..969f839 100644
    "Selected text": "Selected text",
    "Ask anything about the selected text.": "Ask anything about the selected text.",
    "Choose color": "Choose color",
-@@ -6501,5 +6523,16 @@
+@@ -6501,5 +6523,19 @@
    "“{{title}}” and its practice records will be deleted. This cannot be undone.": "“{{title}}” and its practice records will be deleted. This cannot be undone.",
    "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.",
    "Could not prepare attachment; sending will retry: {{name}}": "Could not prepare attachment; sending will retry: {{name}}",
@@ -8471,10 +8806,13 @@ index 613b5fa..969f839 100644
 +  "Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.": "Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.",
 +  "Automatic (model default)": "Automatic (model default)",
 +  "32,000 tokens": "32,000 tokens",
-+  "64,000 tokens": "64,000 tokens"
++  "64,000 tokens": "64,000 tokens",
++  "Remember learning habits": "Remember learning habits",
++  "Remember preferences you state, such as how you like explanations, and use them in future conversations. Turning this off pauses automatic use and keeps existing memories.": "Remember preferences you state, such as how you like explanations, and use them in future conversations. Turning this off pauses automatic use and keeps existing memories.",
++  "Control how much recent activity is used for suggestions. Saved learning preferences are used when learning habit memory is on.": "Control how much recent activity is used for suggestions. Saved learning preferences are used when learning habit memory is on."
  }
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..9ec30b4 100644
+index 6c4afd4..7860cc0 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
 @@ -1,4 +1,18 @@
@@ -8522,7 +8860,7 @@ index 6c4afd4..9ec30b4 100644
    "Selected text": "选中内容",
    "Ask anything about the selected text.": "可以针对这段选中内容继续提问。",
    "Choose color": "选择颜色",
-@@ -6501,5 +6523,16 @@
+@@ -6501,5 +6523,19 @@
    "“{{title}}” and its practice records will be deleted. This cannot be undone.": "将删除「{{title}}」及其练习记录。此操作无法撤销。",
    "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "将删除「{{title}}」及其辅导对话。资料库原件保留。此操作无法撤销。",
    "Could not prepare attachment; sending will retry: {{name}}": "附件预处理未完成，发送时将重试：{{name}}",
@@ -8538,7 +8876,10 @@ index 6c4afd4..9ec30b4 100644
 +  "Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.": "普通聊天和边读边问均生效。范围越短，越早把较旧对话整理为摘要。聊天记录和本轮资料照常保留。",
 +  "Automatic (model default)": "自动（按模型适配）",
 +  "32,000 tokens": "3.2 万 token",
-+  "64,000 tokens": "6.4 万 token"
++  "64,000 tokens": "6.4 万 token",
++  "Remember learning habits": "学习习惯记忆",
++  "Remember preferences you state, such as how you like explanations, and use them in future conversations. Turning this off pauses automatic use and keeps existing memories.": "记住你主动说出的学习偏好，例如喜欢先看例题还是先听原理，并在后续对话中使用。关闭后暂停自动记忆，保留已有记录。",
++  "Control how much recent activity is used for suggestions. Saved learning preferences are used when learning habit memory is on.": "设置首页建议参考多少近期学习活动。开启学习习惯记忆时，也会参考已保存的偏好。"
  }
 diff --git a/web/tests/add-favorite-to-note.spec.tsx b/web/tests/add-favorite-to-note.spec.tsx
 index a34a8c5..6e6357f 100644
