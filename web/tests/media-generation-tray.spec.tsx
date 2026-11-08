@@ -1,12 +1,32 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatStateAdapterProvider, useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
 import { trackMediaJobs, type MediaJob } from "@/features/chat/media/media-jobs";
 import MediaGenerationTray from "@/features/chat/media/MediaGenerationTray";
 import type { StreamEvent } from "@/features/chat/model/protocol";
 import { initI18n } from "@/i18n/init";
+import { updateRecoveryPrincipal } from "@/lib/recovery-principal";
 
 initI18n("en");
+const navigation = vi.hoisted(() => ({ push: vi.fn(), session: vi.fn() }));
+vi.mock("next/navigation", async (load) => ({
+  ...await load<typeof import("next/navigation")>(),
+  useRouter: () => ({ push: navigation.push }),
+}));
+vi.mock("@/lib/session-api", async (load) => ({
+  ...await load<typeof import("@/lib/session-api")>(),
+  getSessionOrganization: navigation.session,
+}));
+beforeEach(() => {
+  localStorage.clear();
+  updateRecoveryPrincipal({ enabled: false, authenticated: false });
+  navigation.push.mockClear();
+  navigation.session.mockReset().mockImplementation(async (sessionId: string) => ({
+    session_id: sessionId,
+    content_workspace_id: "",
+    preferences: {},
+  }));
+});
 const transport = vi.hoisted(() => ({
   emit: undefined as undefined | ((e: StreamEvent) => void),
   stop: vi.fn<(command: { type: string; turn_id: string }) => Promise<boolean>>(),
@@ -69,7 +89,10 @@ describe("background generation", () => {
     expect(screen.queryByTitle("Fractions")).not.toBeInTheDocument();
     expect(screen.queryByText(/New result ready/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Generated lessons" }));
+    expect(screen.getByText("Fractions")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Watch" }));
     expect(await screen.findByTitle("Fractions")).toBeInTheDocument();
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/chat/session-1?dt_workspace="));
   });
 
   it("opens a real animation result and ignores old completion events", async () => {
@@ -145,8 +168,10 @@ describe("background generation", () => {
         status: "completed", user_message_id: 3, assistant_message_id: 4,
       }, "animation-turn", "session-2"));
     });
-    expect(await screen.findByRole("heading", { name: "Math Animator" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Generated lessons" })).toBeInTheDocument();
     expect(screen.getByText(/New result ready/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Watch" }));
+    expect(await screen.findByRole("heading", { name: "Math Animator" })).toBeInTheDocument();
   });
 
   it("allows retrying a rejected stop without marking the task stopped", async () => {
@@ -160,6 +185,40 @@ describe("background generation", () => {
     await act(async () => fireEvent.click(stop));
     expect(stop).toBeEnabled();
     expect(screen.queryByText("Stopped")).not.toBeInTheDocument();
+  });
+
+  it("restores viewed results, opens the reading conversation, and remembers a removal", async () => {
+    navigation.session.mockResolvedValue({
+      session_id: "session-1",
+      content_workspace_id: "",
+      preferences: { workspace_mode: "immersive_reading", reading_workspace_id: "my-reading" },
+    });
+    const first = render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+    fireEvent.click(screen.getByText("Generate lesson"));
+    await screen.findByText("1 generating");
+    await act(async () => {
+      transport.emit?.(event("video_lesson", "session"));
+      transport.emit?.(lesson);
+      transport.emit?.(event("video_lesson", "done", { status: "completed", user_message_id: 1, assistant_message_id: 2 }));
+    });
+    await screen.findByTitle("Fractions");
+    fireEvent.click(screen.getByRole("button", { name: "Collapse player" }));
+    first.unmount();
+
+    const reopened = render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+    const tray = await screen.findByRole("button", { name: "Generated lessons" });
+    expect(tray).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(tray);
+    fireEvent.click(screen.getByRole("button", { name: "Watch" }));
+    expect(await screen.findByTitle("Fractions")).toBeInTheDocument();
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(expect.stringContaining("/my-reading/sessions/session-1")));
+    fireEvent.click(tray);
+    fireEvent.click(screen.getByRole("button", { name: "Remove from list" }));
+    expect(screen.queryByText("Fractions")).not.toBeInTheDocument();
+    reopened.unmount();
+
+    render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+    expect(screen.queryByRole("button", { name: "Generated lessons" })).not.toBeInTheDocument();
   });
 
   it("shows failures in the tray without opening an empty player", async () => {

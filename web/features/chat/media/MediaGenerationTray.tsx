@@ -1,10 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Check, Clapperboard, List, LoaderCircle, Square, X } from "lucide-react";
+import { Check, Clapperboard, LoaderCircle, Square, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
+import { sessionRoute } from "@/lib/mastery-session";
+import { notify } from "@/lib/notifications";
+import { getSessionOrganization } from "@/lib/session-api";
+import { navigateTask } from "@/lib/workspace-scope";
 import type { MediaJob } from "./media-jobs";
 import { takeMediaSendOrigin } from "./send-origin";
 
@@ -12,19 +17,24 @@ const MathPlayer = dynamic(() => import("@/components/math-animator/MathAnimator
 const LessonPlayer = dynamic(() => import("@/components/video-lesson/VideoLessonViewer"), { ssr: false });
 
 export default function MediaGenerationTray() {
-  const { mediaJobs, stopMediaGeneration } = useChatStateAdapter();
+  const { mediaJobs, selectedSessionId, stopMediaGeneration, markMediaViewed, removeMediaJob } = useChatStateAdapter();
   if (!mediaJobs.length) return null;
-  return <MediaTray jobs={mediaJobs} stopJob={stopMediaGeneration} />;
+  return <MediaTray jobs={mediaJobs} selectedSessionId={selectedSessionId} stopJob={stopMediaGeneration}
+    markViewed={markMediaViewed} removeJob={removeMediaJob} />;
 }
 
-function MediaTray({ jobs, stopJob }: {
+function MediaTray({ jobs, selectedSessionId, stopJob, markViewed, removeJob }: {
   jobs: MediaJob[];
+  selectedSessionId: string | null;
   stopJob: (jobId: string) => Promise<void>;
+  markViewed: (jobId: string) => void;
+  removeJob: (jobId: string) => void;
 }) {
   const { t } = useTranslation();
+  const router = useRouter();
+  const sourceLookup = useRef<AbortController | null>(null);
   const [view, setView] = useState<string | null>(null);
   const [dismissedId, setDismissedId] = useState<string | null>(null);
-  const [seenReadyId, setSeenReadyId] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const deliveryIcon = useRef<HTMLSpanElement>(null);
   const delivery = useRef<Animation | null>(null);
@@ -51,40 +61,68 @@ function MediaTray({ jobs, stopJob }: {
       { transform: transform(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, 0.3), opacity: 0 },
     ], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
   }, [jobs]);
-  useEffect(() => () => delivery.current?.cancel(), []);
-  const latestReady = jobs.find(job => job.status === "ready");
-  const hasNewResult = Boolean(latestReady && latestReady.id !== seenReadyId);
-  const autoOpen = latestReady && latestReady.id !== dismissedId ? latestReady : undefined;
-  const stopping = jobs.some(job => job.status === "running" && job.stopRequested);
-  const openJob = view === "list" && stopping ? undefined : view && view !== "list" ? jobs.find(job => job.id === view) : autoOpen;
-  const expanded = Boolean(openJob || view === "list");
+  useEffect(() => () => {
+    delivery.current?.cancel();
+    sourceLookup.current?.abort();
+  }, []);
+  const latestReady = jobs.find(job => job.status === "ready" && !job.restored);
+  const hasNewResult = jobs.some(job => job.status === "ready" && !job.viewed);
+  const autoOpen = latestReady && !latestReady.viewed && latestReady.id !== dismissedId ? latestReady : undefined;
+  const showingList = view === "list";
+  const openJob = showingList ? undefined : view ? jobs.find(job => job.id === view) : autoOpen;
+  const expanded = Boolean(openJob || showingList);
   const runningCount = jobs.filter(job => job.status === "running").length;
   const showGenerationHint = runningCount > 0 && !openJob;
 
-  const changeView = (next: typeof view) => {
-    setDismissedId(latestReady?.id ?? null);
-    setView(next);
-    if (latestReady && (next === latestReady.id || (next === null && openJob?.id === latestReady.id))) {
-      setSeenReadyId(latestReady.id);
-    }
-    if (next === null) trigger.current?.focus();
+  const showList = () => {
+    sourceLookup.current?.abort();
+    setView("list");
   };
 
-  // Escape is local to the player and its controls so generation completing
-  // never captures focus from a student's current typing or reading.
+  const closePanel = () => {
+    sourceLookup.current?.abort();
+    setDismissedId(latestReady?.id ?? null);
+    if (openJob) markViewed(openJob.id);
+    setView(null);
+    trigger.current?.focus();
+  };
+
+  const watchJob = async (job: MediaJob) => {
+    sourceLookup.current?.abort();
+    setView(job.id);
+    markViewed(job.id);
+    if (selectedSessionId === job.sessionKey) return;
+    const controller = new AbortController();
+    sourceLookup.current = controller;
+    const currentPage = window.location.href;
+    try {
+      const session = await getSessionOrganization(job.sessionKey, undefined, controller.signal);
+      if (!controller.signal.aborted && window.location.href === currentPage) {
+        navigateTask(sessionRoute(session), router.push);
+      }
+    } catch {
+      if (!controller.signal.aborted && window.location.href === currentPage) {
+        notify(t("student.media.sourceUnavailable"), { tone: "error" });
+      }
+    }
+  };
+
+  // Escape is local to the player and its controls so automatic previews
+  // never take focus away from the student's current work.
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!expanded) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || !panel.current?.contains(document.activeElement)) return;
+      sourceLookup.current?.abort();
       setDismissedId(latestReady?.id ?? null);
+      if (openJob) markViewed(openJob.id);
       setView(null);
-      if (openJob && openJob.id === latestReady?.id) setSeenReadyId(openJob.id);
       trigger.current?.focus();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [expanded, latestReady?.id, openJob]);
+  }, [expanded, latestReady?.id, markViewed, openJob]);
 
   const label = (job: MediaJob) => job.kind === "math_animator" ? t("Math Animator") : t("Video Lesson");
 
@@ -96,7 +134,7 @@ function MediaTray({ jobs, stopJob }: {
       </span>
       <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
         aria-describedby={showGenerationHint ? "student-media-generation-hint" : undefined}
-        onClick={() => changeView(expanded ? null : runningCount ? "list" : latestReady?.id ?? "list")}
+        onClick={showingList ? closePanel : showList}
         className="pointer-events-auto relative inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
         {runningCount ? <LoaderCircle size={15} aria-hidden className="motion-safe:animate-spin" /> : <Clapperboard size={15} aria-hidden />}
         <span role="status">
@@ -122,9 +160,13 @@ function MediaTray({ jobs, stopJob }: {
               <h2 id="student-media-heading" className="truncate text-sm font-semibold">{openJob ? label(openJob) : t("student.media.jobs")}</h2>
             </div>
             <div className="flex shrink-0 gap-1">
-              {openJob ? <button type="button" title={t("student.media.jobs")} aria-label={t("student.media.jobs")} onClick={() => changeView("list")}
-                className="rounded-lg p-2 hover:bg-[var(--muted)]"><List size={16} /></button> : null}
-              <button type="button" title={t("student.media.collapse")} aria-label={t("student.media.collapse")} onClick={() => changeView(null)}
+              {openJob && openJob.sessionKey !== selectedSessionId ? (
+                <button type="button" onClick={() => void watchJob(openJob)}
+                  className="rounded-lg px-2 text-xs text-[var(--primary)] hover:bg-[var(--muted)]">
+                  {t("student.media.source")}
+                </button>
+              ) : null}
+              <button type="button" title={t("student.media.collapse")} aria-label={t("student.media.collapse")} onClick={closePanel}
                 className="rounded-lg p-2 hover:bg-[var(--muted)]"><X size={16} /></button>
             </div>
           </div>
@@ -141,23 +183,32 @@ function MediaTray({ jobs, stopJob }: {
                     <div className="truncate">{job.output?.kind === "video_lesson" && job.output.result.title || label(job)}</div>
                     {job.prompt ? <div title={job.prompt} className="truncate text-xs text-[var(--muted-foreground)]">{job.prompt}</div> : null}
                   </div>
-                  {job.status === "ready" ? (
-                    <button type="button" onClick={() => changeView(job.id)} className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs text-[var(--primary)] hover:bg-[var(--muted)]">
-                      <Check size={14} aria-hidden />{t("student.media.watch")}
-                    </button>
-                  ) : job.status === "running" ? (
-                    <button type="button" disabled={!job.turnId || job.stopRequested}
-                      aria-label={t("student.media.stopNamed", { title: job.prompt || label(job) })}
-                      onClick={() => void stopJob(job.id)}
-                      className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs hover:bg-[var(--muted)] disabled:opacity-50">
-                      <Square size={12} aria-hidden />
-                      {t(job.stopRequested ? "student.media.stopping" : "student.media.stop")}
-                    </button>
-                  ) : (
-                    <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
-                      {t(job.status === "cancelled" ? "student.media.stopped" : "student.media.unavailable")}
-                    </span>
-                  )}
+                  <div className="flex shrink-0 items-center gap-1">
+                    {job.status === "ready" ? (
+                      <button type="button" onClick={() => void watchJob(job)} className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs text-[var(--primary)] hover:bg-[var(--muted)]">
+                        <Check size={14} aria-hidden />{t("student.media.watch")}
+                      </button>
+                    ) : job.status === "running" ? (
+                      <button type="button" disabled={!job.turnId || job.stopRequested}
+                        aria-label={t("student.media.stopNamed", { title: job.prompt || label(job) })}
+                        onClick={() => void stopJob(job.id)}
+                        className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs hover:bg-[var(--muted)] disabled:opacity-50">
+                        <Square size={12} aria-hidden />
+                        {t(job.stopRequested ? "student.media.stopping" : "student.media.stop")}
+                      </button>
+                    ) : (
+                      <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
+                        {t(job.status === "cancelled" ? "student.media.stopped" : "student.media.unavailable")}
+                      </span>
+                    )}
+                    {job.status !== "running" ? (
+                      <button type="button" aria-label={t("student.media.remove")} title={t("student.media.remove")}
+                        onClick={() => removeJob(job.id)}
+                        className="rounded-md p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]">
+                        <Trash2 size={14} aria-hidden />
+                      </button>
+                    ) : null}
+                  </div>
                 </li>
               ))}
             </ul>

@@ -112,6 +112,7 @@ import {
 } from "@/lib/reading-references";
 
 import { trackMediaJobs, type MediaJob } from "@/features/chat/media/media-jobs";
+import { mediaHistoryScope, readMediaHistory, removeMediaHistoryJob, saveMediaHistoryJob } from "@/features/chat/media/media-history";
 
 type SessionRuntimeStatus =
   "idle" | "running" | "completed" | "failed" | "cancelled" | "rejected";
@@ -405,6 +406,7 @@ interface SessionEntry extends Omit<ChatState, "sessionKey"> {
 
 interface ProviderState {
   mediaJobs: MediaJob[];
+  mediaHistoryScope: string | null;
   selectedKey: string | null;
   sessions: Record<string, SessionEntry>;
   sidebarRefreshToken: number;
@@ -440,6 +442,9 @@ interface SessionSnapshot {
 }
 
 type Action =
+  | { type: "MEDIA_RESTORE_HISTORY"; scope: string; jobs: MediaJob[] }
+  | { type: "MEDIA_VIEWED"; id: string }
+  | { type: "MEDIA_REMOVE"; id: string }
   | { type: "MEDIA_STOP_REQUEST"; id: string; requested: boolean }
   | { type: "RESET_ACCOUNT" }
   | { type: "SET_TOOLS"; tools: string[] }
@@ -800,6 +805,7 @@ function hasTurnEvent(events: StreamEvent[], event: StreamEvent): boolean {
 function reducer(state: ProviderState, action: Action): ProviderState {
   let next = reduce(state, action);
   if (
+    action.type === "MEDIA_VIEWED" || action.type === "MEDIA_REMOVE" ||
     action.type === "MEDIA_STOP_REQUEST" ||
     action.type === "STREAM_START" ||
     action.type === "BIND_SERVER_SESSION" ||
@@ -822,6 +828,13 @@ function reducer(state: ProviderState, action: Action): ProviderState {
 function reduce(state: ProviderState, action: Action): ProviderState {
   if (action.type === "RESET_ACCOUNT") return initialState;
   switch (action.type) {
+    case "MEDIA_RESTORE_HISTORY": {
+      const existing = new Set(state.mediaJobs.map(job => job.id));
+      return {
+        ...state, mediaHistoryScope: action.scope,
+        mediaJobs: [...state.mediaJobs, ...action.jobs.filter(job => !existing.has(job.id))],
+      };
+    }
     case "SET_TOOLS":
       return updateSelectedSession(state, (session) => ({
         ...session,
@@ -1697,6 +1710,7 @@ function reduce(state: ProviderState, action: Action): ProviderState {
 
 const initialState: ProviderState = {
   mediaJobs: [],
+  mediaHistoryScope: null,
   selectedKey: null,
   sessions: {},
   sidebarRefreshToken: 0,
@@ -1728,6 +1742,8 @@ const POST_DONE_TITLE_REFRESH_MS = 5_000;
 interface ChatContextValue {
   mediaJobs: MediaJob[];
   stopMediaGeneration: (jobId: string) => Promise<void>;
+  markMediaViewed: (jobId: string) => void;
+  removeMediaJob: (jobId: string) => void;
   state: ChatState;
   setTools: (tools: string[]) => void;
   setCapability: (cap: string | null) => void;
@@ -2108,6 +2124,12 @@ export function ChatStateAdapterProvider({
   const principalResolvedRef = useRef(principalRef.current !== null);
 
   useEffect(() => {
+    const restoreMediaHistory = (principal: string | null) => {
+      if (principal === null) return;
+      const scope = mediaHistoryScope(principal);
+      dispatch({ type: "MEDIA_RESTORE_HISTORY", scope, jobs: readMediaHistory(scope) });
+    };
+    restoreMediaHistory(principalRef.current);
     const onPrincipalChanged = () => {
       const principal = recoveryPrincipal();
       if (principal === principalRef.current) return;
@@ -2132,6 +2154,7 @@ export function ChatStateAdapterProvider({
         dispatch({ type: "RESET_ACCOUNT" });
         writeStoredActiveSessionId(null);
       }
+      restoreMediaHistory(principal);
       dispatch({ type: "ENSURE_DRAFT_SESSION", key: `draft_${Date.now()}_${++draftCounterRef.current}`,
         failedRecords: readFailedSubmissions(draftFailedSubmissionKey()) });
     };
@@ -2139,6 +2162,22 @@ export function ChatStateAdapterProvider({
     onPrincipalChanged();
     return () => window.removeEventListener(RECOVERY_PRINCIPAL_CHANGED, onPrincipalChanged);
   }, []);
+
+  const persistedMedia = useRef<{ scope: string; viewed: Map<string, boolean> } | null>(null);
+  useEffect(() => {
+    const scope = state.mediaHistoryScope;
+    if (!scope) return;
+    const prior = persistedMedia.current?.scope === scope ? persistedMedia.current.viewed : undefined;
+    const viewed = new Map<string, boolean>();
+    for (const job of state.mediaJobs) {
+      if (job.status !== "ready") continue;
+      const seen = Boolean(job.viewed);
+      const saved = prior?.get(job.id);
+      viewed.set(job.id, seen);
+      if (saved !== undefined ? saved !== seen : !job.restored) saveMediaHistoryJob(scope, job);
+    }
+    persistedMedia.current = { scope, viewed };
+  }, [state.mediaHistoryScope, state.mediaJobs]);
 
   useLayoutEffect(() => {
     stateRef.current = state;
@@ -3534,6 +3573,17 @@ export function ChatStateAdapterProvider({
     [makeDraftKey, sendThroughRunner, ensureRunner],
   );
 
+  const markMediaViewed = useCallback((jobId: string) => {
+    dispatch({ type: "MEDIA_VIEWED", id: jobId });
+  }, []);
+
+  const removeMediaJob = useCallback((jobId: string) => {
+    const current = stateRef.current;
+    if (!current.mediaJobs.some(job => job.id === jobId && job.status !== "running")) return;
+    if (current.mediaHistoryScope) removeMediaHistoryJob(current.mediaHistoryScope, jobId);
+    dispatch({ type: "MEDIA_REMOVE", id: jobId });
+  }, []);
+
   const stopMediaGeneration = useCallback(async (jobId: string) => {
     const job = stateRef.current.mediaJobs.find(item => item.id === jobId);
     if (job?.status !== "running" || !job.turnId || job.stopRequested) return;
@@ -4334,6 +4384,8 @@ export function ChatStateAdapterProvider({
       state: derivedState,
       mediaJobs: state.mediaJobs,
       stopMediaGeneration,
+      markMediaViewed,
+      removeMediaJob,
       setTools,
       setCapability,
       setKBs,
@@ -4408,6 +4460,8 @@ export function ChatStateAdapterProvider({
       state.sidebarRefreshToken,
       state.mediaJobs,
       stopMediaGeneration,
+      markMediaViewed,
+      removeMediaJob,
     ],
   );
 

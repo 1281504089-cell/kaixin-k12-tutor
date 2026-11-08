@@ -14,11 +14,16 @@ export interface MediaJob {
   kind: MediaKind;
   prompt?: string;
   stopRequested?: boolean;
+  completedAt?: number;
+  restored?: boolean;
+  viewed?: boolean;
   status: "running" | "ready" | "failed" | "cancelled";
   output?: MediaOutput;
 }
 
 export type MediaJobEvent =
+  | { type: "MEDIA_VIEWED"; id: string }
+  | { type: "MEDIA_REMOVE"; id: string }
   | { type: "MEDIA_STOP_REQUEST"; id: string; requested: boolean }
   | { type: "STREAM_START"; key: string; startedAt: number; capability?: string | null; prompt?: string }
   | { type: "BIND_SERVER_SESSION"; key: string; sessionId: string; turnId?: string | null }
@@ -26,6 +31,13 @@ export type MediaJobEvent =
   | { type: "STREAM_END"; key: string; status?: string; turnId?: string | null };
 
 export function trackMediaJobs(jobs: MediaJob[], action: MediaJobEvent): MediaJob[] {
+  if (action.type === "MEDIA_VIEWED") {
+    return jobs.map(job => job.id === action.id && job.status === "ready" && !job.viewed
+      ? { ...job, viewed: true } : job);
+  }
+  if (action.type === "MEDIA_REMOVE") {
+    return jobs.filter(job => job.id !== action.id || job.status === "running");
+  }
   if (action.type === "MEDIA_STOP_REQUEST") {
     return jobs.map(job => job.id === action.id && job.status === "running"
       ? { ...job, stopRequested: action.requested } : job);
@@ -68,9 +80,9 @@ export function trackMediaJobs(jobs: MediaJob[], action: MediaJobEvent): MediaJo
   const ready = (action.status === "completed" || !action.status) && Boolean(job.output);
   const status = ready ? "ready" : action.status === "cancelled" ? "cancelled" : "failed";
   const settled: MediaJob[] = [
-    { ...job, status, stopRequested: false, output: ready ? job.output : undefined },
+    { ...job, status, stopRequested: false, output: ready ? job.output : undefined, completedAt: ready ? Date.now() : undefined },
     ...jobs.filter(item => item.id !== job.id),
   ];
-  let finished = 0;
-  return settled.filter(item => item.status === "running" || ++finished <= 8);
+  let unsuccessful = 0;
+  return settled.filter(item => item.status === "running" || item.status === "ready" || ++unsuccessful <= 8);
 }
