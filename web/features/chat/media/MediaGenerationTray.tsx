@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
 import { activeWorkspaceId, scopedUrl } from "@/lib/workspace-scope";
 import type { MediaJob } from "./media-jobs";
+import { takeMediaSendOrigin } from "./send-origin";
 
 const MathPlayer = dynamic(() => import("@/components/math-animator/MathAnimatorViewer"), { ssr: false });
 const LessonPlayer = dynamic(() => import("@/components/video-lesson/VideoLessonViewer"), { ssr: false });
@@ -31,6 +32,32 @@ function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
   const [dismissedId, setDismissedId] = useState<string | null>(null);
   const [seenReadyId, setSeenReadyId] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const deliveryIcon = useRef<HTMLSpanElement>(null);
+  const delivery = useRef<Animation | null>(null);
+  const knownJobs = useRef(new Set<string>());
+  useEffect(() => {
+    const started = jobs.find(job => job.status === "running" && !knownJobs.current.has(job.id));
+    knownJobs.current = new Set(jobs.map(job => job.id));
+    const destination = trigger.current;
+    if (!started || !destination) return;
+    const origin = takeMediaSendOrigin(started.kind);
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || typeof destination.animate !== "function") return;
+    delivery.current?.cancel();
+    if (!origin || !deliveryIcon.current) {
+      delivery.current = destination.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 180 });
+      return;
+    }
+    const bounds = destination.getBoundingClientRect();
+    const icon = deliveryIcon.current;
+    const half = icon.offsetWidth / 2;
+    const transform = (x: number, y: number, scale: number) =>
+      `translate3d(${x - half}px, ${y - half}px, 0) scale(${scale})`;
+    delivery.current = icon.animate([
+      { transform: transform(origin.x, origin.y, 0.85), opacity: 0.9 },
+      { transform: transform(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, 0.3), opacity: 0 },
+    ], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+  }, [jobs]);
+  useEffect(() => () => delivery.current?.cancel(), []);
   const latestReady = jobs.find(job => job.status === "ready");
   const hasNewResult = Boolean(latestReady && latestReady.id !== seenReadyId);
   const autoOpen = latestReady && latestReady.id !== dismissedId ? latestReady : undefined;
@@ -38,6 +65,7 @@ function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
   const openJob = view === "list" && stopping ? undefined : view && view !== "list" ? jobs.find(job => job.id === view) : autoOpen;
   const expanded = Boolean(openJob || view === "list");
   const runningCount = jobs.filter(job => job.status === "running").length;
+  const showGenerationHint = runningCount > 0 && !openJob;
 
   const changeView = (next: typeof view) => {
     setDismissedId(latestReady?.id ?? null);
@@ -68,6 +96,10 @@ function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
 
   return (
     <aside aria-label={t("student.media.jobs")} className="pointer-events-none fixed right-3 top-14 z-30 flex w-[min(28rem,calc(100vw-1.5rem))] flex-col items-end gap-2 sm:right-5">
+      <span ref={deliveryIcon} aria-hidden
+        className="pointer-events-none fixed left-0 top-0 z-10 grid size-7 place-items-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] opacity-0">
+        <Clapperboard size={14} />
+      </span>
       <div className="pointer-events-auto flex items-center gap-2">
         {foregroundGeneration ? (
           <Link href={scopedUrl("/chat")} onNavigate={startChat} className="rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
@@ -75,6 +107,7 @@ function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
           </Link>
         ) : null}
         <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
+          aria-describedby={showGenerationHint ? "student-media-generation-hint" : undefined}
           onClick={() => changeView(expanded ? null : runningCount ? "list" : latestReady?.id ?? "list")}
           className="relative inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
           {runningCount ? <LoaderCircle size={15} aria-hidden className="motion-safe:animate-spin" /> : <Clapperboard size={15} aria-hidden />}
@@ -85,6 +118,13 @@ function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
           {hasNewResult ? <span aria-hidden className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--background)]" /> : null}
         </button>
       </div>
+
+      {showGenerationHint ? (
+        <p id="student-media-generation-hint"
+          className="max-w-72 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs leading-5 text-[var(--muted-foreground)] shadow-sm">
+          {t("student.media.generationHint")}
+        </p>
+      ) : null}
 
       {expanded ? (
         <section ref={panel} id="student-media-panel" aria-labelledby="student-media-heading"
