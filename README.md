@@ -29,9 +29,9 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 ## 已安装用户更新
 
-已使用 1.7.1 完整学生版的电脑，可以从[客户端更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/core-updates)下载对应系统的 Kaixin-Updater-20261108.3 一次性更新启动器。先退出原程序。Mac 解压后用新版应用替换「应用程序」里的旧版。Windows 解压到一个文件夹，从里面打开开心动力超级学霸，后续使用这个程序入口。
+已使用 1.7.1 完整学生版的电脑，可以从[客户端更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/core-updates)下载对应系统的 Kaixin-Updater-20261108.5 一次性更新启动器。先退出原程序。Mac 解压后用新版应用替换「应用程序」里的旧版。Windows 解压到一个文件夹，从里面打开开心动力超级学霸，后续使用这个程序入口。
 
-新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。发现新版本时点「下载并更新」。客户端根据系统和芯片取对应的签名清单。遇到 GitHub 下载直链报 504 时，会自动从公开 Releases API 下载同一份签名更新。更新复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
+新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。已是最新版时会直接显示「已是最新版本」。发现新版时点「下载并更新」。客户端优先从 GitHub API 读取对应系统的签名清单。遇到 GitHub 下载直链报 504 时，会自动从公开 Releases API 下载同一份签名更新。更新复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
 
 <details>
 <summary>启动器下载链接报 504 时</summary>
@@ -40,11 +40,11 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 ```sh
 # Apple 芯片 Mac
-curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723458852' -o 'Kaixin-Updater-20261108.3-macos-arm64.zip'
+curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723681904' -o 'Kaixin-Updater-20261108.5-macos-arm64.zip'
 # Intel Mac
-curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723458480' -o 'Kaixin-Updater-20261108.3-macos-x64.zip'
+curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723681480' -o 'Kaixin-Updater-20261108.5-macos-x64.zip'
 # Windows x64
-curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723457902' -o 'Kaixin-Updater-20261108.3-windows-x64.zip'
+curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723680574' -o 'Kaixin-Updater-20261108.5-windows-x64.zip'
 ```
 
 下载并更换启动器后，从应用内检查更新即可。
