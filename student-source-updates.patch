@@ -881,6 +881,37 @@ index 9e06183..72619b4 100644
          )
          return {"workspace": row.to_dict()}
      except Exception as exc:
+diff --git a/deeptutor/api/routers/settings.py b/deeptutor/api/routers/settings.py
+index e164a72..83199e4 100644
+--- a/deeptutor/api/routers/settings.py
++++ b/deeptutor/api/routers/settings.py
+@@ -72,8 +72,10 @@ from deeptutor.services.settings.interface_settings import (
+     DEFAULT_UI_SETTINGS as INTERFACE_DEFAULTS,
+ )
+ from deeptutor.services.settings.interface_settings import (
++    ChatHistoryRange,
+     UiLanguage,
+     atomic_update,
++    resolve_chat_history_range,
+     resolve_display_settings,
+     resolve_languages,
+     sanitize_enabled_tools,
+@@ -234,6 +236,7 @@ class UISettingsUpdate(DisplaySettings):
+     # Optional by omission, never nullable: null is not a saved preference.
+     content_font_scale: Literal[90, 100, 110, 125, 150] = 100
+     content_line_spacing: Literal["compact", "normal", "relaxed"] = "normal"
++    chat_history_range: ChatHistoryRange = "auto"
+ 
+ 
+ class VoiceAutoplayUpdate(BaseModel):
+@@ -585,6 +588,7 @@ def load_ui_settings() -> dict[str, Any]:
+                 # Filter persisted enabled_optional_tools to current
+                 # toggleable set so retired tool names can't leak into
+                 # the per-turn payload.
++                merged["chat_history_range"] = resolve_chat_history_range(saved.get("chat_history_range"))
+                 merged["enabled_optional_tools"] = sanitize_enabled_tools(
+                     merged.get("enabled_optional_tools")
+                 )
 diff --git a/deeptutor/api/routers/student_learning.py b/deeptutor/api/routers/student_learning.py
 index b5c804d..fe1ccb4 100644
 --- a/deeptutor/api/routers/student_learning.py
@@ -1137,6 +1168,33 @@ index d1d7363..6435b22 100644
              context_window = _coerce_int(model.get("context_window"))
              official_name = model.get("official_name")
              if isinstance(official_name, str) and official_name:
+diff --git a/deeptutor/services/session/context_builder.py b/deeptutor/services/session/context_builder.py
+index ba227cb..63f031c 100644
+--- a/deeptutor/services/session/context_builder.py
++++ b/deeptutor/services/session/context_builder.py
+@@ -275,10 +275,13 @@ class ContextBuilder:
+         store: SessionStoreProtocol,
+         history_budget_ratio: float = 0.35,
+         summary_target_ratio: float = 0.40,
++        *,
++        history_token_limit: int = MAX_HISTORY_PLAN_TOKENS,
+     ) -> None:
+         self.store = store
+         self.history_budget_ratio = history_budget_ratio
+         self.summary_target_ratio = summary_target_ratio
++        self.history_token_limit = history_token_limit
+ 
+     def _effective_context_window(self, llm_config: LLMConfig) -> int:
+         return resolve_effective_context_window(
+@@ -290,7 +293,7 @@ class ContextBuilder:
+     def _history_budget(self, llm_config: LLMConfig) -> int:
+         effective_context_window = self._effective_context_window(llm_config)
+         ratio_budget = max(256, int(effective_context_window * self.history_budget_ratio))
+-        return min(ratio_budget, MAX_HISTORY_PLAN_TOKENS)
++        return min(ratio_budget, MAX_HISTORY_PLAN_TOKENS, self.history_token_limit)
+ 
+     def _summary_budget(self, budget: int, llm_config: LLMConfig | None = None) -> int:
+         ratio_budget = max(96, int(budget * self.summary_target_ratio))
 diff --git a/deeptutor/services/session/pocketbase_store.py b/deeptutor/services/session/pocketbase_store.py
 index 1243d37..deba0fc 100644
 --- a/deeptutor/services/session/pocketbase_store.py
@@ -1202,6 +1260,21 @@ index 7be9696..9f63bd3 100644
  
      async def list_imported_sessions(
          self,
+diff --git a/deeptutor/services/session/turns/context_assembler.py b/deeptutor/services/session/turns/context_assembler.py
+index cc16861..8f913c2 100644
+--- a/deeptutor/services/session/turns/context_assembler.py
++++ b/deeptutor/services/session/turns/context_assembler.py
+@@ -20,5 +20,9 @@ class TurnContextAssembler:
+ 
+             return MasteryContextBuilder(self.store)
+         from deeptutor.services.session.context_builder import ContextBuilder
++        from deeptutor.services.settings.interface_settings import get_ui_settings
+ 
+-        return ContextBuilder(self.store)
++        history_range = get_ui_settings()["chat_history_range"]
++        if history_range == "auto":
++            return ContextBuilder(self.store)
++        return ContextBuilder(self.store, history_token_limit=int(history_range))
 diff --git a/deeptutor/services/session/turns/executor.py b/deeptutor/services/session/turns/executor.py
 index 18a31e2..6e6d83c 100644
 --- a/deeptutor/services/session/turns/executor.py
@@ -1299,6 +1372,47 @@ index a06dd2a..f9c0b4e 100644
                  ):
                      result = merge_registry_edit(
                          result,
+diff --git a/deeptutor/services/settings/interface_settings.py b/deeptutor/services/settings/interface_settings.py
+index 1684e37..0810371 100644
+--- a/deeptutor/services/settings/interface_settings.py
++++ b/deeptutor/services/settings/interface_settings.py
+@@ -20,6 +20,7 @@ from deeptutor.services.path_service import get_path_service
+ from deeptutor.tools.builtin import USER_TOGGLEABLE_TOOL_NAMES
+ 
+ UiLanguage = Literal["en", "zh", "fr", "de", "uk", "pl", "pt", "vi", "ja", "tr"]
++ChatHistoryRange = Literal["auto", "32000", "64000"]
+ 
+ DEFAULT_UI_SETTINGS: dict[str, Any] = {
+     # "system" follows the OS. "snow" is the pure-white Default palette.
+@@ -28,6 +29,7 @@ DEFAULT_UI_SETTINGS: dict[str, Any] = {
+     "response_language": "en",
+     "content_font_scale": 100,
+     "content_line_spacing": "normal",
++    "chat_history_range": "auto",
+     # When true, TTS verbalizes LaTeX (fractions, powers, Greek). Dollar
+     # delimiters are stripped either way so the voice never says "dollar".
+     "voice_math_speak": True,
+@@ -208,6 +210,12 @@ def resolve_display_settings(saved: Mapping[str, Any]) -> dict[str, Any]:
+     }
+ 
+ 
++def resolve_chat_history_range(value: Any) -> ChatHistoryRange:
++    if value == "32000" or value == "64000":
++        return value
++    return "auto"
++
++
+ def get_ui_settings() -> dict[str, Any]:
+     """
+     Read UI settings from interface.json with defaults.
+@@ -226,6 +234,7 @@ def get_ui_settings() -> dict[str, Any]:
+                 **saved,
+                 **resolve_languages(saved),
+                 **resolve_display_settings(saved),
++                "chat_history_range": resolve_chat_history_range(saved.get("chat_history_range")),
+             }
+         except Exception:
+             # On any parse error, fall back to defaults (safe)
 diff --git a/deeptutor/services/student_learning/miniapp/reports/provenance.json b/deeptutor/services/student_learning/miniapp/reports/provenance.json
 index 4bc5131..a4a5794 100644
 --- a/deeptutor/services/student_learning/miniapp/reports/provenance.json
@@ -4549,6 +4663,43 @@ index 293b762..755f2da 100644
 +    older = [entry("u1", "user", "旧题"), entry("a1", "assistant", "很长的旧答案" * 10000)]
 +    newer = [entry("u2", "user", "新题"), entry("a2", "assistant", "新答案")]
 +    assert reports.report_evidence(older + newer) == newer
+diff --git a/tests/multi_user/test_ui_language_scoping.py b/tests/multi_user/test_ui_language_scoping.py
+index daa6752..ee8b4fc 100644
+--- a/tests/multi_user/test_ui_language_scoping.py
++++ b/tests/multi_user/test_ui_language_scoping.py
+@@ -114,3 +114,32 @@ def test_learning_display_uses_existing_user_and_shared_admin_scopes(mu_isolated
+             for settings in (get_ui_settings(), load_ui_settings()):
+                 assert settings["content_font_scale"] == scale
+                 assert settings["content_line_spacing"] == spacing
++
++
++def test_history_range_is_applied_to_the_current_account_turn_builder(mu_isolated_root, as_user):
++    from deeptutor.api.routers.settings import UISettingsUpdate, load_ui_settings, patch_ui_settings
++    from deeptutor.services.llm.config import LLMConfig
++    from deeptutor.services.session.context_builder import MAX_HISTORY_PLAN_TOKENS
++    from deeptutor.services.session.turns.context_assembler import TurnContextAssembler
++
++    assembler = TurnContextAssembler()
++    assembler.store = None
++    large_model = LLMConfig(model="fixture", api_key="fixture", context_window=1_000_000)
++    small_model = LLMConfig(model="fixture", api_key="fixture", context_window=32_000)
++
++    with as_user("u_alice"):
++        patch_ui_settings(**UISettingsUpdate(chat_history_range="32000").model_dump(exclude_unset=True))
++        assert load_ui_settings()["chat_history_range"] == "32000"
++        builder = assembler._create_context_builder()
++        assert builder._history_budget(large_model) == 32_000
++        assert builder._history_budget(small_model) == 11_200
++        assert assembler._create_context_builder(tutoring=True)._history_budget(large_model) == 20_000
++    with as_user("u_bob"):
++        assert load_ui_settings()["chat_history_range"] == "auto"
++        assert assembler._create_context_builder()._history_budget(large_model) == MAX_HISTORY_PLAN_TOKENS
++        patch_ui_settings(chat_history_range="outdated")
++        assert load_ui_settings()["chat_history_range"] == "auto"
++        assert assembler._create_context_builder()._history_budget(large_model) == MAX_HISTORY_PLAN_TOKENS
++    with as_user("u_alice"):
++        patch_ui_settings(**UISettingsUpdate(chat_history_range="64000").model_dump(exclude_unset=True))
++        assert assembler._create_context_builder()._history_budget(large_model) == 64_000
 diff --git a/tests/reading/test_router.py b/tests/reading/test_router.py
 index 2a62f16..9c4fc5e 100644
 --- a/tests/reading/test_router.py
@@ -4596,11 +4747,68 @@ index 0e5c82d..bdb3da9 100644
          detail = await runtime.store.get_session(_session["id"])
          assert detail is not None
          assert detail["preferences"]["workspace_mode"] == "immersive_reading"
+diff --git a/tests/runtime/test_native_engine.py b/tests/runtime/test_native_engine.py
+index fdf9f43..b7a4903 100644
+--- a/tests/runtime/test_native_engine.py
++++ b/tests/runtime/test_native_engine.py
+@@ -282,7 +282,7 @@ async def test_native_history_uses_selected_branch_and_advances_summary_only_for
+         get_messages_for_context=AsyncMock(return_value=rows),
+         update_summary=AsyncMock(),
+     )
+-    result = await module.ContextBuilder(store).build(
++    result = await module.ContextBuilder(store, history_token_limit=900).build(
+         session_id="fixture",
+         llm_config=LLMConfig(
+             binding="openai",
+@@ -293,6 +293,7 @@ async def test_native_history_uses_selected_branch_and_advances_summary_only_for
+         ),
+         leaf_message_id=12,
+     )
++    assert result.budget == 900
+     store.get_messages_for_context.assert_awaited_once_with("fixture", leaf_message_id=12)
+     store.update_summary.assert_awaited_once()
+     assert 0 < store.update_summary.call_args.args[2] < 12
 diff --git a/web/app/globals.css b/web/app/globals.css
-index 457ab09..68ee70b 100644
+index 457ab09..aa8c028 100644
 --- a/web/app/globals.css
 +++ b/web/app/globals.css
-@@ -1225,25 +1225,25 @@ body[data-picker-open] .dt-breathing-text {
+@@ -438,6 +438,35 @@
+   scroll-behavior: auto;
+ }
+ 
++/* Keep wide answer elements from expanding the reader's vertical scrollport. */
++.dt-reading-transcript {
++  min-width: 0;
++  overflow-x: clip;
++}
++
++.dt-reading-transcript .md-renderer :is(.katex-display, .overflow-x-auto) {
++  overscroll-behavior-x: contain;
++}
++
++.dt-reading-transcript .md-renderer .katex-display {
++  overflow-x: auto;
++  overflow-y: hidden;
++}
++
++.dt-reading-transcript .md-renderer .katex-display > .katex {
++  width: max-content;
++  min-width: 100%;
++}
++
++.dt-reading-transcript .md-renderer :not(.katex-display) > .katex {
++  display: inline-block;
++  max-width: 100%;
++  overflow-x: auto;
++  overflow-y: hidden;
++  overscroll-behavior-x: contain;
++  vertical-align: middle;
++}
++
+ /* ─── Prose: base ─── */
+ .prose {
+   @apply font-serif text-[16px];
+@@ -1225,25 +1254,25 @@ body[data-picker-open] .dt-breathing-text {
     reading the answer, not in the two seconds after the page moved. A highlight
     that vanished on a timer was simply missed. */
  .dt-reader-flash {
@@ -5606,7 +5814,7 @@ index a5b665d..b28c30b 100644
        rects: [],
        selectors:
 diff --git a/web/components/reading/workspace/ReadingCompanion.tsx b/web/components/reading/workspace/ReadingCompanion.tsx
-index 6d437f2..6bb1657 100644
+index 6d437f2..9adfaa5 100644
 --- a/web/components/reading/workspace/ReadingCompanion.tsx
 +++ b/web/components/reading/workspace/ReadingCompanion.tsx
 @@ -28,7 +28,7 @@ import {
@@ -5734,7 +5942,7 @@ index 6d437f2..6bb1657 100644
            const distanceFromBottom =
              container.scrollHeight -
              container.scrollTop -
-@@ -436,7 +478,7 @@ export function ReadingCompanion({
+@@ -436,58 +478,76 @@ export function ReadingCompanion({
          // No rule above the composer: the last lines fade out instead, so the
          // composer floats over the conversation as it does on /chat. The
          // bottom padding keeps that fade over empty space, not the last line.
@@ -5743,7 +5951,87 @@ index 6d437f2..6bb1657 100644
          style={{
            WebkitMaskImage: COMPOSER_FADE,
            maskImage: COMPOSER_FADE,
-@@ -486,8 +528,24 @@ export function ReadingCompanion({
+         }}
+       >
+-        {state.messages.length ? (
+-          <ChatMessageList
+-            messages={state.messages}
+-            isStreaming={state.isStreaming}
+-            sessionId={state.sessionId}
+-            language={state.language}
+-            onCopyAssistantMessage={copyAssistantMessage}
+-            onRegenerateMessage={regenerateLastMessage}
+-            canResendLastTurn={state.lastTurnFailed}
+-            onResendLastTurn={resendLastMessage}
+-            onDeleteTurn={deleteTurn}
+-            selectedBranches={state.selectedBranches}
+-            onEditMessage={editMessage}
+-            onDiscardFailedSubmission={discardFailedSubmission}
+-            onRetryFailedSubmission={retryFailedSubmission}
+-            onSwitchBranch={switchBranch}
+-            onSubmitUserReply={submitUserReply}
+-            onConfirmOutline={confirmResearchOutline}
+-            onPreviewAttachment={handlePreviewMessageAttachment}
+-            onLoadMessageTrace={(messageId) =>
+-              state.sessionId
+-                ? loadMessageTrace(state.sessionId, messageId)
+-                : Promise.resolve()
+-            }
+-            onReleaseMessageTrace={(messageId) => {
+-              if (state.sessionId) {
+-                releaseMessageTrace(state.sessionId, messageId);
++        <div className="dt-reading-transcript">
++          {state.messages.length ? (
++            <ChatMessageList
++              messages={state.messages}
++              isStreaming={state.isStreaming}
++              sessionId={state.sessionId}
++              language={state.language}
++              onCopyAssistantMessage={copyAssistantMessage}
++              onRegenerateMessage={regenerateLastMessage}
++              canResendLastTurn={state.lastTurnFailed}
++              onResendLastTurn={resendLastMessage}
++              onDeleteTurn={deleteTurn}
++              selectedBranches={state.selectedBranches}
++              onEditMessage={editMessage}
++              onDiscardFailedSubmission={discardFailedSubmission}
++              onRetryFailedSubmission={retryFailedSubmission}
++              onSwitchBranch={switchBranch}
++              onSubmitUserReply={submitUserReply}
++              onConfirmOutline={confirmResearchOutline}
++              onPreviewAttachment={handlePreviewMessageAttachment}
++              onLoadMessageTrace={(messageId) =>
++                state.sessionId
++                  ? loadMessageTrace(state.sessionId, messageId)
++                  : Promise.resolve()
+               }
+-            }}
+-            showModeBadge={false}
++              onReleaseMessageTrace={(messageId) => {
++                if (state.sessionId) {
++                  releaseMessageTrace(state.sessionId, messageId);
++                }
++              }}
++              showModeBadge={false}
++            />
++          ) : hasCards ? null : (
++            <CompanionWelcome hasMaterial={Boolean(material)} />
++          )}
++          <ReadingActionCards
++            sessionId={state.sessionId}
++            onFollowUp={followUpCard}
+           />
+-        ) : hasCards ? null : (
+-          <CompanionWelcome hasMaterial={Boolean(material)} />
+-        )}
+-        <ReadingActionCards
+-          sessionId={state.sessionId}
+-          onFollowUp={followUpCard}
+-        />
++        </div>
+         <div ref={messagesEndRef} className="h-px" />
+       </div>
+ 
        <div
          ref={composerBoxRef}
          data-reading-composer=""
@@ -5769,7 +6057,7 @@ index 6d437f2..6bb1657 100644
          {!!linkedSessionIds.length && (
            <div className="mx-4 mb-2 flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
              <Link2 size={11} />
-@@ -502,6 +560,8 @@ export function ReadingCompanion({
+@@ -502,6 +562,8 @@ export function ReadingCompanion({
            placeholder={askHint || t("Ask about this material…")}
            placeholderCompletion={askHint}
            selection={selection}
@@ -5778,7 +6066,7 @@ index 6d437f2..6bb1657 100644
            onSent={onClearSelection}
            onRemoveSelection={() => {
              onClearSelection();
-@@ -510,6 +570,7 @@ export function ReadingCompanion({
+@@ -510,6 +572,7 @@ export function ReadingCompanion({
            linkedSessionIds={linkedSessionIds}
            prefillInputRef={prefillInputRef}
          />
@@ -5786,7 +6074,7 @@ index 6d437f2..6bb1657 100644
        </div>
  
        <SaveToNotebookModal
-@@ -534,3 +595,47 @@ export function ReadingCompanion({
+@@ -534,3 +597,47 @@ export function ReadingCompanion({
      </aside>
    );
  }
@@ -6852,6 +7140,44 @@ index f6ba7e6..b77854e 100644
      }
    }
    return <span className="inline-flex flex-wrap items-center gap-1 text-xs">
+diff --git a/web/contracts/generated/api.ts b/web/contracts/generated/api.ts
+index 2bbe64e..f394451 100644
+--- a/web/contracts/generated/api.ts
++++ b/web/contracts/generated/api.ts
+@@ -18269,6 +18269,12 @@ export interface components {
+      *     from the frontend.
+      */
+     readonly UISettingsUpdate: {
++      /**
++       * Chat History Range
++       * @default auto
++       * @enum {string}
++       */
++      readonly chat_history_range: "auto" | "32000" | "64000";
+       /** Code Block Show Line Numbers */
+       readonly code_block_show_line_numbers?: boolean | null;
+       /** Code Block Theme */
+diff --git a/web/contracts/schema/openapi.json b/web/contracts/schema/openapi.json
+index 262de55..e689423 100644
+--- a/web/contracts/schema/openapi.json
++++ b/web/contracts/schema/openapi.json
+@@ -13583,6 +13583,16 @@
+       "UISettingsUpdate": {
+         "description": "Partial UI settings for user-initiated PATCH/PUT updates via /api/settings/ui.\n\n`model_dump(exclude_unset=True)` excludes fields not provided in the\nfrontend payload, while explicitly provided\ndefaults (e.g., `theme: \"snow\"`) still update the backend. This separates\nthe semantic contract: `/ui` endpoint only merges whatever explicitly arrives\nfrom the frontend.",
+         "properties": {
++          "chat_history_range": {
++            "default": "auto",
++            "enum": [
++              "auto",
++              "32000",
++              "64000"
++            ],
++            "title": "Chat History Range",
++            "type": "string"
++          },
+           "code_block_show_line_numbers": {
+             "anyOf": [
+               {
 diff --git a/web/features/chat/ChatStateAdapter.tsx b/web/features/chat/ChatStateAdapter.tsx
 index d77223e..b291fcf 100644
 --- a/web/features/chat/ChatStateAdapter.tsx
@@ -7402,6 +7728,117 @@ index 7406dc8..06c2485 100644
    const { t, i18n } = useTranslation();
    const [status, setStatus] = useState<AppUpdateStatus | null>(null);
    const [job, setJob] = useState<UpdateJob | null>(null);
+diff --git a/web/features/settings/sections/ChatHistoryRangeSection.tsx b/web/features/settings/sections/ChatHistoryRangeSection.tsx
+new file mode 100644
+index 0000000..82c006a
+--- /dev/null
++++ b/web/features/settings/sections/ChatHistoryRangeSection.tsx
+@@ -0,0 +1,85 @@
++"use client";
++
++import { useEffect, useState } from "react";
++import { useTranslation } from "react-i18next";
++
++import { SettingRow, selectClass } from "@/components/settings/shared";
++import { useSettings } from "@/features/settings/store/SettingsStore";
++import { apiFetch, apiUrl } from "@/lib/api";
++import { applyExtensionPayload } from "@/lib/settings-extensions";
++
++const ranges = {
++  auto: "Automatic (model default)",
++  "32000": "32,000 tokens",
++  "64000": "64,000 tokens",
++} as const;
++type HistoryRange = keyof typeof ranges;
++type HistoryPreference = { chat_history_range?: HistoryRange };
++
++export default function ChatHistoryRangeSection() {
++  const { t } = useTranslation();
++  const { draftRevision, registerExtension, pendingExtensionPayload } = useSettings();
++  const [saved, setSaved] = useState<HistoryRange | null>(null);
++  const [range, setRange] = useState<HistoryRange>("auto");
++  const [loadFailed, setLoadFailed] = useState(false);
++
++  useEffect(() => {
++    const controller = new AbortController();
++    setSaved(null);
++    setLoadFailed(false);
++    void (async () => {
++      try {
++        const response = await apiFetch(apiUrl("/api/settings"), { signal: controller.signal });
++        if (!response.ok) throw new Error("Could not load the history range");
++        const { ui } = (await response.json()) as { ui?: HistoryPreference };
++        if (controller.signal.aborted) return;
++        const value = ui?.chat_history_range ?? "auto";
++        const pending = pendingExtensionPayload("chat-history") as HistoryPreference | undefined;
++        setRange(pending?.chat_history_range ?? value);
++        setSaved(value);
++      } catch {
++        if (!controller.signal.aborted) setLoadFailed(true);
++      }
++    })();
++    return () => controller.abort();
++  }, [draftRevision, pendingExtensionPayload]);
++
++  useEffect(() => {
++    const payload = { chat_history_range: range };
++    registerExtension("chat-history", {
++      dirty: saved !== null && range !== saved,
++      payload: saved !== null ? payload : null,
++      save: async () => {
++        await applyExtensionPayload("chat-history", payload);
++        setSaved(range);
++      },
++    });
++    return () => registerExtension("chat-history", null);
++  }, [range, registerExtension, saved]);
++
++  return (
++    <details className="mb-10 rounded-xl border border-[var(--border)] px-4">
++      <summary className="cursor-pointer py-3 text-[14px] font-medium">
++        {t("Advanced settings")}
++      </summary>
++      <SettingRow
++        title={t("Conversation history range")}
++        description={t("Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.")}
++        control={
++          <select
++            aria-label={t("Conversation history range")}
++            className={selectClass}
++            disabled={saved === null}
++            value={range}
++            onChange={(event) => setRange(event.target.value as HistoryRange)}
++          >
++            <option value="auto">{t(ranges.auto)}</option>
++            <option value="32000">{t(ranges["32000"])}</option>
++            <option value="64000">{t(ranges["64000"])}</option>
++          </select>
++        }
++      />
++      {loadFailed && <p role="alert" className="pb-3 text-sm text-[var(--destructive)]">{t("Failed to load settings")}</p>}
++    </details>
++  );
++}
+diff --git a/web/features/settings/sections/StartersSettingsSection.tsx b/web/features/settings/sections/StartersSettingsSection.tsx
+index 2ab6edf..c78c8f8 100644
+--- a/web/features/settings/sections/StartersSettingsSection.tsx
++++ b/web/features/settings/sections/StartersSettingsSection.tsx
+@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ import Link from "next/link";
+ import { ArrowUpRight, Loader2 } from "lucide-react";
+ import ChatResponseTimeoutSection from "@/components/settings/ChatResponseTimeoutSection";
++import ChatHistoryRangeSection from "./ChatHistoryRangeSection";
+ import { useTranslation } from "react-i18next";
+ 
+ import {
+@@ -138,6 +139,7 @@ export default function StarterSettingsPage() {
+       />
+ 
+       <ChatResponseTimeoutSection />
++      {STUDENT_EDITION && <ChatHistoryRangeSection />}
+ 
+       {loading && (
+         <div className="flex items-center gap-2 text-[13px] text-[var(--muted-foreground)]">
 diff --git a/web/lib/latex-normalize.ts b/web/lib/latex-normalize.ts
 index 42c5d7a..811bede 100644
 --- a/web/lib/latex-normalize.ts
@@ -7797,6 +8234,18 @@ index 2772a8e..1a9be3b 100644
 +  const messageId = rawId && !rawId.startsWith("-") ? rawId : null;
 +  return { text, messageId, anchor: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom } };
 +}
+diff --git a/web/lib/settings-extensions.ts b/web/lib/settings-extensions.ts
+index dbb5042..f010087 100644
+--- a/web/lib/settings-extensions.ts
++++ b/web/lib/settings-extensions.ts
+@@ -25,6 +25,7 @@ export const EXTENSION_ENDPOINTS = {
+   "chat-starters": "/api/settings/chat-starters",
+   "chat-attachments": "/api/settings/chat-attachments",
+   "chat-timeout": "/api/settings/chat-response-timeout",
++  "chat-history": "/api/settings/ui",
+   capabilities: "/api/capabilities/settings",
+   memory: "/api/memory/settings",
+   network: "/api/settings/network",
 diff --git a/web/lib/student-learning-api.ts b/web/lib/student-learning-api.ts
 index 3376a0f..a35a223 100644
 --- a/web/lib/student-learning-api.ts
@@ -7958,7 +8407,7 @@ index e8f8270..a8f16ba 100644
    const { summary, metrics } = report
    const lines = [`# ${parent ? '孩子的学习近况' : '我的学习报告'}`, `${report.range.from} 至 ${report.range.to}`, summary.overview.text, `记录范围：${metrics.message_count}条对话记录，${metrics.conversation_count}段对话，${metrics.active_days}个有提问的日期。`, '学习时长、练习总数与正确率：未记录，不由聊天时长或讲解内容推算。']
 diff --git a/web/locales/en/app.json b/web/locales/en/app.json
-index 613b5fa..434f5ee 100644
+index 613b5fa..969f839 100644
 --- a/web/locales/en/app.json
 +++ b/web/locales/en/app.json
 @@ -1,4 +1,18 @@
@@ -8006,7 +8455,7 @@ index 613b5fa..434f5ee 100644
    "Selected text": "Selected text",
    "Ask anything about the selected text.": "Ask anything about the selected text.",
    "Choose color": "Choose color",
-@@ -6501,5 +6523,10 @@
+@@ -6501,5 +6523,16 @@
    "“{{title}}” and its practice records will be deleted. This cannot be undone.": "“{{title}}” and its practice records will be deleted. This cannot be undone.",
    "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.",
    "Could not prepare attachment; sending will retry: {{name}}": "Could not prepare attachment; sending will retry: {{name}}",
@@ -8016,10 +8465,16 @@ index 613b5fa..434f5ee 100644
 +  "Only for this learning session": "Only for this learning session",
 +  "For example, explain with a short example and then ask me a question": "For example, explain with a short example and then ask me a question",
 +  "Reading instructions saved": "Reading instructions saved",
-+  "Reading instructions could not be saved": "Reading instructions could not be saved"
++  "Reading instructions could not be saved": "Reading instructions could not be saved",
++  "Advanced settings": "Advanced settings",
++  "Conversation history range": "Conversation history range",
++  "Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.": "Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.",
++  "Automatic (model default)": "Automatic (model default)",
++  "32,000 tokens": "32,000 tokens",
++  "64,000 tokens": "64,000 tokens"
  }
 diff --git a/web/locales/zh/app.json b/web/locales/zh/app.json
-index 6c4afd4..ad4ef32 100644
+index 6c4afd4..9ec30b4 100644
 --- a/web/locales/zh/app.json
 +++ b/web/locales/zh/app.json
 @@ -1,4 +1,18 @@
@@ -8067,7 +8522,7 @@ index 6c4afd4..ad4ef32 100644
    "Selected text": "选中内容",
    "Ask anything about the selected text.": "可以针对这段选中内容继续提问。",
    "Choose color": "选择颜色",
-@@ -6501,5 +6523,10 @@
+@@ -6501,5 +6523,16 @@
    "“{{title}}” and its practice records will be deleted. This cannot be undone.": "将删除「{{title}}」及其练习记录。此操作无法撤销。",
    "“{{title}}” and its tutor threads will be deleted. Original materials stay in your library. This cannot be undone.": "将删除「{{title}}」及其辅导对话。资料库原件保留。此操作无法撤销。",
    "Could not prepare attachment; sending will retry: {{name}}": "附件预处理未完成，发送时将重试：{{name}}",
@@ -8077,7 +8532,13 @@ index 6c4afd4..ad4ef32 100644
 +  "Only for this learning session": "仅对这次学习生效",
 +  "For example, explain with a short example and then ask me a question": "例如：先用一个简短的例子讲解，再问我一道题",
 +  "Reading instructions saved": "已保存学习指令",
-+  "Reading instructions could not be saved": "暂时无法保存学习指令，请重试"
++  "Reading instructions could not be saved": "暂时无法保存学习指令，请重试",
++  "Advanced settings": "高级设置",
++  "Conversation history range": "对话上下文范围",
++  "Applies to chat and reading. A shorter range summarizes earlier messages sooner. Your saved messages and current materials stay available.": "普通聊天和边读边问均生效。范围越短，越早把较旧对话整理为摘要。聊天记录和本轮资料照常保留。",
++  "Automatic (model default)": "自动（按模型适配）",
++  "32,000 tokens": "3.2 万 token",
++  "64,000 tokens": "6.4 万 token"
  }
 diff --git a/web/tests/add-favorite-to-note.spec.tsx b/web/tests/add-favorite-to-note.spec.tsx
 index a34a8c5..6e6357f 100644
