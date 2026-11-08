@@ -66,7 +66,7 @@ function MediaTray({ jobs, foregroundGeneration, startChat }: {
             {t("student.media.newChat")}
           </Link>
         ) : null}
-        <button ref={trigger} type="button" aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
+        <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
           onClick={() => changeView(expanded ? null : latestReady?.id ?? "list")}
           className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
           {runningCount ? <LoaderCircle size={15} aria-hidden className="motion-safe:animate-spin" /> : <Clapperboard size={15} aria-hidden />}
