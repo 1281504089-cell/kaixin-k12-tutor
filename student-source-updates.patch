@@ -1008,6 +1008,176 @@ index 8cff1dc..5764490 100644
      每轮结束后你会看到工具结果，可以继续调用。
  
      调用工具之前，先用一两句平实的话说明你接下来要做什么、为什么。这段文字会随着你写出来即时呈现给
+diff --git a/deeptutor/agents/math_animator/pipeline.py b/deeptutor/agents/math_animator/pipeline.py
+index f9ee5b9..f741558 100644
+--- a/deeptutor/agents/math_animator/pipeline.py
++++ b/deeptutor/agents/math_animator/pipeline.py
+@@ -207,8 +207,10 @@ class MathAnimatorPipeline:
+ 
+             layout_rounds = {"left": MAX_LAYOUT_ROUNDS}
+             render_scene = renderer.render
++            passing_preflight: tuple[str, VisualReviewResult] | None = None
+ 
+             async def _checked_render(*, code: str, output_mode: str, quality: str) -> RenderResult:
++                nonlocal passing_preflight
+                 if layout_rounds["left"] > 0:
+                     review = await geometry_review(code)
+                     if review is not None and not review.passed:
+@@ -219,6 +221,8 @@ class MathAnimatorPipeline:
+                             + " Suggested fix: "
+                             + review.suggested_fix
+                         )
++                    if review is not None:
++                        passing_preflight = (code, review)
+                 return await render_scene(code=code, output_mode=output_mode, quality=quality)
+ 
+             renderer.render = _checked_render  # type: ignore[method-assign]
+@@ -226,7 +230,10 @@ class MathAnimatorPipeline:
+             async def _geometry_callback(
+                 current_code: str, render_result: RenderResult
+             ) -> VisualReviewResult | None:
+-                # Record-only: what the rendered scene still has, for the result payload.
++                # Geometry review only depends on the source code. Reuse the
++                # passing preflight when these are the exact bytes rendered.
++                if passing_preflight is not None and passing_preflight[0] == current_code:
++                    return passing_preflight[1]
+                 review = await geometry_review(current_code)
+                 if review is None:
+                     return None
+diff --git a/deeptutor/agents/video_lesson/capability.py b/deeptutor/agents/video_lesson/capability.py
+index e59c77c..2deb4eb 100644
+--- a/deeptutor/agents/video_lesson/capability.py
++++ b/deeptutor/agents/video_lesson/capability.py
+@@ -35,7 +35,6 @@ class VideoLessonCapability(TurnCapability):
+             write_page,
+         )
+         from deeptutor.services.llm.config import get_llm_config
+-        from deeptutor.services.model_selection.task_agent import task_model_agent
+         from deeptutor.services.path_service import get_path_service
+ 
+         llm_config = get_llm_config()
+@@ -54,16 +53,6 @@ class VideoLessonCapability(TurnCapability):
+         )
+         writer.set_trace_callback(self._build_trace_bridge(stream, i18n))
+         writer.start(user_input=context.user_message, history=history)
+-        # Fixes edit a lesson that already exists; the fast task model does them in a
+-        # fraction of the main model's time. Without one, the main writer fixes too.
+-        fixer = (
+-            task_model_agent(lambda **kw: LessonWriterAgent(language=context.language, **kw))
+-            or writer
+-        )
+-        if fixer is not writer:
+-            fixer.set_trace_callback(self._build_trace_bridge(stream, i18n))
+-            fixer.share_conversation(writer)
+-
+         # npm install (first use only) overlaps the first, much longer, LLM call.
+         runtime_ready = asyncio.create_task(ensure_runtime())
+         timings: dict[str, float] = {"code_generation": 0.0, "render_check": 0.0}
+@@ -84,7 +73,7 @@ class VideoLessonCapability(TurnCapability):
+                         source=self.name,
+                         stage="code_generation",
+                     )
+-                    draft = await (writer if attempt == 1 else fixer).write(attempt=attempt)
++                    draft = await writer.write(attempt=attempt)
+                 timings["code_generation"] += round(time.perf_counter() - started, 3)
+                 if not draft.code:
+                     attempts.append(
+diff --git a/deeptutor/agents/video_lesson/lesson_writer.py b/deeptutor/agents/video_lesson/lesson_writer.py
+index 83c781e..79cae62 100644
+--- a/deeptutor/agents/video_lesson/lesson_writer.py
++++ b/deeptutor/agents/video_lesson/lesson_writer.py
+@@ -84,10 +84,6 @@ class LessonWriterAgent(BaseAgent):
+         user = template.format(user_input=user_input.strip(), history=history.strip() or "-")
+         self._messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+ 
+-    def share_conversation(self, other: "LessonWriterAgent") -> None:
+-        """Use ``other``'s conversation (same list), so either agent can write the next draft."""
+-        self._messages = other._messages
+-
+     def add_feedback(self, *, previous: str, stage: str, errors: list[str]) -> None:
+         """Keep the failed reply in the conversation and ask for a fix."""
+         template = self.get_prompt("retry_template") or "{stage}\n{errors}"
+diff --git a/deeptutor/agents/video_lesson/prompts/en/lesson_writer.yaml b/deeptutor/agents/video_lesson/prompts/en/lesson_writer.yaml
+index bf41088..7b95dcf 100644
+--- a/deeptutor/agents/video_lesson/prompts/en/lesson_writer.yaml
++++ b/deeptutor/agents/video_lesson/prompts/en/lesson_writer.yaml
+@@ -1,10 +1,10 @@
+ system: |
+-  You are DeepTutor's video lesson author: for the learner's question, write a 60-120 second explainer animation
+-  with Remotion (a React video framework). The goal is real understanding: lead with the answer or the key idea,
++  You are DeepTutor's video lesson author: for the learner's question, write an explainer animation with Remotion (a React video framework).
++  Follow the duration requested by the learner. When none is requested, use 60–120 seconds. The goal is real understanding: lead with the answer or the key idea,
+   then build the reasoning or the story step by step; the narration says what the picture shows.
+ 
+   ## Deliverable
+-  Write one file, Lesson.tsx, that organises the film into 5-8 scenes with the kit's <Scenes>, exporting:
++  Write one file, Lesson.tsx, using the kit's <Scenes>. Default to 5–8 scenes. A short lesson should follow the actual teaching steps, such as 2–3 scenes for a 20-second lesson. Export:
+       const SCENES: Scene[] = [
+         {voice: "s1", frames: 420, content: <Intro />},
+         {voice: "s2", frames: 540, content: <Steps />},
+@@ -17,7 +17,7 @@ system: |
+   ## Narration and voice-over
+   - Each scene's narration goes in the json block's narration list, its id matching the scene's voice. The host
+     voices it with TTS and adds captions that follow the voice; do not write <Narration> yourself.
+-  - Narration is what the teacher says: 2-5 sentences per scene, each under 25 words, ending in punctuation. Write
++  - Fit narration to the scene duration. A short scene may use one sentence. End each sentence with punctuation. Write
+     numbers and formulas the way they are read aloud ("a sub n plus one", "one half"), never LaTeX or symbol strings.
+   - English speech runs about 2.5 words per second; estimate each scene's frames from it. A scene stretches when its
+     voice runs longer, so place the picture's delays within the first 70% of the estimate.
+@@ -29,7 +29,7 @@ system: |
+   - Inside each scene of <Scenes>, useCurrentFrame() starts at 0; the kit's delay props are frames relative to the
+     scene. Nest a <Sequence> when a scene needs its own beats.
+   - Coordinates are 1920x1080 pixels. Keep 120px side margins and leave the bottom 200px to captions.
+-  - At 30fps a scene is usually 300-600 frames.
++  - At 30fps, allocate frames from the target duration and narration length. Keep the key steps and conclusion, and fit the total narration within the target duration.
+ 
+   ## Layout contract (the host measures every frame in a browser and rejects collisions)
+   - Safe area: x 120-1800, y 60-860. Nothing — text, drawing, label, axis, arrowhead — may go below y=860; the
+diff --git a/deeptutor/agents/video_lesson/prompts/zh/lesson_writer.yaml b/deeptutor/agents/video_lesson/prompts/zh/lesson_writer.yaml
+index f667ad1..a9dc1d0 100644
+--- a/deeptutor/agents/video_lesson/prompts/zh/lesson_writer.yaml
++++ b/deeptutor/agents/video_lesson/prompts/zh/lesson_writer.yaml
+@@ -1,9 +1,9 @@
+ system: |
+-  你是 DeepTutor 的「视频讲解」作者：针对学习者的问题，用 Remotion（React 视频框架）写一段 60~120 秒的讲解动画。
++  你是 DeepTutor 的「视频讲解」作者：针对学习者的问题，用 Remotion（React 视频框架）写一段讲解动画。优先采用学习者明确指定的时长，未指定时用 60~120 秒。
+   目标是让学习者真正看懂：先给结论或要点，再一步步展开推理或脉络；画面讲什么，旁白就讲什么。
+ 
+   ## 产物
+-  只写一个文件 Lesson.tsx，用 kit 的 <Scenes> 把全片组织成 5~8 幕，必须导出：
++  只写一个文件 Lesson.tsx，用 kit 的 <Scenes> 组织讲解。默认 5~8 幕，短讲解按实际步骤组织（例如 20 秒用 2~3 幕），必须导出：
+       const SCENES: Scene[] = [
+         {voice: "s1", frames: 420, content: <Intro />},
+         {voice: "s2", frames: 540, content: <Steps />},
+@@ -16,7 +16,7 @@ system: |
+   ## 旁白与配音
+   - 每一幕的旁白写在 json 的 narration 里，id 与该幕的 voice 对应。宿主会用 TTS 配音，并生成跟随配音的字幕；
+     不要再自己写 <Narration>。
+-  - 旁白就是老师要说的话：每幕 2~5 句、每句不超过 30 个字，句末用标点。数字、公式写成念得出来的样子
++  - 旁白就是老师要说的话：按每幕时长分配短句，短讲解可用一幕一句，每句不超过 30 个字，句末用标点。数字、公式写成念得出来的样子
+     （「a n 加一」「二分之一」），不要写 LaTeX 或符号串。
+   - 中文语速约每秒 4 个字，用它估算每幕的 frames。配音更长时这一幕会自动延长，所以画面的 delay 安排在估算时长的前 70% 里。
+ 
+@@ -26,7 +26,12 @@ system: |
+   - <Scenes> 里每一幕的 useCurrentFrame() 从 0 开始计；kit 组件的 delay 参数都是相对所在幕的帧数。
+     幕内需要分段时可以再套 <Sequence>。
+   - 坐标系是 1920×1080 像素。正文区左右各留 120px，底部 200px 留给字幕，不要把内容放进字幕区。
+-  - 30fps：一幕通常 300~600 帧。
++  - 30fps：每幕帧数按目标时长和旁白字数分配。短讲解仍须呈现关键步骤和结论，旁白总长度须能在目标时长内读完。
++
++  ## 画面布局
++  - 画面内容留在 x=120~1800、y=60~860 范围，底部留给字幕。动效结束后的最终位置也要留在这个范围。
++  - 动笔前给标题、正文、公式和图形分配互不重叠的区域。标签放在所指对象旁边，与其他元素留至少 24px，不叠在边线或色块上。
++  - 逐幕核对最长一行文字、图形边缘和最终出现的标注，避免修一个重叠时引入另一个。
+ 
+   ## 美术指导（去掉「AI 生成感」）
+   - 参考对象：优秀教科书插图、纪录片里的信息图、报纸图表版、老师的板书。不要科技发布会、SaaS 官网、赛博朋克风格。
+@@ -65,4 +70,4 @@ retry_template: |
+   宿主编译或逐帧检查没有通过（阶段：{stage}）：
+   {errors}
+ 
+-  请修复这些问题，重新输出完整的 ```json 与 ```tsx 两个代码块。
++  只改检查指出的部位，保留讲解内容、时长和旁白。修复后输出完整的 ```json 与 ```tsx 两个代码块。
 diff --git a/deeptutor/api/main.py b/deeptutor/api/main.py
 index f48dde2..5ab6e8b 100644
 --- a/deeptutor/api/main.py
@@ -4908,6 +5078,43 @@ index 0000000..f6056fb
 +    "exercisePale": "F4F7FA"
 +  }
 +}
+diff --git a/tests/agents/math_animator/test_visual_review.py b/tests/agents/math_animator/test_visual_review.py
+index e73742c..cbd9e66 100644
+--- a/tests/agents/math_animator/test_visual_review.py
++++ b/tests/agents/math_animator/test_visual_review.py
+@@ -90,3 +90,32 @@ async def test_review_skips_without_frames_or_vision_model(monkeypatch, has_fram
+         "does not support image inspection" if has_frames else "no review frames"
+     ) in result.summary
+     provider.assert_not_called()
++
++
++@pytest.mark.asyncio
++async def test_passing_geometry_preflight_is_reused_for_rendered_source(monkeypatch) -> None:
++    pipeline = MathAnimatorPipeline(
++        api_key="test", base_url=None, api_version=None, enable_visual_review=False
++    )
++    original = "# overlapping"
++    repaired = "# clear"
++    blocked = VisualReviewResult(passed=False, summary="Labels overlap", suggested_fix="Move labels")
++    passed = VisualReviewResult(passed=True, summary="Geometry is clear", reviewed_frames=3)
++    geometry = AsyncMock(side_effect=[blocked, passed])
++    repair = AsyncMock(return_value=GeneratedCode(code=repaired))
++    render = AsyncMock(return_value=RenderResult(output_mode="video", quality="medium"))
++    monkeypatch.setattr("deeptutor.agents.math_animator.layout_probe.geometry_review", geometry)
++    monkeypatch.setattr("deeptutor.agents.math_animator.pipeline.ManimRenderService.render", render)
++    monkeypatch.setattr(pipeline.repair_agent, "repair", repair)
++
++    code, result = await pipeline.run_render(
++        turn_id="test-preflight",
++        user_input="Explain a circle",
++        request_config=MathAnimatorRequestConfig(enable_visual_review=False),
++        initial_code=original,
++    )
++
++    assert code == repaired
++    assert [call.args[0] for call in geometry.await_args_list] == [original, repaired]
++    render.assert_awaited_once_with(code=repaired, output_mode="video", quality="medium")
++    assert result.visual_review == passed
 diff --git a/tests/api/test_memory_router_contract.py b/tests/api/test_memory_router_contract.py
 index acb13a8..a8e80a5 100644
 --- a/tests/api/test_memory_router_contract.py
