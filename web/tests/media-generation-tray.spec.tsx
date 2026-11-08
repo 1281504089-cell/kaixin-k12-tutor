@@ -7,7 +7,10 @@ import type { StreamEvent } from "@/features/chat/model/protocol";
 import { initI18n } from "@/i18n/init";
 
 initI18n("en");
-const transport = vi.hoisted(() => ({ emit: undefined as undefined | ((e: StreamEvent) => void) }));
+const transport = vi.hoisted(() => ({
+  emit: undefined as undefined | ((e: StreamEvent) => void),
+  stop: vi.fn<(command: { type: string; turn_id: string }) => Promise<boolean>>(),
+}));
 vi.mock("@/features/chat/transport/UnifiedTurnClient", () => ({
   UnifiedTurnClient: class {
     connected = true;
@@ -15,13 +18,14 @@ vi.mock("@/features/chat/transport/UnifiedTurnClient", () => ({
     connect() {}
     disconnect() {}
     send() {}
+    sendAwaitingAck(command: { type: string; turn_id: string }) { return transport.stop(command); }
     setResumeState() {}
   },
 }));
 
-const event = (source: string, type: StreamEvent["type"], metadata = {}, turnId = "turn-1"): StreamEvent => ({
+const event = (source: string, type: StreamEvent["type"], metadata = {}, turnId = "turn-1", sessionId = "session-1"): StreamEvent => ({
   type, metadata, source, content: "", stage: "render_output", timestamp: 1,
-  session_id: "session-1", turn_id: turnId,
+  session_id: sessionId, turn_id: turnId,
 });
 
 function Harness() {
@@ -58,10 +62,12 @@ describe("background generation", () => {
     expect(screen.queryByTitle("Fractions")).not.toBeInTheDocument();
     await act(async () => transport.emit?.(event("video_lesson", "done", { status: "completed", user_message_id: 1, assistant_message_id: 2 })));
     expect(await screen.findByTitle("Fractions")).toHaveAttribute("sandbox", "allow-scripts");
+    expect(screen.getByText(/New result ready/)).toBeInTheDocument();
     expect(input).toHaveFocus();
     expect(screen.getByTestId("session")).toBeEmptyDOMElement();
     fireEvent.click(screen.getByRole("button", { name: "Collapse player" }));
     expect(screen.queryByTitle("Fractions")).not.toBeInTheDocument();
+    expect(screen.queryByText(/New result ready/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Generated lessons" }));
     expect(await screen.findByTitle("Fractions")).toBeInTheDocument();
   });
@@ -97,6 +103,63 @@ describe("background generation", () => {
     }
     expect(jobs.map(job => job.sessionKey)).toEqual(["first", "second"]);
     expect(trackMediaJobs(jobs, { type: "STREAM_START", key: "third", startedAt: 2, capability: "video_lesson" })[0].id).toBe("third:2");
+  });
+
+  it("cancels only the named background turn and leaves another conversation running", async () => {
+    transport.stop.mockResolvedValue(true);
+    render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+    fireEvent.click(screen.getByText("Generate lesson"));
+    await screen.findByText("1 generating");
+    const lessonEvents = transport.emit;
+    await act(async () => lessonEvents?.(event("video_lesson", "session", {}, "lesson-turn")));
+    fireEvent.click(screen.getByText("Switch to another chat"));
+    fireEvent.click(screen.getByText("Generate animation"));
+    await screen.findByText("2 generating");
+    const animationEvents = transport.emit;
+    await act(async () => animationEvents?.(event("math_animator", "session", {}, "animation-turn", "session-2")));
+    expect(transport.stop).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Generated lessons" }));
+    const stopLesson = screen.getByRole("button", { name: "Stop generation: Test lesson" });
+    await act(async () => fireEvent.click(stopLesson));
+    expect(transport.stop).toHaveBeenCalledExactlyOnceWith({ type: "cancel_turn", turn_id: "lesson-turn" });
+    expect(stopLesson).toBeDisabled();
+    expect(stopLesson).toHaveTextContent("Stopping…");
+    expect(screen.queryByText("Stopped")).not.toBeInTheDocument();
+
+    await act(async () => lessonEvents?.(event("video_lesson", "done", {
+      status: "cancelled", user_message_id: 1, assistant_message_id: 2,
+    }, "lesson-turn")));
+    expect(screen.getByText("Stopped")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stop generation: Test animation" })).toBeEnabled();
+    expect(screen.getByText("1 generating")).toBeInTheDocument();
+    expect(screen.getByTestId("session")).toHaveTextContent("session-2");
+    expect(screen.queryByText(/New result ready/)).not.toBeInTheDocument();
+
+    await act(async () => {
+      animationEvents?.(event("math_animator", "result", {
+        output_mode: "video",
+        artifacts: [{ type: "video", url: "/files/demo.mp4", filename: "demo.mp4" }],
+      }, "animation-turn", "session-2"));
+      animationEvents?.(event("math_animator", "done", {
+        status: "completed", user_message_id: 3, assistant_message_id: 4,
+      }, "animation-turn", "session-2"));
+    });
+    expect(await screen.findByRole("heading", { name: "Math Animator" })).toBeInTheDocument();
+    expect(screen.getByText(/New result ready/)).toBeInTheDocument();
+  });
+
+  it("allows retrying a rejected stop without marking the task stopped", async () => {
+    transport.stop.mockResolvedValue(false);
+    render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+    fireEvent.click(screen.getByText("Generate lesson"));
+    await screen.findByText("1 generating");
+    await act(async () => transport.emit?.(event("video_lesson", "session")));
+    fireEvent.click(screen.getByRole("button", { name: "Generated lessons" }));
+    const stop = screen.getByRole("button", { name: "Stop generation: Test lesson" });
+    await act(async () => fireEvent.click(stop));
+    expect(stop).toBeEnabled();
+    expect(screen.queryByText("Stopped")).not.toBeInTheDocument();
   });
 
   it("shows failures in the tray without opening an empty player", async () => {

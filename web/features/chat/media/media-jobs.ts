@@ -12,22 +12,29 @@ export interface MediaJob {
   sessionKey: string;
   turnId?: string | null;
   kind: MediaKind;
-  status: "running" | "ready" | "failed";
+  prompt?: string;
+  stopRequested?: boolean;
+  status: "running" | "ready" | "failed" | "cancelled";
   output?: MediaOutput;
 }
 
 export type MediaJobEvent =
-  | { type: "STREAM_START"; key: string; startedAt: number; capability?: string | null }
+  | { type: "MEDIA_STOP_REQUEST"; id: string; requested: boolean }
+  | { type: "STREAM_START"; key: string; startedAt: number; capability?: string | null; prompt?: string }
   | { type: "BIND_SERVER_SESSION"; key: string; sessionId: string; turnId?: string | null }
   | { type: "STREAM_EVENT"; key: string; event: StreamEvent }
   | { type: "STREAM_END"; key: string; status?: string; turnId?: string | null };
 
 export function trackMediaJobs(jobs: MediaJob[], action: MediaJobEvent): MediaJob[] {
+  if (action.type === "MEDIA_STOP_REQUEST") {
+    return jobs.map(job => job.id === action.id && job.status === "running"
+      ? { ...job, stopRequested: action.requested } : job);
+  }
   if (action.type === "STREAM_START") {
     const kind = action.capability;
     if (kind !== "math_animator" && kind !== "video_lesson") return jobs;
     const id = `${action.key}:${action.startedAt}`;
-    return [{ id, kind, sessionKey: action.key, status: "running" }, ...jobs];
+    return [{ id, kind, sessionKey: action.key, status: "running", prompt: action.prompt }, ...jobs];
   }
 
   // Only act on this session's live job. Replaying old messages must never
@@ -59,8 +66,9 @@ export function trackMediaJobs(jobs: MediaJob[], action: MediaJobEvent): MediaJo
 
   if (action.status === "running") return jobs;
   const ready = (action.status === "completed" || !action.status) && Boolean(job.output);
+  const status = ready ? "ready" : action.status === "cancelled" ? "cancelled" : "failed";
   const settled: MediaJob[] = [
-    { ...job, status: ready ? "ready" : "failed", output: ready ? job.output : undefined },
+    { ...job, status, stopRequested: false, output: ready ? job.output : undefined },
     ...jobs.filter(item => item.id !== job.id),
   ];
   let finished = 0;

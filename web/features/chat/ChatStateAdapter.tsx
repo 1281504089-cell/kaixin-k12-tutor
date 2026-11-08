@@ -440,6 +440,7 @@ interface SessionSnapshot {
 }
 
 type Action =
+  | { type: "MEDIA_STOP_REQUEST"; id: string; requested: boolean }
   | { type: "RESET_ACCOUNT" }
   | { type: "SET_TOOLS"; tools: string[] }
   | { type: "SET_CAPABILITY"; cap: string | null }
@@ -799,12 +800,17 @@ function hasTurnEvent(events: StreamEvent[], event: StreamEvent): boolean {
 function reducer(state: ProviderState, action: Action): ProviderState {
   let next = reduce(state, action);
   if (
+    action.type === "MEDIA_STOP_REQUEST" ||
     action.type === "STREAM_START" ||
     action.type === "BIND_SERVER_SESSION" ||
     (action.type === "STREAM_EVENT" && action.event.type === "result") ||
     action.type === "STREAM_END"
   ) {
-    const mediaJobs = trackMediaJobs(next.mediaJobs, action);
+    const prompt = action.type === "STREAM_START" ? next.sessions[action.key]?.messages.at(-2) : undefined;
+    const mediaJobs = trackMediaJobs(next.mediaJobs,
+      action.type === "STREAM_START" && prompt?.role === "user"
+        ? { ...action, prompt: prompt.content.trim().slice(0, 160) }
+        : action);
     if (mediaJobs !== next.mediaJobs) next = { ...next, mediaJobs };
   }
   // Opening a conversation from history is how most of them enter memory.
@@ -1721,6 +1727,7 @@ const POST_DONE_TITLE_REFRESH_MS = 5_000;
 
 interface ChatContextValue {
   mediaJobs: MediaJob[];
+  stopMediaGeneration: (jobId: string) => Promise<void>;
   state: ChatState;
   setTools: (tools: string[]) => void;
   setCapability: (cap: string | null) => void;
@@ -3527,6 +3534,24 @@ export function ChatStateAdapterProvider({
     [makeDraftKey, sendThroughRunner, ensureRunner],
   );
 
+  const stopMediaGeneration = useCallback(async (jobId: string) => {
+    const job = stateRef.current.mediaJobs.find(item => item.id === jobId);
+    if (job?.status !== "running" || !job.turnId || job.stopRequested) return;
+    const runner = runnersRef.current.get(job.sessionKey);
+    if (!runner) return;
+
+    const generation = runtimeGeneration.current;
+    dispatch({ type: "MEDIA_STOP_REQUEST", id: jobId, requested: true });
+    // An ACK only queues cancellation. Leave the connection open to receive
+    // the terminal event so a result that finished just before Stop is kept.
+    const accepted = await runner.client.sendAwaitingAck({ type: "cancel_turn", turn_id: job.turnId })
+      .catch(() => false);
+    if (accepted || generation !== runtimeGeneration.current) return;
+    if (stateRef.current.mediaJobs.find(item => item.id === jobId)?.status !== "running") return;
+    dispatch({ type: "MEDIA_STOP_REQUEST", id: jobId, requested: false });
+    notify(i18n.t("student.media.stopFailed"), { tone: "error" });
+  }, []);
+
   const cancelStreamingTurn = useCallback(async () => {
     const generation = runtimeGeneration.current;
     const currentState = stateRef.current;
@@ -4308,6 +4333,7 @@ export function ChatStateAdapterProvider({
     () => ({
       state: derivedState,
       mediaJobs: state.mediaJobs,
+      stopMediaGeneration,
       setTools,
       setCapability,
       setKBs,
@@ -4381,6 +4407,7 @@ export function ChatStateAdapterProvider({
       sessionStatuses,
       state.sidebarRefreshToken,
       state.mediaJobs,
+      stopMediaGeneration,
     ],
   );
 

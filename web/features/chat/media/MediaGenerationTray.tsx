@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Check, Clapperboard, List, LoaderCircle, X } from "lucide-react";
+import { Check, Clapperboard, List, LoaderCircle, Square, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
 import { activeWorkspaceId, scopedUrl } from "@/lib/workspace-scope";
@@ -13,31 +13,38 @@ const MathPlayer = dynamic(() => import("@/components/math-animator/MathAnimator
 const LessonPlayer = dynamic(() => import("@/components/video-lesson/VideoLessonViewer"), { ssr: false });
 
 export default function MediaGenerationTray() {
-  const { mediaJobs, state, newSession } = useChatStateAdapter();
+  const { mediaJobs, state, newSession, stopMediaGeneration } = useChatStateAdapter();
   if (!mediaJobs.length) return null;
   const foregroundGeneration = mediaJobs.some(job => job.status === "running" && job.sessionKey === state.sessionKey);
-  return <MediaTray jobs={mediaJobs} foregroundGeneration={foregroundGeneration}
+  return <MediaTray jobs={mediaJobs} foregroundGeneration={foregroundGeneration} stopJob={stopMediaGeneration}
     startChat={() => newSession({ workspaceId: activeWorkspaceId() || null })} />;
 }
 
-function MediaTray({ jobs, foregroundGeneration, startChat }: {
+function MediaTray({ jobs, foregroundGeneration, startChat, stopJob }: {
   jobs: MediaJob[];
   foregroundGeneration: boolean;
   startChat: () => void;
+  stopJob: (jobId: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<string | null>(null);
   const [dismissedId, setDismissedId] = useState<string | null>(null);
+  const [seenReadyId, setSeenReadyId] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const latestReady = jobs.find(job => job.status === "ready");
+  const hasNewResult = Boolean(latestReady && latestReady.id !== seenReadyId);
   const autoOpen = latestReady && latestReady.id !== dismissedId ? latestReady : undefined;
-  const openJob = view && view !== "list" ? jobs.find(job => job.id === view) : autoOpen;
+  const stopping = jobs.some(job => job.status === "running" && job.stopRequested);
+  const openJob = view === "list" && stopping ? undefined : view && view !== "list" ? jobs.find(job => job.id === view) : autoOpen;
   const expanded = Boolean(openJob || view === "list");
   const runningCount = jobs.filter(job => job.status === "running").length;
 
   const changeView = (next: typeof view) => {
     setDismissedId(latestReady?.id ?? null);
     setView(next);
+    if (latestReady && (next === latestReady.id || (next === null && openJob?.id === latestReady.id))) {
+      setSeenReadyId(latestReady.id);
+    }
     if (next === null) trigger.current?.focus();
   };
 
@@ -50,11 +57,12 @@ function MediaTray({ jobs, foregroundGeneration, startChat }: {
       if (event.key !== "Escape" || !panel.current?.contains(document.activeElement)) return;
       setDismissedId(latestReady?.id ?? null);
       setView(null);
+      if (openJob && openJob.id === latestReady?.id) setSeenReadyId(openJob.id);
       trigger.current?.focus();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [expanded, latestReady?.id]);
+  }, [expanded, latestReady?.id, openJob]);
 
   const label = (job: MediaJob) => job.kind === "math_animator" ? t("Math Animator") : t("Video Lesson");
 
@@ -67,10 +75,14 @@ function MediaTray({ jobs, foregroundGeneration, startChat }: {
           </Link>
         ) : null}
         <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
-          onClick={() => changeView(expanded ? null : latestReady?.id ?? "list")}
-          className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
+          onClick={() => changeView(expanded ? null : runningCount ? "list" : latestReady?.id ?? "list")}
+          className="relative inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-xs font-medium shadow-sm hover:bg-[var(--muted)]">
           {runningCount ? <LoaderCircle size={15} aria-hidden className="motion-safe:animate-spin" /> : <Clapperboard size={15} aria-hidden />}
-          <span role="status">{runningCount ? t("student.media.running", { count: runningCount }) : t("student.media.jobs")}</span>
+          <span role="status">
+            {runningCount ? t("student.media.running", { count: runningCount }) : t("student.media.jobs")}
+            {hasNewResult ? <span className="sr-only"> · {t("student.media.newResult")}</span> : null}
+          </span>
+          {hasNewResult ? <span aria-hidden className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--background)]" /> : null}
         </button>
       </div>
 
@@ -98,14 +110,25 @@ function MediaTray({ jobs, foregroundGeneration, startChat }: {
             <ul className="min-h-0 overflow-y-auto p-2">
               {jobs.map(job => (
                 <li key={job.id} className="flex min-w-0 items-center justify-between gap-2 rounded-xl px-2 py-1.5 text-sm">
-                  <span className="min-w-0 truncate">{job.output?.kind === "video_lesson" && job.output.result.title || label(job)}</span>
+                  <div className="min-w-0">
+                    <div className="truncate">{job.output?.kind === "video_lesson" && job.output.result.title || label(job)}</div>
+                    {job.prompt ? <div title={job.prompt} className="truncate text-xs text-[var(--muted-foreground)]">{job.prompt}</div> : null}
+                  </div>
                   {job.status === "ready" ? (
                     <button type="button" onClick={() => changeView(job.id)} className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs text-[var(--primary)] hover:bg-[var(--muted)]">
                       <Check size={14} aria-hidden />{t("student.media.watch")}
                     </button>
+                  ) : job.status === "running" ? (
+                    <button type="button" disabled={!job.turnId || job.stopRequested}
+                      aria-label={t("student.media.stopNamed", { title: job.prompt || label(job) })}
+                      onClick={() => void stopJob(job.id)}
+                      className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs hover:bg-[var(--muted)] disabled:opacity-50">
+                      <Square size={12} aria-hidden />
+                      {t(job.stopRequested ? "student.media.stopping" : "student.media.stop")}
+                    </button>
                   ) : (
                     <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
-                      {t(job.status === "running" ? "student.media.inProgress" : "student.media.unavailable")}
+                      {t(job.status === "cancelled" ? "student.media.stopped" : "student.media.unavailable")}
                     </span>
                   )}
                 </li>
