@@ -33,6 +33,24 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。发现新版本时点「下载并更新」。客户端根据系统和芯片取对应的签名清单。遇到 GitHub 下载直链报 504 时，会自动从公开 Releases API 下载同一份签名更新。更新复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
 
+<details>
+<summary>启动器下载链接报 504 时</summary>
+
+在终端执行自己系统对应的一行，文件会下载到当前目录。Mac 用「终端」，Windows 用 PowerShell。
+
+```sh
+# Apple 芯片 Mac
+curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723458852' -o 'Kaixin-Updater-20261108.3-macos-arm64.zip'
+# Intel Mac
+curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723458480' -o 'Kaixin-Updater-20261108.3-macos-x64.zip'
+# Windows x64
+curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723457902' -o 'Kaixin-Updater-20261108.3-windows-x64.zip'
+```
+
+下载并更换启动器后，从应用内检查更新即可。
+
+</details>
+
 ## 学习功能
 
 | 学习场景 | 怎么用 |
