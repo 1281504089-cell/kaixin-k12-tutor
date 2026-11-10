@@ -17,5 +17,12 @@
     "file": "student-source-updates.patch",
     "sha256": "28ee1083828ddaad5147372089bd90def540a326f1d8312e8ad5909e7cd2829a",
     "description": "Improve the background media handoff with a brief hint, visible flight and a soft sound"
-  }
+  },
+  "additionalSourceUpdates": [
+    {
+      "file": "student-tutoring-20261111.patch",
+      "sha256": "e88e9bf343301588fcfcbdebb7cb02de58651b125629c019cc488a2180ff44cd",
+      "description": "Add realtime voice and document-camera tutoring and in-chat reading"
+    }
+  ]
 }

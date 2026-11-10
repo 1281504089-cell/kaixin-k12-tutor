@@ -8,6 +8,8 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
 
+已安装 1.7.1 完整版的用户，可下载 20261111 辅导更新包，升级后即可使用语音通话、高拍仪辅导和聊天内的边读边问。更新会备份本机学习资料。 [20261111 辅导更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring)
+
 [下载图文操作手册 PDF](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
 
 Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaking students from primary through high school.

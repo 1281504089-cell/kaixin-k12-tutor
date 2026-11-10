@@ -36,10 +36,11 @@ for arguments in (["init"], ["config", "user.name", "Kaixin Student Builder"],
 print("Verified credential-free source snapshot", manifest["commit"])
 
 if options.with_updates:
-    update = manifest["sourceUpdate"]
-    patch = root / update["file"]
-    if hashlib.sha256(patch.read_bytes()).hexdigest() != update["sha256"]:
-        raise ValueError("Student source update checksum mismatch")
-    for arguments in (["apply", "--index", str(patch)], ["commit", "-m", update["description"]]):
-        subprocess.run(["git", "-C", str(destination), *arguments], check=True)
-    print("Applied student source update", update["sha256"])
+    updates = [manifest["sourceUpdate"], *manifest.get("additionalSourceUpdates", [])]
+    for update in updates:
+        patch = root / update["file"]
+        if hashlib.sha256(patch.read_bytes()).hexdigest() != update["sha256"]:
+            raise ValueError("Student source update checksum mismatch")
+        for arguments in (["apply", "--index", str(patch)], ["commit", "-m", update["description"]]):
+            subprocess.run(["git", "-C", str(destination), *arguments], check=True)
+        print("Applied student source update", update["sha256"])
