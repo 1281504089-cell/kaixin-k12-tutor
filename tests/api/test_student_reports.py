@@ -590,3 +590,23 @@ def test_printed_outline_finds_topic_on_continued_contents_page():
     outline, matched = printed_outline(SimpleNamespace(unit_text=lambda _, page: pages[page]), "book", 4, "请讲讲五四运动。")
     assert matched
     assert outline == [{"title": "第11课 五四运动（印刷页 64）"}]
+
+
+@pytest.mark.asyncio
+async def test_subject_review_normalizes_model_exercise_labels(setup):
+    period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="history")
+    source = await reports.collect(period)
+    result = await reports.bridge("records", {"source": source})
+    result["exercises"][0].update(type="识记·单项选择", options=["A. 甲", "B. 乙", "C. 丙", "D. 丁"], answer="B")
+    original_answer = result["exercises"][1]["answer"]
+    result["exercises"][1].update(type="应用·材料分析", options=None, answer=None, solution=original_answer)
+    normalized = await reports.bridge("validate", {"source": source, "raw": result})
+    assert normalized["exercises"][0]["options"] == ["甲", "乙", "丙", "丁"]
+    assert normalized["exercises"][0]["type"] == "choice"
+    assert normalized["exercises"][1]["type"] == "solution"
+    assert normalized["exercises"][1]["options"] == []
+    assert normalized["exercises"][1]["answer"] == original_answer
+
+    result["exercises"][0]["options"].pop()
+    with pytest.raises(reports.ReportError):
+        await reports.bridge("validate", {"source": source, "raw": result})

@@ -21,6 +21,7 @@ from deeptutor.services.notebook.service import NotebookManager
 TZ = timezone(timedelta(hours=8))
 ROOT = Path(__file__).parent
 LEASE = 420
+KIMI_REPORT_LEASE = 900
 BOOT = uuid.uuid4().hex
 LOGGER = logging.getLogger(__name__)
 ReportSubject = Literal["chinese", "math", "english", "physics", "chemistry", "biology", "history", "geography", "politics"]
@@ -517,6 +518,7 @@ async def begin(period: ReportRange):
         config = None
     report_model = {"name": config.model, "provider": config.provider_name,
                     "effort": config.reasoning_effort} if config is not None else None
+    lease = KIMI_REPORT_LEASE if config is not None and config.model == "kimi-k3.1-pro" else LEASE
     with manager._locked(notebook):
         existing = rows(manager, notebook)
         exact = next((r for r in existing if r["fingerprint"] == source["fingerprint"] and r["policy"] == version and r.get("textbook_scope", []) == source.get("textbook_scope", []) and r.get("report_model") == report_model and r["state"] in {"pending", "ready"} and r.get("result_level") != "records"), None)
@@ -526,7 +528,7 @@ async def begin(period: ReportRange):
             raise ReportError("已有一份报告正在整理，完成后再生成下一份。")
         if len(existing) >= 100:
             raise ReportError("已保存100份报告，请先导出并移除不再需要的报告。")
-        data = {"range": period.payload(), "state": "pending", "stage": "generating", "message": "正在整理完整原文…", "worker": BOOT, "lease_until": time.time() + LEASE, "fingerprint": source["fingerprint"], "policy": version, "evidence": source["messages"], "coverage": source["coverage"], "metrics": source["metrics"], "summary": None}
+        data = {"range": period.payload(), "state": "pending", "stage": "generating", "message": "正在整理完整原文…", "worker": BOOT, "lease_until": time.time() + lease, "fingerprint": source["fingerprint"], "policy": version, "evidence": source["messages"], "coverage": source["coverage"], "metrics": source["metrics"], "summary": None}
         data["report_model"] = report_model
         if period.subject:
             data["subject"] = period.subject
@@ -609,7 +611,7 @@ async def generate(manager, notebook, row, source, config, complete=None):
             raise ReportError("整理期间原文或规则有更新，请重新生成。")
 
     try:
-        async with asyncio.timeout(LEASE - 35):
+        async with asyncio.timeout(max(1, row["lease_until"] - time.time() - 35)):
             if period.subject and not any(m["role"] == "user" for m in source["messages"]) and not any(book["outline"] for book in source.get("textbook_scope", [])):
                 raise ReportError("所选时段暂无可用于分析的学生原文。")
             if not has_model:
