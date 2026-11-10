@@ -8,7 +8,7 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
 
-**20261111 辅导更新**带来了实时语音通话、高拍仪辅导和聊天内边读边问。已有 1.7.1 的电脑按系统下载对应的更新包，升级时会备份本机学习资料。 [下载最新版（高拍仪与语音通话）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-camera-share) · [历次更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
+**20261111 辅导更新**带来了实时语音通话、高拍仪辅导和聊天内边读边问。已有 1.7.1 的电脑按系统下载对应的更新包，升级时会备份本机学习资料。 [下载最新版（语音浮窗）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-voice-float) · [历次更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
 [下载图文操作手册 PDF（含 20261111 增补）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide-20261111.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
 
@@ -31,7 +31,7 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 ## 已安装用户更新
 
-1. 先退出正在运行的客户端，从 [20261111 辅导更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-camera-share) 下载对应系统的 `Kaixin-Updater-20261111-camera-share` ZIP。Apple 芯片 Mac 选 `macos-arm64`，Intel Mac 选 `macos-x64`，Windows 选 `windows-x64`。
+1. 先退出正在运行的客户端，从 [20261111 辅导更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-voice-float) 下载对应系统的 `Kaixin-Updater-20261111-voice-float` ZIP。Apple 芯片 Mac 选 `macos-arm64`，Intel Mac 选 `macos-x64`，Windows 选 `windows-x64`。
 2. Mac 解压后用新版应用替换「应用程序」里的旧版。Windows 解压到一个文件夹，从里面打开开心动力超级学霸，后续使用这个程序入口。
 
 新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。已是最新版时会直接显示「已是最新版本」。发现新版时点「下载并更新」。客户端优先从 GitHub API 读取对应系统的签名清单。遇到 GitHub 下载直链报 504 时，会自动从公开 Releases API 下载同一份签名更新。更新复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
