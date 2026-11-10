@@ -68,10 +68,8 @@ async function word(job){
   '回看本次的知识点与例题。','把关键步骤用自己的话讲一遍。','独立做完练习，再对照答案和解析。',
  ];
  for(const [i,text] of takeaway.entries())children.push(paragraph([run(['学了什么','记住这一点','下一步怎么练'][i],{bold:true,color:t.accent,size:25})],{keepNext:true,spacing:{before:160,after:90}}),...await formatted(text));
- children.push(paragraph([link('查看复盘正文','chapter_0')],{spacing:{before:210}}));
- const body=[];
  for(const[i,s]of job.report.sections.entries()){
-  children.push(chapter(headings[i],'chapter_'+i,{pageBreakBefore:job.report.exercises.length>0&&(i===t.answerIndex||i===t.exerciseIndex&&!job.report.recordSummary)}));
+  children.push(chapter(headings[i],'chapter_'+i,{pageBreakBefore:job.report.exercises.length>0&&i===t.answerIndex}));
   if(i===t.exerciseIndex){
    children.push(...await formatted(s.text));if(!job.report.exercises.length&&s.text!==job.report.trainingNotice)children.push(paragraph([run(job.report.trainingNotice||'本次没有可核实的个人薄弱项，不编造专项练习。')]));
    let previousType='';
@@ -101,7 +99,6 @@ async function word(job){
   children.push(paragraph([new Bookmark({id:'record_'+m.id.slice(1),children:[run(m.label+'  '+m.roleLabel+(m.scopeLabel?'  · '+m.scopeLabel:''),{bold:true,size:20})]}),run('  '+m.timeLabel,{size:18,color:muted})],{keepNext:true,shading:{fill:t.exercisePale||'F7F8FA'},spacing:{before:110,after:65,line:300}}));
   children.push(...await formatted(m.content,{spacing:{after:80,line:330}},true));if(m.hasUnseenImage)children.push(paragraph([run('该条含图片，本次没有读取原图。',{color:muted,size:18})]));
  }
- children.push(...body);
  const font={ascii:'Noto Sans CJK SC',hAnsi:'Noto Sans CJK SC',eastAsia:'Noto Sans CJK SC'};
  const doc=new Document({creator:'开心动力',title:t.title,description:'学生学习复盘',styles:{default:{document:{run:{font,size:templates.bodyPoints*2,color:'000000'},paragraph:{spacing:{line:templates.lineSpacing,lineRule:'auto',after:110},widowControl:true}}},paragraphStyles:[{id:'Title',name:'Title',basedOn:'Normal',run:{size:54,bold:true,color:'000000',font},paragraph:{keepNext:true,spacing:{line:760,lineRule:'exact'}}},{id:'Heading1',name:'Heading 1',basedOn:'Normal',next:'Normal',run:{size:28,bold:true,color:'000000'},paragraph:{keepNext:true,spacing:{line:390,lineRule:'auto'}}},{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{size:24,bold:true,color:'000000'},paragraph:{keepNext:true,spacing:{line:330,lineRule:'auto'}}}]},sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:templates.marginTwips,bottom:templates.marginTwips,left:templates.marginTwips,right:templates.marginTwips,footer:600}}},footers:{default:new Footer({children:[paragraph([run(t.title+'  ·  ',{size:17,color:muted}),new TextRun({children:[PageNumber.CURRENT],size:17,color:muted}),run(' / ',{size:17,color:muted}),new TextRun({children:[PageNumber.TOTAL_PAGES],size:17,color:muted})],{alignment:AlignmentType.CENTER,spacing:{after:0,line:250}})]})},children}]});
  return Packer.toBuffer(doc);
