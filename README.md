@@ -10,7 +10,7 @@
 
 **20261111 辅导更新**带来了实时语音通话、高拍仪辅导和聊天内边读边问。已有 1.7.1 的电脑按系统下载对应的更新包，升级时会备份本机学习资料。 [下载最新版（语音浮窗）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-voice-float) · [历次更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
-[下载图文操作手册 PDF（20261111 操作核对版）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide-20261111-checked.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
+[下载图文操作手册 PDF（20261111 操作核对版）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide-20261111-verified.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
 
 Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaking students from primary through high school.
 
@@ -61,7 +61,7 @@ curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos
 | 教材随读随问 | 按学段、学科筛选或搜索年级、册名，打开整册原页。划选文字可标注或提问。遇到公式、图形和扫描页，长按原页选择「截图引用」，拖框后把原图加入笔记或引用到提问。翻页后可在同一阅读会话继续追问。 |
 | 聊天内边读边问 | 在输入框上方点「边读边问」，在右侧打开教材、资料库文档或临时附件。点「问当前页」，把这一页和问题放在同一个聊天里继续讨论。 |
 | 实时语音通话 | 点聊天右上角的电话，首次填写豆包实时语音 Key 后点「开始通话」。可切换学习辅导、英语陪练、口语翻译、模拟面试等场景，也可共享窗口或屏幕。关掉浮窗后可以从「通话中」重新打开，挂断后文字保存到原对话。 |
-| 高拍仪辅导 | 点输入框上方的「高拍仪辅导员」，再点「开始语音通话」，把纸面题对准摄像头。可旋转、镜像、调画面比例，或临时切到共享屏幕。做题时先给提示，明确要答案时会给简短讲解。 |
+| 高拍仪辅导 | 点输入框上方的「高拍仪辅导员」，再点「开始通话」（部分版本显示「开始语音通话」），把纸面题对准摄像头。可旋转、镜像、调画面比例，或临时切到共享屏幕。做题时先给提示，明确要答案时会给简短讲解。 |
 | 九科学习项目 | 语文、数学、英语、物理、化学、生物、历史、地理、政治各预置三个对话。选学科老师做专项练习，可分别设置项目指令和对话指令。 |
 | 拍题与资料问答 | 拍照和一至两页的短 PDF 可交给支持读图的模型先看原图。需要全文时在后台解析。输入框和右侧预览共用临时附件。 |
 | 错题本与笔记 | 按学科保存错题，选中文字或截取公式和图形后可加入笔记。 |
