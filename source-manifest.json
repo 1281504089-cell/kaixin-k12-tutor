@@ -43,6 +43,11 @@
       "file": "student-voice-guidance-20261111.patch",
       "sha256": "d1c618a3cc3e5184067405295adb35c40dcd9769a0ff65d4471f1cf5a6e82146",
       "description": "Guide students through exercises before revealing answers in realtime voice"
+    },
+    {
+      "file": "student-voice-float-20261111.patch",
+      "sha256": "f42f679a41b3952bce21eba80aca431f0c7cea599bc760fb1eb5c841cc408384",
+      "description": "Keep realtime calls connected while their panel is hidden and simplify the phone layout"
     }
   ]
 }

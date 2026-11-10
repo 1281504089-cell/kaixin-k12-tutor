@@ -1,0 +1,540 @@
+diff --git a/web/features/chat/components/CameraTutor.module.css b/web/features/chat/components/CameraTutor.module.css
+index 58768c5..f954adf 100644
+--- a/web/features/chat/components/CameraTutor.module.css
++++ b/web/features/chat/components/CameraTutor.module.css
+@@ -5,6 +5,7 @@
+   width: min(54rem, calc(100% - 1.5rem));
+   max-height: calc(100dvh - 1.5rem);
+   overflow: auto;
++  overscroll-behavior: contain;
+   border: 1px solid var(--border);
+   border-radius: 1.25rem;
+   padding: clamp(0.875rem, 2.5vw, 1.5rem);
+@@ -22,6 +23,8 @@
+   transition-duration: 360ms;
+ }
+ 
++.dialog:not([open]) { pointer-events: none; }
++
+ .dialog[data-camera] {
+   --dialog-gutter: clamp(.375rem, 1vw, .875rem);
+   width: calc(100% - 2 * var(--dialog-gutter));
+@@ -39,11 +42,15 @@
+ .dialog[data-camera] > :not(.content) { flex-shrink: 0; }
+ 
+ .dialog:not([data-camera]) {
+-  inset: max(3.5rem, env(safe-area-inset-top)) max(.625rem, env(safe-area-inset-right)) auto auto;
++  --phone-shadow: 0 4px 12px rgb(15 23 42 / 8%), 0 16px 42px rgb(15 23 42 / 16%);
++  inset: max(3.25rem, env(safe-area-inset-top)) max(.75rem, env(safe-area-inset-right)) auto auto;
+   margin: 0;
+-  width: min(25rem, calc(100% - 1.25rem));
+-  max-height: calc(100dvh - 4.25rem);
+-  box-shadow: 0 12px 38px rgb(15 23 42 / 22%);
++  width: min(23rem, calc(100% - 1.5rem));
++  max-height: calc(100dvh - max(3.25rem, env(safe-area-inset-top)) - .75rem);
++  padding: .875rem;
++  border-radius: 1.125rem;
++  border-color: transparent;
++  box-shadow: var(--phone-shadow);
+   z-index: 85;
+ }
+ 
+@@ -54,7 +61,7 @@
+   }
+ }
+ 
+-.dialog::backdrop {
++.dialog[data-camera]::backdrop {
+   background: rgb(15 23 42 / 58%);
+ }
+ 
+@@ -77,13 +84,10 @@
+   margin-top: .75rem;
+ }
+ 
+-.content[hidden] { display: none; }
++.content[hidden], .history[hidden], .transcript[hidden] { display: none; }
+ 
+-.dialog:not([data-camera], [data-phone-transcript]) .content:not(:has(.video, .transcript > p)),
+ .dialog:not([data-camera]) .preview:not(:has(.video)),
+-.dialog:not([data-camera], [data-phone-transcript]) .history:not(:has(.transcript > p)),
+-.dialog:not([data-camera]) :is(.previewToolbar, .previewPlaceholder),
+-.dialog:not([data-camera], [data-phone-transcript]) .historyPlaceholder {
++.dialog:not([data-camera]) :is(.previewToolbar, .previewPlaceholder) {
+   display: none;
+ }
+ 
+@@ -123,21 +127,103 @@
+ }
+ 
+ .dialog:not([data-camera]) .video { height: min(24dvh, 11rem); }
+-.dialog:not([data-camera]) .historyTitle { margin-bottom: .375rem; }
+-
+-.pastCalls {
+-  display: grid;
+-  gap: .625rem;
+-  margin-top: .75rem;
+-  font-size: .875rem;
++.dialog:not([data-camera]) .history {
++  padding: .625rem .75rem;
++  border-radius: .75rem;
++  background: color-mix(in srgb, var(--muted) 62%, var(--background));
+ }
++.dialog:not([data-camera]) .content { gap: .625rem; margin-top: .625rem; }
++.dialog:not([data-camera]) .historyTitle { font-size: .75rem; }
++.dialog:not([data-camera]) .historyPlaceholder { padding-block: .25rem; }
++.dialog:not([data-camera]) .transcript { font-size: .875rem; }
+ 
+-.sceneBar {
++.phoneHeader, .phoneIdentity, .phoneStatus, .phoneTools, .phoneFooter, .phoneTranscriptHeader {
+   display: flex;
+   align-items: center;
+-  flex-wrap: wrap;
+   gap: .5rem;
++}
++
++.phoneHeader, .phoneTranscriptHeader { justify-content: space-between; }
++.phoneIdentity { min-width: 0; gap: .625rem; }
++.phoneIdentity h2 { font-size: 1rem; font-weight: 650; }
++
++.phoneMark, .phoneIcon, .phoneAction, .minimizedCall {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  gap: .375rem;
++}
++
++.phoneMark {
++  flex-shrink: 0;
++  width: 2.375rem;
++  height: 2.375rem;
++  border-radius: .75rem;
++  color: var(--primary);
++  background: color-mix(in srgb, var(--primary) 10%, var(--background));
++}
++
++.phoneStatus { color: var(--muted-foreground); font-size: .75rem; gap: .375rem; }
++.phoneStatus > span { width: .375rem; height: .375rem; border-radius: 50%; background: currentColor; flex-shrink: 0; }
++.phoneStatus[data-live] > span { background: #278357; }
++
++.phoneIcon, .phoneAction {
++  min-height: 2.25rem;
++  border-radius: .625rem;
++  color: var(--muted-foreground);
++}
++
++.phoneIcon { min-width: 2.25rem; flex-shrink: 0; }
++.phoneAction { padding: .3125rem .5rem; font-size: .8125rem; }
++.phoneAction:disabled { opacity: .55; }
++
++@media (hover: hover) {
++  .phoneIcon:hover, .phoneAction:hover:not(:disabled), .minimizedCall:hover { background: var(--muted); color: var(--foreground); }
++}
++
++.phoneAction[aria-expanded="true"], .phoneAction[aria-pressed="true"] { color: var(--foreground); background: var(--muted); }
++.phoneTools { flex-wrap: wrap; margin-top: .625rem; }
++.phoneFooter {
++  position: sticky;
++  bottom: -.875rem;
++  flex-wrap: wrap;
+   margin-top: .75rem;
++  margin-bottom: -.875rem;
++  padding: .5rem 0 .875rem;
++  border-top: 1px solid var(--border);
++  background: var(--background);
++}
++.phoneFooter .phoneHangup { margin-inline-start: auto; color: var(--destructive); background: color-mix(in srgb, var(--destructive) 9%, var(--background)); }
++.phoneTranscriptHeader { min-height: 1.75rem; }
++
++.minimizedCall {
++  position: fixed;
++  z-index: 85;
++  inset: auto max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) auto;
++  min-height: 2.5rem;
++  max-width: calc(100% - 1.5rem);
++  padding: .5rem .875rem;
++  border: 1px solid var(--border);
++  border-radius: 999px;
++  color: var(--foreground);
++  background: var(--background);
++  box-shadow: 0 2px 8px rgb(15 23 42 / 10%), 0 8px 24px rgb(15 23 42 / 14%);
++  font-size: .8125rem;
++  font-weight: 600;
++}
++
++.minimizedShare { color: var(--muted-foreground); font-size: .75rem; }
++
++@media (pointer: coarse) {
++  .phoneIcon, .phoneAction, .minimizedCall { min-height: 2.75rem; }
++  .phoneIcon { min-width: 2.75rem; }
++}
++
++.pastCalls {
++  display: grid;
++  gap: .625rem;
++  margin-top: .75rem;
++  font-size: .875rem;
+ }
+ 
+ .sceneGrid {
+diff --git a/web/features/chat/components/CameraTutor.tsx b/web/features/chat/components/CameraTutor.tsx
+index 0c1e00d..cb68f12 100644
+--- a/web/features/chat/components/CameraTutor.tsx
++++ b/web/features/chat/components/CameraTutor.tsx
+@@ -65,14 +65,17 @@ function stopDevices(call: Call) {
+ }
+ 
+ export default function CameraTutor({
+-  entry, onClose,
++  entry, phoneHidden, setPhoneHidden, onClose,
+ }: {
+   entry: TutorCallEntry | null;
++  phoneHidden: boolean;
++  setPhoneHidden: (hidden: boolean) => void;
+   onClose: (savedId: string | null) => void;
+ }) {
+   const titleId = useId();
+   const keyId = useId();
+   const dialog = useRef<HTMLDialogElement>(null);
++  const minimizedButton = useRef<HTMLButtonElement>(null);
+   const video = useRef<HTMLVideoElement>(null);
+   const log = useRef<HTMLDivElement>(null);
+   const follow = useRef(true);
+@@ -107,7 +110,15 @@ export default function CameraTutor({
+ 
+   useLayoutEffect(() => {
+     const element = dialog.current;
+-    if (!element || !entry || element.open) return;
++    if (!element || !entry) return;
++    if (phoneHidden) {
++      if (element.open) {
++        element.close();
++        minimizedButton.current?.focus();
++      }
++      return;
++    }
++    if (element.open) return;
+     const rect = entry.origin?.getBoundingClientRect();
+     const phone = entry.mode === "phone";
+     if (rect) {
+@@ -118,7 +129,7 @@ export default function CameraTutor({
+     element.toggleAttribute("data-camera", !phone);
+     if (phone) element.show();
+     else element.showModal();
+-  }, [entry]);
++  }, [entry, phoneHidden]);
+ 
+   const startWithStoredKey = useEffectEvent((target: TutorCallEntry) => { void start(target, ""); });
+   useEffect(() => {
+@@ -164,7 +175,7 @@ export default function CameraTutor({
+ 
+   useLayoutEffect(() => {
+     if (follow.current && log.current) log.current.scrollTop = log.current.scrollHeight;
+-  }, [collapsed, panel, subtitles]);
++  }, [collapsed, panel, phoneHidden, subtitles]);
+ 
+   function dismiss() {
+     if (entry?.phoneAudio && entry.phoneAudio.state !== "closed") void entry.phoneAudio.close().catch(() => {});
+@@ -490,21 +501,33 @@ export default function CameraTutor({
+   const live = phase === "live";
+   const ended = phase === "ended";
+   const phone = entry?.mode === "phone";
++  const callStatus = live ? status : phase === "ending" ? "正在结束通话…" :
++    ended ? "通话已结束" : phase === "setup" && configured === false ? "需要配置语音 Key" : "正在连接…";
++  const phoneAction = phone ? styles.phoneAction : button;
++  const closeWindow = () => phone ? setPhoneHidden(true) : hangup();
+   const cameraView = picture?.source === "camera";
+   const screenView = picture?.source === "screen";
+   const previewOrientation = cameraView ? orientation : defaultOrientation;
+   return (
++    <>
+     <dialog ref={dialog} className={styles.dialog} aria-labelledby={titleId}
+       style={{ "--camera-pane-share": `${paneShare}%` } as CSSProperties}
+-      data-phone-transcript={phone && phase !== "setup" ? "" : undefined}
+       onKeyDown={(event) => {
+-        if (phone && event.key === "Escape") { event.preventDefault(); hangup(); }
++        if (phone && event.key === "Escape") { event.preventDefault(); closeWindow(); }
+       }}
+-      onCancel={(event) => { event.preventDefault(); hangup(); }}>
+-      <header className="flex items-center justify-between gap-2">
+-        <h2 id={titleId} className="text-lg font-semibold">
+-          {entry?.mode === "camera" ? "高拍仪辅导" : "语音通话"}
+-        </h2>
++      onCancel={(event) => { event.preventDefault(); closeWindow(); }}>
++      <header className={phone ? styles.phoneHeader : "flex items-center justify-between gap-2"}>
++        {phone ? (
++          <div className={styles.phoneIdentity}>
++            <span className={styles.phoneMark}><Phone size={18} aria-hidden="true" /></span>
++            <div>
++              <h2 id={titleId}>语音通话</h2>
++              <p className={styles.phoneStatus} role="status" data-live={live || undefined}>
++                <span aria-hidden="true" />{callStatus}
++              </p>
++            </div>
++          </div>
++        ) : <h2 id={titleId} className="text-lg font-semibold">高拍仪辅导</h2>}
+         {entry?.mode === "camera" && (
+           <label className={styles.splitControl}>
+             <span>画面比例</span>
+@@ -513,35 +536,28 @@ export default function CameraTutor({
+             <span aria-hidden="true">{paneShare}%</span>
+           </label>
+         )}
+-        <div className="flex items-center gap-2">
+-          {phone && live && (
+-            <button type="button" className={button} aria-expanded={!collapsed} aria-label={collapsed ? "展开字幕" : "收起字幕"}
+-              onClick={() => setCollapsed(!collapsed)}>
+-              {collapsed ? <ChevronDown size={17} /> : <ChevronUp size={17} />}
++        <button type="button" className={phone ? styles.phoneIcon : button} onClick={closeWindow}
++          aria-label={phone ? "隐藏通话浮窗" : "关闭通话窗口"} title={phone ? "隐藏通话浮窗" : undefined}>
++          <X size={17} aria-hidden="true" />
++        </button>
++      </header>
++      {phone && (live || ended || (phase === "setup" && configured === false)) && (
++        <div className={styles.phoneTools}>
++          {live && (
++            <button type="button" className={styles.phoneAction} aria-label="选择场景"
++              aria-expanded={viewScenes} onClick={() => setPanel(viewScenes ? "call" : "scenes")}>
++              <Grid2X2 size={15} aria-hidden="true" />{scenes[scene].title}<ChevronDown size={13} aria-hidden="true" />
+             </button>
+           )}
+-          {phone && (phase === "setup" || live || ended) && (
+-            <button type="button" className={button} aria-pressed={viewHistory} onClick={() => {
++          <button type="button" className={styles.phoneAction} aria-pressed={viewHistory} onClick={() => {
+               setPastCall(null);
+               setHistory(null);
+               setHistoryError(false);
+               setPanel(viewHistory ? "call" : "history");
+             }}>
+-              <History size={16} /> {viewHistory ? "返回通话" : "最近 5 天"}
+-            </button>
+-          )}
+-          <button type="button" className={button} onClick={hangup} aria-label="关闭通话窗口">
+-            <X size={17} />
++            <History size={15} aria-hidden="true" />{viewHistory ? "返回通话" : "最近 5 天"}
+           </button>
+         </div>
+-      </header>
+-      {phone && live && (
+-        <div className={styles.sceneBar}>
+-          <button type="button" className={button} aria-expanded={viewScenes} onClick={() => setPanel(viewScenes ? "call" : "scenes")}>
+-            <Grid2X2 size={16} aria-hidden="true" /> {viewScenes ? "返回通话" : "选择场景"}
+-          </button>
+-          <span className="text-xs text-[var(--muted-foreground)]">当前场景 · {scenes[scene].title}</span>
+-        </div>
+       )}
+       {viewScenes && live && (
+         <div className={styles.sceneGrid} role="group" aria-label="选择通话场景" aria-busy={scenePending}>
+@@ -559,7 +575,7 @@ export default function CameraTutor({
+         <div className={styles.pastCalls}>
+           {pastCall ? (
+             <>
+-              <button type="button" className={button} onClick={() => setPastCall(null)}>返回通话记录</button>
++              <button type="button" className={phoneAction} onClick={() => setPastCall(null)}>返回通话记录</button>
+               <p className="font-semibold">{(scenes[pastCall.scene as Scene] ?? scenes.direct).title}</p>
+               {pastCall.lines.map((line) => <p key={`${line.role}:${line.id}`} className="whitespace-pre-wrap break-words">
+                 <span className="font-semibold">{line.role === "user" ? "你：" : "老师："}</span>{line.text}
+@@ -567,7 +583,7 @@ export default function CameraTutor({
+             </>
+           ) : historyError ? <p role="alert">暂时无法读取通话记录。</p> : !history ? <p role="status">正在读取通话记录…</p> : (
+             history.length ? history.map((call) => (
+-              <button key={call.id} type="button" className={`${button} w-full justify-between`} onClick={() => setPastCall(call)}>
++              <button key={call.id} type="button" className={`${phoneAction} w-full justify-between`} onClick={() => setPastCall(call)}>
+                 {(scenes[call.scene as Scene] ?? scenes.direct).title}
+                 <time dateTime={new Date(call.endedAt * 1000).toISOString()}>{new Date(call.endedAt * 1000).toLocaleString()}</time>
+               </button>
+@@ -575,7 +591,7 @@ export default function CameraTutor({
+           )}
+         </div>
+       )}
+-      <div className={styles.content} hidden={collapsed || viewHistory || viewScenes}>
++      <div className={styles.content} hidden={viewHistory || viewScenes || (phone && !picture && !live && !subtitles.length)}>
+         <div className={styles.preview}>
+           <div className={styles.previewToolbar}>
+             <h3 className={styles.panelTitle}>{screenView ? "共享屏幕" : "实时画面"}</h3>
+@@ -604,9 +620,17 @@ export default function CameraTutor({
+             </div>
+           )}
+         </div>
+-        <div className={styles.history}>
+-          <h3 className={styles.historyTitle}>聊天记录</h3>
+-          <div ref={log} className={styles.transcript} aria-label="通话字幕"
++        <div className={styles.history} hidden={phone && !live && !subtitles.length}>
++          <div className={phone ? styles.phoneTranscriptHeader : undefined}>
++            <h3 className={styles.historyTitle}>{phone ? "通话字幕" : "聊天记录"}</h3>
++            {phone && subtitles.length > 0 && (
++              <button type="button" className={styles.phoneIcon} aria-expanded={!collapsed}
++                aria-label={collapsed ? "展开字幕" : "收起字幕"} onClick={() => setCollapsed(!collapsed)}>
++                {collapsed ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronUp size={16} aria-hidden="true" />}
++              </button>
++            )}
++          </div>
++          <div ref={log} className={styles.transcript} aria-label="通话字幕" hidden={collapsed}
+             tabIndex={subtitles.length ? 0 : undefined}
+             onScroll={(event) => {
+               const box = event.currentTarget;
+@@ -619,7 +643,7 @@ export default function CameraTutor({
+               </p>
+             ))}
+           </div>
+-          {!subtitles.length && <p className={styles.historyPlaceholder}>开始对话后，文字会显示在这里。</p>}
++          {!subtitles.length && <p className={styles.historyPlaceholder}>{phone ? "说句话，开始对话。" : "开始对话后，文字会显示在这里。"}</p>}
+         </div>
+       </div>
+       {!viewHistory && (phase === "setup" || (ended && !subtitles.length)) && !(phone && configured === null) && (
+@@ -639,25 +663,22 @@ export default function CameraTutor({
+             {entry?.mode === "camera" ? "通话会同时开启麦克风和摄像头。" : "通话会开启麦克风。需要老师看题时，可共享整个屏幕或单个窗口。"}
+             通话文字会保存到当前聊天。
+           </p>
+-          <button type="submit" disabled={configured === null || (!configured && !key.trim())} className={`${button} justify-self-start`}>
++          <button type="submit" disabled={configured === null || (!configured && !key.trim())} className={`${phoneAction} justify-self-start`}>
+             <Phone size={16} /> 开始通话
+           </button>
+         </form>
+       )}
+-      {phone && phase === "setup" && configured === null && <p role="status" className="mt-3 text-sm">正在连接…</p>}
+       {error && <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+       {phase !== "setup" && (
+-        <div className="mt-3 flex flex-wrap items-center gap-2">
+-          <p role="status" className="mr-auto text-sm text-[var(--muted-foreground)]">
+-            {live ? status : phase === "starting" ? "正在连接…" : phase === "ending" ? "正在结束通话…" : "通话已结束"}
+-          </p>
++        <footer className={phone ? styles.phoneFooter : "mt-3 flex flex-wrap items-center gap-2"}>
++          {!phone && <p role="status" className="mr-auto text-sm text-[var(--muted-foreground)]">{callStatus}</p>}
+           {live && (
+-            <button type="button" className={button} disabled={shareBusy || cameraBusy} onClick={() => void shareScreen()}>
++            <button type="button" className={phoneAction} disabled={shareBusy || cameraBusy} onClick={() => void shareScreen()}>
+               <ScreenShare size={16} /> {phone && !screenView ? "共享屏幕" : "切换共享内容"}
+             </button>
+           )}
+           {live && phone && screenView && (
+-            <button type="button" className={button} disabled={shareBusy} onClick={stopSharing}>停止共享</button>
++            <button type="button" className={phoneAction} disabled={shareBusy} onClick={stopSharing}>停止共享</button>
+           )}
+           {live && !phone && !cameraView && (
+             <button type="button" className={button} disabled={cameraBusy || shareBusy} onClick={() => void changeCamera(camera || undefined)}>
+@@ -673,7 +694,7 @@ export default function CameraTutor({
+             </select>
+           )}
+           {ended && subtitles.length > 0 && (
+-            <button type="button" className={button} onClick={async () => {
++            <button type="button" className={phoneAction} onClick={async () => {
+               try {
+                 await copyText(subtitles.map((line) => `${line.role === "user" ? "你" : "老师"}：${line.text}`).join("\n"));
+                 setCopied(true);
+@@ -682,12 +703,20 @@ export default function CameraTutor({
+               }
+             }}>{copied ? "已复制" : "复制字幕"}</button>
+           )}
+-          <button type="button" className={`${button} text-red-600 dark:text-red-400`}
++          <button type="button" className={phone ? `${phoneAction} ${styles.phoneHangup}` : `${button} text-red-600 dark:text-red-400`}
+             disabled={phase === "ending"} onClick={hangup}>
+             {!ended && <PhoneOff size={16} />}{ended ? "返回聊天" : "挂断"}
+           </button>
+-        </div>
++        </footer>
+       )}
+     </dialog>
++    {phone && phoneHidden && (
++      <button type="button" ref={minimizedButton} className={styles.minimizedCall} aria-label="显示语音通话"
++        onClick={() => setPhoneHidden(false)}>
++        <Phone size={16} aria-hidden="true" />{live ? "通话中" : callStatus}
++        {screenView && <span className={styles.minimizedShare}>共享中</span>}
++      </button>
++    )}
++    </>
+   );
+ }
+diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
+index 9e9c9d7..42253bc 100644
+--- a/web/features/chat/components/ChatWorkspace.tsx
++++ b/web/features/chat/components/ChatWorkspace.tsx
+@@ -318,7 +318,7 @@ export default function ChatWorkspace() {
+     configureSession,
+   } = useChatStateAdapter();
+ 
+-  const { entry: tutorCall, open: openTutorCall, completed: completedCall } = useTutorCall();
++  const { entry: tutorCall, phoneHidden, open: openTutorCall, completed: completedCall } = useTutorCall();
+   const seenCall = useRef(completedCall);
+   useEffect(() => {
+     if (!completedCall || seenCall.current === completedCall) return;
+@@ -2608,9 +2608,12 @@ export default function ChatWorkspace() {
+                     ref={phoneButton}
+                     onClick={() => openTutorCall({ mode: "phone", origin: phoneButton.current, sessionKey: state.sessionKey,
+                       sessionId: state.sessionId || null, workspaceId: state.workspaceId || "" })}
+-                    disabled={tutorCallDisabled || Boolean(tutorCall)}
++                    disabled={tutorCall ? tutorCall.mode !== "phone" : tutorCallDisabled}
++                    active={tutorCall?.mode === "phone"}
+                     icon={Phone}
+                     label="语音通话"
++                    title={phoneHidden ? "显示语音通话" : undefined}
++                    suppressTooltip={tutorCall?.mode === "phone" && !phoneHidden}
+                   />
+                 )}
+                 <PageCustomizeButton page="chat" capabilities={visibleCapabilities} compact />
+diff --git a/web/features/chat/components/HeaderActionButton.tsx b/web/features/chat/components/HeaderActionButton.tsx
+index 93d0a94..e9a2b35 100644
+--- a/web/features/chat/components/HeaderActionButton.tsx
++++ b/web/features/chat/components/HeaderActionButton.tsx
+@@ -27,14 +27,15 @@ const HeaderActionButton = forwardRef<
+     label: string;
+     title?: string;
+     menuOpen?: boolean;
++    suppressTooltip?: boolean;
+   }
+ >(function HeaderActionButton(
+-  { onClick, disabled, active, icon: Icon, label, title, menuOpen },
++  { onClick, disabled, active, icon: Icon, label, title, menuOpen, suppressTooltip },
+   ref,
+ ) {
+   const opensMenu = menuOpen !== undefined;
+   return (
+-    <Tooltip label={title ?? label} side="bottom" suppressed={menuOpen}>
++    <Tooltip label={title ?? label} side="bottom" suppressed={menuOpen || suppressTooltip}>
+       <button
+         ref={ref}
+         type="button"
+diff --git a/web/features/chat/components/TutorCallProvider.tsx b/web/features/chat/components/TutorCallProvider.tsx
+index b4e8842..d88a885 100644
+--- a/web/features/chat/components/TutorCallProvider.tsx
++++ b/web/features/chat/components/TutorCallProvider.tsx
+@@ -8,9 +8,10 @@ import type { TutorCallEntry } from "./CameraTutor";
+ const CameraTutor = dynamic(() => import("./CameraTutor"), { ssr: false });
+ const TutorCallContext = createContext<{
+   entry: TutorCallEntry | null;
++  phoneHidden: boolean;
+   completed: { entry: TutorCallEntry; savedId: string } | null;
+   open: (entry: TutorCallEntry) => void;
+-}>({ entry: null, completed: null, open: () => {} });
++}>({ entry: null, phoneHidden: false, completed: null, open: () => {} });
+ 
+ export function useTutorCall() {
+   return useContext(TutorCallContext);
+@@ -18,10 +19,14 @@ export function useTutorCall() {
+ 
+ export function TutorCallProvider({ children }: { children: ReactNode }) {
+   const [entry, setEntry] = useState<TutorCallEntry | null>(null);
++  const [phoneHidden, setPhoneHidden] = useState(false);
+   const [completed, setCompleted] = useState<{ entry: TutorCallEntry; savedId: string } | null>(null);
+   return (
+-    <TutorCallContext.Provider value={{ entry, completed, open: (next) => {
+-      if (entry) return;
++    <TutorCallContext.Provider value={{ entry, phoneHidden, completed, open: (next) => {
++      if (entry) {
++        if (entry.mode === "phone" && next.mode === "phone") setPhoneHidden(false);
++        return;
++      }
+       // Reserve playback during the click. The stored-key check runs asynchronously.
+       if (next.mode === "phone" && typeof AudioContext !== "undefined") {
+         try {
+@@ -34,8 +39,9 @@ export function TutorCallProvider({ children }: { children: ReactNode }) {
+       setEntry(next);
+     } }}>
+       {children}
+-      <CameraTutor entry={entry} onClose={(savedId) => {
++      <CameraTutor entry={entry} phoneHidden={phoneHidden} setPhoneHidden={setPhoneHidden} onClose={(savedId) => {
+         setEntry(null);
++        setPhoneHidden(false);
+         if (entry && savedId) {
+           setCompleted({ entry, savedId });
+           notifySessionsChanged();
