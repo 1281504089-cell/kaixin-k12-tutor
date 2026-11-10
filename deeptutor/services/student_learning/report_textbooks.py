@@ -9,6 +9,39 @@ from . import textbooks
 from .reports import ReportError
 
 
+PRINTED_CONTENTS = re.compile(r"(?im)^\s*(?:目\s*录|contents)\s*$")
+PRINTED_ENTRY = re.compile(r"^(.+?)\s*(?:[.…．·]\s*){2,}(\d+)\s*$")
+CHAPTER_PREFIX = re.compile(r"^(?:第[一二三四五六七八九十百\d]+(?:课|节|章|单元)|\d+(?:\.\d+)+)\s*")
+
+
+def printed_outline(store: ReadingStore, material: str, count: int, notes: str) -> tuple[list[dict], bool]:
+    """Use printed TOC entries without treating printed numbering as PDF locators."""
+    for page in range(1, min(12, count) + 1):
+        text = store.unit_text(material, page)
+        if not PRINTED_CONTENTS.search(text):
+            continue
+        rows = []
+        for locator in range(page, min(page + 2, count) + 1):
+            page_text = text if locator == page else store.unit_text(material, locator)
+            entries = [entry.groups() for line in page_text.splitlines()
+                       if (entry := PRINTED_ENTRY.fullmatch(line.strip()))]
+            if not entries:
+                break
+            rows.extend(entries)
+        if rows:
+            normalized_notes = re.sub(r"\s+", "", notes)
+            matches = []
+            for title, number in rows:
+                chapter = re.sub(r"\s+", "", CHAPTER_PREFIX.sub("", title).strip())
+                if len(chapter) >= 4 and chapter in normalized_notes:
+                    matches.append((title, number))
+            return [{"title": title[:155] + f"（印刷页 {number}）"}
+                    for title, number in (matches or rows)[:24]], bool(matches)
+        return [{"title": line.strip()[:180]} for line in text.splitlines()
+                if line.strip() and not line.lstrip().startswith("【")][:24], False
+    return [], False
+
+
 def report_textbook_scope(source: dict) -> list[dict]:
     selected = source.get("textbook_id")
     if not learning_surface_allowed("reading"):
@@ -49,20 +82,16 @@ def report_textbook_scope(source: dict) -> list[dict]:
             for page in pages:
                 if preceding := [row for row in outline if row.locator <= page]:
                     matched.add(max(preceding, key=lambda row: (row.locator, row.level)))
+            printed_match = False
             if matched:
                 entries = sorted(matched, key=lambda row: (row.locator, row.level))[:16]
                 scope = [{"title": row.title[:180], "page": row.locator} for row in entries]
             else:
                 scope = [{"title": row.title[:180], "page": row.locator} for row in sorted(outline, key=lambda row: row.level)[:24]]
                 if not scope:
-                    # Some PDFs have a real printed contents page but no bookmarks or reliable PDF page mapping.
-                    for index in range(1, min(12, manifest.unit_count) + 1):
-                        text = store.unit_text(material, index)
-                        if re.search(r"(?m)^\s*(?:目\s*录|contents)\s*$", text, re.I):
-                            scope = [{"title": line.strip()[:180]} for line in text.splitlines() if line.strip()][:24]
-                            break
+                    scope, printed_match = printed_outline(store, material, manifest.unit_count, notes)
             scopes.append({"material_id": material, "title": manifest.title[:180], "outline": scope,
-                           "matched": bool(matched), "pages": pages[:12]})
+                           "matched": bool(matched) or printed_match, "pages": pages[:12]})
         except (ReadingError, OSError, ValueError):
             if selected:
                 raise ReportError("这份教材 PDF 无法读取，请重新选择。", 422) from None

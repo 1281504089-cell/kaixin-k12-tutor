@@ -19,6 +19,7 @@ from deeptutor.services.student_learning import reports
 def setup(tmp_path, monkeypatch):
     from deeptutor.services import session, workspace
     from deeptutor.services.workspace import context
+    from deeptutor.services.model_selection import llm
     from deeptutor.services.llm import config
     from deeptutor.multi_user import learning_access
 
@@ -51,6 +52,7 @@ def setup(tmp_path, monkeypatch):
     }))
     monkeypatch.setattr(session, "get_session_store", lambda: stores[active[0]])
     monkeypatch.setattr(learning_access, "learning_surface_allowed", lambda _: True)
+    monkeypatch.setattr(llm, "list_llm_options", lambda _: {"options": []})
     monkeypatch.setattr(config, "get_llm_config", lambda: config.LLMConfig(model="synthetic-model", api_key="no-key", base_url="http://127.0.0.1:1"))
     monkeypatch.setenv("PATH", "/Users/Admin1/.local/bin:" + os.environ.get("PATH", ""))
     app = FastAPI()
@@ -445,6 +447,9 @@ async def test_additional_subjects_have_their_own_rule_and_complete_practice(set
     assert ("记忆大纲" if subject in {"chinese", "history", "geography", "politics"} else "知识结构与关键概念") in prepared["input"]["headings"][1]
     assert "三道" in prepared["system"] and "textbookScope" in prepared["reviewSystem"]
     draft = await reports.bridge("records", {"source": source})
+    for heading in ("核心知识点", "常见考法", "易错点与纠正"):
+        assert heading in prepared["system"]
+        assert any(heading in section["text"] for section in draft["sections"])
     assert len(draft["sections"]) == 7
     assert len(draft["learningSummary"]) == 3
     assert len(draft["exercises"]) == 3
@@ -548,3 +553,40 @@ def test_many_turns_cover_the_beginning_middle_and_end_of_the_selected_period():
     assert {0, 109, 219} <= {int(entry["id"]) for entry in sample}
     assert len(json.dumps(sample, ensure_ascii=False)) <= 52000
     assert len(sample) < len(messages)
+
+
+def test_kimi_pro_high_is_scoped_to_subject_reports(setup, monkeypatch):
+    from deeptutor.services.model_selection import llm, runtime
+    from deeptutor.services.llm.config import LLMConfig
+
+    kimi = LLMConfig(model="kimi-k3.1-pro", provider_name="moonshot", base_url="https://api.moonshot.cn/v1", api_key="fixture", reasoning_effort="low")
+    monkeypatch.setattr(llm, "list_llm_options", lambda _: {"options": [
+        {"provider": "moonshot", "model": "kimi-k3.1-pro-turbo", "profile_id": "kimi", "model_id": "turbo", "is_active_default": True},
+        {"provider": "moonshot", "model": "kimi-k3.1-pro", "profile_id": "kimi", "model_id": "pro", "is_active_default": False},
+    ]})
+
+    def resolve(selection):
+        assert selection.model_id == "pro"
+        return kimi
+
+    monkeypatch.setattr(runtime, "resolve_llm_config_for_selection", resolve)
+    for subject in ("history", "physics"):
+        config = reports.report_model_config(subject)
+        assert (config.model, config.reasoning_effort) == ("kimi-k3.1-pro", "high")
+    assert reports.report_model_config(None).model == "synthetic-model"
+    kimi.api_key = ""
+    assert reports.report_model_config("physics").model == "synthetic-model"
+
+
+def test_printed_outline_finds_topic_on_continued_contents_page():
+    from deeptutor.services.student_learning.report_textbooks import printed_outline
+
+    pages = {
+        1: "封面",
+        2: "目录\n第一单元 晚清时期……1",
+        3: "第11课 五四运动……64",
+        4: "正文",
+    }
+    outline, matched = printed_outline(SimpleNamespace(unit_text=lambda _, page: pages[page]), "book", 4, "请讲讲五四运动。")
+    assert matched
+    assert outline == [{"title": "第11课 五四运动（印刷页 64）"}]

@@ -453,6 +453,40 @@ async def detail(report_id: str):
     raise ReportError("这份报告不存在，或原文已更改、移除。", 404)
 
 
+def report_model_config(subject: ReportSubject | None):
+    from deeptutor.services.llm.config import get_llm_config
+
+    config = None
+    if subject:
+        from deeptutor.services.config.model_catalog import get_model_catalog_service
+        from deeptutor.services.model_selection.llm import LLMSelection, list_llm_options
+        from deeptutor.services.model_selection.runtime import resolve_llm_config_for_selection
+
+        options = list_llm_options(get_model_catalog_service().load())["options"]
+        candidates = [option for option in options
+                      if option["provider"] == "moonshot" and option["model"] == "kimi-k3.1-pro"]
+        for option in sorted(candidates, key=lambda option: not option["is_active_default"]):
+            try:
+                preferred = resolve_llm_config_for_selection(
+                    LLMSelection(profile_id=option["profile_id"], model_id=option["model_id"])
+                )
+            except (ValueError, LookupError):
+                continue
+            if (
+                preferred.provider_name == "moonshot"
+                and preferred.model == "kimi-k3.1-pro"
+                and preferred.effective_url
+                and preferred.get_api_key() not in {"", "no-key", "sk-no-key-required"}
+            ):
+                config = preferred
+                break
+    if config is None:
+        config = get_llm_config()
+    # Both synthesis and verification can use the output budget for reasoning.
+    budget = DEEPSEEK_V4_REPORT_OUTPUT_TOKENS if config.model.lower() in DEEPSEEK_V4_REPORT_MODELS else REPORT_OUTPUT_TOKENS
+    return config.model_copy(update={"reasoning_effort": "high", "max_tokens": max(config.max_tokens, budget)})
+
+
 async def begin(period: ReportRange):
     source = await collect(period)
     if source.get("missing_extra_sessions"):
@@ -475,26 +509,25 @@ async def begin(period: ReportRange):
         source["textbook_scope"] = await asyncio.to_thread(report_textbook_scope, source)
     manager, notebook = storage()
     version = policy_version()
+    try:
+        config = report_model_config(period.subject)
+    except Exception:
+        if not period.subject:
+            raise ReportError("请先在维护设置连接已授权的聊天模型。", 503) from None
+        config = None
+    report_model = {"name": config.model, "provider": config.provider_name,
+                    "effort": config.reasoning_effort} if config is not None else None
     with manager._locked(notebook):
         existing = rows(manager, notebook)
-        exact = next((r for r in existing if r["fingerprint"] == source["fingerprint"] and r["policy"] == version and r.get("textbook_scope", []) == source.get("textbook_scope", []) and r["state"] in {"pending", "ready"} and r.get("result_level") != "records"), None)
+        exact = next((r for r in existing if r["fingerprint"] == source["fingerprint"] and r["policy"] == version and r.get("textbook_scope", []) == source.get("textbook_scope", []) and r.get("report_model") == report_model and r["state"] in {"pending", "ready"} and r.get("result_level") != "records"), None)
         if exact:
             return public(exact, detail=True), None
         if any(r["state"] == "pending" for r in existing):
             raise ReportError("已有一份报告正在整理，完成后再生成下一份。")
         if len(existing) >= 100:
             raise ReportError("已保存100份报告，请先导出并移除不再需要的报告。")
-        from deeptutor.services.llm.config import get_llm_config
-        try:
-            config = get_llm_config()
-            # Both synthesis and verification can use the output budget for reasoning.
-            budget = DEEPSEEK_V4_REPORT_OUTPUT_TOKENS if config.model.lower() in DEEPSEEK_V4_REPORT_MODELS else REPORT_OUTPUT_TOKENS
-            config = config.model_copy(update={"reasoning_effort": "high", "max_tokens": max(config.max_tokens, budget)})
-        except Exception:
-            if not period.subject:
-                raise ReportError("请先在维护设置连接已授权的聊天模型。", 503) from None
-            config = None
         data = {"range": period.payload(), "state": "pending", "stage": "generating", "message": "正在整理完整原文…", "worker": BOOT, "lease_until": time.time() + LEASE, "fingerprint": source["fingerprint"], "policy": version, "evidence": source["messages"], "coverage": source["coverage"], "metrics": source["metrics"], "summary": None}
+        data["report_model"] = report_model
         if period.subject:
             data["subject"] = period.subject
         if period.textbook_id:
@@ -557,6 +590,7 @@ async def generate(manager, notebook, row, source, config, complete=None):
     usage_token = current_usage.set(usage)
     stage = "generating"
     period = saved_period(row)
+    complete_from_provider = complete is None
     has_model = config is not None or complete is not None
     if complete is None:
         async def complete(system, prompt):
@@ -601,6 +635,9 @@ async def generate(manager, notebook, row, source, config, complete=None):
             await check_sources()
             updates = {"state": "ready", "stage": None, "summary": None if period.subject else summary, "message": "已依据原文整理，并完成独立核对。"}
             if period.subject:
+                if complete_from_provider and config is not None:
+                    model_label = "Kimi K3.1 Pro" if config.model == "kimi-k3.1-pro" else config.model
+                    summary["cover"] += "\n\n生成与核对模型：" + model_label + " · High"
                 updates.update(subject_review=summary, result_level="full")
     except asyncio.CancelledError:
         raise
