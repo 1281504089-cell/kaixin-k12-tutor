@@ -1,0 +1,239 @@
+diff --git a/deeptutor/services/settings/interface_settings.py b/deeptutor/services/settings/interface_settings.py
+index 0fa7dfb..5926f12 100644
+--- a/deeptutor/services/settings/interface_settings.py
++++ b/deeptutor/services/settings/interface_settings.py
+@@ -25,8 +25,8 @@ ChatHistoryRange = Literal["auto", "32000", "64000"]
+ DEFAULT_UI_SETTINGS: dict[str, Any] = {
+     # "system" follows the OS. "snow" is the pure-white Default palette.
+     "theme": "system",
+-    "language": "en",
+-    "response_language": "en",
++    "language": "zh",
++    "response_language": "zh",
+     "content_font_scale": 100,
+     "content_line_spacing": "normal",
+     "chat_history_range": "auto",
+diff --git a/deeptutor/services/setup/init.py b/deeptutor/services/setup/init.py
+index 4736797..30adbf3 100644
+--- a/deeptutor/services/setup/init.py
++++ b/deeptutor/services/setup/init.py
+@@ -24,7 +24,7 @@ _setup_logger = None
+ DEFAULT_INTERFACE_SETTINGS = {
+     # "system" follows the OS. "snow" remains the pure-white Default palette.
+     "theme": "system",
+-    "language": "en",
++    "language": "zh",
+     "sidebar_description": "✨ Data Intelligence Lab @ HKU",
+     "sidebar_nav_order": {
+         "start": ["/", "/history", "/knowledge-bases", "/notebooks"],
+diff --git a/tests/api/test_settings_router.py b/tests/api/test_settings_router.py
+index 24059f4..ab9321c 100644
+--- a/tests/api/test_settings_router.py
++++ b/tests/api/test_settings_router.py
+@@ -2063,7 +2063,7 @@ async def test_ui_endpoints_do_not_freeze_defaults_into_the_file(
+     stored = json.loads(settings_file.read_text(encoding="utf-8"))
+     assert stored == {"theme": "dark"}, f"only the changed field belongs on disk: {stored}"
+     # The read path still reports the full picture.
+-    assert settings_router.load_ui_settings()["language"] == "en"
++    assert settings_router.load_ui_settings()["language"] == "zh"
+ 
+ 
+ @pytest.mark.asyncio
+diff --git a/web/app/layout.tsx b/web/app/layout.tsx
+index cf19abc..c02233a 100644
+--- a/web/app/layout.tsx
++++ b/web/app/layout.tsx
+@@ -10,6 +10,7 @@ import SettingsReturnTracker from "@/components/settings/SettingsReturnTracker";
+ import { WorkspaceNavigation } from "@/components/workspaces/WorkspaceNavigation";
+ import { AppShellProvider } from "@/context/AppShellContext";
+ import { I18nClientBridge } from "@/i18n/I18nClientBridge";
++import { DEFAULT_INTERFACE_LANGUAGE } from "@/i18n/languages";
+ import { TutorCallProvider } from "@/features/chat/components/TutorCallProvider";
+ 
+ // Geist matches the public site (deeptutor.info) and stays crisp at the
+@@ -47,7 +48,7 @@ export default function RootLayout({
+ }>) {
+   return (
+     <html
+-      lang="en"
++      lang={DEFAULT_INTERFACE_LANGUAGE}
+       suppressHydrationWarning
+       data-scroll-behavior="smooth"
+       className={`${fontSans.variable} ${fontSerif.variable}`}
+diff --git a/web/context/AppShellContext.tsx b/web/context/AppShellContext.tsx
+index b0785da..ec4cef4 100644
+--- a/web/context/AppShellContext.tsx
++++ b/web/context/AppShellContext.tsx
+@@ -65,7 +65,7 @@ import {
+   normalizeLearningDisplay,
+   type LearningDisplay,
+ } from "@/lib/learning-display";
+-import { isAppLanguage } from "@/i18n/languages";
++import { DEFAULT_INTERFACE_LANGUAGE, isAppLanguage } from "@/i18n/languages";
+ 
+ interface AppShellContextValue {
+   theme: Theme;
+@@ -91,8 +91,8 @@ export function AppShellProvider({ children }: { children: React.ReactNode }) {
+   const [theme, setThemeState] = useState<Theme>(() => {
+     return getStoredTheme() ?? getSystemTheme();
+   });
+-  // Always start with "en" to match SSR; hydrate from localStorage after mount
+-  const [language, setLanguageState] = useState<AppLanguage>("en");
++  // Start with the student edition locale on both server and client.
++  const [language, setLanguageState] = useState<AppLanguage>(DEFAULT_INTERFACE_LANGUAGE);
+   const [languageReady, setLanguageReady] = useState(false);
+   const [activeSessionId, setActiveSessionIdState] = useState<string | null>(
+     () => readStoredActiveSessionId(),
+@@ -188,7 +188,7 @@ export function AppShellProvider({ children }: { children: React.ReactNode }) {
+ 
+   useEffect(() => {
+     // The saved languages live in the backend's ui settings, but only the
+-    // settings route ever read them, so every other page started in English
++    // settings route ever read them, so other pages used the built-in default
+     // until the user changed it again in this browser. Adopt them once, and
+     // only when this browser has made no choice of its own — a local selection
+     // is the more specific signal and must win.
+diff --git a/web/context/app-shell-storage.ts b/web/context/app-shell-storage.ts
+index 5f5118b..37c5e54 100644
+--- a/web/context/app-shell-storage.ts
++++ b/web/context/app-shell-storage.ts
+@@ -5,6 +5,7 @@ import type { ResponseLanguage } from "@/i18n/languages";
+ import { browserStorage } from "@/shared/storage";
+ import { activeWorkspaceId } from "@/lib/workspace-scope";
+ import {
++  DEFAULT_INTERFACE_LANGUAGE,
+   normalizeLanguage as normalizeAppLanguage,
+   type AppLanguage,
+ } from "@/i18n/languages";
+@@ -148,20 +149,20 @@ export function resolveResponseLanguage(
+ }
+ 
+ export function readStoredLanguage(): AppLanguage {
+-  if (typeof window === "undefined") return "en";
++  if (typeof window === "undefined") return DEFAULT_INTERFACE_LANGUAGE;
+   try {
+     return normalizeLanguage(
+       browserStorage.readRaw("local", LANGUAGE_STORAGE_KEY),
+     );
+   } catch {
+-    return "en";
++    return DEFAULT_INTERFACE_LANGUAGE;
+   }
+ }
+ 
+ /** Whether this browser has ever recorded a choice.
+  *
+- * ``readStoredLanguage`` cannot answer this: it normalizes a missing value to
+- * "en", which is indistinguishable from an explicit English selection. The
++ * ``readStoredLanguage`` cannot answer this: it maps a missing value to
++ * the same locale as an explicit Chinese selection. The
+  * bootstrap needs the difference — it may only consult the server-side
+  * preference when the browser has no choice of its own to honour.
+  */
+diff --git a/web/i18n/languages.ts b/web/i18n/languages.ts
+index 8ef03d8..469b328 100644
+--- a/web/i18n/languages.ts
++++ b/web/i18n/languages.ts
+@@ -14,6 +14,8 @@ export const APP_LANGUAGES = [
+ 
+ export type AppLanguage = (typeof APP_LANGUAGES)[number]["code"];
+ 
++export const DEFAULT_INTERFACE_LANGUAGE: AppLanguage = "zh";
++
+ const SUPPORTED_CODES: ReadonlySet<string> = new Set(
+   APP_LANGUAGES.map(({ code }) => code),
+ );
+@@ -23,9 +25,10 @@ export function isAppLanguage(value: unknown): value is AppLanguage {
+ }
+ 
+ export function normalizeLanguage(value: unknown): AppLanguage {
+-  if (typeof value !== "string") return "en";
++  if (typeof value !== "string") return DEFAULT_INTERFACE_LANGUAGE;
+   const code = value.trim().toLowerCase().replaceAll("_", "-");
+   const base = code.split("-", 1)[0];
++  if (base === "en" || code === "english") return "en";
+   if (base === "zh" || base === "cn" || code === "chinese") return "zh";
+   if (base === "fr" || code === "french") return "fr";
+   if (base === "de" || code === "german" || code === "deutsch") return "de";
+@@ -35,7 +38,7 @@ export function normalizeLanguage(value: unknown): AppLanguage {
+   if (base === "vi" || code === "vietnamese" || code === "tiếng việt") return "vi";
+   if (base === "ja" || base === "jp" || code === "japanese") return "ja";
+   if (base === "tr" || code === "turkish" || code === "türkçe") return "tr";
+-  return "en";
++  return DEFAULT_INTERFACE_LANGUAGE;
+ }
+ 
+ /** Model output can use more languages than the app UI locale supports. */
+diff --git a/web/tests/app-shell-language-adoption.spec.tsx b/web/tests/app-shell-language-adoption.spec.tsx
+index 0a56bf4..19784db 100644
+--- a/web/tests/app-shell-language-adoption.spec.tsx
++++ b/web/tests/app-shell-language-adoption.spec.tsx
+@@ -4,6 +4,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+ import { AppShellProvider, useAppShell } from '@/context/AppShellContext'
+ import { LANGUAGE_STORAGE_KEY, RESPONSE_LANGUAGE_STORAGE_KEY } from '@/context/app-shell-storage'
+ import { apiFetch } from '@/lib/api'
++import { I18nClientBridge } from '@/i18n/I18nClientBridge'
++import { useTranslation } from 'react-i18next'
+ 
+ // This fixture exercises language adoption, independently of auth bootstrap.
+ vi.mock('@/lib/auth', () => ({ fetchAuthStatus: vi.fn(async () => null) }))
+@@ -66,3 +68,20 @@ it("keeps a browser's French UI choice while adopting its missing output prefere
+   expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('fr')
+   expect(localStorage.getItem(RESPONSE_LANGUAGE_STORAGE_KEY)).toBe('uk')
+ })
++
++it('opens the student interface in Simplified Chinese if settings cannot be read', async () => {
++  function HomeLabels() {
++    const { t } = useTranslation()
++    return <><button>{t('Home')}</button><h1>{t('Burning the midnight oil?')}</h1></>
++  }
++  vi.mocked(apiFetch).mockRejectedValue(new Error('Local service unavailable'))
++  render(
++    <AppShellProvider>
++      <I18nClientBridge><HomeLabels /></I18nClientBridge>
++    </AppShellProvider>
++  )
++  expect(await screen.findByRole('button', { name: '主页' })).toBeInTheDocument()
++  expect(screen.getByRole('heading', { name: '还在熬夜？' })).toBeInTheDocument()
++  expect(document.documentElement.lang).toBe('zh')
++  expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBeNull()
++})
+diff --git a/web/tests/app-shell-language-bootstrap.test.ts b/web/tests/app-shell-language-bootstrap.test.ts
+index 15671cf..2f69fbe 100644
+--- a/web/tests/app-shell-language-bootstrap.test.ts
++++ b/web/tests/app-shell-language-bootstrap.test.ts
+@@ -28,11 +28,9 @@ function withLocalStorage(entries: Record<string, string>, run: () => void) {
+ }
+ 
+ test("an absent choice is distinguishable from an explicit English one", () => {
+-  // readStoredLanguage normalizes both to "en", so the bootstrap cannot use it
+-  // to decide whether the server-side preference may be adopted.
+   withLocalStorage({}, () => {
+     assert.equal(hasStoredLanguage(), false);
+-    assert.equal(readStoredLanguage(), "en");
++    assert.equal(readStoredLanguage(), "zh");
+   });
+ 
+   withLocalStorage({ [LANGUAGE_STORAGE_KEY]: "en" }, () => {
+@@ -56,10 +54,10 @@ test("a stored choice is reported for every supported language", () => {
+   });
+ });
+ 
+-test("an unusable value still counts as a choice and normalizes to English", () => {
++test("an unusable value falls back to the student interface language", () => {
+   withLocalStorage({ [LANGUAGE_STORAGE_KEY]: "xx" }, () => {
+     assert.equal(hasStoredLanguage(), true);
+-    assert.equal(readStoredLanguage(), "en");
++    assert.equal(readStoredLanguage(), "zh");
+   });
+ });
+ 
+@@ -68,7 +66,7 @@ test("server-side rendering reports no stored choice instead of throwing", () =>
+   (globalThis as { window?: unknown }).window = undefined;
+   try {
+     assert.equal(hasStoredLanguage(), false);
+-    assert.equal(readStoredLanguage(), "en");
++    assert.equal(readStoredLanguage(), "zh");
+   } finally {
+     (globalThis as { window?: unknown }).window = original;
+   }
