@@ -6787,7 +6787,7 @@ index 7b831c0..2b856a0 100644
                      <InlineMarkdown content={value} />
                    ) : (
 diff --git a/web/components/chat/home/ChatComposer.tsx b/web/components/chat/home/ChatComposer.tsx
-index 46aaa0d..2bcdc72 100644
+index 46aaa0d..3b09a59 100644
 --- a/web/components/chat/home/ChatComposer.tsx
 +++ b/web/components/chat/home/ChatComposer.tsx
 @@ -9,6 +9,7 @@ import {
@@ -6802,7 +6802,7 @@ index 46aaa0d..2bcdc72 100644
  import type { SelectedQuestionEntry } from "@/components/chat/QuestionBankPicker";
  import type { SelectedRecord } from "@/lib/notebook-selection-types";
  import type { LLMSelection } from "@/features/chat/model/protocol";
-+import { recordMediaSend } from "@/features/chat/media/send-origin";
++import { recordMediaSend, type MediaSendOrigin } from "@/features/chat/media/send-origin";
  import type { LLMOption, RefreshLLMOptions } from "@/lib/llm-options";
  import ChatSpaceMenu from "@/components/chat/space/ChatSpaceMenu";
  import type { SpaceMemoryFile } from "@/lib/space-items";
@@ -6822,7 +6822,33 @@ index 46aaa0d..2bcdc72 100644
    /**
     * Hide the capability chip. A surface that only ever runs one capability
     * — and names it in its own chrome — gains nothing from a picker that
-@@ -1065,7 +1069,7 @@ export default memo(function ChatComposer({
+@@ -871,7 +875,7 @@ export default memo(function ChatComposer({
+   }, [scheduleDraftSave]);
+ 
+   const doSend = useCallback(
+-    (content: string) => {
++    (content: string, origin?: MediaSendOrigin) => {
+       if (preparingAttachments) return false;
+       // Keyboard and button submissions share the same admission checks.
+       // A refused submission must leave the draft in the input.
+@@ -880,6 +884,7 @@ export default memo(function ChatComposer({
+         onRequestConfigConfirm();
+         return false;
+       }
++      if (!awaitingUserReply) recordMediaSend(activeCap.value, origin);
+       onSend(content);
+       if (restoredDraftRef.current && !restoreFailedRef.current) {
+         const location = draftLocationRef.current ?? currentWorkspaceDraftLocation();
+@@ -905,7 +910,7 @@ export default memo(function ChatComposer({
+       focusTextarea();
+       return true;
+     },
+-    [preparingAttachments, awaitingUserReply, capabilityConfigConfirmed, capabilityNeedsConfig,
++    [activeCap.value, preparingAttachments, awaitingUserReply, capabilityConfigConfirmed, capabilityNeedsConfig,
+       cancelDraftSave, enqueueDraftWrite, focusTextarea, isStreaming, onRequestConfigConfirm, onSend],
+   );
+ 
+@@ -1065,7 +1070,7 @@ export default memo(function ChatComposer({
          ]
        : [];
    const trayMode: TrayMode | undefined = modeInTray
@@ -6831,7 +6857,22 @@ index 46aaa0d..2bcdc72 100644
      : undefined;
    // Create mode's own chip reads "Create Skill" / "Create Persona" and comes
    // before even the mode token: picking a kind already forced the mode back
-@@ -1196,13 +1200,17 @@ export default memo(function ChatComposer({
+@@ -1182,7 +1187,7 @@ export default memo(function ChatComposer({
+         }
+       : undefined;
+ 
+-  const handleManualSend = useCallback(() => {
++  const handleManualSend = useCallback((origin?: MediaSendOrigin) => {
+     if (isConfigBlocked) {
+       // Don't silently fail — surface the config card so the user knows
+       // they need to confirm settings first.
+@@ -1191,17 +1196,17 @@ export default memo(function ChatComposer({
+     }
+     if (!canSend) return;
+     const content = inputHandleRef.current?.getValue() || "";
+-    doSend(content);
++    doSend(content, origin);
+   }, [canSend, doSend, isConfigBlocked, onRequestConfigConfirm]);
  
    // One button, so one handler: mid-turn the same control cancels — except
    // while the turn is waiting on the user, where sending IS how it continues.
@@ -6841,17 +6882,12 @@ index 46aaa0d..2bcdc72 100644
        onCancelStreaming();
        return;
      }
-+    const kind = activeCap.value;
-+    if (canSend && !isConfigBlocked && !awaitingUserReply && !queuing) {
-+      recordMediaSend(kind, event.detail > 0 ? { x: event.clientX, y: event.clientY } : undefined);
-+    }
-     handleManualSend();
--  }, [handleManualSend, streamingBlocksSend, onCancelStreaming]);
-+  }, [activeCap.value, awaitingUserReply, canSend, handleManualSend, isConfigBlocked, queuing, streamingBlocksSend, onCancelStreaming]);
+-    handleManualSend();
++    handleManualSend(event.detail > 0 ? { x: event.clientX, y: event.clientY } : undefined);
+   }, [handleManualSend, streamingBlocksSend, onCancelStreaming]);
  
    const sendLabel =
-     sendState === "streaming"
-@@ -1437,6 +1445,8 @@ export default memo(function ChatComposer({
+@@ -1437,6 +1442,8 @@ export default memo(function ChatComposer({
                    />
                  }
  
@@ -9960,10 +9996,10 @@ index c789249..c60a6cf 100644
  }
 diff --git a/web/features/chat/media/MediaGenerationTray.tsx b/web/features/chat/media/MediaGenerationTray.tsx
 new file mode 100644
-index 0000000..bc2ff14
+index 0000000..0dc621e
 --- /dev/null
 +++ b/web/features/chat/media/MediaGenerationTray.tsx
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,252 @@
 +"use client";
 +
 +import dynamic from "next/dynamic";
@@ -9977,10 +10013,12 @@ index 0000000..bc2ff14
 +import { getSessionOrganization } from "@/lib/session-api";
 +import { navigateTask } from "@/lib/workspace-scope";
 +import type { MediaJob } from "./media-jobs";
-+import { takeMediaSendOrigin } from "./send-origin";
++import { playMediaDeliverySound, takeMediaSend } from "./send-origin";
 +
 +const MathPlayer = dynamic(() => import("@/components/math-animator/MathAnimatorViewer"), { ssr: false });
 +const LessonPlayer = dynamic(() => import("@/components/video-lesson/VideoLessonViewer"), { ssr: false });
++const GENERATION_HINT_MS = 2400;
++const DELIVERY_MS = 680;
 +
 +export default function MediaGenerationTray() {
 +  const { mediaJobs, selectedSessionId, stopMediaGeneration, markMediaViewed, removeMediaJob } = useChatStateAdapter();
@@ -10001,34 +10039,61 @@ index 0000000..bc2ff14
 +  const sourceLookup = useRef<AbortController | null>(null);
 +  const [view, setView] = useState<string | null>(null);
 +  const [dismissedId, setDismissedId] = useState<string | null>(null);
++  const [hintJobId, setHintJobId] = useState<string | null>(null);
 +  const trigger = useRef<HTMLButtonElement>(null);
 +  const deliveryIcon = useRef<HTMLSpanElement>(null);
-+  const delivery = useRef<Animation | null>(null);
++  const delivery = useRef<Animation[]>([]);
 +  const knownJobs = useRef(new Set<string>());
 +  useEffect(() => {
 +    const started = jobs.find(job => job.status === "running" && !knownJobs.current.has(job.id));
 +    knownJobs.current = new Set(jobs.map(job => job.id));
 +    const destination = trigger.current;
 +    if (!started || !destination) return;
-+    const origin = takeMediaSendOrigin(started.kind);
-+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || typeof destination.animate !== "function") return;
-+    delivery.current?.cancel();
-+    if (!origin || !deliveryIcon.current) {
-+      delivery.current = destination.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 180 });
-+      return;
-+    }
-+    const bounds = destination.getBoundingClientRect();
++
++    setHintJobId(started.id);
++    const submission = takeMediaSend(started.kind);
++    if (submission) playMediaDeliverySound();
++    delivery.current.forEach(animation => animation.cancel());
++    delivery.current = [];
++    if (typeof destination.animate !== "function") return;
++
++    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 +    const icon = deliveryIcon.current;
++    const origin = submission?.point;
++    const fly = origin && icon && !reducedMotion && typeof icon.animate === "function";
++    const ring = "color-mix(in srgb, var(--primary) 48%, transparent)";
++    delivery.current.push(destination.animate([
++      { boxShadow: `0 0 0 0 ${ring}`, transform: "scale(1)" },
++      { boxShadow: `0 0 0 6px ${ring}`, transform: reducedMotion ? "scale(1)" : "scale(1.08)", offset: 0.36 },
++      { boxShadow: "0 0 0 10px transparent", transform: "scale(1)" },
++    ], { duration: 390, delay: fly ? DELIVERY_MS - 95 : 0, easing: "ease-out" }));
++    if (!fly) return;
++
++    const bounds = destination.getBoundingClientRect();
 +    const half = icon.offsetWidth / 2;
-+    const transform = (x: number, y: number, scale: number) =>
-+      `translate3d(${x - half}px, ${y - half}px, 0) scale(${scale})`;
-+    delivery.current = icon.animate([
-+      { transform: transform(origin.x, origin.y, 0.85), opacity: 0.9 },
-+      { transform: transform(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, 0.3), opacity: 0 },
-+    ], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
++    const dx = bounds.x + bounds.width / 2 - origin.x;
++    const dy = bounds.y + bounds.height / 2 - origin.y;
++    const lift = Math.min(90, Math.hypot(dx, dy) * 0.15);
++    const point = (progress: number, scale: number) => {
++      const x = origin.x + dx * progress - half;
++      const y = Math.max(0, origin.y + dy * progress - 4 * lift * progress * (1 - progress) - half);
++      return `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
++    };
++    delivery.current.push(icon.animate([
++      { transform: point(0, 0.78), opacity: 1 },
++      { transform: point(0.07, 1.06), opacity: 1, offset: 0.2 },
++      { transform: point(0.55, 1), opacity: 1, offset: 0.57 },
++      { transform: point(0.96, 0.8), opacity: 1, offset: 0.91 },
++      { transform: point(1, 0.54), opacity: 0 },
++    ], { duration: DELIVERY_MS, easing: "ease-in-out" }));
 +  }, [jobs]);
++  useEffect(() => {
++    if (!hintJobId) return;
++    const timeout = window.setTimeout(() => setHintJobId(null), GENERATION_HINT_MS);
++    return () => window.clearTimeout(timeout);
++  }, [hintJobId]);
 +  useEffect(() => () => {
-+    delivery.current?.cancel();
++    delivery.current.forEach(animation => animation.cancel());
 +    sourceLookup.current?.abort();
 +  }, []);
 +  const latestReady = jobs.find(job => job.status === "ready" && !job.restored);
@@ -10038,10 +10103,11 @@ index 0000000..bc2ff14
 +  const openJob = showingList ? undefined : view ? jobs.find(job => job.id === view) : autoOpen;
 +  const expanded = Boolean(openJob || showingList);
 +  const runningCount = jobs.filter(job => job.status === "running").length;
-+  const showGenerationHint = runningCount > 0 && !openJob;
++  const showGenerationHint = !expanded && jobs.some(job => job.id === hintJobId && job.status === "running");
 +
 +  const showList = () => {
 +    sourceLookup.current?.abort();
++    setHintJobId(null);
 +    setView("list");
 +  };
 +
@@ -10049,6 +10115,7 @@ index 0000000..bc2ff14
 +    sourceLookup.current?.abort();
 +    setDismissedId(latestReady?.id ?? null);
 +    if (openJob) markViewed(openJob.id);
++    setHintJobId(null);
 +    setView(null);
 +    trigger.current?.focus();
 +  };
@@ -10083,6 +10150,7 @@ index 0000000..bc2ff14
 +      sourceLookup.current?.abort();
 +      setDismissedId(latestReady?.id ?? null);
 +      if (openJob) markViewed(openJob.id);
++      setHintJobId(null);
 +      setView(null);
 +      trigger.current?.focus();
 +    };
@@ -10095,8 +10163,8 @@ index 0000000..bc2ff14
 +  return (
 +    <aside aria-label={t("student.media.jobs")} className="pointer-events-none fixed right-3 top-14 z-30 flex w-[min(28rem,calc(100vw-1.5rem))] flex-col items-end gap-2 sm:right-5">
 +      <span ref={deliveryIcon} aria-hidden
-+        className="pointer-events-none fixed left-0 top-0 z-10 grid size-7 place-items-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] opacity-0">
-+        <Clapperboard size={14} />
++        className="pointer-events-none fixed left-0 top-0 z-10 grid size-10 place-items-center rounded-full border-2 border-[var(--primary-foreground)] bg-[var(--primary)] text-[var(--primary-foreground)] opacity-0 shadow-[0_4px_16px_color-mix(in_srgb,var(--primary)_50%,transparent)]">
++        <Clapperboard size={19} />
 +      </span>
 +      <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
 +        aria-describedby={showGenerationHint ? "student-media-generation-hint" : undefined}
@@ -10340,24 +10408,73 @@ index 0000000..012202a
 +}
 diff --git a/web/features/chat/media/send-origin.ts b/web/features/chat/media/send-origin.ts
 new file mode 100644
-index 0000000..b66a205
+index 0000000..392c2da
 --- /dev/null
 +++ b/web/features/chat/media/send-origin.ts
-@@ -0,0 +1,15 @@
-+type SendOrigin = { x: number; y: number };
+@@ -0,0 +1,64 @@
++export type MediaSendOrigin = { x: number; y: number };
 +
-+let pending: { kind: string; point: SendOrigin; expires: number } | undefined;
++const pending = new Map<string, { point?: MediaSendOrigin; expires: number }>();
++let audio: AudioContext | undefined;
++let audioReady: Promise<void> | undefined;
 +
-+export function recordMediaSend(kind: string, point: SendOrigin | undefined) {
-+  pending = (kind === "math_animator" || kind === "video_lesson") && point
-+    ? { kind, point, expires: performance.now() + 1200 }
-+    : undefined;
++export function recordMediaSend(kind: string, point?: MediaSendOrigin) {
++  if (kind !== "math_animator" && kind !== "video_lesson") return;
++  pending.set(kind, { point, expires: performance.now() + 5000 });
++
++  // Unlock audio in the submit gesture. Playback waits until the job is added.
++  if (typeof window.AudioContext !== "function") return;
++  try {
++    audio ??= new AudioContext();
++    audioReady = audio.state === "running" ? Promise.resolve() : audio.resume().catch(() => {});
++  } catch {
++    // Some clients block audio; the visual feedback is still available.
++  }
 +}
 +
-+export function takeMediaSendOrigin(kind: string): SendOrigin | undefined {
-+  const origin = pending;
-+  pending = undefined;
-+  if (origin?.kind === kind && performance.now() <= origin.expires) return origin.point;
++export function takeMediaSend(kind: string) {
++  const submission = pending.get(kind);
++  pending.delete(kind);
++  return submission && performance.now() <= submission.expires ? submission : undefined;
++}
++
++export function playMediaDeliverySound() {
++  const context = audio;
++  if (!context || !audioReady) return;
++  const requestedAt = performance.now();
++  void audioReady.then(() => {
++    if (context.state !== "running" || performance.now() - requestedAt > 300) return;
++    const start = context.currentTime;
++    const end = start + 0.23;
++    const volume = context.createGain();
++    volume.gain.setValueAtTime(0, start);
++    volume.gain.linearRampToValueAtTime(0.12, start + 0.045);
++    volume.gain.exponentialRampToValueAtTime(0.001, end);
++    volume.connect(context.destination);
++
++    const whistle = context.createOscillator();
++    whistle.frequency.setValueAtTime(860, start);
++    whistle.frequency.exponentialRampToValueAtTime(1740, start + 0.06);
++    whistle.frequency.exponentialRampToValueAtTime(490, end);
++    whistle.connect(volume);
++
++    const air = context.createBuffer(1, Math.ceil(0.23 * context.sampleRate), context.sampleRate);
++    const samples = air.getChannelData(0);
++    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
++    const noise = context.createBufferSource();
++    noise.buffer = air;
++    const filter = context.createBiquadFilter();
++    filter.type = "bandpass";
++    filter.frequency.setValueAtTime(2400, start);
++    filter.frequency.exponentialRampToValueAtTime(700, end);
++    noise.connect(filter).connect(volume);
++
++    whistle.onended = () => volume.disconnect();
++    whistle.start(start);
++    whistle.stop(end);
++    noise.start(start);
++    noise.stop(end);
++  }).catch(() => {});
 +}
 diff --git a/web/features/chat/messages/ChatMessageList.tsx b/web/features/chat/messages/ChatMessageList.tsx
 index de5ee55..9b74045 100644
@@ -11845,10 +11962,10 @@ index e11711e..04df6d8 100644
 +});
 diff --git a/web/tests/media-generation-tray.spec.tsx b/web/tests/media-generation-tray.spec.tsx
 new file mode 100644
-index 0000000..81e850e
+index 0000000..31d6d32
 --- /dev/null
 +++ b/web/tests/media-generation-tray.spec.tsx
-@@ -0,0 +1,236 @@
+@@ -0,0 +1,258 @@
 +import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 +import { beforeEach, describe, expect, it, vi } from "vitest";
 +import { ChatStateAdapterProvider, useChatStateAdapter } from "@/features/chat/ChatStateAdapter";
@@ -11919,6 +12036,28 @@ index 0000000..81e850e
 +});
 +
 +describe("background generation", () => {
++  it("hides the handoff hint while generation is still running", async () => {
++    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
++    try {
++      render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
++      await act(async () => { fireEvent.click(screen.getByText("Generate lesson")); });
++      const hint = /Keep studying while it generates/;
++      expect(screen.getByText(hint)).toBeInTheDocument();
++      act(() => { vi.advanceTimersByTime(2400); });
++      expect(screen.queryByText(hint)).not.toBeInTheDocument();
++      expect(screen.getByText("1 generating")).toBeInTheDocument();
++
++      await act(async () => transport.emit?.(event("video_lesson", "session")));
++      expect(screen.queryByText(hint)).not.toBeInTheDocument();
++      fireEvent.click(screen.getByText("Switch to another chat"));
++      await act(async () => { fireEvent.click(screen.getByText("Generate animation")); });
++      expect(screen.getByText(hint)).toBeInTheDocument();
++      expect(screen.getByText("2 generating")).toBeInTheDocument();
++    } finally {
++      vi.useRealTimers();
++    }
++  });
++
 +  it("keeps a lesson running after a session switch and opens a collapsible player without stealing focus", async () => {
 +    render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
 +    fireEvent.click(screen.getByText("Generate lesson"));

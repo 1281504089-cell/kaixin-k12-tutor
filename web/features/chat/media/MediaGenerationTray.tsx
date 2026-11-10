@@ -11,10 +11,12 @@ import { notify } from "@/lib/notifications";
 import { getSessionOrganization } from "@/lib/session-api";
 import { navigateTask } from "@/lib/workspace-scope";
 import type { MediaJob } from "./media-jobs";
-import { takeMediaSendOrigin } from "./send-origin";
+import { playMediaDeliverySound, takeMediaSend } from "./send-origin";
 
 const MathPlayer = dynamic(() => import("@/components/math-animator/MathAnimatorViewer"), { ssr: false });
 const LessonPlayer = dynamic(() => import("@/components/video-lesson/VideoLessonViewer"), { ssr: false });
+const GENERATION_HINT_MS = 2400;
+const DELIVERY_MS = 680;
 
 export default function MediaGenerationTray() {
   const { mediaJobs, selectedSessionId, stopMediaGeneration, markMediaViewed, removeMediaJob } = useChatStateAdapter();
@@ -35,34 +37,61 @@ function MediaTray({ jobs, selectedSessionId, stopJob, markViewed, removeJob }: 
   const sourceLookup = useRef<AbortController | null>(null);
   const [view, setView] = useState<string | null>(null);
   const [dismissedId, setDismissedId] = useState<string | null>(null);
+  const [hintJobId, setHintJobId] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const deliveryIcon = useRef<HTMLSpanElement>(null);
-  const delivery = useRef<Animation | null>(null);
+  const delivery = useRef<Animation[]>([]);
   const knownJobs = useRef(new Set<string>());
   useEffect(() => {
     const started = jobs.find(job => job.status === "running" && !knownJobs.current.has(job.id));
     knownJobs.current = new Set(jobs.map(job => job.id));
     const destination = trigger.current;
     if (!started || !destination) return;
-    const origin = takeMediaSendOrigin(started.kind);
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || typeof destination.animate !== "function") return;
-    delivery.current?.cancel();
-    if (!origin || !deliveryIcon.current) {
-      delivery.current = destination.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 180 });
-      return;
-    }
-    const bounds = destination.getBoundingClientRect();
+
+    setHintJobId(started.id);
+    const submission = takeMediaSend(started.kind);
+    if (submission) playMediaDeliverySound();
+    delivery.current.forEach(animation => animation.cancel());
+    delivery.current = [];
+    if (typeof destination.animate !== "function") return;
+
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const icon = deliveryIcon.current;
+    const origin = submission?.point;
+    const fly = origin && icon && !reducedMotion && typeof icon.animate === "function";
+    const ring = "color-mix(in srgb, var(--primary) 48%, transparent)";
+    delivery.current.push(destination.animate([
+      { boxShadow: `0 0 0 0 ${ring}`, transform: "scale(1)" },
+      { boxShadow: `0 0 0 6px ${ring}`, transform: reducedMotion ? "scale(1)" : "scale(1.08)", offset: 0.36 },
+      { boxShadow: "0 0 0 10px transparent", transform: "scale(1)" },
+    ], { duration: 390, delay: fly ? DELIVERY_MS - 95 : 0, easing: "ease-out" }));
+    if (!fly) return;
+
+    const bounds = destination.getBoundingClientRect();
     const half = icon.offsetWidth / 2;
-    const transform = (x: number, y: number, scale: number) =>
-      `translate3d(${x - half}px, ${y - half}px, 0) scale(${scale})`;
-    delivery.current = icon.animate([
-      { transform: transform(origin.x, origin.y, 0.85), opacity: 0.9 },
-      { transform: transform(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, 0.3), opacity: 0 },
-    ], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+    const dx = bounds.x + bounds.width / 2 - origin.x;
+    const dy = bounds.y + bounds.height / 2 - origin.y;
+    const lift = Math.min(90, Math.hypot(dx, dy) * 0.15);
+    const point = (progress: number, scale: number) => {
+      const x = origin.x + dx * progress - half;
+      const y = Math.max(0, origin.y + dy * progress - 4 * lift * progress * (1 - progress) - half);
+      return `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+    };
+    delivery.current.push(icon.animate([
+      { transform: point(0, 0.78), opacity: 1 },
+      { transform: point(0.07, 1.06), opacity: 1, offset: 0.2 },
+      { transform: point(0.55, 1), opacity: 1, offset: 0.57 },
+      { transform: point(0.96, 0.8), opacity: 1, offset: 0.91 },
+      { transform: point(1, 0.54), opacity: 0 },
+    ], { duration: DELIVERY_MS, easing: "ease-in-out" }));
   }, [jobs]);
+  useEffect(() => {
+    if (!hintJobId) return;
+    const timeout = window.setTimeout(() => setHintJobId(null), GENERATION_HINT_MS);
+    return () => window.clearTimeout(timeout);
+  }, [hintJobId]);
   useEffect(() => () => {
-    delivery.current?.cancel();
+    delivery.current.forEach(animation => animation.cancel());
     sourceLookup.current?.abort();
   }, []);
   const latestReady = jobs.find(job => job.status === "ready" && !job.restored);
@@ -72,10 +101,11 @@ function MediaTray({ jobs, selectedSessionId, stopJob, markViewed, removeJob }: 
   const openJob = showingList ? undefined : view ? jobs.find(job => job.id === view) : autoOpen;
   const expanded = Boolean(openJob || showingList);
   const runningCount = jobs.filter(job => job.status === "running").length;
-  const showGenerationHint = runningCount > 0 && !openJob;
+  const showGenerationHint = !expanded && jobs.some(job => job.id === hintJobId && job.status === "running");
 
   const showList = () => {
     sourceLookup.current?.abort();
+    setHintJobId(null);
     setView("list");
   };
 
@@ -83,6 +113,7 @@ function MediaTray({ jobs, selectedSessionId, stopJob, markViewed, removeJob }: 
     sourceLookup.current?.abort();
     setDismissedId(latestReady?.id ?? null);
     if (openJob) markViewed(openJob.id);
+    setHintJobId(null);
     setView(null);
     trigger.current?.focus();
   };
@@ -117,6 +148,7 @@ function MediaTray({ jobs, selectedSessionId, stopJob, markViewed, removeJob }: 
       sourceLookup.current?.abort();
       setDismissedId(latestReady?.id ?? null);
       if (openJob) markViewed(openJob.id);
+      setHintJobId(null);
       setView(null);
       trigger.current?.focus();
     };
@@ -129,8 +161,8 @@ function MediaTray({ jobs, selectedSessionId, stopJob, markViewed, removeJob }: 
   return (
     <aside aria-label={t("student.media.jobs")} className="pointer-events-none fixed right-3 top-14 z-30 flex w-[min(28rem,calc(100vw-1.5rem))] flex-col items-end gap-2 sm:right-5">
       <span ref={deliveryIcon} aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-10 grid size-7 place-items-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] opacity-0">
-        <Clapperboard size={14} />
+        className="pointer-events-none fixed left-0 top-0 z-10 grid size-10 place-items-center rounded-full border-2 border-[var(--primary-foreground)] bg-[var(--primary)] text-[var(--primary-foreground)] opacity-0 shadow-[0_4px_16px_color-mix(in_srgb,var(--primary)_50%,transparent)]">
+        <Clapperboard size={19} />
       </span>
       <button ref={trigger} type="button" aria-label={t("student.media.jobs")} aria-expanded={expanded} aria-controls={expanded ? "student-media-panel" : undefined}
         aria-describedby={showGenerationHint ? "student-media-generation-hint" : undefined}

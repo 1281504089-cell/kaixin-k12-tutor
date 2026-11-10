@@ -68,6 +68,28 @@ const lesson = event("video_lesson", "result", {
 });
 
 describe("background generation", () => {
+  it("hides the handoff hint while generation is still running", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+      await act(async () => { fireEvent.click(screen.getByText("Generate lesson")); });
+      const hint = /Keep studying while it generates/;
+      expect(screen.getByText(hint)).toBeInTheDocument();
+      act(() => { vi.advanceTimersByTime(2400); });
+      expect(screen.queryByText(hint)).not.toBeInTheDocument();
+      expect(screen.getByText("1 generating")).toBeInTheDocument();
+
+      await act(async () => transport.emit?.(event("video_lesson", "session")));
+      expect(screen.queryByText(hint)).not.toBeInTheDocument();
+      fireEvent.click(screen.getByText("Switch to another chat"));
+      await act(async () => { fireEvent.click(screen.getByText("Generate animation")); });
+      expect(screen.getByText(hint)).toBeInTheDocument();
+      expect(screen.getByText("2 generating")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("keeps a lesson running after a session switch and opens a collapsible player without stealing focus", async () => {
     render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
     fireEvent.click(screen.getByText("Generate lesson"));

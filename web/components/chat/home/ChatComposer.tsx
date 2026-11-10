@@ -52,7 +52,7 @@ import type { SelectedHistorySession } from "@/components/chat/HistorySessionPic
 import type { SelectedQuestionEntry } from "@/components/chat/QuestionBankPicker";
 import type { SelectedRecord } from "@/lib/notebook-selection-types";
 import type { LLMSelection } from "@/features/chat/model/protocol";
-import { recordMediaSend } from "@/features/chat/media/send-origin";
+import { recordMediaSend, type MediaSendOrigin } from "@/features/chat/media/send-origin";
 import type { LLMOption, RefreshLLMOptions } from "@/lib/llm-options";
 import ChatSpaceMenu from "@/components/chat/space/ChatSpaceMenu";
 import type { SpaceMemoryFile } from "@/lib/space-items";
@@ -875,7 +875,7 @@ export default memo(function ChatComposer({
   }, [scheduleDraftSave]);
 
   const doSend = useCallback(
-    (content: string) => {
+    (content: string, origin?: MediaSendOrigin) => {
       if (preparingAttachments) return false;
       // Keyboard and button submissions share the same admission checks.
       // A refused submission must leave the draft in the input.
@@ -884,6 +884,7 @@ export default memo(function ChatComposer({
         onRequestConfigConfirm();
         return false;
       }
+      if (!awaitingUserReply) recordMediaSend(activeCap.value, origin);
       onSend(content);
       if (restoredDraftRef.current && !restoreFailedRef.current) {
         const location = draftLocationRef.current ?? currentWorkspaceDraftLocation();
@@ -909,7 +910,7 @@ export default memo(function ChatComposer({
       focusTextarea();
       return true;
     },
-    [preparingAttachments, awaitingUserReply, capabilityConfigConfirmed, capabilityNeedsConfig,
+    [activeCap.value, preparingAttachments, awaitingUserReply, capabilityConfigConfirmed, capabilityNeedsConfig,
       cancelDraftSave, enqueueDraftWrite, focusTextarea, isStreaming, onRequestConfigConfirm, onSend],
   );
 
@@ -1186,7 +1187,7 @@ export default memo(function ChatComposer({
         }
       : undefined;
 
-  const handleManualSend = useCallback(() => {
+  const handleManualSend = useCallback((origin?: MediaSendOrigin) => {
     if (isConfigBlocked) {
       // Don't silently fail — surface the config card so the user knows
       // they need to confirm settings first.
@@ -1195,7 +1196,7 @@ export default memo(function ChatComposer({
     }
     if (!canSend) return;
     const content = inputHandleRef.current?.getValue() || "";
-    doSend(content);
+    doSend(content, origin);
   }, [canSend, doSend, isConfigBlocked, onRequestConfigConfirm]);
 
   // One button, so one handler: mid-turn the same control cancels — except
@@ -1205,12 +1206,8 @@ export default memo(function ChatComposer({
       onCancelStreaming();
       return;
     }
-    const kind = activeCap.value;
-    if (canSend && !isConfigBlocked && !awaitingUserReply && !queuing) {
-      recordMediaSend(kind, event.detail > 0 ? { x: event.clientX, y: event.clientY } : undefined);
-    }
-    handleManualSend();
-  }, [activeCap.value, awaitingUserReply, canSend, handleManualSend, isConfigBlocked, queuing, streamingBlocksSend, onCancelStreaming]);
+    handleManualSend(event.detail > 0 ? { x: event.clientX, y: event.clientY } : undefined);
+  }, [handleManualSend, streamingBlocksSend, onCancelStreaming]);
 
   const sendLabel =
     sendState === "streaming"
