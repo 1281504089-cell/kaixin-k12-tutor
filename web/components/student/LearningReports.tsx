@@ -268,17 +268,21 @@ export default function LearningReports() {
         </div>
       </div>
       <div className={styles.subjectReport}>
+            {report.result_level === 'records' && <div className={styles.notice} role="status">{report.message}{!historyId && <button type="button" disabled={!canGenerate} onClick={() => void generate()}>重试专项报告</button>}</div>}
         {!!subjectReview.learningSummary?.length && <div className={styles.subjectCover}>
           {subjectReview.learningSummary.map((line, i) => <div className={styles.learningTakeaway} key={i}><strong>{['学了什么', '记住这一点', '下一步怎么练'][i]}</strong><RichMarkdownRenderer content={learningOnly(line)} variant="compact" enableMath enableImages={false} /></div>)}
         </div>}
         {subjectReview.sections.map((section, i) => <section className={styles.subjectSection} key={section.title}>
           <h3>{section.title.replace(/[：:]依据真实作答记录$/, '')}</h3>
           <RichMarkdownRenderer content={subjectSectionMarkdown(subjectReview, report.subject!, i)} variant="compact" enableMath enableImages={false} />
+          {subjectReview.figure?.section === i && <figure className={styles.studyFigure}>
+            <img src={`data:image/png;base64,${subjectReview.figure.png}`} alt={subjectReview.figure.alt} width={960} height={480} />
+            <figcaption>{subjectReview.figure.caption}</figcaption>
+          </figure>}
         </section>)}
         <details className={styles.reportBasis} key={report.id}>
           <summary>教材与记录依据<ChevronRight size={14} /></summary>
           <div className={styles.subjectCover}><RichMarkdownRenderer content={subjectReview.cover} variant="compact" enableMath enableImages={false} /></div>
-          {report.result_level === 'records' && <div className={styles.notice} role="status">{report.message}{!historyId && <button type="button" disabled={!canGenerate} onClick={() => void generate()}>重试专项报告</button>}</div>}
           <section className={styles.subjectSection}><h3>教材范围</h3>
             {report.textbook_scope?.length ? report.textbook_scope.map((book, i) => <div key={i}><h4>{book.title}</h4>
               <p>{book.matched ? '定位到本次讨论的章节' : book.outline.length ? '目录可供参考，未确认具体学到哪一章' : 'PDF 未提供可核对的目录'}</p>

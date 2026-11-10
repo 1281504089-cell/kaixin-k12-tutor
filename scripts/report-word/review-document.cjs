@@ -84,6 +84,18 @@ async function word(job){
    children.push(...await formatted(s.text),paragraph([run(job.report.exercises.length?'完成所有练习后，再对照本节。开放题可接受合理的等价表达。':'本次没有专项训练题，不虚构答案或正确率。',{color:muted,size:20})],{spacing:{after:150,line:310}}));
    for(const e of job.report.exercises)children.push(paragraph([run('第 '+e.id+' 题',{bold:true,size:23})],{keepNext:true,shading:{fill:t.exercisePale||'F7F8FA'},indent:{left:110,right:100},spacing:{before:170,after:90,line:330}}),...await formatted('**参考答案**  '+e.answer,{keepNext:true}),...await formatted(e.explanation));
   }else children.push(...await formatted(s.text));
+  const figure = job.report.figure;
+  if (figure?.section === i) {
+   const width = Math.min(bodyWidth, 540);
+   children.push(
+    paragraph([new ImageRun({type:'png',data:Buffer.from(figure.png,'base64'),
+     transformation:{width,height:width/2},
+     altText:{title:'学习示意图',description:figure.alt,name:'study-figure',id:String(++drawingId)}})],
+     {alignment:AlignmentType.CENTER,keepNext:true,spacing:{before:120,after:45,line:240}}),
+    paragraph([run(figure.caption,{color:muted,size:20})],
+     {alignment:AlignmentType.CENTER,spacing:{after:165,line:260}}),
+   );
+  }
  }
  children.push(chapter('教材与记录依据','source_appendix',{pageBreakBefore:true}),paragraph([run(evidence.length?'节选处已标注，完整内容可在原对话查看。此处保留学生原始作答。':'这个时段没有可用于复盘的对话原文。正文提供学科知识与练习。',{size:20,color:muted})]));
  children.push(paragraph([run('资料范围说明',{bold:true,size:22})],{keepNext:true}),...await formatted(job.report.cover));

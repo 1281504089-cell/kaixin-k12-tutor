@@ -19,7 +19,8 @@ export type ReflectionAnswers = { goal: string; state: string; process: string; 
 export type ReportReflection = { id?: string; revision: number; answers: ReflectionAnswers; saved_at: number | null }
 type SubjectExercise = { id: number; question: string; options: string[]; answer: string; explanation: string }
 export type TextbookScope = { title: string; matched: boolean; pages: number[]; outline: { title: string; page?: number }[] }
-export type SubjectReview = { title: string; cover: string; learningSummary?: string[]; sections: (ReportClaim & { title: string })[]; exercises: SubjectExercise[] }
+type ReportFigure = { section: number; caption: string; alt: string; png: string }
+export type SubjectReview = { figure?: ReportFigure; title: string; cover: string; learningSummary?: string[]; sections: (ReportClaim & { title: string })[]; exercises: SubjectExercise[] }
 export type LearningReport = { id: string; range: { from: string; to: string }; subject?: ReportSubject; extra_session_count?: number; created_at: number; state: 'pending' | 'ready' | 'failed'; stage: 'generating' | 'reviewing' | null; message: string; metrics: ReportMetrics; stale: boolean; summary?: { overview: ReportClaim; records: ReportClaim[]; observations: ReportClaim[]; nextSteps: ReportClaim[] } | null; subject_review?: SubjectReview; result_level?: 'records' | 'full'; evidence?: ReportEvidence[]; textbook_scope?: TextbookScope[]; coverage?: { factDates: string[]; missingDates: string[]; partialDates: string[] } }
 export type ReportOverview = { range: { from: string; to: string }; metrics: ReportMetrics; coverage: { factDates: string[]; missingDates: string[]; partialDates: string[] }; reflection?: ReportReflection; report: LearningReport | null; history: LearningReport[]; missing_extra_sessions?: number }
 

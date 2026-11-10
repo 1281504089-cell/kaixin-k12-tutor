@@ -114,7 +114,7 @@ def digest(value) -> str:
 
 
 def policy_version() -> str:
-    files = [ROOT / "report-contract.cjs", ROOT / "reports.py", ROOT / "report_textbooks.py", *sorted((ROOT / "miniapp/reports").glob("*"))]
+    files = [ROOT / "report-contract.cjs", ROOT / "reports.py", ROOT / "report_textbooks.py", ROOT / "report_figures.py", *sorted((ROOT / "miniapp/reports").glob("*"))]
     return digest([hashlib.sha256(p.read_bytes()).hexdigest() for p in files if p.is_file()])
 
 
@@ -633,6 +633,14 @@ async def generate(manager, notebook, row, source, config, complete=None):
             if review.get("approved") is not True or review.get("issues") != []:
                 raise ReportError("专项内容未通过独立核对。")
             summary = await bridge("finish", {"source": source, "draft": draft, "review": review})
+            if period.subject and complete_from_provider:
+                from .report_figures import build_figure
+
+                figure = await build_figure(
+                    source, summary, config, time_budget=row["lease_until"] - time.time() - 65,
+                )
+                if figure is not None:
+                    summary["figure"] = figure
             stage = "checking_sources"
             await check_sources()
             updates = {"state": "ready", "stage": None, "summary": None if period.subject else summary, "message": "已依据原文整理，并完成独立核对。"}

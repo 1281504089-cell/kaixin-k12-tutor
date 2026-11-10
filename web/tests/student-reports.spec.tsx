@@ -148,3 +148,21 @@ it('offers nine subjects and places PDF scope and evidence after the learning co
   await waitFor(() => expect(api.get.mock.lastCall?.[0].textbook_id).toBe('aabbccddeeff1122'))
   expect(learningOnly('式子 $m1+n$，说明 [m1]。')).toBe('式子 $m1+n$，说明 。')
 })
+
+it('places a reviewed figure with its explanation before the evidence appendix', async () => {
+  const physics: LearningReport = {
+    ...report, subject: 'physics', summary: null, result_level: 'full',
+    subject_review: {
+      title: '平面镜复盘', cover: '模拟教材和记录', exercises: [],
+      sections: [{ ...claim, title: '平面镜成像', text: '物距等于像距。' }],
+      figure: { section: 0, caption: '平面镜光路示意', alt: '物和虚像分居镜面两侧。', png: 'iVBORw0KGgo=' },
+    },
+  }
+  api.get.mockResolvedValue({ range: physics.range, metrics: physics.metrics, report: physics, history: [], coverage: physics.coverage })
+  render(<LearningReports />)
+  fireEvent.click(screen.getByRole('button', { name: /物理复盘/ }))
+  const figure = (await screen.findByRole('img', { name: '物和虚像分居镜面两侧。' })).closest('figure')!
+  expect(figure.closest('section')?.textContent).toContain('物距等于像距。')
+  expect(figure.textContent).toContain('平面镜光路示意')
+  expect(figure.compareDocumentPosition(screen.getByText('教材与记录依据')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})

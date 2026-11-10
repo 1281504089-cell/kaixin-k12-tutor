@@ -610,3 +610,67 @@ async def test_subject_review_normalizes_model_exercise_labels(setup):
     result["exercises"][0]["options"].pop()
     with pytest.raises(reports.ReportError):
         await reports.bridge("validate", {"source": source, "raw": result})
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("text_approved,figure_approved", [(True, True), (True, False), (False, True)])
+async def test_report_only_displays_and_exports_a_reviewed_figure(setup, monkeypatch, text_approved, figure_approved):
+    import base64
+    from io import BytesIO
+    from zipfile import ZipFile
+
+    from PIL import Image
+    from deeptutor.services.llm import factory
+    from deeptutor.services.student_learning import report_figures
+
+    await seed(setup, workspace="math", content="三角形的三条边在哪里？")
+    period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="math")
+    row, task = await reports.begin(period)
+    source = task[3]
+    raw = await reports.bridge("records", {"source": source})
+    raw["sections"][1]["text"] = "三角形的几何示意图用三条线段围成。"
+    image = BytesIO()
+    Image.new("RGB", (960, 480), "white").save(image, "PNG")
+    monkeypatch.setattr(report_figures, "render_figure", lambda _: image.getvalue())
+    monkeypatch.setattr(report_figures, "figure_model_config", lambda config: config)
+    candidate = {"section": 1, "caption": "教学示意 · 三角形", "alt": "三个顶点依次连接形成三角形。",
+                 "paths": [{"points": [[200, 300], [450, 80], [720, 300], [200, 300]], "tone": "blue", "style": "solid"}],
+                 "labels": [{"at": [450, 48], "text": "A", "tone": "ink"}]}
+
+    def review(approved):
+        return {"approved": approved, "issues": [] if approved else ["与题设不符"]}
+
+    complete = AsyncMock(side_effect=[json.dumps(x, ensure_ascii=False) for x in [
+        raw, review(text_approved), {"figure": candidate}, review(figure_approved),
+    ]])
+    monkeypatch.setattr(factory, "complete_with_config", complete)
+    await reports.generate(*task)
+    result = await reports.detail(row["id"])
+    assert result["state"] == "ready"
+    assert result["result_level"] == ("full" if text_approved else "records")
+    assert complete.await_count == (4 if text_approved else 2)
+
+    shown = result["subject_review"].get("figure")
+    if text_approved and figure_approved:
+        assert shown["caption"] == candidate["caption"]
+        assert base64.b64decode(shown["png"]) == image.getvalue()
+    else:
+        assert shown is None
+    with ZipFile(BytesIO(await reports.export_word(row["id"]))) as word:
+        xml = word.read("word/document.xml").decode()
+        assert ("study-figure" in xml) is (shown is not None)
+        if shown:
+            assert xml.index(candidate["caption"]) < xml.index("教材与记录依据")
+
+
+@pytest.mark.asyncio
+async def test_report_skips_figures_for_text_only_and_non_science(setup, monkeypatch):
+    from deeptutor.services.llm import factory
+    from deeptutor.services.student_learning import report_figures
+
+    complete = AsyncMock()
+    monkeypatch.setattr(factory, "complete_with_config", complete)
+    for subject, text in (("math", "用公分母统一计数单位。"), ("history", "结合图像讨论五四运动。")):
+        result = await report_figures.build_figure({"subject": subject}, {"sections": [{"text": text}] * 9}, None, time_budget=240)
+        assert result is None
+    complete.assert_not_awaited()

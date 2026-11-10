@@ -41,3 +41,7 @@
 .reportBasis summary{display:flex;align-items:center;gap:7px;cursor:pointer;padding:14px 0;font-size:14px;font-weight:650;list-style:none}
 .reportBasis summary::-webkit-details-marker{display:none}
 .reportBasis[open] summary svg{transform:rotate(90deg)}
+
+.studyFigure { margin: 16px auto 4px; max-width: 680px; }
+.studyFigure img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; background: white; }
+.studyFigure figcaption { margin-top: 8px; color: var(--muted-foreground); font-size: 13px; text-align: center; }
