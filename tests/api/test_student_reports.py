@@ -429,7 +429,11 @@ def test_subject_evidence_keeps_whole_turns_under_the_model_budget():
         return {"id": id, "conversationId": "lesson", "role": role, "content": content}
     older = [entry("u1", "user", "旧题"), entry("a1", "assistant", "很长的旧答案" * 10000)]
     newer = [entry("u2", "user", "新题"), entry("a2", "assistant", "新答案")]
-    assert reports.report_evidence(older + newer) == newer
+    sampled = reports.report_evidence(older + newer)
+    assert sampled[0] == older[0] and sampled[-2:] == newer
+    assert sampled[1]["content_excerpt"] and "中间原文略" in sampled[1]["content"]
+    assert sampled[1]["source_digest"] == reports.digest(older[1])
+    assert len(sampled[1]["content"]) < 4000
 
 
 @pytest.mark.asyncio
@@ -448,7 +452,7 @@ async def test_additional_subjects_have_their_own_rule_and_complete_practice(set
 
 
 @pytest.mark.asyncio
-async def test_review_uses_actual_pdf_outline_and_places_word_evidence_on_page_two(setup, monkeypatch, tmp_path):
+async def test_review_uses_actual_pdf_outline_and_places_word_evidence_after_the_answers(setup, monkeypatch, tmp_path):
     import io
     import zipfile
     from xml.etree import ElementTree as ET
@@ -489,13 +493,15 @@ async def test_review_uses_actual_pdf_outline_and_places_word_evidence_on_page_t
         root = ET.fromstring(archive.read("word/document.xml"))
     w = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
     paragraphs = root.findall(".//w:body/w:p", w)
-    first_break = next(i for i, p in enumerate(paragraphs) if p.find("w:pPr/w:pageBreakBefore", w) is not None)
     def page_text(rows):
         return " ".join(t.text or "" for p in rows for t in p.findall(".//w:t", w))
-    assert "记住这一点" in page_text(paragraphs[:first_break])
-    assert "教材与记录依据" not in page_text(paragraphs[:first_break])
-    assert "教材与记录依据" in page_text(paragraphs[first_break:first_break + 1])
-    assert "PDF 第 2 页" in page_text(paragraphs[first_break:])
+
+    appendix = next(i for i, p in enumerate(paragraphs) if "教材与记录依据" in page_text([p]))
+    assert paragraphs[appendix].find("w:pPr/w:pageBreakBefore", w) is not None
+    assert "记住这一点" in page_text(paragraphs[:appendix])
+    assert "参考答案与解析" in page_text(paragraphs[:appendix])
+    assert "下次复习怎么做" in page_text(paragraphs[:appendix])
+    assert "PDF 第 2 页" in page_text(paragraphs[appendix:])
 
     selected = period.model_copy(update={"extra_sessions": [], "textbook_id": book.material_id})
     scoped = report_textbooks.report_textbook_scope(await reports.collect(selected))
@@ -503,3 +509,42 @@ async def test_review_uses_actual_pdf_outline_and_places_word_evidence_on_page_t
     assert [row["title"] for row in scoped[0]["outline"]] == ["辛亥革命", "五四运动"]
     with pytest.raises(reports.ReportError, match="教材 PDF 无法读取"):
         await reports.begin(selected.model_copy(update={"textbook_id": "abcd1234"}))
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("extra_text", ["", "这一段是很长的学习记录。" * 10000])
+async def test_short_and_oversized_records_generate_a_complete_export(setup, extra_text):
+    original = "我想复习分数通分。" + extra_text
+    await seed(setup, workspace="math", content=original)
+    period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="math")
+    row, task = await reports.begin(period)
+    prepared = await reports.bridge("prepare", {"source": task[3]})
+    messages = prepared["input"]["messages"]
+    assert len(messages) == 1 and messages[0]["content"].startswith("我想复习分数通分")
+    assert messages[0]["isExcerpt"] is bool(extra_text)
+    assert len(messages[0]["content"]) < 4000
+    complete = AsyncMock(side_effect=TimeoutError("model fixture timeout"))
+    await reports.generate(*task, complete=complete)
+    complete.assert_awaited_once()
+    result = await reports.detail(row["id"])
+    review = result["subject_review"]
+    assert result["state"] == "ready" and result["result_level"] == "records"
+    assert len(review["sections"]) == 9 and len(review["exercises"]) == 10
+    assert all(question["answer"] and question["explanation"] for question in review["exercises"])
+    assert (await reports.export_word(row["id"])).startswith(b"PK")
+    if extra_text:
+        assert "长记录节选" in review["cover"]
+        assert result["evidence"][0]["content_excerpt"]
+        fresh = await reports.collect(period)
+        fresh["messages"][0]["content"] = original[:50000] + "这句变了" + original[50000:]
+        assert not await reports.valid_sources(result, fresh)
+
+
+def test_many_turns_cover_the_beginning_middle_and_end_of_the_selected_period():
+    messages = [
+        {"id": str(index), "conversationId": "lesson", "role": "user", "content": "复习要点" * 300}
+        for index in range(220)
+    ]
+    sample = reports.report_evidence(messages)
+    assert {0, 109, 219} <= {int(entry["id"]) for entry in sample}
+    assert len(json.dumps(sample, ensure_ascii=False)) <= 52000
+    assert len(sample) < len(messages)

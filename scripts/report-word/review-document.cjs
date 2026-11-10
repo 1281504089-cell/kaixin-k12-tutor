@@ -71,23 +71,23 @@ async function word(job){
  children.push(paragraph([link('查看复盘正文','chapter_0')],{spacing:{before:210}}));
  const body=[];
  for(const[i,s]of job.report.sections.entries()){
-  body.push(chapter(headings[i],'chapter_'+i,{pageBreakBefore:i===0||job.report.exercises.length>0&&(i===t.answerIndex||i===t.exerciseIndex&&!job.report.recordSummary)},s.refs.length?[run('  '),link('对话依据','evidence_'+i)]:[]));
+  children.push(chapter(headings[i],'chapter_'+i,{pageBreakBefore:job.report.exercises.length>0&&(i===t.answerIndex||i===t.exerciseIndex&&!job.report.recordSummary)}));
   if(i===t.exerciseIndex){
-   body.push(...await formatted(s.text));if(!job.report.exercises.length&&s.text!==job.report.trainingNotice)body.push(paragraph([run(job.report.trainingNotice||'本次没有可核实的个人薄弱项，不编造专项练习。')]));
+   children.push(...await formatted(s.text));if(!job.report.exercises.length&&s.text!==job.report.trainingNotice)children.push(paragraph([run(job.report.trainingNotice||'本次没有可核实的个人薄弱项，不编造专项练习。')]));
    let previousType='';
    for(const e of job.report.exercises){
-    if(job.subject==='math'&&e.type!==previousType){body.push(paragraph([run(e.type==='choice'?'A  选择题':e.type==='fill'?'B  填空题':'C  解答题',{bold:true,size:24})],{keepNext:true,spacing:{before:170,after:105,line:330}}));previousType=e.type;}
-    body.push(paragraph([run('第 '+e.id+' 题',{bold:true,size:23})],{keepNext:true,shading:{fill:t.exercisePale||'F7F8FA'},border:{bottom:rule(line,4)},indent:{left:110,right:100},spacing:{before:170,after:90,line:330}}),...await formatted(e.question,{keepNext:true}));
-    for(const[o,k]of e.options.map((o,k)=>[o,k]))body.push(...await formatted(String.fromCharCode(65+k)+'. '+o,{keepNext:true,spacing:{after:60,line:280}}));
-    body.push(paragraph([run(e.type==='choice'?'我的选择  ______':e.type==='fill'?'我的答案  __________________________':'我的思路与作答',{color:muted,size:20})],{keepNext:e.type==='solution',spacing:{before:80,after:95,line:300}}));
-    if(e.type==='solution'){const lines=job.subject==='math'?3:2;for(let k=0;k<lines;k++)body.push(paragraph([],{keepNext:k<lines-1,border:{bottom:rule('D8DEE3',4)},spacing:{after:100,line:280,lineRule:'exact'}}));}
+    if(job.subject==='math'&&e.type!==previousType){children.push(paragraph([run(e.type==='choice'?'A  选择题':e.type==='fill'?'B  填空题':'C  解答题',{bold:true,size:24})],{keepNext:true,spacing:{before:170,after:105,line:330}}));previousType=e.type;}
+    children.push(paragraph([run('第 '+e.id+' 题',{bold:true,size:23})],{keepNext:true,shading:{fill:t.exercisePale||'F7F8FA'},border:{bottom:rule(line,4)},indent:{left:110,right:100},spacing:{before:170,after:90,line:330}}),...await formatted(e.question,{keepNext:true}));
+    for(const[o,k]of e.options.map((o,k)=>[o,k]))children.push(...await formatted(String.fromCharCode(65+k)+'. '+o,{keepNext:true,spacing:{after:60,line:280}}));
+    children.push(paragraph([run(e.type==='choice'?'我的选择  ______':e.type==='fill'?'我的答案  __________________________':'我的思路与作答',{color:muted,size:20})],{keepNext:e.type==='solution',spacing:{before:80,after:95,line:300}}));
+    if(e.type==='solution'){const lines=job.subject==='math'?3:2;for(let k=0;k<lines;k++)children.push(paragraph([],{keepNext:k<lines-1,border:{bottom:rule('D8DEE3',4)},spacing:{after:100,line:280,lineRule:'exact'}}));}
    }
   }else if(i===t.answerIndex){
-   body.push(...await formatted(s.text),paragraph([run(job.report.exercises.length?'完成所有练习后，再对照本节。开放题可接受合理的等价表达。':'本次没有专项训练题，不虚构答案或正确率。',{color:muted,size:20})],{spacing:{after:150,line:310}}));
-   for(const e of job.report.exercises)body.push(paragraph([run('第 '+e.id+' 题',{bold:true,size:23})],{keepNext:true,shading:{fill:t.exercisePale||'F7F8FA'},indent:{left:110,right:100},spacing:{before:170,after:90,line:330}}),...await formatted('**参考答案**  '+e.answer,{keepNext:true}),...await formatted(e.explanation));
-  }else body.push(...await formatted(s.text));
+   children.push(...await formatted(s.text),paragraph([run(job.report.exercises.length?'完成所有练习后，再对照本节。开放题可接受合理的等价表达。':'本次没有专项训练题，不虚构答案或正确率。',{color:muted,size:20})],{spacing:{after:150,line:310}}));
+   for(const e of job.report.exercises)children.push(paragraph([run('第 '+e.id+' 题',{bold:true,size:23})],{keepNext:true,shading:{fill:t.exercisePale||'F7F8FA'},indent:{left:110,right:100},spacing:{before:170,after:90,line:330}}),...await formatted('**参考答案**  '+e.answer,{keepNext:true}),...await formatted(e.explanation));
+  }else children.push(...await formatted(s.text));
  }
- children.push(chapter('教材与记录依据','source_appendix',{pageBreakBefore:true}),paragraph([run(evidence.length?'原话仅调整标题、表格与公式的显示，未订正学生作答。记录较多时本节自动续页。':'这个时段没有可用于复盘的对话原文。正文提供学科知识与练习。',{size:20,color:muted})]));
+ children.push(chapter('教材与记录依据','source_appendix',{pageBreakBefore:true}),paragraph([run(evidence.length?'节选处已标注，完整内容可在原对话查看。此处保留学生原始作答。':'这个时段没有可用于复盘的对话原文。正文提供学科知识与练习。',{size:20,color:muted})]));
  children.push(paragraph([run('资料范围说明',{bold:true,size:22})],{keepNext:true}),...await formatted(job.report.cover));
  for(const book of job.textbookScope||[]){
   children.push(paragraph([run(book.title,{bold:true,size:22})],{keepNext:true}));

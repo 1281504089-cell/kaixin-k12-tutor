@@ -110,7 +110,7 @@ it('keeps four reflections collapsed, preserves unsaved input and saves without 
   expect(api.generate).not.toHaveBeenCalled()
 })
 
-it('offers nine subjects and keeps PDF scope and evidence behind page two', async () => {
+it('offers nine subjects and places PDF scope and evidence after the learning content', async () => {
   const history: LearningReport = {
     ...report, subject: 'history', summary: null,
     textbook_scope: [{ title: '本机历史教材', matched: true, pages: [14], outline: [{title: '辛亥革命', page: 12}] }],
@@ -129,12 +129,18 @@ it('offers nine subjects and keeps PDF scope and evidence behind page two', asyn
   fireEvent.click(screen.getByRole('button', {name: /历史复盘/}))
   await screen.findByRole('heading', {name: '记忆大纲'})
   expect(screen.getByText('按时间线梳理辛亥革命。')).toBeTruthy()
-  expect(screen.queryByText(/资料范围：历史教材/)).toBeNull()
+  const appendix = screen.getByText('教材与记录依据').closest('details')!
+  expect(appendix.open).toBe(false)
+  expect(screen.getByRole('heading', {name: '记忆大纲'}).compareDocumentPosition(appendix) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(screen.queryByText(/\[m1\]|（M2）/)).toBeNull()
-  fireEvent.click(screen.getByRole('button', {name: '2. 教材与记录依据'}))
+  fireEvent.click(screen.getByText('教材与记录依据'))
   expect(screen.getByText('辛亥革命 · PDF 第 12 页')).toBeTruthy()
   expect(screen.getByText('请解释为什么要通分。')).toBeTruthy()
-  expect(screen.queryByRole('heading', {name: '记忆大纲'})).toBeNull()
+  expect(appendix.open).toBe(true)
+  expect(screen.getByRole('heading', {name: '记忆大纲'})).toBeTruthy()
+  const copied = reportMarkdown(history, false)
+  expect(copied.indexOf('教材与记录依据')).toBeGreaterThan(copied.indexOf('怎样说明材料和结论的关系？'))
+  expect(copied.indexOf('请解释为什么要通分。')).toBeGreaterThan(copied.indexOf('教材与记录依据'))
   fireEvent.click(screen.getByRole('button', {name: '选择教材 PDF'}))
   await screen.findByRole('option', {name: '本机历史教材'})
   fireEvent.change(screen.getByRole('combobox', {name: '教材范围'}), {target: {value:'aabbccddeeff1122'}})

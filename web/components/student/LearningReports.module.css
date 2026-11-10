@@ -30,12 +30,14 @@
 .sessionPickerActions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--border)}
 .sessionPickerActions>span{margin-right:auto}
 
-.scopeActions,.reportPages{display:flex;gap:8px;flex-wrap:wrap}
-.reportPages{border-bottom:1px solid var(--border);margin-bottom:16px;padding-bottom:8px}
-.reportPages button{padding:7px 12px;border-radius:8px;color:var(--muted-foreground)}
-.reportPages button[aria-pressed=true]{background:var(--soft);color:var(--sage);font-weight:600}
+.scopeActions{display:flex;gap:8px;flex-wrap:wrap}
 .learningTakeaway + .learningTakeaway{margin-top:10px}
 .learningTakeaway strong,.reportBasis h4{font-size:13px;font-weight:650}
 .reportBasis .subjectSection p,.reportBasis .subjectSection li{font-size:13px;overflow-wrap:anywhere}
 .reportBasis ul{list-style:disc;padding-inline-start:20px;margin-bottom:12px}
 .dateForm select{width:100%;border:1px solid var(--border);background:var(--background);border-radius:8px;padding:8px}
+
+.reportBasis{border-top:1px solid var(--border);margin-top:14px}
+.reportBasis summary{display:flex;align-items:center;gap:7px;cursor:pointer;padding:14px 0;font-size:14px;font-weight:650;list-style:none}
+.reportBasis summary::-webkit-details-marker{display:none}
+.reportBasis[open] summary svg{transform:rotate(90deg)}

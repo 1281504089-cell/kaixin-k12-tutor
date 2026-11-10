@@ -13,7 +13,7 @@ export type ReportPeriod = { from_date: string; to_date: string; subject?: Repor
 export const reportSessionKey = (session: ReportSession) => `${session.workspace_id}:${session.session_id}`
 export const MAX_EXTRA_REPORT_SESSIONS = 20
 export type ReportClaim = { text: string; title?: string; subject?: string; next?: string; refs: string[]; contextRefs: string[] }
-export type ReportEvidence = { id: string; role: 'user' | 'assistant'; content: string; date: string | null; recordedAt?: string; kind?: string; projectName: string; title: string; status: string; has_images: boolean }
+export type ReportEvidence = { id: string; role: 'user' | 'assistant'; content: string; date: string | null; recordedAt?: string; kind?: string; projectName: string; title: string; status: string; has_images: boolean; content_excerpt?: boolean }
 export type ReportMetrics = { message_count: number; conversation_count: number; active_days: number; minutes: number | null; exercise_count: number | null; accuracy: number | null; reflection_count?: number }
 export type ReflectionAnswers = { goal: string; state: string; process: string; adjustment: string }
 export type ReportReflection = { id?: string; revision: number; answers: ReflectionAnswers; saved_at: number | null }
@@ -95,6 +95,11 @@ export function reportMarkdown(report: LearningReport, parent: boolean) {
     return [`# ${review.title}`, `${report.range.from} 至 ${report.range.to}`, ...(review.learningSummary ?? []).map(learningOnly),
       ...review.sections.map((section, i) => `## ${section.title}\n\n${subjectSectionMarkdown(review, report.subject!, i)}`),
       '## 教材与记录依据', review.cover,
+      ...(report.textbook_scope ?? []).map(book => ['### ' + book.title,
+        ...book.outline.map(entry => '- ' + entry.title + (entry.page ? ' · PDF 第 ' + entry.page + ' 页' : '')),
+      ].join('\n')),
+      ...(report.evidence ?? []).map((record, index) =>
+        '### 记录 ' + (index + 1) + ' · ' + (record.role === 'user' ? '学生' : 'AI 助手') + (record.content_excerpt ? ' · 原文节选' : '') + '\n\n' + record.content),
     ].join('\n\n')
   }
   if (!report.summary) return ''

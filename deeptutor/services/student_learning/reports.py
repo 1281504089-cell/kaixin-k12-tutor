@@ -310,7 +310,7 @@ async def collect(period: ReportRange) -> dict:
 
 
 def report_evidence(messages: list[dict]) -> list[dict]:
-    # Admit complete question/answer groups, newest first, without clipping formulas.
+    """Keep short records intact and fit a representative sample of long ones."""
     turns = []
     current = {}
     for message in messages:
@@ -319,14 +319,44 @@ def report_evidence(messages: list[dict]) -> list[dict]:
             current[key] = []
             turns.append(current[key])
         current[key].append(message)
-    selected = set()
+
+    if not turns:
+        return []
+    limit = 52000
+    size = sum(len(json.dumps(turn, ensure_ascii=False)) for turn in turns)
+    if size <= limit and len(messages) <= 180:
+        return messages
+
+    selected = {}
     size = 0
-    for turn in reversed(turns):
+    newest = len(turns) - 1
+    for index in dict.fromkeys([newest, 0, newest // 2, *range(newest - 1, -1, -1)]):
+        turn = turns[index]
         count = len(json.dumps(turn, ensure_ascii=False))
-        if size + count <= 52000 and len(selected) + len(turn) <= 180:
+        if count > limit // 3 or len(turn) > 60:
+            turn = turn if len(turn) <= 3 else [turn[0], *turn[-2:]]
+            compact = []
+            for entry in turn:
+                content = entry["content"]
+                if len(content) > 4000:
+                    head = content[:2800]
+                    tail = content[-1000:]
+                    # Prefer nearby line breaks without losing one-line records.
+                    cut = head.rfind("\n", 2000)
+                    start = tail.find("\n", 0, 250)
+                    if cut >= 0:
+                        head = head[:cut]
+                    if start >= 0:
+                        tail = tail[start + 1:]
+                    entry = {**entry, "content": head + "\n\n〔中间原文略，完整内容见原对话〕\n\n" + tail,
+                             "content_excerpt": True, "source_digest": digest(entry)}
+                compact.append(entry)
+            turn = compact
+            count = len(json.dumps(turn, ensure_ascii=False))
+        if size + count <= limit and len(selected) + len(turn) <= 180:
             size += count
-            selected.update(message["id"] for message in turn)
-    return [message for message in messages if message["id"] in selected]
+            selected.update((entry["id"], entry) for entry in turn)
+    return [selected[message["id"]] for message in messages if message["id"] in selected]
 
 
 async def valid_sources(row: dict, source: dict) -> bool:
@@ -337,7 +367,15 @@ async def valid_sources(row: dict, source: dict) -> bool:
     )):
         return False
     current = {m["id"]: m for m in source["messages"]}
-    return not source.get("missing_extra_sessions") and all(current.get(m["id"]) == m for m in row.get("evidence", []))
+    def matches(saved):
+        original = current.get(saved["id"])
+        if original is None:
+            return False
+        if saved.get("content_excerpt"):
+            return saved.get("source_digest") == digest(original)
+        return original == saved
+
+    return not source.get("missing_extra_sessions") and all(matches(m) for m in row.get("evidence", []))
 
 
 def saved_period(row: dict) -> ReportRange:
@@ -424,8 +462,13 @@ async def begin(period: ReportRange):
     if period.subject:
         total = len(source["messages"])
         source["messages"] = report_evidence(source["messages"])
-        if total > len(source["messages"]):
-            source["coverage"]["selectionNote"] = f"日期范围内共有 {total} 条记录，本报告选用 {len(source['messages'])} 条组成的完整问答，优先选用较近的记录"
+        selected = len(source["messages"])
+        excerpts = sum(bool(message.get("content_excerpt")) for message in source["messages"])
+        if selected < total or excerpts:
+            note = f"所选时段共有 {total} 条记录，本次参考其中 {selected} 条代表性记录"
+            if excerpts:
+                note += f"，其中 {excerpts} 条为长记录节选，完整内容保留在原对话"
+            source["coverage"]["selectionNote"] = note
     if period.subject:
         from .report_textbooks import report_textbook_scope
 
@@ -527,7 +570,8 @@ async def generate(manager, notebook, row, source, config, complete=None):
 
     async def check_sources():
         current = await collect(period)
-        if current["fingerprint"] != row["fingerprint"] or policy_version() != row["policy"]:
+        changed = not await valid_sources(row, current) if period.subject else current["fingerprint"] != row["fingerprint"]
+        if changed or policy_version() != row["policy"]:
             raise ReportError("整理期间原文或规则有更新，请重新生成。")
 
     try:

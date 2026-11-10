@@ -24,7 +24,6 @@ export default function LearningReports() {
   const [report, setReport] = useState<LearningReport | null>(null)
   const [historyId, setHistoryId] = useState('')
   const [history, setHistory] = useState<LearningReport[]>([])
-  const [basisId, setBasisId] = useState('')
   const [pdfs, setPdfs] = useState<MaterialInfo[]>([])
   const [pdfLoading, setPdfLoading] = useState(false)
   const [pdfError, setPdfError] = useState(false)
@@ -143,7 +142,7 @@ export default function LearningReports() {
       && JSON.stringify(period.extra_sessions ?? []) === JSON.stringify(next.extra_sessions ?? [])) return
     requestVersion.current++
     setLoading(true)
-    setPeriod(next); setHistoryId(''); setBasisId(''); setReport(null); setData(null); setReflection(emptyReflection); setError(''); setReflectionError('')
+    setPeriod(next); setHistoryId(''); setReport(null); setData(null); setReflection(emptyReflection); setError(''); setReflectionError('')
   }
 
   async function saveSupplement() {
@@ -161,7 +160,7 @@ export default function LearningReports() {
     setBusy(true); setError('')
     try {
       const next = await generateReport(period)
-      if (alive.current) { setHistoryId(''); setBasisId(''); setReport(next); await load() }
+      if (alive.current) { setHistoryId(''); setReport(next); await load() }
     } catch (caught) { if (alive.current) setError(caught instanceof Error ? caught.message : '这次未能开始整理，原记录保留。') }
     finally { if (alive.current) setBusy(false) }
   }
@@ -205,7 +204,6 @@ export default function LearningReports() {
   const metrics = report?.metrics || data?.metrics
   const summary = report?.summary
   const subjectReview = report?.subject_review
-  const showingBasis = !!report && report.id === basisId
   const directRefs = new Set(subjectReview?.sections.flatMap(section => section.refs))
   const textbookLabel = pdfs.find(book => book.material_id === period.textbook_id)?.title || '已选 PDF'
   const displayedSubject = historyId ? report?.subject : period.subject
@@ -270,11 +268,15 @@ export default function LearningReports() {
         </div>
       </div>
       <div className={styles.subjectReport}>
-        <nav className={styles.reportPages} aria-label="报告分页">
-          <button type="button" aria-pressed={!showingBasis} onClick={() => setBasisId('')}>1. 学习回顾</button>
-          <button type="button" aria-pressed={showingBasis} onClick={() => setBasisId(report.id)}>2. 教材与记录依据</button>
-        </nav>
-        {showingBasis ? <div className={styles.reportBasis}>
+        {!!subjectReview.learningSummary?.length && <div className={styles.subjectCover}>
+          {subjectReview.learningSummary.map((line, i) => <div className={styles.learningTakeaway} key={i}><strong>{['学了什么', '记住这一点', '下一步怎么练'][i]}</strong><RichMarkdownRenderer content={learningOnly(line)} variant="compact" enableMath enableImages={false} /></div>)}
+        </div>}
+        {subjectReview.sections.map((section, i) => <section className={styles.subjectSection} key={section.title}>
+          <h3>{section.title.replace(/[：:]依据真实作答记录$/, '')}</h3>
+          <RichMarkdownRenderer content={subjectSectionMarkdown(subjectReview, report.subject!, i)} variant="compact" enableMath enableImages={false} />
+        </section>)}
+        <details className={styles.reportBasis} key={report.id}>
+          <summary>教材与记录依据<ChevronRight size={14} /></summary>
           <div className={styles.subjectCover}><RichMarkdownRenderer content={subjectReview.cover} variant="compact" enableMath enableImages={false} /></div>
           {report.result_level === 'records' && <div className={styles.notice} role="status">{report.message}{!historyId && <button type="button" disabled={!canGenerate} onClick={() => void generate()}>重试专项报告</button>}</div>}
           <section className={styles.subjectSection}><h3>教材范围</h3>
@@ -287,18 +289,10 @@ export default function LearningReports() {
           <section className={styles.subjectSection}><h3>对话记录</h3><div className={styles.sources}>
             {report.evidence?.length ? report.evidence.map((row, i) => <section key={row.id}>
               <div><span>记录 {i + 1} · {directRefs.has(row.id) ? '直接依据' : '对话上下文'}</span><small>{row.date || '自报补充'} · {row.projectName} · {row.role === 'user' ? '我' : 'AI 助手'}</small></div>
-              <h4>{row.title}</h4><RichMarkdownRenderer content={row.content} variant="compact" enableMath enableImages={false} />
+              <h4>{row.title}{row.content_excerpt && ' · 原文节选'}</h4><RichMarkdownRenderer content={row.content} variant="compact" enableMath enableImages={false} />
             </section>) : <p>没有可展示的对话原文。</p>}
           </div></section>
-        </div> : <>
-          {!!subjectReview.learningSummary?.length && <div className={styles.subjectCover}>
-            {subjectReview.learningSummary.map((line, i) => <div className={styles.learningTakeaway} key={i}><strong>{['学了什么', '记住这一点', '下一步怎么练'][i]}</strong><RichMarkdownRenderer content={learningOnly(line)} variant="compact" enableMath enableImages={false} /></div>)}
-          </div>}
-          {subjectReview.sections.map((section, i) => <section className={styles.subjectSection} key={section.title}>
-            <h3>{section.title.replace(/[：:]依据真实作答记录$/, '')}</h3>
-            <RichMarkdownRenderer content={subjectSectionMarkdown(subjectReview, report.subject!, i)} variant="compact" enableMath enableImages={false} />
-          </section>)}
-        </>}
+        </details>
       </div>
     </article> : summary && report ? <article className={styles.report}>
       <div className={styles.reportHeader}><div><span className={styles.verified}><ShieldCheck size={14} />已完成独立核对</span><h2>{parent ? '孩子的学习近况' : '我的学习回顾'}</h2><p>{periodLabel}</p></div><div className={styles.reportTools}><div className={styles.views} aria-label="报告阅读视角"><button type="button" aria-pressed={!parent} onClick={() => setParent(false)}>学生</button><button type="button" aria-pressed={parent} onClick={() => setParent(true)}>家长</button></div><Tooltip label={copied ? '已复制' : '复制报告'}><button className={styles.iconButton} type="button" aria-label={copied ? '已复制报告' : '复制报告'} onClick={() => void copy()}>{copied ? <Check size={17} /> : <Clipboard size={17} />}</button></Tooltip><Tooltip label="下载报告"><button className={styles.iconButton} type="button" aria-label="下载报告" onClick={download}><ArrowDownToLine size={17} /></button></Tooltip></div></div>
@@ -336,7 +330,7 @@ export default function LearningReports() {
           close()
         }} />}
         {modal?.type === 'dates' && <form className={styles.dateForm} onSubmit={event => { event.preventDefault(); const span = (Date.parse(draftPeriod.to_date) - Date.parse(draftPeriod.from_date)) / 86400_000 + 1; if (!(span >= 1 && span <= 28) || draftPeriod.to_date > beijingDate()) { setDateError('请选择截至今天的连续1至28天。'); return } choose(draftPeriod); close() }}><label>从哪一天<input type="date" required value={draftPeriod.from_date} max={beijingDate()} onChange={event => setDraftPeriod({ ...draftPeriod, from_date: event.target.value })} data-autofocus /></label><label>到哪一天<input type="date" required value={draftPeriod.to_date} max={beijingDate()} min={draftPeriod.from_date} onChange={event => setDraftPeriod({ ...draftPeriod, to_date: event.target.value })} /></label>{dateError && <p role="alert" className={styles.scopeNote}>{dateError}</p>}<button type="submit" className={styles.primary}>查看这段时间<ArrowRight size={15} /></button></form>}
-        {modal?.type === 'history' && <div className={styles.history}>{history.length ? history.map(row => <div className={styles.historyRow} key={row.id}><button type="button" onClick={() => { setHistoryId(row.id); setBasisId(''); close() }}><span className={styles.historyIcon}><FileChartColumnIncreasing size={20} /></span><span><strong>{row.subject ? reportSubjectNames[row.subject] + " · " : "综合 · "}{dateLabel(row.range.from)}{row.range.from !== row.range.to ? ' — ' + dateLabel(row.range.to) : ''}</strong><small>{new Date(row.created_at * 1000).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</small></span><span className={styles.historyState}>{label(row)}</span><ChevronRight size={15} /></button><Tooltip label="移除报告，保留原对话"><button type="button" className={styles.iconButton} aria-label={`移除${row.range.from}至${row.range.to}的报告`} onClick={() => void remove(row)}><Trash2 size={15} /></button></Tooltip></div>) : <div className={styles.noHistory}><History size={28} /><p>第一份报告，会从这里开始保存。</p></div>}</div>}
+        {modal?.type === 'history' && <div className={styles.history}>{history.length ? history.map(row => <div className={styles.historyRow} key={row.id}><button type="button" onClick={() => { setHistoryId(row.id); close() }}><span className={styles.historyIcon}><FileChartColumnIncreasing size={20} /></span><span><strong>{row.subject ? reportSubjectNames[row.subject] + " · " : "综合 · "}{dateLabel(row.range.from)}{row.range.from !== row.range.to ? ' — ' + dateLabel(row.range.to) : ''}</strong><small>{new Date(row.created_at * 1000).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</small></span><span className={styles.historyState}>{label(row)}</span><ChevronRight size={15} /></button><Tooltip label="移除报告，保留原对话"><button type="button" className={styles.iconButton} aria-label={`移除${row.range.from}至${row.range.to}的报告`} onClick={() => void remove(row)}><Trash2 size={15} /></button></Tooltip></div>) : <div className={styles.noHistory}><History size={28} /><p>第一份报告，会从这里开始保存。</p></div>}</div>}
         {modal?.type === 'sources' && <div className={styles.sources}>{sourceRows.map(row => <section key={row.id}><div><span>{modal.claim?.refs.includes(row.id) ? '直接依据' : '同一对话上下文'}{row.kind === 'student_reflection' ? ' · 学生自报' : ''}</span><small>{row.date || (row.recordedAt ? '保存于' + new Date(row.recordedAt).toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '自报补充')} · {row.projectName} · {row.role === 'user' ? '我' : '老师'}</small></div><h3>{row.title}</h3><p>{row.content}</p>{(row.status === 'incomplete' || row.has_images) && <small>含未完成消息或图片，本次仅依据可见文字。</small>}{row.kind === 'student_reflection' && <small>这是学生针对所选范围提供的自报，不等同于已经独立核实的学习行为或掌握情况。</small>}</section>)}</div>}
       </Dialog>
     </div>
