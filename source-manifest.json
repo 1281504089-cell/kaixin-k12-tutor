@@ -53,6 +53,11 @@
       "file": "student-camera-share-20261111.patch",
       "sha256": "6783d154af1ebc4d431ec88a77b6a241dc585d57096e0bcd74d57a5c5efd61bc",
       "description": "Clarify voice and camera controls and link directly to macOS screen-sharing privacy settings"
+    },
+    {
+      "file": "student-media-permissions-20261111.patch",
+      "sha256": "f0ce3df3f744748f98770f72211bfb919fd995b5c0679a9fcaf9fc884c4c8d14",
+      "description": "Remember microphone consent and offer in-app screen sharing or a direct setup shortcut"
     }
   ]
 }
