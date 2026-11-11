@@ -1,0 +1,118 @@
+diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
+index e64ffe1c046327264b8accbb050e5745df717d9e..8a8519445c890c24dd7c1c4c44ee0fae0745362c 100644
+--- a/apps/desktop/src/main.mjs
++++ b/apps/desktop/src/main.mjs
+@@ -475,11 +475,17 @@ else {
+   const microphoneFile = path.join(userRoot, 'microphone-permission.json');
+   let microphoneAllowed = !mac && (await readJSON(microphoneFile).catch(() => false)) === true;
+   let microphoneRequest;
++  const cameraFile = path.join(userRoot, 'camera-permission.json');
++  let cameraAllowed = !mac && (await readJSON(cameraFile).catch(() => false)) === true;
++  let cameraRequest;
+   const trustedMedia = (contents, details) => Boolean(state.url && contents === view?.webContents &&
+     details.isMainFrame && details.requestingUrl?.startsWith(state.url + '/'));
+   const hasMicrophonePermission = () => mac
+     ? systemPreferences.getMediaAccessStatus('microphone') === 'granted'
+     : microphoneAllowed;
++  const hasCameraPermission = () => mac
++    ? systemPreferences.getMediaAccessStatus('camera') === 'granted'
++    : cameraAllowed;
+   const confirmMedia = async (message, detail = '') => {
+     const result = await dialog.showMessageBox(window, {
+       type: 'question', message, detail, buttons: [t('deny'), t('allow')], defaultId: 0, cancelId: 0,
+@@ -493,9 +499,16 @@ else {
+     await writeJSON(microphoneFile, true).catch(error => console.warn('Could not save microphone permission', error));
+     return true;
+   };
++  const requestCamera = async () => {
++    if (mac) return systemPreferences.askForMediaAccess('camera');
++    if (!await confirmMedia(t('mediaPrompt'))) return false;
++    cameraAllowed = true;
++    await writeJSON(cameraFile, true).catch(error => console.warn('Could not save camera permission', error));
++    return true;
++  };
+   coreSession.setPermissionCheckHandler((contents, permission, _origin, details) =>
+-    permission === 'clipboard-sanitized-write' || (permission === 'media' && details.mediaType === 'audio' &&
+-      trustedMedia(contents, details) && hasMicrophonePermission()));
++    permission === 'clipboard-sanitized-write' || (permission === 'media' && trustedMedia(contents, details) &&
++      (details.mediaType === 'audio' ? hasMicrophonePermission() : details.mediaType === 'video' && hasCameraPermission())));
+   coreSession.setPermissionRequestHandler(async (contents, permission, callback, details) => {
+     if (permission === 'clipboard-sanitized-write') return callback(true);
+     if (!trustedMedia(contents, details)) return callback(false);
+@@ -511,6 +524,12 @@ else {
+           microphoneRequest ??= requestMicrophone().finally(() => { microphoneRequest = undefined; });
+           allowed = await microphoneRequest;
+         }
++      } else if (details.mediaTypes?.length === 1 && details.mediaTypes[0] === 'video') {
++        allowed = hasCameraPermission();
++        if (!allowed) {
++          cameraRequest ??= requestCamera().finally(() => { cameraRequest = undefined; });
++          allowed = await cameraRequest;
++        }
+       } else {
+         allowed = await confirmMedia(t('mediaPrompt'));
+       }
+diff --git a/apps/desktop/test/media-permissions.test.mjs b/apps/desktop/test/media-permissions.test.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..c0e10bfe42d1d9df40596967510cf956f49e68da
+--- /dev/null
++++ b/apps/desktop/test/media-permissions.test.mjs
+@@ -0,0 +1,58 @@
++import assert from 'node:assert/strict';
++import { readFile } from 'node:fs/promises';
++import path from 'node:path';
++import test from 'node:test';
++
++// Exercise the installed handlers without starting Electron or opening real devices.
++const source = await readFile(new URL('../src/main.mjs', import.meta.url), 'utf8');
++const block = source.slice(source.indexOf("  const mac = process.platform === 'darwin';"), source.indexOf('  coreSession.setDisplayMediaRequestHandler'));
++const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
++
++async function handlers(platform, grants = {}, saved = {}, approve = true) {
++  const registered = {}, contents = {}, asked = [], writes = [];
++  const state = { url: 'http://127.0.0.1:18802' };
++  await new AsyncFunction('process', 'path', 'userRoot', 'readJSON', 'writeJSON', 'systemPreferences', 'coreSession', 'state', 'view', 'dialog', 'window', 't', block)(
++    { platform }, path, '/private-test', async file => saved[path.basename(file)], async (file, value) => writes.push([path.basename(file), value]),
++    { getMediaAccessStatus: device => grants[device] ?? 'denied', askForMediaAccess: async device => { asked.push(device); if (approve) grants[device] = 'granted'; return approve; } },
++    { setPermissionCheckHandler: fn => { registered.check = fn; }, setPermissionRequestHandler: fn => { registered.request = fn; } },
++    state, { webContents: contents }, { showMessageBox: async () => { asked.push('prompt'); return { response: approve ? 1 : 0 }; } }, {}, key => key,
++  );
++  const details = { requestingUrl: state.url + '/chat', isMainFrame: true };
++  return { ...registered, contents, details, asked, writes };
++}
++
++test('an authorized camera remains visible to device enumeration only in the trusted main frame', async () => {
++  const h = await handlers('darwin', { camera: 'granted', microphone: 'granted' });
++  const check = overrides => h.check(h.contents, 'media', '', { ...h.details, mediaType: 'video', ...overrides });
++  assert.equal(check({}), true);
++  assert.equal(check({ isMainFrame: false }), false);
++  assert.equal(check({ requestingUrl: 'https://example.org/chat' }), false);
++  assert.equal(check({ mediaType: 'unknown' }), false);
++  assert.equal(h.check({}, 'media', '', { ...h.details, mediaType: 'video' }), false);
++  assert.deepEqual(h.asked, []);
++});
++
++test('camera consent is checked and requested separately from microphone consent', async () => {
++  for (const approve of [true, false]) {
++    const h = await handlers('darwin', { microphone: 'granted' }, {}, approve);
++    const details = { ...h.details, mediaTypes: ['video'] };
++    let allowed;
++    await h.request(h.contents, 'media', value => { allowed = value; }, details);
++    assert.equal(allowed, approve);
++    assert.deepEqual(h.asked, ['camera']);
++    assert.equal(h.check(h.contents, 'media', '', { ...h.details, mediaType: 'audio' }), true);
++    if (approve) {
++      await h.request(h.contents, 'media', value => { allowed = value; }, details);
++      assert.deepEqual(h.asked, ['camera']);
++    }
++  }
++});
++
++test('non-Mac camera consent survives restart without granting microphone access', async () => {
++  const first = await handlers('win32');
++  await first.request(first.contents, 'media', allowed => assert.equal(allowed, true), { ...first.details, mediaTypes: ['video'] });
++  assert.deepEqual(first.writes, [['camera-permission.json', true]]);
++  const restored = await handlers('win32', {}, Object.fromEntries(first.writes));
++  assert.equal(restored.check(restored.contents, 'media', '', { ...restored.details, mediaType: 'video' }), true);
++  assert.equal(restored.check(restored.contents, 'media', '', { ...restored.details, mediaType: 'audio' }), false);
++});

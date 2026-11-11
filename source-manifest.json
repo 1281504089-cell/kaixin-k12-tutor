@@ -73,6 +73,11 @@
       "file": "student-scene-video-20261111.patch",
       "sha256": "1a52d97497643689cd09c88b24e898dfda00a1d2ff08400e0dd72904497a6964",
       "description": "Start voice scenes immediately, speed up MOSS, stream shared video and refresh connected cameras"
+    },
+    {
+      "file": "student-camera-permission-20261111.patch",
+      "sha256": "c8c580f8297bd50423e15bc99fa8292b4ec4c47606ddd432db42e191908a488a",
+      "description": "Respect granted camera access during device enumeration and persist camera consent separately"
     }
   ]
 }
