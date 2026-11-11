@@ -8,9 +8,9 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-77f2ba387-macos-x64)
 
-**20261111 辅导更新**带来了实时语音通话、高拍仪辅导和聊天内边读边问。已有 1.7.1 的电脑按系统下载对应的更新包，升级时会备份本机学习资料。 [下载最新版（语音浮窗）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-voice-float) · [历次更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
+**20261111 辅导更新**带来了实时语音通话、高拍仪辅导和聊天内边读边问，最新版加入可选的 MOSS-Live 语音及授权优化。已有 1.7.1 的电脑按系统下载对应的更新包，升级时会备份本机学习资料。 [下载最新版（MOSS 语音与授权优化）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-moss-live) · [历次更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
-最新源码增加了可选的 **MOSS-Live 实时语音**，在「设置 → 语音」与豆包切换，分别保存 Key；不会自动更换原有豆包配置。下载版请以发布页注明的功能为准。[MOSS-Live 接入与小样本对比](MOSS-LIVE.md)
+在「设置 → 语音」可切换豆包 / **MOSS-Live 实时语音**，分别保存 Key；不会自动更换原有豆包配置。本次更新包包含这项功能，旧安装包请先更新。[MOSS-Live 接入与小样本对比](MOSS-LIVE.md)
 
 [下载图文操作手册 PDF（20261111 操作核对版）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide-20261111-verified.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
 
@@ -33,7 +33,7 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 ## 已安装用户更新
 
-1. 先退出正在运行的客户端，从 [20261111 辅导更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-tutoring-voice-float) 下载对应系统的 `Kaixin-Updater-20261111-voice-float` ZIP。Apple 芯片 Mac 选 `macos-arm64`，Intel Mac 选 `macos-x64`，Windows 选 `windows-x64`。
+1. 先退出正在运行的客户端，从 [20261111 辅导更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-moss-live) 下载对应系统的 `Kaixin-Updater-20261111-moss-live` ZIP。Apple 芯片 Mac 选 `macos-arm64`，Intel Mac 选 `macos-x64`，Windows 选 `windows-x64`。
 2. Mac 解压后用新版应用替换「应用程序」里的旧版。Windows 解压到一个文件夹，从里面打开开心动力超级学霸，后续使用这个程序入口。
 
 新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。已是最新版时会直接显示「已是最新版本」。发现新版时点「下载并更新」。客户端优先从 GitHub API 读取对应系统的签名清单。遇到 GitHub 下载直链报 504 时，会自动从公开 Releases API 下载同一份签名更新。更新复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
@@ -62,7 +62,7 @@ curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos
 | --- | --- |
 | 教材随读随问 | 按学段、学科筛选或搜索年级、册名，打开整册原页。划选文字可标注或提问。遇到公式、图形和扫描页，长按原页选择「截图引用」，拖框后把原图加入笔记或引用到提问。翻页后可在同一阅读会话继续追问。 |
 | 聊天内边读边问 | 在输入框上方点「边读边问」，在右侧打开教材、资料库文档或临时附件。点「问当前页」，把这一页和问题放在同一个聊天里继续讨论。 |
-| 实时语音通话 | 点聊天右上角的电话，首次填写豆包实时语音 Key 后点「开始通话」。可切换学习辅导、英语陪练、口语翻译、模拟面试等场景，也可共享窗口或屏幕。关掉浮窗后可以从「通话中」重新打开，挂断后文字保存到原对话。 |
+| 实时语音通话 | 在「设置 → 语音」选豆包或 MOSS-Live 并保存对应 Key。点聊天右上角的电话，有已保存 Key 时直接接通；首次也可在通话窗口填写。可切换学习辅导、英语陪练、口语翻译、模拟面试等场景，也可共享窗口或屏幕。收起浮窗后可以从「通话中」重新打开，挂断后文字保存到原对话。 |
 | 高拍仪辅导 | 点输入框上方的「高拍仪辅导员」，再点「开始通话」（部分版本显示「开始语音通话」），把纸面题对准摄像头。可旋转、镜像、调画面比例，或临时切到共享屏幕。做题时先给提示，明确要答案时会给简短讲解。 |
 | 九科学习项目 | 语文、数学、英语、物理、化学、生物、历史、地理、政治各预置三个对话。选学科老师做专项练习，可分别设置项目指令和对话指令。 |
 | 拍题与资料问答 | 拍照和一至两页的短 PDF 可交给支持读图的模型先看原图。需要全文时在后台解析。输入框和右侧预览共用临时附件。 |
@@ -74,7 +74,7 @@ curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos
 
 教材库收录的是当前目录中的主科册次。原页可直接阅读，日常答题自动参考已核对的教材要点，待核对页面保留状态。
 
-学习记录、资料和设置保存在本机。语音通话和高拍仪辅导需要联网。首次开启时在通话窗口填写自己的豆包实时语音 API Key，接通后会在本机保存。该 Key 独立于聊天模型及本机语音转文字。远程模型问答、Edge 朗读、搜索和公开视频字幕也需要网络。安装包已排除 API 密钥、个人学习记录和签名私钥。
+学习记录、资料和设置保存在本机。语音通话和高拍仪辅导需要联网，可在「设置 → 语音」提前保存豆包或 MOSS-Live API Key；首次通话时填写的 Key 也会在接通后保存。两个服务分别保存 Key，独立于聊天模型及本机语音转文字。远程模型问答、Edge 朗读、搜索和公开视频字幕也需要网络。安装包已排除 API 密钥、个人学习记录和签名私钥。
 
 ## 开发者
 
