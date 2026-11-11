@@ -80,9 +80,19 @@
       "description": "Respect granted camera access during device enumeration and persist camera consent separately"
     },
     {
+      "file": "student-reading-complete-20261111.patch",
+      "sha256": "fc55d620ed8248290418b52476c20a91ee43850bbc3c891a944bfa096ffcb58c",
+      "description": "Restore saved reading conversations and quote original text, scanned pages and temporary PDF attachments in the current conversation"
+    },
+    {
       "file": "student-kimi-provider-20261111.patch",
       "sha256": "77e60135d1315b585be072f53b008611df030187d753ba4fa1627228807ce82c",
       "description": "Expose the existing Moonshot API as Kimi in provider search and API connection dropdowns without changing credentials or defaults"
+    },
+    {
+      "file": "student-desktop-chinese-20261111.patch",
+      "sha256": "0845d8216a3b8924563a335435b9f5dd63fa20aef8eedbc9a2fb8f7a313907eb",
+      "description": "Start the desktop launcher and first-install interface in Simplified Chinese while preserving explicit language choices"
     }
   ]
 }

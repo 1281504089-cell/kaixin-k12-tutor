@@ -2,7 +2,7 @@
 import argparse, hashlib, json, os, shutil, subprocess, tarfile, time
 from pathlib import Path
 
-args = argparse.ArgumentParser(); args.add_argument('--target', required=True); args.add_argument('--stage', choices=['payload','package'], required=True); args.add_argument('--payload-run'); a=args.parse_args()
+args = argparse.ArgumentParser(); args.add_argument('--target', required=True); args.add_argument('--stage', choices=['payload','refresh','package'], required=True); args.add_argument('--payload-run'); a=args.parse_args()
 checkout=Path.cwd(); root=checkout/'student-source'; desktop=root/'apps/desktop'; local=desktop/'.local'/a.target; runtime=local/'runtime'; seed=local/'seed'; inputs=checkout/'delivery-inputs'; inputs.mkdir(exist_ok=True); local.mkdir(parents=True, exist_ok=True)
 repo=os.environ['GITHUB_REPOSITORY']; run_id=os.environ['GITHUB_RUN_ID']
 def run(command, cwd=root, env=None): subprocess.run([str(x) for x in command], cwd=cwd, env=env, check=True)
@@ -32,8 +32,23 @@ def publish(tag, title, files, note):
     run(['gh','release','create',tag,'--repo',repo,'--prerelease','--title',title,'--notes',note], checkout)
     run(['gh','release','upload',tag,'--repo',repo,*files], checkout)
 freeze=json.loads((root/'SOURCE_FREEZE.json').read_text())
-if a.stage=='payload':
-    if a.target=='macos-x64':
+if a.stage in ('payload','refresh'):
+    if a.stage=='refresh':
+        tag=f'payload-42341195532-{a.target}'
+        download(tag,'parts.json'); download(tag,'*.tar.gz.*')
+        base=json.loads((checkout/f'complete-base-{a.target}.json').read_text())
+        parts=json.loads((inputs/'parts.json').read_text())['parts']
+        archive=inputs/base['archive']
+        with archive.open('wb') as output:
+            for part in parts:
+                assert Path(part['file']).name==part['file']
+                file=inputs/part['file']; assert file.stat().st_size==part['bytes'] and digest(file)==part['sha256']
+                with file.open('rb') as stream: shutil.copyfileobj(stream,output)
+                file.unlink()
+        assert digest(archive)==base['sha256']
+        extract(archive,runtime)
+        assert len(list((runtime/'student-seed/reading').glob('*/raw/*.pdf')))==136
+    elif a.target=='macos-x64':
         download('delivery-resources-20261107','intel-native-base.tar.gz'); download('delivery-resources-20261107','base-manifest.json')
         base=json.loads((inputs/'base-manifest.json').read_text()); archive=inputs/base['archive']; assert digest(archive)==base['sha256']; extract(archive,runtime)
     else:
@@ -47,15 +62,16 @@ if a.stage=='payload':
     run(['node','apps/desktop/scripts/refresh-runtime.mjs','--target',a.target])
     run(['node',root/'web/node_modules/vitest/vitest.mjs','run','tests/mermaid-error-recovery.spec.tsx','tests/markdown-math-renderer.spec.tsx','tests/visualize/VisualizationViewer.spec.tsx','--maxWorkers=2'],root/'web')
     shutil.rmtree(root/'web/node_modules', ignore_errors=True); shutil.rmtree(root/'web/.next',ignore_errors=True)
-    download('delivery-resources-20261107','textbooks-manifest.json'); download('delivery-resources-20261107','textbook-metadata.tar.gz'); download('delivery-resources-20261107','book-*.pdf')
-    books=json.loads((inputs/'textbooks-manifest.json').read_text()); assert books['count']==136
-    metadata=inputs/books['metadata']['file']; assert digest(metadata)==books['metadata']['sha256']
-    shutil.rmtree(runtime/'student-seed',ignore_errors=True); extract(metadata,runtime/'student-seed'); metadata.unlink()
-    for book in books['books']:
-        file=inputs/book['file']; assert file.stat().st_size==book['bytes'] and digest(file)==book['sha256']
-        relative=Path(book['relative']); assert relative.parts[0]=='reading' and relative.parts[1]==book['sha256'] and relative.parts[2]=='raw' and len(relative.parts)==4 and relative.suffix=='.pdf'
-        if a.target.startswith('windows'): relative=Path(*relative.parts[:3])/'source.pdf'
-        dest=runtime/'student-seed'/relative; dest.parent.mkdir(parents=True,exist_ok=True); file.replace(dest)
+    if a.stage=='payload':
+        download('delivery-resources-20261107','textbooks-manifest.json'); download('delivery-resources-20261107','textbook-metadata.tar.gz'); download('delivery-resources-20261107','book-*.pdf')
+        books=json.loads((inputs/'textbooks-manifest.json').read_text()); assert books['count']==136
+        metadata=inputs/books['metadata']['file']; assert digest(metadata)==books['metadata']['sha256']
+        shutil.rmtree(runtime/'student-seed',ignore_errors=True); extract(metadata,runtime/'student-seed'); metadata.unlink()
+        for book in books['books']:
+            file=inputs/book['file']; assert file.stat().st_size==book['bytes'] and digest(file)==book['sha256']
+            relative=Path(book['relative']); assert relative.parts[0]=='reading' and relative.parts[1]==book['sha256'] and relative.parts[2]=='raw' and len(relative.parts)==4 and relative.suffix=='.pdf'
+            if a.target.startswith('windows'): relative=Path(*relative.parts[:3])/'source.pdf'
+            dest=runtime/'student-seed'/relative; dest.parent.mkdir(parents=True,exist_ok=True); file.replace(dest)
     if a.target.startswith('windows'):
         unsupported=[str(p.relative_to(runtime)) for p in runtime.rglob('*') if not str(p.relative_to(runtime)).isascii()]
         assert not unsupported, f'Nonportable resource paths: {unsupported[:8]}'
@@ -108,7 +124,7 @@ else:
     report['packagingCommit']=os.environ['GITHUB_SHA']
     if a.target.startswith('windows'): report['installerScriptSHA256']=digest(checkout/'windows-installer.nsi')
     receipt=desktop/'out/validation.json'; receipt.write_text(json.dumps(report,indent=2)+'\n')
-    guide=desktop/'out/INSTALL.txt'; guide.write_text('同一平台的全部分卷请放在同一文件夹。Mac 打开第一个 .dmg，再拖入 Applications；Windows 双击 Setup.exe，资源分卷自动校验合并。首次启动解压本机运行环境，建议预留至少 30GB 可用空间。安装包不含 API Key，请在设置中填写个人接口。教材、错题本、笔记和学习记录保存在本机。此体验版没有购买系统开发者签名。\n',encoding='utf-8')
+    guide=desktop/'out/INSTALL.txt'; guide.write_text('本完整包已包含 MOSS、豆包实时通话、高拍仪、阅读记录保留、PDF 片段引用及 Kimi API 入口，无需先装旧版再安装更新包。首次安装的界面默认简体中文。\n同一平台的全部分卷请放在同一文件夹。Mac 打开第一个 .dmg，再拖入 Applications；Windows 双击 Setup.exe，资源分卷自动校验合并。首次启动解压本机运行环境，建议预留至少 30GB 可用空间。安装包不含 API Key，请在设置中填写个人接口。教材、错题本、笔记和学习记录保存在本机。此体验版没有购买系统开发者签名。\n',encoding='utf-8')
     files=[*files,receipt,guide]
     assert len({p.name for p in files})==len(files) and all(p.name.isascii() for p in files)
     checksums=''.join(f'{digest(p)}  {p.name}\n' for p in files); sums=desktop/'out/SHA256SUMS.txt'; sums.write_text(checksums)
