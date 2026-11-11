@@ -1,0 +1,41 @@
+diff --git a/web/lib/student-edition.ts b/web/lib/student-edition.ts
+index 9551886c661f06abfd4752e3c0cd642b17706fde..ce98c5a0abcbf9b2fe00f4fdf40922117620fe98 100644
+--- a/web/lib/student-edition.ts
++++ b/web/lib/student-edition.ts
+@@ -8,7 +8,7 @@ export function studentErrorText(message: string, translate: (key: string) => st
+ }
+ 
+ const HIDDEN_SETTINGS = new Set([
+-  "workspace", "llm", "task-models", "embedding", "search", "voice", "multimodal",
++  "workspace", "llm", "task-models", "embedding", "search", "multimodal",
+   "tts", "stt", "image", "video", "imagegen", "videogen", "video-learning",
+   "guardian", "tools", "capabilities", "attachments", "knowledge", "network", "status",
+ ]);
+diff --git a/web/tests/student-edition.spec.tsx b/web/tests/student-edition.spec.tsx
+index 1c4a4b3772246b5bd3aa64fd383660e19e9eb49b..c1491e26c298bcb665e8e44f5173660306752c70 100644
+--- a/web/tests/student-edition.spec.tsx
++++ b/web/tests/student-edition.spec.tsx
+@@ -36,7 +36,7 @@ it('hides management from shared navigation even for the local administrator, pr
+     expect(navVisibleUnderPolicy(href, null)).toBe(false)
+     expect(displayed).not.toContain(href)
+   }
+-  for (const href of ['/chat', '/learning', '/learning/reading', '/learning/watching', '/space/questions', '/settings/connections', '/settings/data-migration']) {
++  for (const href of ['/chat', '/learning', '/learning/reading', '/learning/watching', '/space/questions', '/settings/connections', '/settings/voice', '/settings/data-migration']) {
+     expect(studentRouteVisible(href)).toBe(true)
+   }
+   const keys = visibleSettingsPages(access).map(page => page.key)
+@@ -44,12 +44,13 @@ it('hides management from shared navigation even for the local administrator, pr
+     expect(keys).not.toContain(key)
+     expect(visibleSettingsPages(access, true).map(page => page.key)).toContain(key)
+   }
+-  expect(keys).toEqual(expect.arrayContaining(['general', 'connections', 'data-migration', 'archive']))
++  expect(keys).toEqual(expect.arrayContaining(['general', 'connections', 'voice', 'data-migration', 'archive']))
+ })
+ 
+ it('keeps hidden settings out of search results, while API credentials and export remain discoverable', () => {
+   render(<SettingsNav />)
+   expect(screen.getByRole('link', { name: 'Providers' })).toHaveAttribute('href', '/settings/connections')
++  expect(screen.getByRole('link', { name: 'Voice' })).toHaveAttribute('href', '/settings/voice')
+   expect(screen.getByRole('link', { name: 'Data export' })).toHaveAttribute('href', '/settings/data-migration')
+   for (const query of ['Codex', 'network', 'guardian', 'embedding', 'task-models', 'knowledge']) {
+     fireEvent.change(screen.getByRole('textbox'), { target: { value: query } })

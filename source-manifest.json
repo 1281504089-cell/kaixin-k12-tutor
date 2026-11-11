@@ -63,6 +63,11 @@
       "file": "student-moss-live-20261111.patch",
       "sha256": "f19112e310e829db9054eb46c79d4def7653a8b9c94903e19a578603b8738b47",
       "description": "Add separately saved MOSS-Live realtime voice with playback-aware interruption and provider switching"
+    },
+    {
+      "file": "student-moss-settings-entry-20261111.patch",
+      "sha256": "55044760fbdca5659f79088028c2b50232cdbb6b4ee7082f317b9ff9a0a3bbca",
+      "description": "Expose realtime voice configuration in student settings navigation and search"
     }
   ]
 }
