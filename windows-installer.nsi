@@ -37,6 +37,14 @@ VIAddVersionKey "FileVersion" "${FILEVERSION}"
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
+Function .onInit
+  StrCpy $LANGUAGE ${LANG_SIMPCHINESE}
+FunctionEnd
+
+Function un.onInit
+  StrCpy $LANGUAGE ${LANG_SIMPCHINESE}
+FunctionEnd
+
 ; The app's own files, never the whole folder: the user may have chosen a
 ; folder that holds other things. Learning data lives in
 ; %LOCALAPPDATA%\开心动力超级学霸 and survives upgrades and uninstalls.

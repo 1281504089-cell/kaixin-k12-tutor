@@ -57,6 +57,9 @@ try {
         Start-Sleep -Seconds 2
     } while ($true)
 
+    $profile = $proxy.Content | ConvertFrom-Json
+    if ($profile.language -ne 'zh' -or $profile.response_language -ne 'zh') { throw 'A fresh install must default to Simplified Chinese' }
+
     # Closing the real window must stop both services, not just Electron.
     Write-Host 'UI and API are ready. Checking window close and uninstall...'
     $appProcess.Refresh()

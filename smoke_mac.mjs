@@ -32,7 +32,9 @@ try {
   const books=await (await fetch(frontend+'/api/student/textbooks')).json();
   assert.equal(books.books.length,136);
   const profile=await (await fetch(frontend+'/api/settings/ui')).json();
-  await writeFile(path.join(target.local,'installed-app-smoke.json'),JSON.stringify({target:target.id,launch:'passed',ui:'passed',api:'passed',textbooks:136,freshProfile:true,developerPATH:'absent',system:os.release()},null,2));
+  assert.equal(profile.language,'zh','A fresh install must use a Chinese interface');
+  assert.equal(profile.response_language,'zh');
+  await writeFile(path.join(target.local,'installed-app-smoke.json'),JSON.stringify({target:target.id,launch:'passed',ui:'passed',api:'passed',language:profile.language,textbooks:136,freshProfile:true,developerPATH:'absent',system:os.release()},null,2));
 } finally {
   try { process.kill(-app.pid,'SIGTERM'); } catch {}
   await new Promise(resolve=>{if(app.exitCode!==null)resolve();else{const t=setTimeout(()=>{try { process.kill(-app.pid,'SIGKILL'); } catch {} resolve()},30000);app.once('exit',()=>{clearTimeout(t);resolve()})}});

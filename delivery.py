@@ -121,6 +121,9 @@ else:
     files=[p for p in (desktop/'out').iterdir() if p.is_file()]
     assert files and all(p.stat().st_size<2*1024**3 for p in files)
     report={'target':a.target,'approvedSource':freeze['commit'],'runtime':manifest['runtimeId'],'apiKeysIncluded':False,'studentRecordsIncluded':False,'installerSmoke':'passed','runner':os.environ.get('ImageOS'),'platformSigning':'ad-hoc' if not a.target.startswith('windows') else 'unsigned'}
+    if freeze['commit']!=freeze.get('frozenBaseCommit',freeze['commit']):
+        assert not manifest.get('baseRuntimeId'), 'A complete installer must work without a previous installation'
+        report.update(defaultInterfaceLanguage='zh',firstInstallIncludesLatestFeatures=True)
     report['packagingCommit']=os.environ['GITHUB_SHA']
     if a.target.startswith('windows'): report['installerScriptSHA256']=digest(checkout/'windows-installer.nsi')
     receipt=desktop/'out/validation.json'; receipt.write_text(json.dumps(report,indent=2)+'\n')
