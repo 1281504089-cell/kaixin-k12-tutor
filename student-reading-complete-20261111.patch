@@ -1,0 +1,916 @@
+diff --git a/web/components/chat/home/ChatReadingTab.tsx b/web/components/chat/home/ChatReadingTab.tsx
+index 9001eea..4ebe881 100644
+--- a/web/components/chat/home/ChatReadingTab.tsx
++++ b/web/components/chat/home/ChatReadingTab.tsx
+@@ -2,11 +2,12 @@
+ 
+ import { useEffect, useRef, useState } from "react";
+ import dynamic from "next/dynamic";
+-import { BookOpen, ChevronLeft, ChevronRight, FileUp, Library } from "lucide-react";
++import { BookOpen, ChevronLeft, ChevronRight, FileUp, Library, Scan } from "lucide-react";
+ import { getMaterial, listMaterials, rawMaterialUrl, type MaterialDetail } from "@/lib/reading-api";
+ import { getTextbooks } from "@/lib/student-learning-api";
+-import type { JumpRequest } from "@/components/reading/PdfDocumentView";
++import type { JumpRequest, SelectionPayload } from "@/components/reading/PdfDocumentView";
+ import { Button } from "@/shared/ui/Button";
++import { QuotedPassage } from "./QuotedPassage";
+ 
+ const PdfView = dynamic(() => import("@/components/reading/PdfDocumentView").then(m => m.PdfDocumentView), { ssr: false });
+ const EpubView = dynamic(() => import("@/components/reading/EpubDocumentView").then(m => m.EpubDocumentView), { ssr: false });
+@@ -20,7 +21,6 @@ export type ChatReadingDocument = {
+ type Source = "textbook" | "library" | "file";
+ type Choice = { id: string; title: string };
+ 
+-const noop = () => {};
+ const noAnnotations: [] = [];
+ const sources = [
+   { id: "textbook", label: "教材", icon: BookOpen },
+@@ -35,7 +35,7 @@ export default function ChatReadingTab({
+   onDocumentChange: (document: ChatReadingDocument | null) => void;
+   onLocation: (materialId: string, locator: number) => void;
+   onLocalFile: (file: File) => Promise<boolean>;
+-  onAsk: () => void;
++  onAsk: (selection?: SelectionPayload) => void;
+ }) {
+   const documentId = reading?.material.material_id;
+   const fileInput = useRef<HTMLInputElement>(null);
+@@ -46,6 +46,10 @@ export default function ChatReadingTab({
+   const [loading, setLoading] = useState(false);
+   const [opening, setOpening] = useState(false);
+   const [error, setError] = useState("");
++  const [selected, setSelected] = useState<{ materialId: string; value: SelectionPayload } | null>(null);
++  const [regionMaterialId, setRegionMaterialId] = useState<string | null>(null);
++  const selection = selected && selected.materialId === documentId ? selected.value : null;
++  const regionActive = Boolean(documentId && regionMaterialId === documentId);
+   const [jump, setJump] = useState<JumpRequest | null>(() =>
+     reading ? { locator: reading.locator, nonce: 1 } : null,
+   );
+@@ -72,6 +76,32 @@ export default function ChatReadingTab({
+   }, [source, documentId]);
+ 
+   useEffect(() => () => { generation.current++; }, []);
++  useEffect(() => {
++    if (!regionActive) return;
++    const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") setRegionMaterialId(null); };
++    window.addEventListener("keydown", cancel);
++    return () => window.removeEventListener("keydown", cancel);
++  }, [regionActive]);
++
++  function startRegion() {
++    setSelected(null);
++    window.getSelection()?.removeAllRanges();
++    setRegionMaterialId(documentId ?? null);
++  }
++
++  function select(value: SelectionPayload | null) {
++    setSelected(value && documentId ? { materialId: documentId, value } : null);
++  }
++
++  function selectRegion(value: SelectionPayload) {
++    if (!value.image) {
++      setError("截图还未准备好，请等页面显示完整后重试。");
++      return;
++    }
++    setRegionMaterialId(null);
++    setError("");
++    select(value);
++  }
+ 
+   async function choose(id: string) {
+     const token = ++generation.current;
+@@ -117,7 +147,7 @@ export default function ChatReadingTab({
+       annotations: noAnnotations,
+       unitCount: material.unit_count,
+       jump,
+-      onSelection: noop,
++      onSelection: select,
+       onVisibleLocatorChange: (page: number) => onLocation(material.material_id, page),
+     };
+     return (
+@@ -130,17 +160,33 @@ export default function ChatReadingTab({
+             <span className="text-xs text-muted-foreground">第 {locator} {material.unit === "page" ? "页" : material.unit === "slide" ? "张" : material.unit === "chapter" ? "章" : "节"} / {material.unit_count}</span>
+             <Button size="sm" variant="ghost" aria-label="下一页" disabled={locator >= material.unit_count} onClick={() => move(1)}><ChevronRight size={14} /></Button>
+           </div>
+-          <Button size="sm" variant="secondary" onClick={onAsk} className="ml-auto">问当前页</Button>
++          {material.render_mode === "pdf" && <Button size="sm" variant={regionActive ? "secondary" : "ghost"}
++            aria-pressed={regionActive} onClick={() => regionActive ? setRegionMaterialId(null) : startRegion()} icon={<Scan size={14} />}>
++            {regionActive ? "取消框选" : "截图引用"}
++          </Button>}
++          <Button size="sm" variant="secondary" onClick={() => onAsk()} className="ml-auto">问当前页</Button>
+         </div>
+         <div className="relative min-h-0 flex-1 overflow-hidden">
+           {material.render_mode === "pdf" ? (
+-            <PdfView key={material.material_id} {...common} sourceUrl={rawMaterialUrl(material.material_id, textbook ? "" : undefined)} />
++            <PdfView key={material.material_id} {...common} sourceUrl={rawMaterialUrl(material.material_id, textbook ? "" : undefined)}
++              onRequestRegion={startRegion} onRegionSelect={regionActive ? selectRegion : undefined}
++              selectedRegion={selection?.region ? selection : undefined} />
+           ) : material.render_mode === "epub" ? (
+             <EpubView key={material.material_id} {...common} unitRefs={material.unit_refs} onError={setError} />
+           ) : (
+             <TextView key={material.material_id} {...common} unit={material.unit} contentFormat={material.content_format} sourceType={material.source_type} />
+           )}
+         </div>
++        {regionActive && <p role="status" className="shrink-0 px-3 py-2 text-sm text-muted-foreground">拖动框选题目或公式，按 Esc 取消。</p>}
++        {selection && <div className="shrink-0 border-t border-border pb-2" aria-label="已选阅读片段">
++          <QuotedPassage quote={selection.text || selection.quote} image={selection.image} onRemove={() => select(null)} />
++          <div className="flex justify-end px-3 pt-2"><Button size="sm" onClick={() => {
++            onLocation(material.material_id, selection.locator);
++            onAsk(selection);
++            setSelected(null);
++            window.getSelection()?.removeAllRanges();
++          }}>引用片段</Button></div>
++        </div>}
+         {error && <p role="alert" className="shrink-0 px-3 py-2 text-sm text-destructive">{error}</p>}
+       </section>
+     );
+diff --git a/web/components/chat/home/SessionViewerPanel.tsx b/web/components/chat/home/SessionViewerPanel.tsx
+index 66c3249..8c699dc 100644
+--- a/web/components/chat/home/SessionViewerPanel.tsx
++++ b/web/components/chat/home/SessionViewerPanel.tsx
+@@ -37,6 +37,7 @@ import {
+ } from "react";
+ import dynamic from "next/dynamic";
+ import type { ChatReadingDocument } from "./ChatReadingTab";
++import type { SelectionPayload } from "@/components/reading/PdfDocumentView";
+ import type { ReadingReferencePayload } from "@/lib/reading-references";
+ import {
+   Activity,
+@@ -266,7 +267,7 @@ export interface SessionViewerPanelProps {
+   /** Connected agents a side chat can be handed to. */
+   agents?: { name: string; kind?: string }[];
+   onAddFiles?: (files: File[]) => Promise<PendingAttachment[]>;
+-  onAskReading?: () => void;
++  onAskReading?: (selection?: SelectionPayload) => void;
+ }
+ 
+ const NO_AGENTS: { name: string; kind?: string }[] = [];
+@@ -1241,7 +1242,7 @@ function SessionViewerPanelInner(
+       />
+       <div className="relative min-h-0 flex-1 overflow-hidden bg-[var(--card)]">
+         {activeTab?.kind === "file" ? (
+-          <FileTabBody source={activeTab.source} />
++          <FileTabBody source={activeTab.source} onQuote={onAskReading} />
+         ) : activeTab?.kind === "reading" ? (
+           <ChatReadingTab
+             key={tabsKey}
+@@ -1249,7 +1250,7 @@ function SessionViewerPanelInner(
+             onDocumentChange={setReadingDocument}
+             onLocation={setReadingLocation}
+             onLocalFile={openLocalFile}
+-            onAsk={() => onAskReading?.()}
++            onAsk={selection => onAskReading?.(selection)}
+           />
+         ) : activeTab?.kind === "web" ? (
+           <WebTabBody key={activeTab.url} url={activeTab.url} />
+@@ -1580,12 +1581,12 @@ function FileTabActions({ source }: { source: FilePreviewSource }) {
+   );
+ }
+ 
+-function FileTabBody({ source }: { source: FilePreviewSource }) {
++function FileTabBody({ source, onQuote }: { source: FilePreviewSource; onQuote?: (selection: SelectionPayload) => void }) {
+   const previewUrl = useMemo(() => resolveSourceUrl(source, apiUrl), [source]);
+   const kind = previewKindFor(source);
+   return (
+     <div className="relative h-full overflow-hidden">
+-      <PreviewBody source={source} previewUrl={previewUrl} kind={kind} />
++      <PreviewBody source={source} previewUrl={previewUrl} kind={kind} onQuote={onQuote} />
+     </div>
+   );
+ }
+@@ -1594,10 +1595,12 @@ const PreviewBody = memo(function PreviewBody({
+   source,
+   previewUrl,
+   kind,
++  onQuote,
+ }: {
+   source: FilePreviewSource;
+   previewUrl: string | null;
+   kind: ReturnType<typeof previewKindFor> | null;
++  onQuote?: (selection: SelectionPayload) => void;
+ }) {
+   const filename = source.filename;
+ 
+@@ -1611,7 +1614,7 @@ const PreviewBody = memo(function PreviewBody({
+     );
+     if (previewUrl) {
+       return (
+-        <OfficePdfPreview url={previewUrl} filename={filename} fallback={fallback} />
++        <OfficePdfPreview url={previewUrl} filename={filename} fallback={fallback} onQuote={onQuote} />
+       );
+     }
+     return fallback;
+@@ -1623,13 +1626,14 @@ const PreviewBody = memo(function PreviewBody({
+ 
+   switch (kind) {
+     case "pdf":
+-      return <PdfPreview url={previewUrl} filename={filename} />;
++      return <PdfPreview url={previewUrl} filename={filename} onQuote={onQuote} />;
+     case "docx":
+       return (
+         <OfficePdfPreview
+           url={previewUrl}
+           filename={filename}
+           fallback={<DocxPreview url={previewUrl} />}
++          onQuote={onQuote}
+         />
+       );
+     case "xlsx":
+@@ -1638,6 +1642,7 @@ const PreviewBody = memo(function PreviewBody({
+           url={previewUrl}
+           filename={filename}
+           fallback={<XlsxPreview url={previewUrl} />}
++          onQuote={onQuote}
+         />
+       );
+     case "image":
+diff --git a/web/components/chat/preview/previewers/OfficePdfPreview.tsx b/web/components/chat/preview/previewers/OfficePdfPreview.tsx
+index 2eb820b..1e234c7 100644
+--- a/web/components/chat/preview/previewers/OfficePdfPreview.tsx
++++ b/web/components/chat/preview/previewers/OfficePdfPreview.tsx
+@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
+ import { apiFetch } from "@/lib/api";
+ import { activeWorkspaceId, scopedUrl } from "@/lib/workspace-scope";
+ import PdfPreview from "./PdfPreview";
++import type { SelectionPayload } from "@/components/reading/PdfDocumentView";
+ 
+ const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+ 
+@@ -24,10 +25,12 @@ export default function OfficePdfPreview({
+   url,
+   filename,
+   fallback,
++  onQuote,
+ }: {
+   url: string;
+   filename: string;
+   fallback: ReactNode;
++  onQuote?: (selection: SelectionPayload) => void;
+ }) {
+   const { t } = useTranslation();
+   const [state, setState] = useState<PreviewState>({
+@@ -99,7 +102,7 @@ export default function OfficePdfPreview({
+ 
+   const current = state.sourceUrl === url ? state : { kind: "loading" as const };
+   if (current.kind === "ready") {
+-    return <PdfPreview key={current.pdfUrl} url={current.pdfUrl} filename={filename} />;
++    return <PdfPreview key={current.pdfUrl} url={current.pdfUrl} filename={filename} onQuote={onQuote} />;
+   }
+   if (current.kind === "fallback") return <>{fallback}</>;
+   return (
+diff --git a/web/components/chat/preview/previewers/PdfPreview.tsx b/web/components/chat/preview/previewers/PdfPreview.tsx
+index 12d8152..893e9ab 100644
+--- a/web/components/chat/preview/previewers/PdfPreview.tsx
++++ b/web/components/chat/preview/previewers/PdfPreview.tsx
+@@ -1,22 +1,38 @@
+ "use client";
+ 
+-import { useCallback, useRef, useState } from "react";
+-import { PdfDocumentView, type JumpRequest } from "@/components/reading/PdfDocumentView";
++import { useCallback, useEffect, useRef, useState } from "react";
++import { PdfDocumentView, type JumpRequest, type SelectionPayload } from "@/components/reading/PdfDocumentView";
+ import { PreviewControls, clampPreviewZoom, usePreviewGestures } from "../PreviewControls";
++import { QuotedPassage } from "@/components/chat/home/QuotedPassage";
++import { Button } from "@/shared/ui/Button";
+ 
+ const ignoreSelection = () => {};
+ 
+-export default function PdfPreview(props: { url: string; filename: string }) {
++export default function PdfPreview(props: { url: string; filename: string; onQuote?: (selection: SelectionPayload) => void }) {
+   return <AttachmentPdf key={props.url} {...props} />;
+ }
+ 
+-function AttachmentPdf({ url, filename }: { url: string; filename: string }) {
++function AttachmentPdf({ url, filename, onQuote }: { url: string; filename: string; onQuote?: (selection: SelectionPayload) => void }) {
+   const root = useRef<HTMLDivElement>(null);
+   const nonce = useRef(0);
+   const [zoom, setZoom] = useState(1);
+   const [pages, setPages] = useState(0);
+   const [page, setPage] = useState(1);
+   const [jump, setJump] = useState<JumpRequest | null>(null);
++  const [selection, setSelection] = useState<SelectionPayload | null>(null);
++  const [region, setRegion] = useState(false);
++  const [error, setError] = useState("");
++  useEffect(() => {
++    if (!region) return;
++    const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") setRegion(false); };
++    window.addEventListener("keydown", cancel);
++    return () => window.removeEventListener("keydown", cancel);
++  }, [region]);
++  const startRegion = useCallback(() => {
++    setSelection(null);
++    window.getSelection()?.removeAllRanges();
++    setRegion(true);
++  }, []);
+   const go = useCallback((value: number) => {
+     if (!pages) return;
+     const locator = Math.max(1, Math.min(pages, value));
+@@ -26,6 +42,23 @@ function AttachmentPdf({ url, filename }: { url: string; filename: string }) {
+   usePreviewGestures(root, zoom, changeZoom, direction => go(page + direction));
+   return <div ref={root} aria-label={filename} className="flex h-full min-h-0 flex-col" style={{ touchAction: "pan-x pan-y" }}>
+     <PreviewControls zoom={zoom} onZoom={changeZoom} page={page} pages={pages} onPage={go} />
+-    <div className="min-h-0 flex-1"><PdfDocumentView materialId="temporary-attachment-preview" sourceUrl={url} zoom={zoom} onDocumentLoad={setPages} unitCount={pages} annotations={[]} jump={jump} onSelection={ignoreSelection} onVisibleLocatorChange={setPage} /></div>
++    {onQuote && <div className="flex shrink-0 items-center gap-2 px-3 py-1">
++      <Button size="sm" variant="ghost" aria-pressed={region} onClick={() => region ? setRegion(false) : startRegion()}>{region ? "取消框选" : "截图引用"}</Button>
++      <span className="text-xs text-muted-foreground">{region ? "拖动框选，按 Esc 取消" : "划选文字，或截图引用公式与图片"}</span>
++    </div>}
++    <div className="min-h-0 flex-1"><PdfDocumentView materialId="temporary-attachment-preview" sourceUrl={url} zoom={zoom} onDocumentLoad={setPages} unitCount={pages} annotations={[]} jump={jump}
++      onSelection={onQuote ? setSelection : ignoreSelection} onVisibleLocatorChange={setPage}
++      onRequestRegion={onQuote ? startRegion : undefined}
++      onRegionSelect={region && onQuote ? value => {
++        if (!value.image) { setError("截图还未准备好，请等页面显示完整后重试。"); return; }
++        setError(""); setSelection(value); setRegion(false);
++      } : undefined} selectedRegion={selection?.region ? selection : undefined} /></div>
++    {onQuote && selection && <div className="shrink-0 border-t border-border pb-2" aria-label="已选阅读片段">
++      <QuotedPassage quote={selection.text || selection.quote} image={selection.image} onRemove={() => setSelection(null)} />
++      <div className="flex justify-end px-3 pt-2"><Button size="sm" onClick={() => {
++        onQuote(selection); setSelection(null); window.getSelection()?.removeAllRanges();
++      }}>引用片段</Button></div>
++    </div>}
++    {error && <p role="alert" className="px-3 py-2 text-sm text-destructive">{error}</p>}
+   </div>;
+ }
+diff --git a/web/components/reading/ReaderPane.tsx b/web/components/reading/ReaderPane.tsx
+index 6404676..5d80ace 100644
+--- a/web/components/reading/ReaderPane.tsx
++++ b/web/components/reading/ReaderPane.tsx
+@@ -1132,6 +1132,7 @@ export function ReaderPane({
+               <HeaderButton
+                 icon={Scan}
+                 label={t("Screenshot quote")}
++                showLabel
+                 active={regionActive}
+                 onClick={() => {
+                   if (regionActive) setRegionMaterialId(null);
+@@ -1484,6 +1485,7 @@ function HeaderButton({
+   menu = false,
+   buttonRef,
+   className = "",
++  showLabel = false,
+ }: {
+   icon: typeof FileText;
+   label: string;
+@@ -1494,6 +1496,7 @@ function HeaderButton({
+   menu?: boolean;
+   buttonRef?: RefObject<HTMLButtonElement | null>;
+   className?: string;
++  showLabel?: boolean;
+ }) {
+   return (
+     <Tooltip label={label} suppressed={Boolean(menu && active)}>
+@@ -1506,7 +1509,7 @@ function HeaderButton({
+         aria-expanded={menu ? active : undefined}
+         disabled={spinning || disabled}
+         onClick={onClick}
+-        className={`h-7 w-7 shrink-0 items-center justify-center rounded-lg transition disabled:cursor-default ${
++        className={`h-7 ${showLabel ? "gap-1 px-2" : "w-7"} shrink-0 items-center justify-center rounded-lg transition disabled:cursor-default ${
+           className || "inline-flex"
+         } ${
+           active
+@@ -1515,6 +1518,7 @@ function HeaderButton({
+         }`}
+       >
+         <Icon size={14} className={spinning ? "animate-spin" : undefined} />
++        {showLabel && <span className="whitespace-nowrap text-[11.5px]">{label}</span>}
+       </button>
+     </Tooltip>
+   );
+diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
+index 28ef9e5..d7fc576 100644
+--- a/web/components/reading/workspace/ReadingWorkspace.tsx
++++ b/web/components/reading/workspace/ReadingWorkspace.tsx
+@@ -179,7 +179,7 @@ export function ReadingWorkspacePage() {
+     buildMasteryPath,
+     renameWorkspace,
+     reportViewport,
+-  } = useReadingWorkspace(workspaceId, sessionIdParam);
++  } = useReadingWorkspace(workspaceId, sessionIdParam, searchParams.get("newReading") === "1");
+ 
+   const readingWorkspaceReady = Boolean(workspace) && !loading;
+   useEffect(() => {
+diff --git a/web/components/reading/workspace/useReadingWorkspace.ts b/web/components/reading/workspace/useReadingWorkspace.ts
+index 5574ff2..ba9bf25 100644
+--- a/web/components/reading/workspace/useReadingWorkspace.ts
++++ b/web/components/reading/workspace/useReadingWorkspace.ts
+@@ -51,6 +51,7 @@ const NO_BOOKMARKS: ReadingBookmark[] = [];
+ export function useReadingWorkspace(
+   workspaceId: string,
+   sessionIdParam: string | null,
++  startNew = false,
+ ) {
+   const router = useRouter();
+   const { t } = useTranslation();
+@@ -76,6 +77,7 @@ export function useReadingWorkspace(
+   // The conversation that was open when this collection started a new one; it
+   // belongs to wherever the learner came from, never to this collection.
+   const inheritedSessionRef = useRef<string | null>(null);
++  const sessionRequestRef = useRef<AbortController | null>(null);
+   const transcriptRequestRef = useRef(0);
+ 
+   const refreshConversations = useCallback(async () => {
+@@ -177,9 +179,16 @@ export function useReadingWorkspace(
+     return () => window.clearTimeout(timer);
+   }, [refresh, workspace]);
+ 
++  useEffect(() => () => {
++    if (!sessionRequestRef.current) return;
++    sessionRequestRef.current.abort();
++    sessionRequestRef.current = null;
++    sessionBootRef.current = "";
++  }, [workspaceId, sessionIdParam, startNew]);
++
+   useEffect(() => {
+-    if (!workspace || loading) return;
+-    const bootKey = `${workspaceId}:${sessionIdParam ?? "new"}`;
++    if (!workspace || workspace.workspace_id !== workspaceId || loading) return;
++    const bootKey = `${workspaceId}:${sessionIdParam ?? (startNew ? "new" : "resume")}`;
+     if (sessionBootRef.current === bootKey) return;
+     sessionBootRef.current = bootKey;
+ 
+@@ -189,40 +198,47 @@ export function useReadingWorkspace(
+     // answer for whatever partial row the backend has written so far.
+     if (sessionIdParam && sessionIdParam === state.sessionId) return;
+ 
++    inheritedSessionRef.current = state.sessionId;
++    sessionRequestRef.current?.abort();
++    const request = new AbortController();
++    sessionRequestRef.current = request;
+     void (async () => {
+       try {
+-        // The URL is the truth about which conversation is open, the same
+-        // rule /chat follows: `/reading/<ws>/sessions/<id>` opens that conversation,
+-        // `/reading/<ws>` is a *new* one. This used to reopen the most recent
+-        // conversation instead, so arriving from the library — which links to
+-        // the bare collection URL — dropped the reader into an old transcript
+-        // they had not asked for.
+-        //
+-        // A conversation with nothing in it is a local draft, never a row:
+-        // the backend attaches the session to this workspace when the first
+-        // turn runs (see `turn_runtime`), so opening a collection and walking
+-        // away no longer litters it with empty conversations.
+-        if (sessionIdParam) {
+-          await loadSession(sessionIdParam);
+-          configureSession(sessionConfiguration, sessionIdParam);
++        // A collection entry resumes its latest saved conversation. Only the
++        // explicit new-conversation action starts over; no saved row is removed.
++        const sessionId = sessionIdParam ?? (!startNew ? conversations[0]?.session_id : null);
++        if (sessionId) {
++          if (state.sessionId !== sessionId) await loadSession(sessionId, { signal: request.signal });
++          if (request.signal.aborted) return;
++          configureSession(sessionConfiguration, sessionId);
++          if (!sessionIdParam) {
++            const url = new URL(window.location.href);
++            url.searchParams.delete("newReading");
++            url.searchParams.set("readingSession", sessionId);
++            window.history.replaceState(null, "", url);
++          }
+         } else {
+-          inheritedSessionRef.current = state.sessionId;
+           newSession({ ...sessionConfiguration, capability: null });
+         }
+       } catch (caught) {
++        if (request.signal.aborted) return;
+         setError(
+           caught instanceof Error
+             ? caught.message
+             : t("The reading conversation could not be loaded."),
+         );
++      } finally {
++        if (sessionRequestRef.current === request) sessionRequestRef.current = null;
+       }
+     })();
+   }, [
+     configureSession,
++    conversations,
+     loadSession,
+     loading,
+     newSession,
+     sessionIdParam,
++    startNew,
+     sessionConfiguration,
+     state.sessionId,
+     t,
+@@ -405,24 +421,15 @@ export function useReadingWorkspace(
+     [workspace],
+   );
+ 
+-  // The same gesture /chat's "new chat" makes: reset to a local draft and
+-  // navigate to the URL that *means* "new". No row is written until the
+-  // learner actually says something, and the title is then the one the model
+-  // writes from that first turn rather than a placeholder every conversation
+-  // shares.
+-  //
+-  // Deliberately does not cancel the streaming turn. It used to, copying
+-  // /chat — and copying its bug: the turn being cancelled belongs to the
+-  // conversation being navigated *away* from, so starting a new one killed
+-  // the previous answer mid-flight.
++  // Mark an explicit fresh start so remounting cannot resume the old thread.
++  // The previous conversation's background answer keeps running.
+   const newConversation = useCallback(() => {
+     if (!workspace) return;
+-    newSession({ ...sessionConfiguration, capability: null });
+-    router.push(readingCollectionRoute(workspace.workspace_id));
++    const url = new URL(readingCollectionRoute(workspace.workspace_id), window.location.origin);
++    url.searchParams.set("newReading", "1");
++    router.push(`${url.pathname}${url.search}`);
+   }, [
+-    newSession,
+     router,
+-    sessionConfiguration,
+     workspace,
+   ]);
+ 
+@@ -430,9 +437,10 @@ export function useReadingWorkspace(
+   // first turn binds can make the reader reload before the reply appears.
+   useEffect(() => {
+     if (!state.sessionId || sessionIdParam) return;
+-    if (sessionBootRef.current !== `${workspaceId}:new`) return;
++    if (!([`${workspaceId}:new`, `${workspaceId}:resume`].includes(sessionBootRef.current))) return;
+     if (state.sessionId === inheritedSessionRef.current) return;
+     const url = new URL(window.location.href);
++    url.searchParams.delete("newReading");
+     url.searchParams.set("readingSession", state.sessionId);
+     window.history.replaceState(null, "", url);
+     void listReadingConversations(workspaceId)
+diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
+index 42253bc..f800605 100644
+--- a/web/features/chat/components/ChatWorkspace.tsx
++++ b/web/features/chat/components/ChatWorkspace.tsx
+@@ -161,6 +161,7 @@ import {
+   selectedReadingsToPayload,
+   type SelectedReadingReference,
+ } from "@/lib/reading-references";
++import { selectionImageAttachments } from "@/lib/reading-selection";
+ import { normalizeSelectedText, textFromDomSelection } from "@/lib/selection-text";
+ import {
+   isQuoteAttachment,
+@@ -3099,7 +3100,15 @@ export default function ChatWorkspace() {
+               resourceCatalog={resourceCatalog}
+               agents={agentOptions}
+               onAddFiles={handleAddFiles}
+-              onAskReading={() => {
++              onAskReading={selection => {
++                if (selection) {
++                  const quote = quoteAttachment(selection.text || selection.quote);
++                  const images = selectionImageAttachments(selection.image, selection.locator).map(image => ({
++                    ...image, mimeType: image.mime_type, previewUrl: selection.image,
++                    size: Math.ceil(image.base64.length * 3 / 4),
++                  }));
++                  setAttachments(previous => [...previous, ...(quote ? [quote] : []), ...images]);
++                }
+                 if (!window.matchMedia("(min-width: 1024px)").matches) setViewerOpen(false);
+                 focusComposerRef.current?.();
+               }}
+diff --git a/web/lib/reading-selection.ts b/web/lib/reading-selection.ts
+index aaab82a..3a272e4 100644
+--- a/web/lib/reading-selection.ts
++++ b/web/lib/reading-selection.ts
+@@ -164,6 +164,17 @@ export function pdfSelectionImage(page: HTMLElement, rects: NormalisedRect[], pa
+     const context = crop.getContext("2d");
+     if (!context) return;
+     context.drawImage(source, left, top, width, height, 0, 0, crop.width, crop.height);
++    // A PDF canvas has dimensions before its pixels finish painting. Inspect
++    // the crop itself: some embedded browsers never settle the render promise.
++    const pixels = context.getImageData(0, 0, crop.width, crop.height).data;
++    let hasContent = false;
++    for (let i = 0; i < pixels.length; i += 4) {
++      if (pixels[i + 3] > 0 && (pixels[i] < 248 || pixels[i + 1] < 248 || pixels[i + 2] < 248)) {
++        hasContent = true;
++        break;
++      }
++    }
++    if (!hasContent) return;
+     return crop.toDataURL("image/png");
+   } catch {
+     // A blocked canvas read must still allow a text quote or page annotation.
+diff --git a/web/tests/chat-reading-selection.spec.tsx b/web/tests/chat-reading-selection.spec.tsx
+new file mode 100644
+index 0000000..8971936
+--- /dev/null
++++ b/web/tests/chat-reading-selection.spec.tsx
+@@ -0,0 +1,82 @@
++import React from "react";
++import { fireEvent, render, screen } from "@testing-library/react";
++import { beforeEach, expect, it, vi } from "vitest";
++import type { SelectionPayload, PdfDocumentViewProps } from "@/components/reading/PdfDocumentView";
++import ChatReadingTab from "@/components/chat/home/ChatReadingTab";
++
++const chosen: SelectionPayload = {
++  locator: 12, quote: "分数的意义", text: "分数的意义", rects: [[0.1, 0.2, 0.6, 0.4]],
++  image: "data:image/png;base64,cGl4ZWxz", anchor: {x: 100, y: 100},
++};
++const mocks = vi.hoisted(() => ({ ask: vi.fn(), location: vi.fn(), document: vi.fn(), local: vi.fn() }));
++vi.mock("next/dynamic", () => ({ default: () => (props: PdfDocumentViewProps) => <div>
++  <button onClick={() => props.onSelection(chosen)}>Select text</button>
++  <button onClick={() => props.onSelection({...chosen, image: undefined})}>Select plain passage</button>
++  {props.onRegionSelect && <>
++    <button onClick={() => props.onRegionSelect?.({...chosen, region: true})}>Select formula image</button>
++    <button onClick={() => props.onRegionSelect?.({...chosen, image: undefined, region: true})}>Unavailable image</button>
++  </>}
++</div> }));
++vi.mock("react-i18next", () => ({useTranslation: () => ({t: (value: string) => value})}));
++const material = {
++  material_id: "9986f6ad50b84c04de82d6e37fdbb4d87a24c1ff10fa49c3be09865aee421521",
++  filename: "五年级数学.pdf", title: "五年级数学", unit: "page" as const, unit_count: 132,
++  mime: "application/pdf", render_mode: "pdf" as const, has_raw_view: true,
++  byte_size: 100, char_count: 10, created_at: 1, annotation_count: 0, revision: 2,
++  outline: [], outline_text: "", unit_refs: [], extractor: "pdf",
++};
++const props = () => ({
++  document: {material, textbook: true, locator: 1},
++  onDocumentChange: mocks.document, onLocation: mocks.location, onLocalFile: mocks.local, onAsk: mocks.ask,
++});
++beforeEach(() => vi.clearAllMocks());
++it("quotes readable text from library or EPUB pages without requiring an image", () => {
++  render(<ChatReadingTab {...props()} document={{material: {...material, render_mode: "epub"}, textbook: false, locator: 1}} />);
++  fireEvent.click(screen.getByText("Select plain passage"));
++  expect(screen.getByText("分数的意义")).toBeInTheDocument();
++  fireEvent.click(screen.getByRole("button", {name: "引用片段"}));
++  expect(mocks.ask).toHaveBeenCalledWith({...chosen, image: undefined});
++});
++
++it("quotes a selected textbook passage with its original image and page", () => {
++  render(<ChatReadingTab {...props()} />);
++  fireEvent.click(screen.getByText("Select text"));
++  expect(screen.getByRole("img", {name: "Quoted passage"})).toHaveAttribute("src", chosen.image);
++  fireEvent.click(screen.getByRole("button", {name: "引用片段"}));
++  expect(mocks.ask).toHaveBeenCalledWith(chosen);
++  expect(mocks.location).toHaveBeenCalledWith(material.material_id, 12);
++  expect(screen.queryByLabelText("已选阅读片段")).toBeNull();
++});
++it("supports a screenshot quote for scanned pages and formulas", () => {
++  render(<ChatReadingTab {...props()} />);
++  fireEvent.click(screen.getByRole("button", {name: "截图引用"}));
++  expect(screen.getByRole("status")).toHaveTextContent("拖动框选");
++  fireEvent.click(screen.getByText("Select formula image"));
++  expect(screen.queryByText("Select formula image")).toBeNull();
++  expect(screen.getByRole("img", {name: "Quoted passage"})).toHaveAttribute("src", chosen.image);
++  fireEvent.click(screen.getByRole("button", {name: "引用片段"}));
++  expect(mocks.ask).toHaveBeenCalledWith({...chosen, region: true});
++});
++it("keeps the screenshot picker open with an error if the source pixels are unavailable", () => {
++  render(<ChatReadingTab {...props()} />);
++  fireEvent.click(screen.getByRole("button", {name: "截图引用"}));
++  fireEvent.click(screen.getByText("Unavailable image"));
++  expect(screen.getByRole("alert")).toHaveTextContent("等页面显示完整后重试");
++  expect(screen.queryByRole("button", {name: "引用片段"})).toBeNull();
++  expect(mocks.ask).not.toHaveBeenCalled();
++});
++it("does not carry a previous document's selection or picker into another file", () => {
++  const view = render(<ChatReadingTab {...props()} />);
++  fireEvent.click(screen.getByText("Select text"));
++  view.rerender(<ChatReadingTab {...props()} document={{material: {...material, material_id: "other"}, textbook: false, locator: 1}} />);
++  expect(screen.queryByLabelText("已选阅读片段")).toBeNull();
++  expect(screen.queryByText("Select formula image")).toBeNull();
++});
++it("keeps whole-page questions and escape-to-cancel available", () => {
++  render(<ChatReadingTab {...props()} />);
++  fireEvent.click(screen.getByRole("button", {name: "问当前页"}));
++  expect(mocks.ask).toHaveBeenCalledWith();
++  fireEvent.click(screen.getByRole("button", {name: "截图引用"}));
++  fireEvent.keyDown(window, {key: "Escape"});
++  expect(screen.queryByText("Select formula image")).toBeNull();
++});
+diff --git a/web/tests/pdf-preview-quote.spec.tsx b/web/tests/pdf-preview-quote.spec.tsx
+new file mode 100644
+index 0000000..c376f86
+--- /dev/null
++++ b/web/tests/pdf-preview-quote.spec.tsx
+@@ -0,0 +1,44 @@
++import React from "react";
++import { fireEvent, render, screen } from "@testing-library/react";
++import { beforeEach, expect, it, vi } from "vitest";
++import PdfPreview from "@/components/chat/preview/previewers/PdfPreview";
++import type { PdfDocumentViewProps, SelectionPayload } from "@/components/reading/PdfDocumentView";
++
++const selection: SelectionPayload = {locator: 5, quote: "题目片段", image: "data:image/png;base64,cGl4ZWxz", rects: [[0,0,0.5,0.5]], anchor:{x:10,y:10}};
++vi.mock("@/components/reading/PdfDocumentView", () => ({PdfDocumentView: (props: PdfDocumentViewProps) => <div>
++  <button onClick={() => props.onSelection(selection)}>Select passage</button>
++  {props.onRegionSelect && <button onClick={() => props.onRegionSelect?.({...selection,region:true})}>Capture diagram</button>}
++</div>}));
++vi.mock("react-i18next", () => ({useTranslation: () => ({t: (key: string) => key})}));
++beforeEach(() => vi.clearAllMocks());
++it("quotes a temporary PDF selection into its owning chat", () => {
++  const quote = vi.fn();
++  render(<PdfPreview url="blob:local-pdf" filename="临时数学资料.pdf" onQuote={quote} />);
++  fireEvent.click(screen.getByText("Select passage"));
++  fireEvent.click(screen.getByRole("button", {name:"引用片段"}));
++  expect(quote).toHaveBeenCalledWith(selection);
++  expect(screen.queryByLabelText("已选阅读片段")).toBeNull();
++});
++it("captures a scanned PDF region, with escape available to cancel", () => {
++  const quote = vi.fn();
++  render(<PdfPreview url="blob:scan" filename="扫描资料.pdf" onQuote={quote} />);
++  fireEvent.click(screen.getByRole("button", {name:"截图引用"}));
++  fireEvent.keyDown(window,{key:"Escape"});
++  expect(screen.queryByText("Capture diagram")).toBeNull();
++  fireEvent.click(screen.getByRole("button", {name:"截图引用"}));
++  fireEvent.click(screen.getByText("Capture diagram"));
++  expect(screen.getByRole("img",{name:"Quoted passage"})).toHaveAttribute("src",selection.image);
++  fireEvent.click(screen.getByRole("button", {name:"引用片段"}));
++  expect(quote).toHaveBeenCalledWith({...selection,region:true});
++});
++it("does not carry a previous file's quote into the next preview", () => {
++  const quote = vi.fn();
++  const view=render(<PdfPreview url="blob:one" filename="one.pdf" onQuote={quote} />);
++  fireEvent.click(screen.getByText("Select passage"));
++  view.rerender(<PdfPreview url="blob:two" filename="two.pdf" onQuote={quote} />);
++  expect(screen.queryByLabelText("已选阅读片段")).toBeNull();
++});
++it("keeps standalone previews without a chat callback read-only", () => {
++  render(<PdfPreview url="blob:read-only" filename="read-only.pdf" />);
++  expect(screen.queryByRole("button",{name:"截图引用"})).toBeNull();
++});
+diff --git a/web/tests/reading-selection-image.spec.ts b/web/tests/reading-selection-image.spec.ts
+index d5ee943..b4fab96 100644
+--- a/web/tests/reading-selection-image.spec.ts
++++ b/web/tests/reading-selection-image.spec.ts
+@@ -9,7 +9,7 @@ describe("PDF selection original pixels", () => {
+     source.height = 1400;
+     page.append(source);
+     const drawImage = vi.fn();
+-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
++    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage, getImageData: () => ({data: new Uint8ClampedArray([0, 0, 0, 255])}) } as unknown as CanvasRenderingContext2D);
+     vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue("data:image/png;base64,cGl4ZWxz");
+     const image = pdfSelectionImage(page, [[0.1, 0.2, 0.2, 0.22], [0.1, 0.23, 0.2, 0.25]]);
+     expect(drawImage).toHaveBeenCalledWith(source, 88, 268, 124, 94, 0, 0, 124, 94);
+@@ -20,10 +20,19 @@ describe("PDF selection original pixels", () => {
+   it("lets callers keep the quote and coordinates when the browser blocks a canvas read", () => {
+     const page = document.createElement("div");
+     page.append(document.createElement("canvas"));
+-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage: vi.fn() } as unknown as CanvasRenderingContext2D);
++    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage: vi.fn(), getImageData: () => ({data: new Uint8ClampedArray([0, 0, 0, 255])}) } as unknown as CanvasRenderingContext2D);
+     vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockImplementation(() => {
+       throw new DOMException("Canvas read blocked", "SecurityError");
+     });
+     expect(pdfSelectionImage(page, [[0.1, 0.2, 0.3, 0.4]])).toBeUndefined();
+   });
++  it("does not quote an empty canvas while a scanned page is still painting", () => {
++    const page = document.createElement("div");
++    const source = document.createElement("canvas");
++    source.width = 1000; source.height = 1400; page.append(source);
++    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
++      drawImage: vi.fn(), getImageData: () => ({data: new Uint8ClampedArray([255,255,255,255,0,0,0,0])}),
++    } as unknown as CanvasRenderingContext2D);
++    expect(pdfSelectionImage(page, [[0.1, 0.2, 0.3, 0.4]])).toBeUndefined();
++  });
+ });
+diff --git a/web/tests/reading-workspace-session-lifecycle.spec.tsx b/web/tests/reading-workspace-session-lifecycle.spec.tsx
+index a34ec7d..3da0f4c 100644
+--- a/web/tests/reading-workspace-session-lifecycle.spec.tsx
++++ b/web/tests/reading-workspace-session-lifecycle.spec.tsx
+@@ -1,4 +1,5 @@
+ import { act, renderHook, waitFor } from "@testing-library/react";
++import { StrictMode } from "react";
+ import { beforeEach, expect, it, vi } from "vitest";
+ import { useReadingWorkspace } from "@/components/reading/workspace/useReadingWorkspace";
+ 
+@@ -6,6 +7,7 @@ const mocks = vi.hoisted(() => ({
+   state: { sessionId: "chat-old" as string | null },
+   newSession: vi.fn(), loadSession: vi.fn().mockResolvedValue(undefined),
+   configureSession: vi.fn(), getWorkspace: vi.fn(),
++  listConversations: vi.fn(),
+   reading: { material: null, annotations: [], openMaterial: vi.fn(), closeMaterial: vi.fn(), reportViewport: vi.fn() },
+   router: { push: vi.fn() }, t: (key: string) => key,
+ }));
+@@ -17,14 +19,131 @@ vi.mock("@/lib/reading-turn-state", () => ({setReadingWorkspace: vi.fn()}));
+ vi.mock("@/lib/reading-workspace-api", async (original) => ({
+   ...await original<typeof import("@/lib/reading-workspace-api")>(),
+   getReadingWorkspace: mocks.getWorkspace,
+-  listReadingConversations: vi.fn().mockResolvedValue([]),
++  listReadingConversations: mocks.listConversations,
+ }));
+ const workspace = {workspace_id: "collection", title: "Book", active_material_id: null, tabs: []};
+ beforeEach(() => {
+   vi.clearAllMocks();
+   mocks.state.sessionId = "chat-old";
++  mocks.listConversations.mockResolvedValue([]);
++  mocks.loadSession.mockResolvedValue(undefined);
+   window.history.replaceState(null, "", "/learning/reading/collection");
+ });
++it("resumes the latest saved reading conversation after leaving for another chat", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockResolvedValue([{session_id: "reading-latest"}, {session_id: "reading-older"}]);
++  let resolve!: () => void;
++  mocks.loadSession.mockReturnValue(new Promise<void>(r => {resolve = r;}));
++  const {rerender, unmount} = renderHook(() => useReadingWorkspace("collection", null));
++  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledWith("reading-latest", expect.objectContaining({signal: expect.any(AbortSignal)})));
++  expect(mocks.newSession).not.toHaveBeenCalled();
++  expect(window.location.search).toBe("");
++  await act(async () => {resolve();});
++  expect(window.location.search).toBe("?readingSession=reading-latest");
++  mocks.state.sessionId = "reading-latest";
++  rerender();
++  unmount();
++  mocks.state.sessionId = "another-chat";
++  window.history.replaceState(null, "", "/learning/reading/collection");
++  mocks.loadSession.mockResolvedValue(undefined);
++  renderHook(() => useReadingWorkspace("collection", null));
++  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledTimes(2));
++  expect(mocks.loadSession).toHaveBeenLastCalledWith("reading-latest", expect.anything());
++  expect(mocks.newSession).not.toHaveBeenCalled();
++});
++it("starts blank only when explicitly requested and binds the next turn without keeping the new flag", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockResolvedValue([{session_id: "reading-latest"}]);
++  window.history.replaceState(null, "", "/learning/reading/collection?newReading=1&dt_workspace=math");
++  const {rerender} = renderHook(() => useReadingWorkspace("collection", null, true));
++  await waitFor(() => expect(mocks.newSession).toHaveBeenCalledOnce());
++  expect(mocks.loadSession).not.toHaveBeenCalled();
++  expect(window.location.search).not.toContain("readingSession");
++  mocks.state.sessionId = null;
++  rerender();
++  mocks.state.sessionId = "reading-new";
++  rerender();
++  expect(new URLSearchParams(window.location.search).get("readingSession")).toBe("reading-new");
++  expect(new URLSearchParams(window.location.search).get("dt_workspace")).toBe("math");
++  expect(new URLSearchParams(window.location.search).has("newReading")).toBe(false);
++});
++it("keeps explicit older conversation links instead of resuming a newer one", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockResolvedValue([{session_id: "reading-latest"}]);
++  renderHook(() => useReadingWorkspace("collection", "reading-older"));
++  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledWith("reading-older", expect.anything()));
++  expect(mocks.loadSession.mock.calls.some(([id]) => id === "reading-latest")).toBe(false);
++  expect(mocks.newSession).not.toHaveBeenCalled();
++});
++it("shows a restore error without replacing a saved conversation with an empty draft", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockResolvedValue([{session_id: "reading-latest"}]);
++  mocks.loadSession.mockRejectedValue(new Error("offline"));
++  const {result} = renderHook(() => useReadingWorkspace("collection", null));
++  await waitFor(() => expect(result.current.error).toBe("offline"));
++  expect(mocks.newSession).not.toHaveBeenCalled();
++  expect(window.location.search).toBe("");
++});
++it("does not create a draft when the saved conversation list could not be read", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockRejectedValue(new Error("history unavailable"));
++  const {result} = renderHook(() => useReadingWorkspace("collection", null));
++  await waitFor(() => expect(result.current.error).toBe("history unavailable"));
++  expect(mocks.newSession).not.toHaveBeenCalled();
++  expect(mocks.loadSession).not.toHaveBeenCalled();
++});
++it("uses the explicit new-reading route for the new conversation button", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  const hook = renderHook(() => useReadingWorkspace("collection", "reading-existing"));
++  await waitFor(() => expect(hook.result.current.workspace).toEqual(workspace));
++  act(() => hook.result.current.newConversation());
++  const target = new URL(mocks.router.push.mock.calls.at(-1)?.[0], window.location.origin);
++  expect(target.pathname).toBe("/learning/reading/collection");
++  expect(target.searchParams.get("newReading")).toBe("1");
++});
++it("does not reload a live conversation when the first turn binds its URL", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.state.sessionId = "reading-live";
++  renderHook(() => useReadingWorkspace("collection", "reading-live"));
++  await waitFor(() => expect(mocks.getWorkspace).toHaveBeenCalled());
++  expect(mocks.loadSession).not.toHaveBeenCalled();
++  expect(mocks.newSession).not.toHaveBeenCalled();
++});
++it("aborts a pending restore on leaving so its late response cannot switch chats back", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockResolvedValue([{session_id: "reading-latest"}]);
++  let resolve!: () => void;
++  mocks.loadSession.mockReturnValue(new Promise<void>(r => {resolve = r;}));
++  const hook = renderHook(() => useReadingWorkspace("collection", null));
++  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledOnce());
++  const signal = mocks.loadSession.mock.calls[0][1].signal;
++  hook.unmount();
++  expect(signal.aborted).toBe(true);
++  await act(async () => {resolve();});
++  expect(mocks.configureSession).not.toHaveBeenCalled();
++  expect(window.location.search).toBe("");
++});
++it("does not cancel a pending history restore when collection polling refreshes its metadata", async () => {
++  mocks.getWorkspace.mockImplementation(async () => ({workspace: {...workspace}}));
++  mocks.listConversations.mockImplementation(async () => [{session_id: "reading-latest"}]);
++  let resolve!: () => void;
++  mocks.loadSession.mockReturnValue(new Promise<void>(r => {resolve = r;}));
++  const hook = renderHook(() => useReadingWorkspace("collection", null));
++  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledOnce());
++  const signal = mocks.loadSession.mock.calls[0][1].signal;
++  await act(async () => {await hook.result.current.refresh();});
++  expect(signal.aborted).toBe(false);
++  await act(async () => {resolve();});
++  expect(window.location.search).toBe("?readingSession=reading-latest");
++  expect(mocks.newSession).not.toHaveBeenCalled();
++});
++it("restores history under React strict effect replay without leaving an aborted blank view", async () => {
++  mocks.getWorkspace.mockResolvedValue({workspace});
++  mocks.listConversations.mockResolvedValue([{session_id: "reading-latest"}]);
++  renderHook(() => useReadingWorkspace("collection", null), {wrapper: StrictMode});
++  await waitFor(() => expect(window.location.search).toBe("?readingSession=reading-latest"));
++  expect(mocks.newSession).not.toHaveBeenCalled();
++});
+ it("does not adopt an inherited chat before or after asynchronous collection hydration", async () => {
+   let resolve!: (value: unknown) => void;
+   mocks.getWorkspace.mockReturnValue(new Promise(r => {resolve = r;}));
+@@ -47,7 +166,7 @@ it("does not adopt an inherited chat before or after asynchronous collection hyd
+ it("loads an explicitly linked reading session instead of starting a draft", async () => {
+   mocks.getWorkspace.mockResolvedValue({workspace});
+   renderHook(() => useReadingWorkspace("collection", "reading-existing"));
+-  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledWith("reading-existing"));
++  await waitFor(() => expect(mocks.loadSession).toHaveBeenCalledWith("reading-existing", expect.anything()));
+   expect(mocks.newSession).not.toHaveBeenCalled();
+   expect(mocks.configureSession).toHaveBeenCalledWith(expect.anything(), "reading-existing");
+ });
