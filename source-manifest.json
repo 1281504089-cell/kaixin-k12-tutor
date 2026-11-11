@@ -68,6 +68,11 @@
       "file": "student-moss-settings-entry-20261111.patch",
       "sha256": "55044760fbdca5659f79088028c2b50232cdbb6b4ee7082f317b9ff9a0a3bbca",
       "description": "Expose realtime voice configuration in student settings navigation and search"
+    },
+    {
+      "file": "student-scene-video-20261111.patch",
+      "sha256": "1a52d97497643689cd09c88b24e898dfda00a1d2ff08400e0dd72904497a6964",
+      "description": "Start voice scenes immediately, speed up MOSS, stream shared video and refresh connected cameras"
     }
   ]
 }
