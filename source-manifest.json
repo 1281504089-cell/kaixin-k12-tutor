@@ -58,6 +58,11 @@
       "file": "student-media-permissions-20261111.patch",
       "sha256": "f0ce3df3f744748f98770f72211bfb919fd995b5c0679a9fcaf9fc884c4c8d14",
       "description": "Remember microphone consent and offer in-app screen sharing or a direct setup shortcut"
+    },
+    {
+      "file": "student-moss-live-20261111.patch",
+      "sha256": "f19112e310e829db9054eb46c79d4def7653a8b9c94903e19a578603b8738b47",
+      "description": "Add separately saved MOSS-Live realtime voice with playback-aware interruption and provider switching"
     }
   ]
 }
