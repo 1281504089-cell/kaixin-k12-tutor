@@ -10,6 +10,8 @@
 
 **20261111 辅导更新**带来了实时语音通话、高拍仪辅导和聊天内边读边问，最新版保留 MOSS 实时看屏、场景切换和手机摄像头选择，并补齐阅读记录恢复与文字／公式截图引用：学习区重新打开会恢复最近的阅读对话，只有明确点「新对话」才开始空白会话；聊天内教材、资料库和临时 PDF 也能引用片段。已有 1.7.1 的电脑按系统下载对应的更新包，升级时会备份本机学习资料。 [下载最新版（阅读记录保留与片段引用补全）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-reading-complete) · [历次更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
+添加文字聊天 API 时，可搜索 **Kimi / Moonshot（月之暗面）** 并填写对应 Key；原有接口、密钥和默认模型保持不变。
+
 在「设置 → 语音」可切换豆包 / **MOSS-Live 实时语音**，分别保存 Key；不会自动更换原有豆包配置。本次更新包包含这项功能，旧安装包请先更新。[MOSS-Live 接入与小样本对比](MOSS-LIVE.md)
 
 [下载图文操作手册 PDF（20261111 操作核对版）](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-k12-tutor-guide-20261111-verified.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)

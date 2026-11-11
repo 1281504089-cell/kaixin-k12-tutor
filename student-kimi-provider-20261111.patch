@@ -1,0 +1,124 @@
+diff --git a/web/components/settings/ConnectionsEditor.tsx b/web/components/settings/ConnectionsEditor.tsx
+index 2741a12..33f4cdb 100644
+--- a/web/components/settings/ConnectionsEditor.tsx
++++ b/web/components/settings/ConnectionsEditor.tsx
+@@ -15,6 +15,7 @@ import {
+ import { useTranslation } from "react-i18next";
+ 
+ import ProviderIcon from "@/components/common/ProviderIcon";
++import { formatProviderLabel } from "@/lib/provider-branding";
+ import { ProviderModelDiscovery } from "./ProviderModelDiscovery";
+ import {
+   CONNECTABLE_SERVICES,
+@@ -591,7 +592,7 @@ function AddConnectionPanel({
+                   key={item.provider}
+                   value={item.provider}
+                 >
+-                  {item.label}
++                  {formatProviderLabel(item.provider, item.label, i18n.resolvedLanguage ?? i18n.language ?? "en")}
+                 </option>
+               ))}
+             </select>
+diff --git a/web/lib/provider-branding.ts b/web/lib/provider-branding.ts
+index a90d57b..aa5ca3a 100644
+--- a/web/lib/provider-branding.ts
++++ b/web/lib/provider-branding.ts
+@@ -72,6 +72,7 @@ export const PROVIDER_ICONS: Readonly<Record<string, ProviderIconSpec>> = {
+ };
+ 
+ const PROVIDER_ALIASES: Readonly<Record<string, string>> = {
++  "kimi": "moonshot",
+   "y-api": "y_api",
+   "yapi": "y_api",
+   "azure": "azure_openai",
+@@ -110,7 +111,7 @@ const CHINESE_NAMES: Readonly<Record<string, { name: string; labels: string[] }>
+   dashscope: {"name": "阿里云百炼", "labels": ["DashScope", "Aliyun DashScope"]},
+   aliyun: {"name": "阿里云百炼", "labels": ["Aliyun DashScope"]},
+   aliyun_iqs: {"name": "阿里云信息查询服务", "labels": ["Aliyun IQS"]},
+-  moonshot: {"name": "月之暗面", "labels": ["Moonshot", "Moonshot AI"]},
++  moonshot: {"name": "月之暗面", "labels": ["Moonshot", "Moonshot AI", "Kimi", "Kimi / Moonshot", "Kimi / Moonshot AI"]},
+   minimax: {"name": "稀宇科技", "labels": ["MiniMax"]},
+   minimax_anthropic: {"name": "稀宇科技", "labels": ["MiniMax (Anthropic)"]},
+   stepfun: {"name": "阶跃星辰", "labels": ["Step Fun", "StepFun"]},
+@@ -138,7 +139,8 @@ export function formatProviderLabel(provider: string, label: string, language: s
+   const chinese = Object.hasOwn(CHINESE_NAMES, key) ? CHINESE_NAMES[key] : undefined;
+   if (!chinese) return label;
+   const suffix = `（${chinese.name}）`;
+-  const english = label.endsWith(suffix) ? label.slice(0, -suffix.length) : label;
++  let english = label.endsWith(suffix) ? label.slice(0, -suffix.length) : label;
++  if (key === "moonshot" && /^moonshot(?: ai)?$/i.test(english)) english = `Kimi / ${english}`;
+   if (!/^zh(?:[-_]|$)/i.test(language)) return english;
+   return english.includes(chinese.name) ? english : `${english}${suffix}`;
+ }
+diff --git a/web/tests/provider-branding-locale.spec.tsx b/web/tests/provider-branding-locale.spec.tsx
+index 1698756..804a89b 100644
+--- a/web/tests/provider-branding-locale.spec.tsx
++++ b/web/tests/provider-branding-locale.spec.tsx
+@@ -1,5 +1,5 @@
+ import React from 'react'
+-import { act, render, screen } from '@testing-library/react'
++import { act, fireEvent, render, screen } from '@testing-library/react'
+ import { createInstance } from 'i18next'
+ import { I18nextProvider } from 'react-i18next'
+ import { expect, it, vi } from 'vitest'
+@@ -28,3 +28,28 @@ it('updates provider originals immediately when the interface language changes',
+   expect(screen.getByRole('radio', { name: 'DeepSeek（深度求索）' })).toBeInTheDocument()
+   expect(options[0].label).toBe('DeepSeek')
+ })
++it('finds the existing Moonshot API by Kimi or its Chinese name and keeps the canonical provider id', async () => {
++  const i18n = createInstance()
++  await i18n.init({lng:'zh', fallbackLng:'en', resources:{en:{translation:{}},zh:{translation:{}}}})
++  const choose=vi.fn()
++  const create=vi.fn()
++  function Picker() {
++    const [vendor,setVendor]=React.useState('')
++    return <AddProviderPanel options={[{value:'moonshot',label:'Moonshot',services:['llm']}]}
++      vendor={vendor} onVendor={value=>{choose(value);setVendor(value)}} onCreate={create} onCancel={vi.fn()} />
++  }
++  render(<I18nextProvider i18n={i18n}>
++    <Picker />
++  </I18nextProvider>)
++  const search=screen.getByRole('searchbox')
++  for(const query of ['kimi','KIMI','Moonshot','月之暗面']) {
++    fireEvent.change(search,{target:{value:query}})
++    expect(screen.getByRole('radio',{name:'Kimi / Moonshot（月之暗面）'})).toBeInTheDocument()
++  }
++  fireEvent.click(screen.getByRole('radio',{name:'Kimi / Moonshot（月之暗面）'}))
++  expect(choose).toHaveBeenCalledWith('moonshot')
++  expect(screen.getByRole('radio',{name:'Kimi / Moonshot（月之暗面）'})).toBeChecked()
++  expect(screen.getByRole('button',{name:'Continue'})).toBeEnabled()
++  fireEvent.click(screen.getByRole('button',{name:'Continue'}))
++  expect(create).toHaveBeenCalledWith(undefined)
++})
+diff --git a/web/tests/provider-branding.spec.ts b/web/tests/provider-branding.spec.ts
+index a050c0c..eb8efb3 100644
+--- a/web/tests/provider-branding.spec.ts
++++ b/web/tests/provider-branding.spec.ts
+@@ -50,6 +50,7 @@ describe('provider branding', () => {
+   it('resolves legacy aliases but leaves unknown custom brands generic', () => {
+     expect(providerIconSpec(' workbuddy ')).toEqual(providerIconSpec('codebuddy'))
+     expect(providerIconSpec('atlas_cloud')).toEqual(providerIconSpec('atlascloud'))
++    expect(providerIconSpec('Kimi')).toEqual(providerIconSpec('moonshot'))
+     for (const id of ['my-gateway', '__proto__', 'constructor', '', null]) {
+       expect(providerIconSpec(id)).toBeUndefined()
+     }
+@@ -59,7 +60,9 @@ describe('provider branding', () => {
+     expect(formatProviderLabel('deepseek', 'DeepSeek', 'zh')).toBe('DeepSeek（深度求索）')
+     expect(formatProviderLabel('dashscope', 'Aliyun DashScope', 'zh')).toBe('Aliyun DashScope（阿里云百炼）')
+     expect(formatProviderLabel('deepseek', 'DeepSeek（深度求索）', 'zh')).toBe('DeepSeek（深度求索）')
+-    expect(formatConfiguredProviderName('moonshot', 'Moonshot', 'zh')).toBe('Moonshot（月之暗面）')
++    expect(formatConfiguredProviderName('moonshot', 'Moonshot', 'zh')).toBe('Kimi / Moonshot（月之暗面）')
++    expect(formatProviderLabel('moonshot', 'Kimi / Moonshot（月之暗面）', 'zh')).toBe('Kimi / Moonshot（月之暗面）')
++    expect(formatConfiguredProviderName('moonshot', '校区 Kimi 接口', 'zh')).toBe('校区 Kimi 接口')
+     expect(formatConfiguredProviderName('deepseek', 'My study account', 'zh')).toBe('My study account')
+     expect(formatProviderLabel('openai', 'OpenAI', 'zh')).toBe('OpenAI')
+   })
+@@ -68,7 +71,7 @@ describe('provider branding', () => {
+     for (const language of ['en', 'fr', 'de', 'uk', 'pl', 'vi', 'pt', 'ja', 'tr']) {
+       expect(formatProviderLabel('deepseek', 'DeepSeek', language)).toBe('DeepSeek')
+       expect(formatProviderLabel('deepseek', 'DeepSeek（深度求索）', language)).toBe('DeepSeek')
+-      expect(formatConfiguredProviderName('moonshot', 'Moonshot（月之暗面）', language)).toBe('Moonshot')
++      expect(formatConfiguredProviderName('moonshot', 'Moonshot（月之暗面）', language)).toBe('Kimi / Moonshot')
+       expect(formatConfiguredProviderName('deepseek', '我的学习账号（深度求索）', language)).toBe('我的学习账号（深度求索）')
+     }
+     expect(formatProviderLabel('deepseek', 'DeepSeek', 'zh-CN')).toBe('DeepSeek（深度求索）')

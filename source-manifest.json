@@ -76,8 +76,13 @@
     },
     {
       "file": "student-camera-permission-20261111.patch",
-      "sha256": "fc55d620ed8248290418b52476c20a91ee43850bbc3c891a944bfa096ffcb58c",
+      "sha256": "c8c580f8297bd50423e15bc99fa8292b4ec4c47606ddd432db42e191908a488a",
       "description": "Respect granted camera access during device enumeration and persist camera consent separately"
+    },
+    {
+      "file": "student-kimi-provider-20261111.patch",
+      "sha256": "77e60135d1315b585be072f53b008611df030187d753ba4fa1627228807ce82c",
+      "description": "Expose the existing Moonshot API as Kimi in provider search and API connection dropdowns without changing credentials or defaults"
     }
   ]
 }
