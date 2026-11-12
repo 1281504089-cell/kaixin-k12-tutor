@@ -13,7 +13,7 @@ python3 bootstrap_source.py --with-updates
 cd student-source
 ```
 
-Windows 可用 `py -3.12 bootstrap_source.py --with-updates`。脚本会按清单校验两个分卷与合并归档的 SHA-256，然后解包到新的 `student-source/` 目录。归档的源码版本记录在 `student-source/SOURCE_FREEZE.json`。`--with-updates` 还会校验并应用[学生版源码修复](student-source-updates.patch)，可在解包目录用 `git log -2` 查看。省略该参数可取回与当前安装包一致的冻结源码。 [源码清单](source-manifest.json) · [解包脚本](bootstrap_source.py)
+Windows 可用 `py -3.12 bootstrap_source.py --with-updates`。脚本会按清单校验两个分卷与合并归档的 SHA-256，然后解包到新的 `student-source/` 目录。归档的源码版本记录在 `student-source/SOURCE_FREEZE.json`。`--with-updates` 还会校验并应用[学生版源码修复](student-source-updates.patch)，可在解包目录用 `git log -2` 查看。省略该参数只会取回最初的冻结快照；复现当前安装包应使用 `--with-updates` 并核对发布页的源码标识。 [源码清单](source-manifest.json) · [解包脚本](bootstrap_source.py)
 
 ## 本地运行
 
@@ -27,6 +27,7 @@ python -m venv .venv
 
 ```sh
 python -m pip install -r requirements/full.txt
+python -m pip install 'python-socks[asyncio]==3.2.1'
 python -m pip install -e . --no-deps
 npm --prefix web ci --legacy-peer-deps
 deeptutor init --non-interactive --home data/dev-home
@@ -49,7 +50,7 @@ deeptutor start --dev --home data/dev-home
 | 模型菜单与接口发现 | `web/components/chat/home/ModelSelector.tsx`、`deeptutor/services/settings/connection_setup.py` |
 | 桌面外壳、运行时和打包 | `apps/desktop/`。本机构建步骤见源码内的 `apps/desktop/README.md`。 |
 
-改网页时可运行 `npm --prefix web run typecheck`。桌面外壳安装 npm 依赖后可运行 `npm --prefix apps/desktop test`。原生打包使用对应平台的运行时及自有签名密钥。 [三平台学生版构建流程](.github/workflows/student-delivery.yml)
+改网页时可运行 `npm --prefix web run typecheck`。桌面外壳安装 npm 依赖后可运行 `npm --prefix apps/desktop test`。原生打包使用对应平台的运行时及自有签名密钥。 [三平台完整学生版构建流程](.github/workflows/student-complete.yml)
 
 ## 桌面核心更新
 
@@ -60,3 +61,7 @@ deeptutor start --dev --home data/dev-home
 ## 复用与归属
 
 源码归档内的 `LICENSE` 为 Apache 2.0，第三方源码和素材归属见归档内的 `THIRD_PARTY_NOTICES.md`。GitHub 侧栏的 GPL-3.0 标识来自 [dvisvgm 的许可证文件](dvisvgm-LICENSE.txt)。使用或分发教材及打包组件时请核对各自的条款。 [接口与许可说明](delivery-notes.md)
+
+## 安装后的语音验收
+
+完整包随附 `runtime.json`、`components.json` 和 `installed-voice-smoke.json`。出包流程先在对应原生系统安装并启动客户端，再用已安装的 Python 和实际包内代码执行语音回归及本机 SOCKS WebSocket 收发检查，不能用开发目录里的库替代。该验收不调用收费接口、不使用真实 Key；麦克风、教室噪声和个人账户的实测另行记录。刷新已有运行环境也会安装锁定的依赖，避免只更新源码却漏掉新组件。
