@@ -13,6 +13,7 @@ $sentinel = Join-Path $install 'keep-user-file.dll'
 Set-Content $sentinel 'unrelated user file'
 $oldPath = $env:PATH
 $oldHome = $env:OPEN_DEEPTUTOR_TEST_HOME
+$testPython = (Get-Command python).Source
 $appProcess = $null
 $log = Join-Path $userRoot 'logs/runtime.log'
 try {
@@ -59,7 +60,7 @@ try {
 
     $profile = $proxy.Content | ConvertFrom-Json
     if ($profile.language -ne 'zh' -or $profile.response_language -ne 'zh') { throw 'A fresh install must default to Simplified Chinese' }
-    & python "$desktop/../../../verify-installed-voice.py" --profile $userRoot --source "$desktop/../.." --output "$desktop/.local/windows-x64/installed-voice-smoke.json"
+    & $testPython "$desktop/../../../verify-installed-voice.py" --profile $userRoot --source "$desktop/../.." --output "$desktop/.local/windows-x64/installed-voice-smoke.json"
     if ($LASTEXITCODE -ne 0) { throw 'Installed voice transport regression failed' }
 
     # Closing the real window must stop both services, not just Electron.
