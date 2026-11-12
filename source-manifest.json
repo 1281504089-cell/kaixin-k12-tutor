@@ -93,6 +93,11 @@
       "file": "student-desktop-chinese-20261111.patch",
       "sha256": "0845d8216a3b8924563a335435b9f5dd63fa20aef8eedbc9a2fb8f7a313907eb",
       "description": "Start the desktop launcher and first-install interface in Simplified Chinese while preserving explicit language choices"
+    },
+    {
+      "file": "student-voice-proxy-20261112.patch",
+      "sha256": "f338e67b8fc77a1fe8685d04e4710012810bf82354384b3a9326a4289b1d71c9",
+      "description": "Ship the missing SOCKS voice transport in fresh and refreshed runtimes, verify it during packaging and report voice failures without exposing credentials"
     }
   ]
 }
