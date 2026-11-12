@@ -119,6 +119,7 @@ else:
     assert voice_report['usesInstalledRuntime'] and voice_report['socksWebSocketRoundTrip']=='passed'
     assert voice_report['runtime']==manifest['runtimeId'] and voice_report['voiceRegressionTests']>=13
     shutil.copy2(local/'installed-voice-smoke.json',desktop/'out/installed-voice-smoke.json')
+    shutil.copy2(seed/'runtime.json',desktop/'out/runtime.json')
     for name in ['components.json','smoke-result.json']:
         download(tag,name); shutil.copy2(inputs/name,desktop/'out'/name)
     shutil.copy2(checkout/'delivery-notes.md',desktop/'out/API-AND-LICENSE.md')
