@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-12",
+  "status": "native_validation_complete; USB final verification in progress",
+  "source": "04276f68ac022ed6aaadea7eea20fb5ad756f513",
+  "platforms": [
+    {
+      "target": "macos-arm64",
+      "source": "04276f68ac022ed6aaadea7eea20fb5ad756f513",
+      "runtime": "1.7.1-04276f68a-arm64",
+      "release": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-arm64",
+      "nativeBuild": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43191115987",
+      "checks": {
+        "nativeInstallAndStartup": "passed",
+        "voiceTransportTests": 13,
+        "voiceThroughSyntheticSocks": "passed",
+        "componentVersions": {
+          "ok": true,
+          "python_socks": "3.2.1",
+          "websockets": "16.1.1"
+        },
+        "singleImage": true,
+        "diskChecksum": "$2384D079",
+        "appSignature": "passed",
+        "runtimeSignature": "passed",
+        "architecture": "arm64",
+        "usbReadBackSHA256": "passed",
+        "uncachedUSBReadBackSHA256": "pending"
+      },
+      "apiKeysIncluded": false,
+      "studentRecordsIncluded": false,
+      "file": "Kaixin-K12-Tutor-20261112-Mac-Apple.dmg",
+      "bytes": 7065414185,
+      "sha256": "7771afd1fcc0a08e5c51316ebd1c194131dca1918ef58fa81422d15e8d59d069",
+      "verifiedAt": "2026-11-12 18:14:26"
+    },
+    {
+      "target": "macos-x64",
+      "source": "04276f68ac022ed6aaadea7eea20fb5ad756f513",
+      "runtime": "1.7.1-04276f68a-x64",
+      "release": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-x64",
+      "nativeBuild": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43193158381",
+      "checks": {
+        "nativeInstallAndStartup": "passed",
+        "runtimeComponents": 16,
+        "voiceTransportTests": 13,
+        "voiceThroughSyntheticSocks": "passed",
+        "usbDelivery": "in_progress"
+      },
+      "apiKeysIncluded": false,
+      "studentRecordsIncluded": false
+    },
+    {
+      "target": "windows-x64",
+      "source": "04276f68ac022ed6aaadea7eea20fb5ad756f513",
+      "runtime": "1.7.1-04276f68a-x64",
+      "release": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-windows-x64",
+      "nativeBuild": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43194230750",
+      "checks": {
+        "nativeInstallAndStartup": "passed",
+        "runtimeComponents": 16,
+        "voiceTransportTests": 13,
+        "voiceThroughSyntheticSocks": "passed",
+        "usbDelivery": "in_progress"
+      },
+      "apiKeysIncluded": false,
+      "studentRecordsIncluded": false
+    }
+  ],
+  "apiKeysIncluded": false,
+  "studentRecordsIncluded": false,
+  "updatedAt": "2026-11-12 18:47:04"
+}

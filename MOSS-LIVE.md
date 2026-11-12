@@ -39,8 +39,8 @@
 
 从已交付 Apple 芯片单文件安装镜像中读回确认：MOSS 代码与冻结源码一致，带有 websockets 16.1.1，但没有随包带上系统 SOCKS 代理需要的 python-socks。已复现该环境下的 ImportError；这是安装包的组件遗漏，不能据此认定每次断开都是这一原因。websockets 的[官方代理说明](https://websockets.readthedocs.io/en/15.0.1/topics/proxies.html)列出了这项额外依赖。
 
-[下载 Mac 离线语音组件修复包](https://github.com/1281504089-cell/kaixin-k12-tutor/raw/refs/heads/main/repairs/20261112-voice-proxy/Kaixin-Voice-Repair-macOS-20261112.zip)。先退出客户端，解压后双击“修复语音连接.command”，再重新打开客户端。适用 Intel 与 Apple 芯片版，约 50 KB，不需要管理员密码、不访问网络、不更改学习数据和 Key。修复包只解决这项组件遗漏；已发布的完整安装镜像尚未因此自动替换。
+[下载 Mac 离线语音组件修复包](https://github.com/1281504089-cell/kaixin-k12-tutor/raw/refs/heads/main/repairs/20261112-voice-proxy/Kaixin-Voice-Repair-macOS-20261112.zip)。先退出客户端，解压后双击“修复语音连接.command”，再重新打开客户端。适用 Intel 与 Apple 芯片版，约 50 KB，不需要管理员密码、不访问网络、不更改学习数据和 Key。修复包只解决这项组件遗漏，供仍使用旧运行环境的电脑使用。20261112 三系统完整安装包已包含该依赖，新安装不用另跑修复包。
 
 源码补丁锁定 python-socks[asyncio] 3.2.1，并覆盖新建运行环境、复用运行环境的刷新构建及出包检查；同时区分认证、计费、并发限制、服务暂时不可用和缺少本机组件，避免只留下“已断开”。不把服务端原始错误信息或 Key 写入日志。
 
-验证：13 项语音回归检查通过；模拟 SOCKS 转发通过；实际 MOSS-Live 经 SOCKS 转发约 0.53 秒进入可通话状态；本机 Intel Mac 离线安装组件成功；损坏组件在安装前被拒绝。这里的时间只是连接就绪时间，不是回复首音频延迟。尚未在报错的 M4/macOS 27 复测，不能称为该机已修复。
+验证：13 项语音回归检查通过；模拟 SOCKS 转发通过；实际 MOSS-Live 经 SOCKS 转发约 0.53 秒进入可通话状态；本机 Intel Mac 离线安装组件成功；损坏组件在安装前被拒绝。这里的时间只是连接就绪时间，不是回复首音频延迟。用户随后反馈：原先报错的 M4 在补齐组件后已可正常使用。此反馈不等于三套新包都在该台电脑实测；新包分别在对应原生构建机安装、启动，并以包内实际 Python 与代码通过 13 项语音回归和本机 SOCKS WebSocket 收发。验收未使用真实 Key 或收费接口。
