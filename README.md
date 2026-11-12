@@ -33,6 +33,25 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 3. Windows 下载 1 个 `Setup.exe` 和 4 个 `Runtime.001` 至 `Runtime.004`。双击 Setup，安装器会校验并合并分卷。
 4. 预留至少 30 GB 空间。安装校验和首次启动解压都可能需要几分钟。
 
+<details>
+<summary>Mac 打开分卷提示错误 109、110 或“镜像无法识别”</summary>
+
+先把同一版本的 `.dmg`、全部 `.dmgpart` 和 `SHA256SUMS.txt` 放在本机同一个文件夹，保留原名。若 U 盘附带「Mac-Apple芯片-兼容安装」，打开该文件夹内的单文件 `.dmg`，再把应用拖入「应用程序」。
+
+GitHub 下载的 Apple 芯片版也可合并成单文件。先在终端进入下载文件夹，再依次执行下列命令。校验全部通过后继续，输出文件存入「下载」文件夹。
+
+```sh
+shasum -a 256 -c SHA256SUMS.txt
+hdiutil convert -format ULFO -o "$HOME/Downloads/Kaixin-Apple-Silicon-Complete.dmg" ./Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-52e56898b-arm64-part.dmg
+open "$HOME/Downloads/Kaixin-Apple-Silicon-Complete.dmg"
+```
+
+合并会额外占用约 7 GB。若提示输出文件已存在，先打开已有的完整镜像核对版本，或为本次输出换一个文件名。若校验失败，重新复制或下载提示失败的分卷，再校验。客户端要求 macOS 13 或以上。
+
+本次 M4 / macOS 27 反馈显示，合并后可挂载；维护者也读回核对了 U 盘四卷的 SHA-256。单文件镜像的校验、挂载、完整运行环境与应用签名已在本机 macOS 15 核对。其他电脑的运行与首次权限设置仍需在对应系统确认。
+
+</details>
+
 三种系统包含相同的学习功能。体积主要来自 136 册教材和本机运行工具；各系统的原生运行文件、安装容器和压缩方式不同，请按对应发布页全部安装分卷的合计大小比较。MOSS、豆包与本次修复已集成在完整包里。
 
 ## 旧版用户的可选增量更新
