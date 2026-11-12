@@ -59,6 +59,8 @@ try {
 
     $profile = $proxy.Content | ConvertFrom-Json
     if ($profile.language -ne 'zh' -or $profile.response_language -ne 'zh') { throw 'A fresh install must default to Simplified Chinese' }
+    & python "$desktop/../../../verify-installed-voice.py" --profile $userRoot --source "$desktop/../.." --output "$desktop/.local/windows-x64/installed-voice-smoke.json"
+    if ($LASTEXITCODE -ne 0) { throw 'Installed voice transport regression failed' }
 
     # Closing the real window must stop both services, not just Electron.
     Write-Host 'UI and API are ready. Checking window close and uninstall...'

@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -34,6 +34,8 @@ try {
   const profile=await (await fetch(frontend+'/api/settings/ui')).json();
   assert.equal(profile.language,'zh','A fresh install must use a Chinese interface');
   assert.equal(profile.response_language,'zh');
+  execFileSync('python', [path.resolve(root, '../verify-installed-voice.py'), '--profile', home,
+    '--source', root, '--output', path.join(target.local, 'installed-voice-smoke.json')], { stdio: 'inherit' });
   await writeFile(path.join(target.local,'installed-app-smoke.json'),JSON.stringify({target:target.id,launch:'passed',ui:'passed',api:'passed',language:profile.language,textbooks:136,freshProfile:true,developerPATH:'absent',system:os.release()},null,2));
 } finally {
   try { process.kill(-app.pid,'SIGTERM'); } catch {}

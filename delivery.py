@@ -115,6 +115,10 @@ else:
         run(['pwsh','-NoProfile','-NonInteractive','-File',desktop/'platforms/windows-x64/smoke-installer.ps1'],desktop)
     else:
         run(['node',checkout/'smoke_mac.mjs','--target',a.target],root)
+    voice_report=json.loads((local/'installed-voice-smoke.json').read_text(encoding='utf-8'))
+    assert voice_report['usesInstalledRuntime'] and voice_report['socksWebSocketRoundTrip']=='passed'
+    assert voice_report['runtime']==manifest['runtimeId'] and voice_report['voiceRegressionTests']>=13
+    shutil.copy2(local/'installed-voice-smoke.json',desktop/'out/installed-voice-smoke.json')
     for name in ['components.json','smoke-result.json']:
         download(tag,name); shutil.copy2(inputs/name,desktop/'out'/name)
     shutil.copy2(checkout/'delivery-notes.md',desktop/'out/API-AND-LICENSE.md')
