@@ -1,12 +1,12 @@
 diff --git a/apps/desktop/scripts/refresh-runtime.mjs b/apps/desktop/scripts/refresh-runtime.mjs
-index 023fde80e301309586f2d7fa6f58d35a5c1d428e..57fd33c4f98432cb046928f458888ff589d1cc94 100644
+index 023fde80e301309586f2d7fa6f58d35a5c1d428e..aceaa0832522b382409136075a12b45a95bf10ff 100644
 --- a/apps/desktop/scripts/refresh-runtime.mjs
 +++ b/apps/desktop/scripts/refresh-runtime.mjs
 @@ -13,6 +13,8 @@ const model = JSON.parse(await readFile(path.join(target.runtime, 'support/local
  assert.equal(model.arch, target.arch);
  const runtimeNode = path.join(target.runtime, target.layout.node);
  assert.equal(execFileSync(runtimeNode, ['--version'], { encoding: 'utf8' }).trim(), `v${target.node.version}`);
-+execFileSync('uv', ['pip', 'install', '--break-system-packages', '--python', path.join(target.runtime, target.layout.python),
++execFileSync(path.join(target.runtime, target.layout.python), ['-m', 'pip', 'install', '--break-system-packages',
 +  '--no-deps', '--require-hashes', '-r', path.join(root, `requirements/student-runtime-${target.id}.lock`)], { stdio: 'inherit' });
  const remotionLock = 'deeptutor/agents/video_lesson/remotion/package-lock.json';
  assert.deepEqual(await readFile(path.join(root, remotionLock)), await readFile(path.join(target.runtime, 'support/remotion/package-lock.json')));
