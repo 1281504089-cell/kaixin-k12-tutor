@@ -21,19 +21,19 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.13'
+      - uses: astral-sh/setup-uv@v6
+      - name: Prepare the bundled Python version
+        run: uv venv --python 3.12.13 .stt-venv
       - name: Verify source and apply the candidate
         run: |
-          python bootstrap_source.py --with-updates
+          .stt-venv/Scripts/python.exe bootstrap_source.py --with-updates
           cp student-source/deeptutor/services/local_ai/worker.py baseline-stt-worker.py
           git -C student-source apply ../qa/windows-stt-20261114/candidate.patch
       - name: Install the locked CPU speech decoder and test-only container reader
-        run: python -m pip install numpy==2.2.6 sherpa-onnx==1.12.40 sherpa-onnx-core==1.12.40 imageio-ffmpeg==0.6.0
+        run: uv pip install --python .stt-venv/Scripts/python.exe numpy==2.2.6 sherpa-onnx==1.12.40 sherpa-onnx-core==1.12.40 imageio-ffmpeg==0.6.0
       - name: Decode real spoken audio in ASCII and Chinese model paths
         working-directory: student-source
-        run: python ../qa/windows-stt-20261114/verify_windows_stt.py
+        run: ../.stt-venv/Scripts/python.exe ../qa/windows-stt-20261114/verify_windows_stt.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
