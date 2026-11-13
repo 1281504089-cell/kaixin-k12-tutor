@@ -1,0 +1,98 @@
+{
+  "tag": "student-20261114-fetchfix",
+  "launcher_build": "20261114-fetchfix",
+  "core_commit": "525157ebded003193f2927960d983e4819e08513",
+  "manifests": {
+    "macos-arm64": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "darwin",
+      "arch": "arm64",
+      "coreVersion": "1.7.1",
+      "commit": "525157ebded003193f2927960d983e4819e08513",
+      "builtAt": 1794589202282,
+      "corePayloadSha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+      "runtimeId": "1.7.1-kaixin-20261114-stt-macos-arm64-20261112",
+      "baseRuntimeId": "1.7.1-04276f68a-arm64",
+      "archive": "kaixin-core-20261114-stt.tar.gz",
+      "sha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+      "signature": "y2R/wAuug5KsKsdurw9EQle3XThWoGaC8KNg6Gn7xOg9mKUDnrtfx17rrrlARlg8JnvfGoj4Wj9a4QSSsdDiCQ=="
+    },
+    "macos-x64": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "darwin",
+      "arch": "x64",
+      "coreVersion": "1.7.1",
+      "commit": "525157ebded003193f2927960d983e4819e08513",
+      "builtAt": 1794589202282,
+      "corePayloadSha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+      "runtimeId": "1.7.1-kaixin-20261114-stt-macos-x64-20261112",
+      "baseRuntimeId": "1.7.1-04276f68a-x64",
+      "archive": "kaixin-core-20261114-stt.tar.gz",
+      "sha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+      "signature": "/UJxPhiZIakYb1R53MkJ/EiLd6nsioCVSokAWoe1QuGE7V38muKerK9qZwRA+l0jdkeUPVcexzVeqBNqvPTJCw=="
+    },
+    "windows-x64": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "win32",
+      "arch": "x64",
+      "coreVersion": "1.7.1",
+      "commit": "525157ebded003193f2927960d983e4819e08513",
+      "builtAt": 1794589202282,
+      "corePayloadSha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+      "runtimeId": "1.7.1-kaixin-20261114-stt-windows-x64-20261112",
+      "baseRuntimeId": "1.7.1-04276f68a-x64",
+      "archive": "kaixin-core-20261114-stt.tar.gz",
+      "sha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+      "signature": "2DJh+fGB5pM0fce6944Ga+5mwFZPCUh89MSTdWPaIChWdPj8smgfflhWLc3QZm1ht0VSVC43tZUky0VEDhCoAg=="
+    }
+  },
+  "core_asset": {
+    "url": "https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/744425053",
+    "id": 744425053,
+    "node_id": "RA_kwDOVlRP084sXwZd",
+    "name": "kaixin-core-20261114-stt.tar.gz",
+    "label": "",
+    "uploader": {
+      "login": "github-actions[bot]",
+      "id": 41898282,
+      "node_id": "MDM6Qm90NDE4OTgyODI=",
+      "avatar_url": "https://avatars.githubusercontent.com/in/15368?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/github-actions%5Bbot%5D",
+      "html_url": "https://github.com/apps/github-actions",
+      "followers_url": "https://api.github.com/users/github-actions%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/github-actions%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/github-actions%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/github-actions%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/github-actions%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "content_type": "application/x-gtar",
+    "state": "uploaded",
+    "size": 44834247,
+    "digest": "sha256:2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+    "download_count": 0,
+    "created_at": "2026-11-13T16:54:36Z",
+    "updated_at": "2026-11-13T16:54:38Z",
+    "browser_download_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-core-20261114-stt.tar.gz"
+  },
+  "shell_files": {
+    "src/main.mjs": {
+      "before_sha256": "b7467a3d4e332fc3b4bf459c8362dc372345d98c3e2ccbef23ecd12a472c43bf",
+      "sha256": "94660a9fde5dcabd50cbc90954462c62df08d9ff1943a4b88659b1ca5d39c64f"
+    },
+    "src/release-updates.mjs": {
+      "before_sha256": "6fecffe4c788aff7f6d7eff36169dfcbfe72fad573b3a3b094519bb717d52ba4",
+      "sha256": "096d157875a6f2c33ef9ac54133519107caa93706329949eb333a73256e619bf"
+    }
+  }
+}

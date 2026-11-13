@@ -1,0 +1,73 @@
+name: Build and verify three complete installers with download fallback
+on:
+  push:
+    branches: ['codex/fetchfix-release-20261114-*']
+    paths: ['ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'ci_repackage.py', 'ci-proxy-smoke.cjs', 'fetchfix-*', 'fetchfix-shell/**', 'fetchfix-tests/**', 'fetchfix-windows/**', '.github/workflows/fetchfix-release.yml']
+permissions:
+  contents: write
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create isolated candidate release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag=student-20261114-fetchfix
+          if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
+            python -c "import json; assert json.load(open('current.json'))['isPrerelease'], 'Never overwrite a final release'"
+          else
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '三端下载修复候选 · 2026-11-14' --notes '等待三个系统的最终安装文件、教材与代理下载验证。'
+          fi
+  native:
+    needs: candidate
+    timeout-minutes: 85
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Windows packaging tool
+        if: runner.os == 'Windows'
+        run: choco install nsis --yes --no-progress
+      - name: Build and test the final complete installer
+        run: python ci-fresh-install.py --target ${{ matrix.target }}
+      - name: Retain native proof and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fetchfix-${{ matrix.target }}
+          path: fresh-evidence/${{ matrix.target }}/
+          if-no-files-found: error
+  publish:
+    needs: native
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all native reports and publish the same tested files
+        run: python ci-promote-fetchfix.py
