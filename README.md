@@ -8,6 +8,8 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-x64)
 
+**20261113 头像更新提示。** 有新版时，左上角头像旁会出现提示卡，关闭后保留「有新版」标记；点击即可查看并更新，不必去设置。后台检查不打断学习，也不会自行安装。Intel Mac 已安装用户先更换一次[本轮启动器](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/Kaixin-Updater-20261113-avatar-macos-x64.zip)，再检查核心更新；这台测试 Mac 已完成。[操作实拍与验证范围](AVATAR-UPDATES-20261113.md)
+
 **20261113 科目项目更新。** 每科旁边常驻「＋」，点哪一科就在哪一科新建对话，自动带上对应老师。每科默认只保留「错题讲解」；取消「预习／复习」默认入口，原有记录保留。已更新源码和 Intel Mac 签名增量，并在本机验证前后端一致。[项目操作与验证说明](PROJECT-CONTROLS-20261113.md)
 
 **20261113 联网搜索源码修复。** 免费搜索改为明确的主备引擎；单次搜索最多等待 12 秒，网络失败停止换词重试，空结果最多补查一次。来源没读全就说明缺口，不把摘要补成真题。已通过 248 项相关回归及 DeepSeek Flash High 小样本实测。**已合入本次 Intel Mac 签名增量更新；完整安装包仍为 20261112。** [搜索说明、实测与限制](SEARCH-20261113.md)

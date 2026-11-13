@@ -123,6 +123,11 @@
       "file": "student-project-controls-20261113.patch",
       "sha256": "18c9513c86d57db13a24839c3d641ef9dc5f90e279e1f73b8ebf658a8a342df4",
       "description": "Keep a visible per-subject add-chat button, seed only the stable mistake conversation, retire preparation/review navigation without deleting prior records, and preserve subject teachers/instructions"
+    },
+    {
+      "file": "student-avatar-update-20261113.patch",
+      "sha256": "d471e08dbb1172e8625017cc67a0c0a7023dbe732cd23085b5aa40dc89ca1b3c",
+      "description": "Surface verified desktop updates at the avatar with a dismissible anchored notice, a persistent version marker and direct update action; keep background checks passive, periodically refresh status, replay state on reload and preserve signed updates and backups"
     }
   ]
 }

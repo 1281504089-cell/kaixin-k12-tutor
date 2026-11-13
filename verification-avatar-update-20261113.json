@@ -1,0 +1,63 @@
+{
+  "source_commit": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
+  "parent_source_commit": "5aad706a5d3d70b5b422150a26a8646fa117a6e4",
+  "patch_sha256": "d471e08dbb1172e8625017cc67a0c0a7023dbe732cd23085b5aa40dc89ca1b3c",
+  "tests": {
+    "desktop_passed": 18,
+    "frontend_passed": 18,
+    "production_build": "passed",
+    "typecheck": "passed",
+    "desktop_syntax": "passed"
+  },
+  "patch": {
+    "files_checked": 10,
+    "patch_applies": true,
+    "all_files_byte_equal": true
+  },
+  "native_ui": {
+    "isolated_data": true,
+    "official_signed_feed": true,
+    "automatic_notice_observed": true,
+    "direct_native_confirmation_observed": true,
+    "cancel_preserves_notice": true,
+    "avatar_menu_action_observed": true,
+    "collapsed_sidebar_observed": true,
+    "dismissal_remount_regression": "passed"
+  },
+  "mac_deployment": {
+    "runtimeId": "1.7.1-kaixin-20261113-avatar-update-x64",
+    "commit": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
+    "upgrade_phase": "complete",
+    "frontend_build": "VqEahODnYRWuE1H6KW5WQ",
+    "frontend_matches_verified_build": true,
+    "backend_ready": true,
+    "frontend_ready": true,
+    "native_shell_files_match": true,
+    "signature_verified": true
+  },
+  "data_preservation": {
+    "databases_checked": 12,
+    "settings_checked": 17,
+    "api_and_user_settings_unchanged": true,
+    "setup_marker_may_change_as_requested": true,
+    "all_preexisting_learning_rows_present": true,
+    "tables_unchanged": true,
+    "changed_tables": [],
+    "sessions_before": 31,
+    "sessions_after": 31,
+    "messages_before": 106,
+    "messages_after": 106
+  },
+  "launcher": {
+    "name": "Kaixin-Updater-20261113-avatar-macos-x64.zip",
+    "size": 175025182,
+    "sha256": "d7db29be2d0e013bee64cc38857784e82279e4c78264b840c5f71dac87206d6a",
+    "codesign_verified": true,
+    "platform": "darwin",
+    "arch": "x64",
+    "contains_runtime_and_books": false,
+    "requires_existing_full_install": true
+  },
+  "other_platform_installers_rebuilt": false,
+  "api_keys_or_personal_learning_records_uploaded": false
+}
