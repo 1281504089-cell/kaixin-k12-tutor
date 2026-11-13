@@ -51,7 +51,12 @@ async function content() {
     await import(pathToFileURL(path.join(__dirname, 'main.mjs')));
     await app.whenReady();
     let view;
-    while (!(view = await content())) await pause(500);
+    const readyDeadline = Date.now() + 120000;
+    while (!(view = await content())) {
+      assert.ok(Date.now() < readyDeadline, 'The old installed core did not open the update test interface');
+      await pause(500);
+    }
+    await pause(1000);
     void view.executeJavaScript('window.kaixinDesktop.checkForUpdates()').catch(error => { invokeError = error.message; });
     while (!installed) await pause(500);
     const after = JSON.parse(readFileSync(path.join(home, 'active.json')));

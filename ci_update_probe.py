@@ -31,6 +31,8 @@ print(json.dumps(asyncio.run(run())))
  probe=root/('update-entry.app' if target.startswith('macos') else 'update-entry')
  shutil.copytree(source,probe,symlinks=True,ignore=lambda directory,names:[n for n in names if n in {'seed','update'}] if Path(directory)==resources else [])
  copied=probe/'Contents/Resources' if target.startswith('macos') else probe/'resources'
+ # The production launcher always verifies its seed manifest, even when an older core is already installed.
+ (copied/'seed').mkdir();shutil.copyfile(resources/'seed/runtime.json',copied/'seed/runtime.json')
  package=copied/'app/package.json';pkg=json.loads(package.read_text());pkg['main']='src/update-flow.cjs';package.write_text(json.dumps(pkg,ensure_ascii=False))
  shutil.copyfile(root/'ci-update-flow.cjs',copied/'app/src/update-flow.cjs')
  for name in ['main.mjs','release-updates.mjs','update-network.mjs']:assert (copied/'app/src'/name).read_bytes()==(resources/'app/src'/name).read_bytes()
