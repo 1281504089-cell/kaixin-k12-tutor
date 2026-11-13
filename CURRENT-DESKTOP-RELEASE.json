@@ -1,0 +1,168 @@
+{
+  "formatVersion": 1,
+  "repository": "1281504089-cell/kaixin-k12-tutor",
+  "tag": "student-20261114-unified",
+  "release_id": 444569798,
+  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified",
+  "release_repository_commit": "02bc419d243843ffc371ea1ec8c902a86d18862f",
+  "combined_source_commit": "d3214451efd0a392aca1000805362626632cc858",
+  "learning_source_commit": "f61912e0da2b821ed3739aeb4765296a7ddfef53",
+  "backend_source_commit": "525157ebded003193f2927960d983e4819e08513",
+  "frontend_build_id": "3Z48lqOkysYS-aVa8ATjs",
+  "launcher_build": "20261114-unified",
+  "builtAt": 1794589979457,
+  "core_archive": "kaixin-core-20261114-projects-v2.tar.gz",
+  "core_sha256": "918fffe063172304fac7ae119970f1b7dfee207572eb17ed4f14c82573261a54",
+  "platforms": {
+    "windows-x64": {
+      "native_run": {
+        "run_id": 43487830213,
+        "workflow_commit": "a20eb18864123cb1f49e1d35748038341187b1cb"
+      },
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43487830213/job/132100942676",
+      "new_install_runtime": "1.7.1-kaixin-20261114-projects-windows-x64-20261112",
+      "stable_manifest": "runtime-windows-x64.json",
+      "stable_manifest_sha256": "57e4fc2b8f45bfd17504796794694b0cffc3c8b023373f2805da5edd86a0387b",
+      "stable_runtime": "1.7.1-kaixin-20261114-projects-windows-x64-universal",
+      "complete_installation_files": [
+        {
+          "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+          "bytes": 1992294400,
+          "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+          "bytes": 1992294400,
+          "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+          "bytes": 1992294400,
+          "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+          "bytes": 1005564586,
+          "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+          "bytes": 204633477,
+          "sha256": "5af7cdf1c1ddfbb89174fdbafaa80cbf2b46a5608adb175873bba475f0d6e081"
+        }
+      ],
+      "migration_file": {
+        "file": "Kaixin-Launcher-Migration-d3214451efd0-windows-x64-Setup.exe",
+        "bytes": 159892786,
+        "sha256": "4650036eae7ea9f7a713fbee8eb008547d94e6677dd71c53a01786f3f6f13ea6"
+      },
+      "native_installation": "passed",
+      "native_migration_and_update": "passed",
+      "existing_synthetic_records_preserved": true
+    },
+    "macos-x64": {
+      "native_run": {
+        "run_id": 43479655765,
+        "workflow_commit": "3c39fec01345b9848668e0bcb8e8df411cf8750e"
+      },
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43479655765/job/132072586037",
+      "new_install_runtime": "1.7.1-kaixin-20261114-projects-macos-x64-20261112",
+      "stable_manifest": "runtime-macos-x64.json",
+      "stable_manifest_sha256": "a231b86fe6771f877d797e27e379f8e75e714cf9ad3abd82d29179735eac983e",
+      "stable_runtime": "1.7.1-kaixin-20261114-projects-macos-x64-universal",
+      "complete_installation_files": [
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-unified-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "79a48f0fb0424d337f1fe3a9a89861756f70b227edfda6c4fa9ec7c06dc38d5d"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-unified-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "8a93398f9819f0e01266a3061257a12c7d20b3cc74524d93f8a65884b5798732"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-unified-part.004.dmgpart",
+          "bytes": 1201564129,
+          "sha256": "01523f5e927dd99571a9d0c3b45d6bf39c65dbbcd4e0de4bd6cfe023dad19874"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-unified-part.dmg",
+          "bytes": 1992734464,
+          "sha256": "88a83af01a02a52ea693a303bca88566a0372f952e78736aa63e15a29294e0bc"
+        }
+      ],
+      "migration_file": {
+        "file": "Kaixin-Launcher-Migration-d3214451efd0-macos-x64.zip",
+        "bytes": 128816569,
+        "sha256": "6e0f55d4aecf9d10e58c6bd8ae709469e6dedc21e0053beb28ec0bb0c509c585"
+      },
+      "native_installation": "passed",
+      "native_migration_and_update": "passed",
+      "existing_synthetic_records_preserved": true
+    },
+    "macos-arm64": {
+      "native_run": {
+        "run_id": 43479655765,
+        "workflow_commit": "3c39fec01345b9848668e0bcb8e8df411cf8750e"
+      },
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43479655765/job/132072585993",
+      "new_install_runtime": "1.7.1-kaixin-20261114-projects-macos-arm64-20261112",
+      "stable_manifest": "runtime-macos-arm64.json",
+      "stable_manifest_sha256": "d03fa3b278fd9d18fc3d927bb3a3f195b84b69d466cf92a685ea68382615e604",
+      "stable_runtime": "1.7.1-kaixin-20261114-projects-macos-arm64-universal",
+      "complete_installation_files": [
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-unified-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "81345314748d588b47425969bc57340357f7b7000dd159a6e1e7b0adc07f36ac"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-unified-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "74ccc6f621727175060f5e0c151b747a71122d374abd158efad1aa74055f71a8"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-unified-part.004.dmgpart",
+          "bytes": 1132173612,
+          "sha256": "1e143affefed55c816802e4f9dd3b06e378e7e1f03fd4c8842b90668f003fadb"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-unified-part.dmg",
+          "bytes": 1992728996,
+          "sha256": "6ef8c8e75e435fa04aa8b79bd1fcffa936cfd25988ee5247161eb50ff34c9ded"
+        }
+      ],
+      "migration_file": {
+        "file": "Kaixin-Launcher-Migration-d3214451efd0-macos-arm64.zip",
+        "bytes": 122802302,
+        "sha256": "43f32b93155c5e3a5fbd25b81b3248d51fc095d276733881eea6899697b07fbe"
+      },
+      "native_installation": "passed",
+      "native_migration_and_update": "passed",
+      "existing_synthetic_records_preserved": true
+    }
+  },
+  "post_publication_verification": {
+    "signature_verified_manifests": 12,
+    "native_platform": "darwin",
+    "native_arch": "x64",
+    "transport": "production Chromium update session",
+    "previous_compatibility_runtime_gets_small_update": true,
+    "downloaded_core_commit": "f61912e0da2b821ed3739aeb4765296a7ddfef53",
+    "downloaded_sha256": "918fffe063172304fac7ae119970f1b7dfee207572eb17ed4f14c82573261a54",
+    "current_full_install_does_not_downgrade": true,
+    "earliest_base_gets_automatic_native_bridge": true,
+    "real_user_profile_modified": false
+  },
+  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-unified/PUBLICATION-RECEIPT.json",
+  "usb_delivery": {
+    "completed": true,
+    "verified_payload_files": 9,
+    "superseded_installation_directories_removed": true,
+    "other_materials_preserved": true
+  },
+  "release_skill": "skills/scholar-desktop-release/SKILL.md",
+  "physical_student_devices_all_tested": false,
+  "recorded_at_epoch": 1794599635.2508109
+}
