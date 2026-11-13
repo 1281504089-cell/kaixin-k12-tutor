@@ -6,7 +6,9 @@
 - **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
 - **九科有各自的 AI 老师。** 每科都有自己的学习项目。做题卡住时可以选对应科目的老师，先要个提示，自己做下去。
 
-[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified)
+[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments)
+
+**20261114 附件与资料库更新。** 上传时选择临时或长期，原件上传后即可阅读、截图引用和提问；全文解析与检索在后台准备。长期资料和内置教材统一放在「资料 → 资料库」。收藏夹、学习日志、题库、书籍、独立阅读的闲置入口一并收起。[使用方式、实测和限制](ATTACHMENTS-20261114.md)。
 
 **新电脑只装当前整合完整版，无需先装旧版或旧补丁。** 三种系统均包含新版更新器、项目与历史列表修复、语音预加载、运行环境和 136 册教材。[完整安装步骤](INSTALL-LATEST.md)。
 
@@ -26,7 +28,7 @@
 
 **20261113 整合更新。** 对话里的教材页码现在能直接打开对应原页，有核实原句时会短暂标亮；右侧收起或切到活动后也能点击打开；阅读区可输入页码、按回车跳转。无关教材页不再额外跑一轮模型研读。合并了移入项目、查历史聊天、在聊天里创建和修改任务，以及此前的附件长期保存、语音输入、选择卡片和数学配图更新。[整合说明与验证范围](INTEGRATED-20261113.md)
 
-**本次三系统完整包保留全部已有功能。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [本次完整安装说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-unified/INSTALLATION.txt) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
+**本次三系统完整包保留全部已有功能。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [本次完整安装说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-attachments/INSTALLATION.txt) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
 添加文字聊天 API 时，可搜索 **Kimi / Moonshot（月之暗面）** 并填写对应 Key；原有接口、密钥和默认模型保持不变。
 
@@ -44,20 +46,20 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 ## 下载安装
 
-本轮完整包主版本为 **1.7.1**，运行核心编号包含 **20261114-projects**，自带本机运行环境、136 册教材及本轮已整合修复。首次安装使用下表对应系统的一套文件；装好已包含本轮优化，在设置填写自己的聊天 API。界面默认简体中文。
+本轮完整包主版本为 **1.7.1**，运行核心编号包含 **20261114-attachments**，自带本机运行环境、136 册教材及本轮已整合修复。首次安装使用下表对应系统的一套文件；装好已包含本轮优化，在设置填写自己的聊天 API。界面默认简体中文。
 
 | 电脑 | 安装文件 | 自动试装 |
 | --- | --- | --- |
-| Apple 芯片 Mac | [下载 Apple 芯片版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
-| Intel Mac | [下载 Intel 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
-| Windows x64 | [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-unified) | 本轮中文路径安装、启动与退出、更新保留记录、卸载保留资料 |
+| Apple 芯片 Mac | [下载 Apple 芯片版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
+| Intel Mac | [下载 Intel 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
+| Windows x64 | [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments) | 本轮中文路径安装、启动与退出、更新保留记录、卸载保留资料 |
 
 1. 下载同一发布页的全部平台分卷，放进一个新文件夹并保留原名。学生安装请使用表中的平台文件。
 2. Mac 下载 1 个 `.dmg` 和 3 个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。
 3. Windows 下载 1 个 `Setup.exe` 和 4 个 `Runtime.001` 至 `Runtime.004`。双击 Setup，安装器会校验并合并分卷。
 4. 建议预留 40 GB 临时空间。安装校验和首次启动解压都可能需要几分钟。
 
-**U 盘交付采用每个系统一份完整文件**：Apple 芯片和 Intel 各一个普通 `.dmg`；Windows 一个完整 ZIP，解压后运行 `Setup.exe`。无需手动合并 Mac 分卷或另补语音组件。GitHub 每个发布附件限制为 2 GiB，因此上方下载页仍提供经校验的分卷；U 盘与 GitHub 包内使用同一份已验证运行环境。
+**GitHub 提供经过校验的安装分卷**，每个附件小于 2 GiB。此前交付的 U 盘单文件安装介质本批未重写；从 U 盘安装旧包后，通过「检查更新」获取本批核心。
 
 <details>
 <summary>Mac 打开分卷提示错误 109、110 或“镜像无法识别”</summary>
@@ -71,9 +73,9 @@ hdiutil convert -format ULFO -o "$HOME/Downloads/Kaixin-Mac-Complete.dmg" ./发�
 open "$HOME/Downloads/Kaixin-Mac-Complete.dmg"
 ```
 
-合并额外占用约 7 GB。若输出文件已存在，先核对版本或换一个文件名；校验失败时重新复制或下载失败的分卷。客户端要求 macOS 13 或以上。U 盘本轮目录提供普通单文件镜像，可以直接打开，不用转换。
+合并额外占用约 7 GB。若输出文件已存在，先核对版本或换一个文件名；校验失败时重新复制或下载失败的分卷。客户端要求 macOS 13 或以上。此前 U 盘中的普通单文件镜像可以直接打开；安装后再检查更新，不能把旧介质当作本批安装包。
 
-U 盘单文件镜像按磁盘校验、只读挂载、应用签名、芯片架构、运行环境签名和完整回读流程验收。对应系统的安装与启动已在原生构建机验证；U 盘单文件成品另有写入回读记录，保存在 U 盘的「校验记录」文件夹。
+本批 GitHub 分卷在对应系统的原生构建机上校验、挂载或安装并启动。此前 U 盘单文件成品的写入回读记录属于当时的介质版本，保存在 U 盘的「校验记录」文件夹。
 
 </details>
 
@@ -98,7 +100,7 @@ U 盘单文件镜像按磁盘校验、只读挂载、应用签名、芯片架构
 | 实时语音通话 | 在「设置 → 语音」选豆包或 MOSS-Live 并保存对应 Key。点聊天右上角的电话，有已保存 Key 时直接接通；首次也可在通话窗口填写。可切换学习辅导、英语陪练、口语翻译、模拟面试等场景，也可共享窗口或屏幕。收起浮窗后可以从「通话中」重新打开，挂断后文字保存到原对话。 |
 | 高拍仪辅导 | 点输入框上方的「高拍仪辅导员」，再点「开始通话」（部分版本显示「开始语音通话」），把纸面题对准摄像头。可旋转、镜像、调画面比例，或临时切到共享屏幕。做题时先给提示，明确要答案时会给简短讲解。 |
 | 九科学习项目 | 语文、数学、英语、物理、化学、生物、历史、地理、政治各默认保留一个「错题讲解」。点科目旁的「＋」在本科目新建普通对话，自动带上对应老师；项目指令和对话指令仍分别设置。 |
-| 拍题与资料问答 | 拍照和一至两页的短 PDF 可交给支持读图的模型先看原图。需要全文时在后台解析。输入框和右侧预览共用临时附件。 |
+| 拍题与资料问答 | 拍照和一至两页的短 PDF 可交给支持读图的模型先看原图。需要全文时在后台解析。上传时可选临时使用或长期保存。输入框和右侧共用原件，先阅读和提问，后台再准备全文；长期资料在「资料 → 资料库」找回。 |
 | 错题本与笔记 | 按学科保存错题，选中文字或截取公式和图形后可加入笔记。 |
 | 九科学习复盘 | 选学科和日期，默认读取对应科目项目，也可手动加入聊天或阅读对话。报告按学科整理考点、易错点和练习，理科按需配图，依据放在文末，可导出 Word。「四问复盘」选填。 |
 | 选模型 | 菜单标出快速问答、理科难题验算、长文阅读等用途。填入 API 后可发现接口列出的受支持模型，打开菜单时在后台更新列表。 |
@@ -107,15 +109,16 @@ U 盘单文件镜像按磁盘校验、只读挂载、应用签名、芯片架构
 
 教材库收录的是当前目录中的主科册次。原页可直接阅读，日常答题自动参考已核对的教材要点，待核对页面保留状态。
 
+「资料库」保存可直接阅读的原件；「知识库」建立可供 AI 检索的内容索引。选择长期保存时会自动加入本机知识库，无需学生另做一次导入。
+
 学习记录、资料和设置保存在本机。语音通话和高拍仪辅导需要联网，可在「设置 → 语音」提前保存豆包或 MOSS-Live API Key；首次通话时填写的 Key 也会在接通后保存。两个服务分别保存 Key，独立于聊天模型及本机语音转文字。远程模型问答、Edge 朗读、搜索和公开视频字幕也需要网络。安装包已排除 API 密钥、个人学习记录和签名私钥。
 
 ## 开发者
 
-本次三端启动器与交付脚本另保存在 [隔离发行分支](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/codex/inplace-release-20261113-96000b)，不合并后续待命的 personal agent 改动。从 GitHub 克隆发行仓库后，运行 `python3 bootstrap_source.py --with-updates`，即可校验、解包并应用最新源码修复。上方完整安装包已由完整补丁集合重建，不需要另补辅导更新。开发者指南列出本地启动命令、教材与学科配置的位置、打包入口和依赖说明。 [查看开发者指南](DEVELOPMENT.md) · [查看源码清单](source-manifest.json)
+本批完整源码、三端构建与验收脚本、签名清单保存在[对应发布标签](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/student-20261114-attachments)。从 GitHub 克隆发行仓库后，运行 `python3 bootstrap_source.py --with-updates`，即可校验、解包并应用最新源码修复。上方完整安装包已由完整补丁集合重建，不需要另补辅导更新。开发者指南列出本地启动命令、教材与学科配置的位置、打包入口和依赖说明。 [查看开发者指南](DEVELOPMENT.md) · [查看源码清单](source-manifest.json)
 
 ## 验证与许可
 
 本次发布页提供三份 `verification-系统.json`，记录完整下载文件的大小、SHA256、冻结源码、运行环境和首次安装验收结果；旧冻结快照、历史发布和全部增量补丁保留。Mac 在 macOS 15 原生构建机验证，Windows 在 Windows 原生构建机验证。体验包采用 Mac 临时签名和 Windows 未签名安装器，首次打开可能看到系统来源提示。
 
 源码归档内附 `LICENSE` 与 `THIRD_PARTY_NOTICES.md`。教材、GeoGebra、Remotion 等资源的使用与分发条件请查看各自说明。 [接口与许可说明](delivery-notes.md) · [上游 DeepTutor](https://github.com/HKUDS/DeepTutor)
-
