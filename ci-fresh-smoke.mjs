@@ -138,7 +138,14 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
 } finally {
   if (child?.pid && child.exitCode === null) {
     if (process.platform === 'win32') {
-      execFileSync(path.join(process.env.SystemRoot, 'System32/taskkill.exe'), ['/PID', String(child.pid), '/T', '/F']);
+      try {
+        execFileSync(path.join(process.env.SystemRoot, 'System32/taskkill.exe'), ['/PID', String(child.pid), '/T', '/F']);
+      } catch (error) {
+        // taskkill can report a decoder that exited while its process tree was being stopped.
+        console.warn('Process-tree cleanup returned status ' + error.status + '; checking actual exit and service shutdown.');
+      }
+      await Promise.race([new Promise(resolve => child.once('exit', resolve)), pause(20000)]);
+      assert.notEqual(child.exitCode, null, 'Installed app is still running after cleanup');
     } else {
       process.kill(-child.pid, 'SIGTERM');
       await Promise.race([new Promise(resolve => child.once('exit', resolve)), pause(20000)]);

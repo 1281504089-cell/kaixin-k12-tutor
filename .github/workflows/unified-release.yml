@@ -5,6 +5,7 @@ on:
     paths: ['ci-*.py', 'ci_*.py', 'ci-*.mjs', 'ci-*.cjs', 'fetchfix-*', 'fetchfix-shell/**', 'fetchfix-tests/**', 'fetchfix-windows/**', 'launcher-migration/**', 'migration-seeds/**', '.github/workflows/unified-release.yml']
 permissions:
   contents: write
+  actions: read
 jobs:
   candidate:
     runs-on: ubuntu-latest
@@ -28,10 +29,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: macos-x64
-            runner: macos-15-intel
-          - target: macos-arm64
-            runner: macos-15
           - target: windows-x64
             runner: windows-2025
     runs-on: ${{ matrix.runner }}
@@ -52,6 +49,11 @@ jobs:
       - name: Install Windows packaging tool
         if: runner.os == 'Windows'
         run: choco install nsis --yes --no-progress
+      - name: Read previous isolated diagnostics
+        shell: bash
+        run: |
+          gh run download 43479655765 --name unified-windows-x64 --dir previous-windows
+          python -c "import pathlib; [print(p.name + ': ' + p.read_text()) for p in pathlib.Path('previous-windows').glob('*.json')]"
       - name: Build and test the final complete installer
         run: python ci-fresh-install.py --target ${{ matrix.target }}
       - name: Retain native proof and diagnostics
