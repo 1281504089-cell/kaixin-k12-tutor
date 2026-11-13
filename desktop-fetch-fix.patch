@@ -1,23 +1,25 @@
 diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
-index ce83d2c..f1ed2ef 100644
+index ce83d2c..cec17c8 100644
 --- a/apps/desktop/src/main.mjs
 +++ b/apps/desktop/src/main.mjs
-@@ -1,4 +1,4 @@
--import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme, desktopCapturer, systemPreferences } from 'electron';
-+import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme, desktopCapturer, systemPreferences, net } from 'electron';
- import { fork } from 'node:child_process';
- import { watch } from 'node:fs';
- import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access } from 'node:fs/promises';
-@@ -29,6 +29,8 @@ const transactionFile = path.join(userRoot, 'upgrade.json');
+@@ -11,6 +11,7 @@ import { WINDOWS, agentMarker, edition, targetId } from './platform.mjs';
+ import { killTree } from './processes.mjs';
+ import { snapshotWorkspace } from './workspace-snapshot.mjs';
+ import { findReleaseUpdate, downloadReleaseUpdate } from './release-updates.mjs';
++import { createUpdateFetch } from './update-network.mjs';
+ 
+ app.setName('开心动力超级学霸');
+ if (WINDOWS) app.setAppUserModelId('org.kaixindongli.super-scholar');
+@@ -29,6 +30,8 @@ const transactionFile = path.join(userRoot, 'upgrade.json');
  const interfaceFile = path.join(runtimeHome, 'data/user/settings/interface.json');
  const seed = app.isPackaged ? path.join(process.resourcesPath, 'seed/runtime.json') : path.join(sourceDirectory, '../.local', targetId(), 'seed/runtime.json');
  const publicKey = await readFile(path.join(sourceDirectory, '../assets/runtime-public.pem'), 'utf8');
 +// Chromium follows the same system proxy/PAC settings as the desktop browser.
-+const updateFetch = (url, options) => net.fetch(String(url), options);
++const updateFetch = createUpdateFetch(session);
  // macOS draws the shell's own title bar under the traffic lights; Windows keeps its native frame and menu bar.
  const HEADER_HEIGHT = WINDOWS ? 0 : 44;
  const BACKGROUND = { light: '#ffffff', dark: '#161618' };
-@@ -373,7 +375,7 @@ async function performReleaseCheck(check) {
+@@ -373,7 +376,7 @@ async function performReleaseCheck(check) {
    let temporary;
    let downloading = false;
    try {
@@ -26,7 +28,7 @@ index ce83d2c..f1ed2ef 100644
      if (!next) {
        publishRelease(null);
        if (check.interactive) await updateNotice('releaseCurrent');
-@@ -408,7 +410,7 @@ async function performReleaseCheck(check) {
+@@ -408,7 +411,7 @@ async function performReleaseCheck(check) {
      window.setProgressBar(2);
      const file = await downloadReleaseUpdate(next, temporary, progress => {
        if (!window.isDestroyed()) window.setProgressBar(progress);
@@ -36,7 +38,7 @@ index ce83d2c..f1ed2ef 100644
      await applyCoreUpdate(file);
      await updateNotice('releaseInstalled', next.runtimeId);
 diff --git a/apps/desktop/src/release-updates.mjs b/apps/desktop/src/release-updates.mjs
-index c2ef8a8..b91ddc9 100644
+index c2ef8a8..6362386 100644
 --- a/apps/desktop/src/release-updates.mjs
 +++ b/apps/desktop/src/release-updates.mjs
 @@ -1,5 +1,5 @@
@@ -47,7 +49,24 @@ index c2ef8a8..b91ddc9 100644
  import path from 'node:path';
  import { Readable, Transform } from 'node:stream';
  import { pipeline } from 'node:stream/promises';
-@@ -59,13 +59,6 @@ async function getApiAsset(name, fetchAsset, signal) {
+@@ -15,10 +15,14 @@ const RELEASE_METADATA_LIMIT = 2 * 1024 ** 2;
+ const ARCHIVE_LIMIT = 2 * 1024 ** 3;
+ const HOSTS = new Set(['github.com', 'api.github.com', 'release-assets.githubusercontent.com', 'objects.githubusercontent.com']);
+ 
++export function isGitHubUpdateURL(url) {
++  return url.protocol === 'https:' && HOSTS.has(url.hostname) && !url.port && !url.username && !url.password
++    && (url.hostname !== 'api.github.com' || url.href.startsWith(API));
++}
++
+ async function fetchGitHub(url, fetchAsset, signal, accept) {
+   for (let hop = 0; hop < 5; hop++) {
+-    if (url.protocol !== 'https:' || !HOSTS.has(url.hostname) || url.port || url.username || url.password
+-      || (url.hostname === 'api.github.com' && !url.href.startsWith(API))) {
++    if (!isGitHubUpdateURL(url)) {
+       throw new Error('Invalid GitHub update download location');
+     }
+     const response = await fetchAsset(url, {
+@@ -59,13 +63,6 @@ async function getApiAsset(name, fetchAsset, signal) {
    return fetchGitHub(new URL(`assets/${asset.id}`, API), fetchAsset, signal, 'application/octet-stream');
  }
  
@@ -61,7 +80,7 @@ index c2ef8a8..b91ddc9 100644
  async function readManifestRoute(fetchManifest, signal) {
    const timeout = AbortSignal.timeout(MANIFEST_ROUTE_TIMEOUT);
    const routeSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
-@@ -112,25 +105,58 @@ export async function findReleaseUpdate(target, current, publicKey, fetchAsset =
+@@ -112,25 +109,58 @@ export async function findReleaseUpdate(target, current, publicKey, fetchAsset =
  export async function downloadReleaseUpdate(manifest, directory, onProgress, fetchAsset = fetch, signal) {
    const deadline = AbortSignal.timeout(30 * 60 * 1000);
    signal = signal ? AbortSignal.any([signal, deadline]) : deadline;
@@ -138,6 +157,29 @@ index c2ef8a8..b91ddc9 100644
    const file = path.join(directory, 'runtime.json');
    await writeFile(file, JSON.stringify(manifest), { mode: 0o600, flag: 'wx' });
    return file;
+diff --git a/apps/desktop/src/update-network.mjs b/apps/desktop/src/update-network.mjs
+new file mode 100644
+index 0000000..b148a87
+--- /dev/null
++++ b/apps/desktop/src/update-network.mjs
+@@ -0,0 +1,17 @@
++import { isGitHubUpdateURL } from './release-updates.mjs';
++
++/** Electron cancels manual fetch redirects; an isolated session validates every followed hop. */
++export function createUpdateFetch(sessions) {
++  let updates;
++  return (url, options) => {
++    if (!updates) {
++      updates = sessions.fromPartition('kaixin-updates');
++      updates.webRequest.onBeforeRequest((request, done) => {
++        let allowed = false;
++        try { allowed = isGitHubUpdateURL(new URL(request.url)); } catch {}
++        done({ cancel: !allowed });
++      });
++    }
++    return updates.fetch(String(url), { ...options, redirect: 'follow' });
++  };
++}
 diff --git a/apps/desktop/test/release-updates.test.mjs b/apps/desktop/test/release-updates.test.mjs
 index 2c99b2b..ba068db 100644
 --- a/apps/desktop/test/release-updates.test.mjs
@@ -203,6 +245,42 @@ index 2c99b2b..ba068db 100644
  test('signed update reuses original runtime without modifying it; wrong archive is rejected', async t => {
    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-update-test-'));
    t.after(() => rm(root, { recursive: true, force: true }));
+diff --git a/apps/desktop/test/update-network.test.mjs b/apps/desktop/test/update-network.test.mjs
+new file mode 100644
+index 0000000..42361a4
+--- /dev/null
++++ b/apps/desktop/test/update-network.test.mjs
+@@ -0,0 +1,30 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++import { createUpdateFetch } from '../src/update-network.mjs';
++
++test('the system-network session validates every redirect, omits credentials and initializes after readiness', async () => {
++  let guard, sessions = 0;
++  const calls = [];
++  const fetch = createUpdateFetch({ fromPartition(name) {
++    sessions++;
++    assert.equal(name, 'kaixin-updates');
++    return { webRequest: { onBeforeRequest(callback) { guard = callback; } },
++      fetch: async (url, options) => { calls.push({ url, options }); return new Response('ok'); } };
++  } });
++  assert.equal(sessions, 0);
++  await fetch(new URL('https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/tags/core-updates'), { credentials: 'omit', redirect: 'manual' });
++  await fetch(new URL('https://release-assets.githubusercontent.com/fixture'), { credentials: 'omit' });
++  assert.equal(sessions, 1);
++  assert.equal(calls[0].options.redirect, 'follow');
++  assert.equal(calls[0].options.credentials, 'omit');
++  for (const [url, cancel] of [
++    ['https://release-assets.githubusercontent.com/fixture', false],
++    ['https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/fixture', false],
++    ['https://example.org/redirect', true], ['http://github.com/unsafe', true],
++    ['https://api.github.com/user', true], ['https://user@github.com/path', true],
++  ]) {
++    let result;
++    guard({ url }, value => { result = value; });
++    assert.equal(result.cancel, cancel, url);
++  }
++});
 diff --git a/apps/desktop/test/update-notice.test.mjs b/apps/desktop/test/update-notice.test.mjs
 index 8a2b7a8..b593b60 100644
 --- a/apps/desktop/test/update-notice.test.mjs

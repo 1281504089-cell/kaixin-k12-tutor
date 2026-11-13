@@ -1,4 +1,4 @@
-const { app, session, net } = require('electron');
+const { app, session } = require('electron');
 const http = require('node:http');
 const sockets = require('node:net');
 const { readFileSync, writeFileSync } = require('node:fs');
@@ -28,18 +28,27 @@ app.whenReady().then(async () => {
   const timer = setTimeout(() => app.exit(1), 240000);
   try {
     await new Promise(resolve => proxy.listen(0, '127.0.0.1', resolve));
-    await session.defaultSession.setProxy({ mode: 'fixed_servers', proxyRules: `http=127.0.0.1:${proxy.address().port};https=127.0.0.1:${proxy.address().port}` });
+    await session.fromPartition('kaixin-updates').setProxy({ mode: 'fixed_servers', proxyRules: `http=127.0.0.1:${proxy.address().port};https=127.0.0.1:${proxy.address().port}` });
     const { findReleaseUpdate, downloadReleaseUpdate } = await import(pathToFileURL(path.join(__dirname, 'release-updates.mjs')));
+    const { createUpdateFetch } = await import(pathToFileURL(path.join(__dirname, 'update-network.mjs')));
+    const systemFetch = createUpdateFetch(session);
     const key = readFileSync(path.join(__dirname, '../assets/runtime-public.pem'));
     const base = JSON.parse(readFileSync(process.env.KX_BASE_MANIFEST));
     const target = process.platform === 'win32' ? 'windows-x64' : `macos-${process.arch}`;
     let failedDirect = false;
-    const fetch = (url, options) => {
+    const fetch = async (url, options) => {
       if (url.hostname === 'github.com') {
         failedDirect = true;
         return Promise.reject(new TypeError('fetch failed'));
       }
-      return net.fetch(String(url), options);
+      try {
+        const response = await systemFetch(url, options);
+        console.log('Proxy request:', url.hostname, response.status);
+        return response;
+      } catch (error) {
+        console.error('Proxy request failed:', url.hostname, error.message, error.cause?.code);
+        throw error;
+      }
     };
     const offered = await findReleaseUpdate(target, base, key, fetch, AbortSignal.timeout(30000));
     assert.equal(offered.baseRuntimeId, base.runtimeId);

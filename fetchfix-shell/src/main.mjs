@@ -1,4 +1,4 @@
-import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme, desktopCapturer, systemPreferences, net } from 'electron';
+import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, session, nativeTheme, desktopCapturer, systemPreferences } from 'electron';
 import { fork } from 'node:child_process';
 import { watch } from 'node:fs';
 import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access } from 'node:fs/promises';
@@ -11,6 +11,7 @@ import { WINDOWS, agentMarker, edition, targetId } from './platform.mjs';
 import { killTree } from './processes.mjs';
 import { snapshotWorkspace } from './workspace-snapshot.mjs';
 import { findReleaseUpdate, downloadReleaseUpdate } from './release-updates.mjs';
+import { createUpdateFetch } from './update-network.mjs';
 
 app.setName('开心动力超级学霸');
 if (WINDOWS) app.setAppUserModelId('org.kaixindongli.super-scholar');
@@ -30,7 +31,7 @@ const interfaceFile = path.join(runtimeHome, 'data/user/settings/interface.json'
 const seed = app.isPackaged ? path.join(process.resourcesPath, 'seed/runtime.json') : path.join(sourceDirectory, '../.local', targetId(), 'seed/runtime.json');
 const publicKey = await readFile(path.join(sourceDirectory, '../assets/runtime-public.pem'), 'utf8');
 // Chromium follows the same system proxy/PAC settings as the desktop browser.
-const updateFetch = (url, options) => net.fetch(String(url), options);
+const updateFetch = createUpdateFetch(session);
 // macOS draws the shell's own title bar under the traffic lights; Windows keeps its native frame and menu bar.
 const HEADER_HEIGHT = WINDOWS ? 0 : 44;
 const BACKGROUND = { light: '#ffffff', dark: '#161618' };

@@ -17,7 +17,10 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
         file = sources / name
         assert hashlib.sha256(file.read_bytes()).hexdigest() == row['sha256']
         destination = resources / 'app' / name
-        assert hashlib.sha256(destination.read_bytes()).hexdigest() == row['before_sha256']
+        if row['before_sha256'] is None:
+            assert not destination.exists()
+        else:
+            assert hashlib.sha256(destination.read_bytes()).hexdigest() == row['before_sha256']
         shutil.copyfile(file, destination)
     core = resources / 'update'
     for file in core.iterdir():

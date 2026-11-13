@@ -15,10 +15,14 @@ const RELEASE_METADATA_LIMIT = 2 * 1024 ** 2;
 const ARCHIVE_LIMIT = 2 * 1024 ** 3;
 const HOSTS = new Set(['github.com', 'api.github.com', 'release-assets.githubusercontent.com', 'objects.githubusercontent.com']);
 
+export function isGitHubUpdateURL(url) {
+  return url.protocol === 'https:' && HOSTS.has(url.hostname) && !url.port && !url.username && !url.password
+    && (url.hostname !== 'api.github.com' || url.href.startsWith(API));
+}
+
 async function fetchGitHub(url, fetchAsset, signal, accept) {
   for (let hop = 0; hop < 5; hop++) {
-    if (url.protocol !== 'https:' || !HOSTS.has(url.hostname) || url.port || url.username || url.password
-      || (url.hostname === 'api.github.com' && !url.href.startsWith(API))) {
+    if (!isGitHubUpdateURL(url)) {
       throw new Error('Invalid GitHub update download location');
     }
     const response = await fetchAsset(url, {

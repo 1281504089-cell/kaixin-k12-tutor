@@ -88,11 +88,15 @@
   "shell_files": {
     "src/main.mjs": {
       "before_sha256": "b7467a3d4e332fc3b4bf459c8362dc372345d98c3e2ccbef23ecd12a472c43bf",
-      "sha256": "94660a9fde5dcabd50cbc90954462c62df08d9ff1943a4b88659b1ca5d39c64f"
+      "sha256": "57b36431bef3bb45430ba07701ad79e06ec10ffa93a9c513be9ce4f3a1f73a3f"
     },
     "src/release-updates.mjs": {
       "before_sha256": "6fecffe4c788aff7f6d7eff36169dfcbfe72fad573b3a3b094519bb717d52ba4",
-      "sha256": "096d157875a6f2c33ef9ac54133519107caa93706329949eb333a73256e619bf"
+      "sha256": "e1d19421545668f85cf280a399cb96acdd5a4724d420d3b4d81daca024a64ee4"
+    },
+    "src/update-network.mjs": {
+      "before_sha256": null,
+      "sha256": "d8664ce99adac17cbd2f2ebd1ffe21c49232d55dc8f41d1b200d6d50813084b1"
     }
   }
 }
