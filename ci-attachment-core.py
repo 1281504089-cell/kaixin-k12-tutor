@@ -4,6 +4,11 @@ from pathlib import Path,PurePosixPath
 ROOT=Path.cwd(); CONFIG=json.loads((ROOT/'attachment-release.json').read_text())
 subprocess.run(['python','bootstrap_source.py','--with-updates'],check=True)
 SOURCE=ROOT/'student-source';WEB=SOURCE/'web'
+tracked=subprocess.check_output(['git','ls-files','-z'],cwd=SOURCE).decode().rstrip('\0').split('\0')
+aggregate=hashlib.sha256()
+for name in sorted(n for n in tracked if n!='SOURCE_FREEZE.json'):
+ data=(SOURCE/name).read_bytes();aggregate.update(name.encode()+b'\0'+hashlib.sha256(data).digest())
+assert aggregate.hexdigest()==CONFIG['source_files_sha256'], 'Rebuilt source differs from the frozen tested source'
 env={**os.environ,'NEXT_TELEMETRY_DISABLED':'1','NEXT_PUBLIC_API_BASE':'__NEXT_PUBLIC_API_BASE_PLACEHOLDER__','NEXT_PUBLIC_AUTH_ENABLED':'__NEXT_PUBLIC_AUTH_ENABLED_PLACEHOLDER__'}
 for command in [['npm','ci','--legacy-peer-deps','--no-audit','--no-fund'],['npm','run','build']]:subprocess.run(command,cwd=WEB,env=env,check=True)
 subprocess.run(['npx','vitest','run',*CONFIG['web_tests']],cwd=WEB,env=env,check=True)

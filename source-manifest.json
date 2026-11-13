@@ -145,9 +145,9 @@
       "description": "Keep General chat history visible across subjects, offer the standard scoped project conversation menu, and make add controls subtle"
     },
     {
-      "file": "student-desktop-update-network-20261114.patch",
-      "sha256": "21ca8b6d32551ab3321925c4ce64158de4b624f0224ffa37509c0b5a8b289e63",
-      "description": "Use guarded Chromium system proxy downloads, retry public GitHub routes after connection or stream failure, preserve cancellation and signed updates, and enforce three-platform publication"
+      "file": "student-desktop-update-network-20261114-v2.patch",
+      "sha256": "3c0336f98dd862d5822b374d6d2473fb57b7db20a118a1633426a6beb6318607",
+      "description": "Reconstruct the validated updater without applying existing release guards twice; retain the identical published updater source"
     },
     {
       "file": "student-attachments-20261114.patch",
