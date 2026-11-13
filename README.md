@@ -6,41 +6,43 @@
 - **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
 - **九科有各自的 AI 老师。** 每科都有自己的学习项目。做题卡住时可以选对应科目的老师，先要个提示，自己做下去。
 
-[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-x64)
+[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2)
 
-**20261113 头像更新提示。** 有新版时，左上角头像旁会出现提示卡，关闭后保留「有新版」标记；点击即可查看并更新，不必去设置。后台检查不打断学习，也不会自行安装。Intel Mac 已安装用户先更换一次[本轮启动器](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/Kaixin-Updater-20261113-avatar-macos-x64.zip)，再检查核心更新；这台测试 Mac 已完成。[操作实拍与验证范围](AVATAR-UPDATES-20261113.md)
+**20261113 三端同步发行。** Windows x64、Intel Mac 和 Apple 芯片 Mac 的完整包已同步到同一冻结核心，新装首次启动即使用本轮更新。已经安装的学生可直接点击「核心 → 检查更新」；不用 U 盘，也不用卸载重装。早期和 20261112 完整版的环境编号不同，本轮联网更新已兼容两批。三端原生新装和记录保留均通过；后续独立 personal agent 分支未随本批合并。[本次完整安装与原地更新说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/INSTALL-20261113.txt)
 
-**20261113 科目项目更新。** 每科旁边常驻「＋」，点哪一科就在哪一科新建对话，自动带上对应老师。每科默认只保留「错题讲解」；取消「预习／复习」默认入口，原有记录保留。已更新源码和 Intel Mac 签名增量，并在本机验证前后端一致。[项目操作与验证说明](PROJECT-CONTROLS-20261113.md)
+**20261113 头像更新提示。** 有新版时，左上角头像旁显示提示卡；关闭后保留「有新版」标记，后台检查不打断学习。新完整包包含配套启动器；已有旧启动器仍可从「核心 → 检查更新」安装本轮核心。[单项操作与验证范围](AVATAR-UPDATES-20261113.md)
 
-**20261113 联网搜索源码修复。** 免费搜索改为明确的主备引擎；单次搜索最多等待 12 秒，网络失败停止换词重试，空结果最多补查一次。来源没读全就说明缺口，不把摘要补成真题。已通过 248 项相关回归及 DeepSeek Flash High 小样本实测。**已合入本次 Intel Mac 签名增量更新；完整安装包仍为 20261112。** [搜索说明、实测与限制](SEARCH-20261113.md)
+**20261113 科目项目更新。** 每科旁边常驻「＋」，点哪一科就在哪一科新建对话，自动带上对应老师。每科默认只保留「错题讲解」；取消「预习／复习」默认入口，原有记录保留。现已包含在本次三系统完整安装和原地核心更新中。[项目操作与验证说明](PROJECT-CONTROLS-20261113.md)
+
+**20261113 联网搜索源码修复。** 免费搜索改为明确的主备引擎；单次搜索最多等待 12 秒，网络失败停止换词重试，空结果最多补查一次。来源没读全就说明缺口，不把摘要补成真题。已通过 248 项相关回归及 DeepSeek Flash High 小样本实测。**现已包含在本次三系统完整安装和原地核心更新中。** [搜索说明、实测与限制](SEARCH-20261113.md)
 
 **20261113 整合更新。** 对话里的教材页码现在能直接打开对应原页，有核实原句时会短暂标亮；右侧收起或切到活动后也能点击打开；阅读区可输入页码、按回车跳转。无关教材页不再额外跑一轮模型研读。合并了移入项目、查历史聊天、在聊天里创建和修改任务，以及此前的附件长期保存、语音输入、选择卡片和数学配图更新。[整合说明与验证范围](INTEGRATED-20261113.md)
 
-**20261112 三系统完整安装版。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [完整安装说明](INSTALL-20261112.md) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
+**本次三系统完整包保留全部已有功能。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [本次完整安装说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/INSTALL-20261113.txt) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
 添加文字聊天 API 时，可搜索 **Kimi / Moonshot（月之暗面）** 并填写对应 Key；原有接口、密钥和默认模型保持不变。
 
 在「设置 → 语音」可切换豆包 / **MOSS-Live 实时语音**，分别保存 Key；不会自动更换原有豆包配置。上方三种系统的完整安装包均已包含这项功能。[MOSS-Live 接入与小样本对比](MOSS-LIVE.md)
 
-[查看 20261112 安装说明](INSTALL-20261112.md) · [原版安装图解 PDF](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-complete-20261111/INSTALL-complete-20261111.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
+[查看历史 20261112 安装说明](INSTALL-20261112.md) · [原版安装图解 PDF](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-complete-20261111/INSTALL-complete-20261111.pdf) · [查看安装步骤](#下载安装) · [看看怎么学](#学习功能) · [获取源码与开发指南](DEVELOPMENT.md)
 
 Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaking students from primary through high school.
 
 ## 20261113 源码修复
 
-[数学配图与选择题卡的新增说明、实拍及实测数据](MATH-FIGURES-20261113.md)：讲题需要图时主动配静态图，确有必要才用交互图；完整文字选择题自动补快捷选项，原题保留。沿用原有 SVG／GeoGebra 显示与动画流程，只保留有速度实测收益的补充路径。**已合入 20261113 签名代码更新；三系统完整安装包仍为 20261112，未重新打包。**
+[数学配图与选择题卡的新增说明、实拍及实测数据](MATH-FIGURES-20261113.md)：讲题需要图时主动配静态图，确有必要才用交互图；完整文字选择题自动补快捷选项，原题保留。沿用原有 SVG／GeoGebra 显示与动画流程，只保留有速度实测收益的补充路径。**现已包含在本次三系统完整安装和原地核心更新中。**
 
-[查看本次修复、使用方式和验证范围](SOURCE-FIXES-20261113.md)：附件可选临时／长期保存、科目项目新建对话、离线语音转写和录音声波反馈、模型切换兼容、DeepSeek 分级生成预算与摘要失败提示。**已合入 20261113 签名代码更新。Intel Mac 用户从客户端检查更新；下方 20261112 完整安装包仍需另作增量更新，Apple 芯片与 Windows 本轮未做真机试装。**
+[查看本次修复、使用方式和验证范围](SOURCE-FIXES-20261113.md)：附件可选临时／长期保存、科目项目新建对话、离线语音转写和录音声波反馈、模型切换兼容、DeepSeek 分级生成预算与摘要失败提示。**现已包含在本次三系统完整安装和原地核心更新中，三端已完成原生新装与运行验收。**
 
 ## 下载安装
 
-完整安装包基础版本为 **1.7.1**，已合入 20261111 辅导与阅读修复，以及 20261112 语音连接组件修复，自带本机运行环境和 136 册教材。第一次安装只用下表对应系统的这一套文件；装好后在设置填写自己的 API。界面默认简体中文。
+本轮完整包主版本为 **1.7.1**，运行核心编号包含 **20261113-sync2**，自带本机运行环境、136 册教材及本轮已整合修复。首次安装只用下表对应系统的一套文件，无需另补代码更新；装好后在设置填写自己的 API。界面默认简体中文。
 
 | 电脑 | 安装文件 | 自动试装 |
 | --- | --- | --- |
-| Apple 芯片 Mac | [下载 Apple 芯片版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-arm64) | 原生安装启动、教材读取、13 项语音回归、代理收发 |
-| Intel Mac | [下载 Intel 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-x64) | 原生安装启动、教材读取、13 项语音回归、代理收发 |
-| Windows x64 | [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-windows-x64) | 中文路径安装、启动、13 项语音回归、卸载保留资料 |
+| Apple 芯片 Mac | [下载 Apple 芯片版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
+| Intel Mac | [下载 Intel 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
+| Windows x64 | [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) | 本轮中文路径安装、启动与退出、更新保留记录、卸载保留资料 |
 
 1. 下载同一发布页的全部平台分卷，放进一个新文件夹并保留原名。学生安装请使用表中的平台文件。
 2. Mac 下载 1 个 `.dmg` 和 3 个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。
@@ -52,52 +54,37 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 <details>
 <summary>Mac 打开分卷提示错误 109、110 或“镜像无法识别”</summary>
 
-先把同一版本的 `.dmg`、全部 `.dmgpart` 和 `SHA256SUMS.txt` 放在本机同一个文件夹，保留原名。若 U 盘附带「Mac-Apple芯片-兼容安装」，打开该文件夹内的单文件 `.dmg`，再把应用拖入「应用程序」。
+先把同一版本的 `.dmg`、全部 `.dmgpart` 放在本机同一个文件夹，保留原名。发布页的 `verification-macos-x64.json` 和 `verification-macos-arm64.json` 分别列出对应系统文件的 SHA256。若 U 盘附带「Mac-Apple芯片-兼容安装」，打开该文件夹内的单文件 `.dmg`，再把应用拖入「应用程序」。
 
 GitHub 下载的两种 Mac 包均可合并成单文件。先在终端进入下载文件夹，校验通过后执行转换；把 `./发布页中以-part.dmg结尾的文件名` 换成当前文件夹里真正的首卷名称。
 
 ```sh
-shasum -a 256 -c SHA256SUMS.txt
 hdiutil convert -format ULFO -o "$HOME/Downloads/Kaixin-Mac-Complete.dmg" ./发布页中以-part.dmg结尾的文件名
 open "$HOME/Downloads/Kaixin-Mac-Complete.dmg"
 ```
 
-合并额外占用约 7 GB。若输出文件已存在，先核对版本或换一个文件名；校验失败时重新复制或下载失败的分卷。客户端要求 macOS 13 或以上。U 盘 20261112 目录已提供普通单文件镜像，可以直接打开，不用转换。
+合并额外占用约 7 GB。若输出文件已存在，先核对版本或换一个文件名；校验失败时重新复制或下载失败的分卷。客户端要求 macOS 13 或以上。U 盘本轮目录提供普通单文件镜像，可以直接打开，不用转换。
 
-U 盘单文件镜像按磁盘校验、只读挂载、应用签名、芯片架构、运行环境签名和完整回读流程验收。对应系统的安装与启动已在原生构建机验证；U 盘成品的完成状态与具体结果见[三系统验收记录](verification/20261112-complete.json)。
+U 盘单文件镜像按磁盘校验、只读挂载、应用签名、芯片架构、运行环境签名和完整回读流程验收。对应系统的安装与启动已在原生构建机验证；U 盘单文件成品另有写入回读记录，保存在 U 盘的「校验记录」文件夹。
 
 </details>
 
 三种系统包含相同的学习功能。体积主要来自 136 册教材和本机运行工具；各系统的原生运行文件、安装容器和压缩方式不同，请按对应发布页全部安装分卷的合计大小比较。MOSS、豆包与本次修复已集成在完整包里。
 
-## 旧版用户的可选增量更新
+## 已安装学生原地更新
 
-首次安装请先用上方完整包。20261113 的阅读与学习操作通过代码增量更新提供；以下小包供已经安装过 1.7.1 运行环境的电脑使用。
+在原软件点击「核心 → 检查更新」，也可使用「设置 → 关于 → 检查更新」。发现新版后点「下载并更新」，等待备份和重新打开。**不需要卸载、不需要替换原程序、不需要重新填写 Key。** 聊天、任务、教材和设置保留，启动失败会回退。
 
-这里的增量包主要更新应用代码，不会自动给旧运行环境补装 20261112 的语音代理依赖。使用 MOSS-Live 时若提示缺少本机组件，请先用 [Mac 离线语音修复包](MOSS-LIVE.md#2026-11-12部分电脑开始通话即断开)，或安装上方对应系统的完整包。
+本轮兼容早期完整包 `77f2ba387` 和 20261112 完整包 `04276f68a`。旧更新器的首次兼容下载约 1.17–1.25 GB，包含所需运行环境；有配套新启动器且已有匹配环境时，可选择约 45 MB 的同批代码更新。检查和下载需要该电脑能访问 GitHub。
 
-1. 先退出正在运行的客户端，从 [20261111 辅导更新页](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-update-20261111-reading-complete) 下载对应系统的 `Kaixin-Updater-20261111-reading-complete` ZIP。Apple 芯片 Mac 选 `macos-arm64`，Intel Mac 选 `macos-x64`，Windows 选 `windows-x64`。
-2. Mac 解压后用新版应用替换「应用程序」里的旧版。Windows 解压到一个文件夹，从里面打开开心动力超级学霸，后续使用这个程序入口。
+不能直接联网时，下载对应系统的离线核心 ZIP，完整解压，运行里面的版本匹配工具，再从「核心 → 安装核心更新」选工具生成的「选这个文件更新.json」：
 
-新版启动器里打开「核心 → 检查更新」，或「设置 → 关于 → 检查更新」。已是最新版时会直接显示「已是最新版本」。发现新版时点「下载并更新」。客户端优先从 GitHub API 读取对应系统的签名清单。遇到 GitHub 下载直链报 504 时，会自动从公开 Releases API 下载同一份签名更新。更新复用电脑上已有的 Python、Node.js、教材和本机资源。安装时备份学习工作区，启动失败时恢复上一版与备份。首次安装仍请用上方的完整学生版。
+- [Windows 离线核心更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/Kaixin-Windows-Update-20261113.zip)
+- [Intel Mac 离线核心更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/Kaixin-Mac-Intel-Update-20261113.zip)
+- [Apple 芯片 Mac 离线核心更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/Kaixin-Mac-Apple-Update-20261113.zip)
+- [离线更新步骤](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/OFFLINE-UPDATE-20261113.txt)
 
-<details>
-<summary>旧版启动器的备用下载方式</summary>
-
-如果你需要为较早的版本补装 20261108.5 启动器，可以在终端执行对应系统的一行。Mac 用「终端」，Windows 用 PowerShell。最新辅导更新请用上方的 20261111 下载页。
-
-```sh
-# Apple 芯片 Mac
-curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723681904' -o 'Kaixin-Updater-20261108.5-macos-arm64.zip'
-# Intel Mac
-curl -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723681480' -o 'Kaixin-Updater-20261108.5-macos-x64.zip'
-# Windows x64
-curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/723680574' -o 'Kaixin-Updater-20261108.5-windows-x64.zip'
-```
-
-下载并更换启动器后，从应用内检查更新即可。
-
-</details>
+离线小包只更新代码，复用该电脑的现有依赖；早期环境若缺少语音代理组件，使用上面的联网兼容更新补齐。不要手动改运行环境编号。旧发布与更新前的签名清单保留在 Releases，便于追溯。
 
 ## 学习功能
 
@@ -121,10 +108,10 @@ curl.exe -fL -H 'Accept: application/octet-stream' 'https://api.github.com/repos
 
 ## 开发者
 
-从 GitHub 克隆发行仓库后，运行 `python3 bootstrap_source.py --with-updates`，即可校验、解包并应用最新源码修复。上方完整安装包已由完整补丁集合重建，不需要另补辅导更新。开发者指南列出本地启动命令、教材与学科配置的位置、打包入口和依赖说明。 [查看开发者指南](DEVELOPMENT.md) · [查看源码清单](source-manifest.json)
+本次三端启动器与交付脚本另保存在 [隔离发行分支](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/codex/inplace-release-20261113-96000b)，不合并后续待命的 personal agent 改动。从 GitHub 克隆发行仓库后，运行 `python3 bootstrap_source.py --with-updates`，即可校验、解包并应用最新源码修复。上方完整安装包已由完整补丁集合重建，不需要另补辅导更新。开发者指南列出本地启动命令、教材与学科配置的位置、打包入口和依赖说明。 [查看开发者指南](DEVELOPMENT.md) · [查看源码清单](source-manifest.json)
 
 ## 验证与许可
 
-发布页附 `SHA256SUMS.txt`、`validation.json`、`components.json` 和 `installed-voice-smoke.json`，记录各系统完整包的源码标识、运行环境校验值与首次安装验收结果；旧冻结快照与全部增量补丁保留。Mac 在 macOS 15 原生构建机验证，Windows 在 Windows 原生构建机验证。体验包采用 Mac 临时签名和 Windows 未签名安装器，首次打开可能看到系统来源提示。
+本次发布页提供三份 `verification-系统.json`，记录完整下载文件的大小、SHA256、冻结源码、运行环境和首次安装验收结果；旧冻结快照、历史发布和全部增量补丁保留。Mac 在 macOS 15 原生构建机验证，Windows 在 Windows 原生构建机验证。体验包采用 Mac 临时签名和 Windows 未签名安装器，首次打开可能看到系统来源提示。
 
 源码归档内附 `LICENSE` 与 `THIRD_PARTY_NOTICES.md`。教材、GeoGebra、Remotion 等资源的使用与分发条件请查看各自说明。 [接口与许可说明](delivery-notes.md) · [上游 DeepTutor](https://github.com/HKUDS/DeepTutor)
