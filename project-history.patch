@@ -1,0 +1,795 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 4058b4a..b2b6ed7 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -189,3 +189,10 @@ Windows x64、Intel Mac、Apple 芯片 Mac 按同一冻结源码和批次准备
+ ## 本项目清理约定
+ 
+ 每次交付后主动清理本项目内确认废弃且可重建的测试目录、构建缓存、临时下载和已被验证新版替代的安装文件。先核对实际进程、构建引用和回退用途，再按明确路径清理并记录释放空间。保留学习资料、设置、密钥、教材、验证记录及用途不明的文件。相邻项目不在清理范围内。
++
++## 用户确认的后续桌面发行要求
++
++每次正式优化更新默认同时更新 Windows x64、Intel Mac、Apple 芯片 Mac 三端 GitHub 发行。
++学生应通过已有软件界面的“检查更新”完成原地升级；手动 ZIP、脚本、只更新源码或单一平台不作为默认完成标准。
++必须区分清单验签、下载、安装、重启和保留记录的结果；三端界面升级链路未通过时明确保留待验项，不能以 CI 发布成功代替学生实机升级成功。
++旧更新器如需一次兼容修复，先准备不卸载、不清记录和 Key 的具体补丁并验收，不要求学生重新下载整套完整版。
+diff --git a/web/components/sidebar/SidebarShell.tsx b/web/components/sidebar/SidebarShell.tsx
+index 5cd0b03..024b808 100644
+--- a/web/components/sidebar/SidebarShell.tsx
++++ b/web/components/sidebar/SidebarShell.tsx
+@@ -37,7 +37,7 @@ import { isLearningSession } from "@/lib/navigation";
+ import Tooltip from "@/shared/ui/Tooltip";
+ import { WorkspaceMenu } from "@/components/sidebar/WorkspaceMenu";
+ import { SHORTCUTS, matchesShortcut } from "@/lib/shortcuts";
+-import { RecordHeader, useRecordView } from "@/components/sidebar/RecordList";
++import { RecordHeader, useRecordView, type RecordView } from "@/components/sidebar/RecordList";
+ import type { LearningSessions } from "@/components/sidebar/LearningNavigation";
+ 
+ // The fallback history list is needed only by shells without organization.
+@@ -77,16 +77,20 @@ export interface SidebarShellProps {
+   initialWidth?: number;
+   widthStorageKey?: string;
+   sessions?: SessionSummary[];
++  accountSessions?: SessionSummary[];
++  temporaryHistory?: { sessions: SessionSummary[]; render: (view: RecordView, onNavigate?: () => void) => ReactNode };
+   activeSessionId?: string | null;
+   /** Conversations the caller is streaming right now; they sort to the top. */
+   liveSessionIds?: ReadonlySet<string>;
+   loadingSessions?: boolean;
+   showSessions?: boolean;
++  sessionLoadError?: boolean;
++  onRetrySessions?: () => void;
+   /** Clicking the Chat nav item resets to a fresh session via this handler. */
+   onNewChat?: () => void;
+-  onSelectSession?: (sessionId: string) => void | Promise<void>;
+-  onRenameSession?: (sessionId: string, title: string) => void | Promise<void>;
+-  onDeleteSession?: (sessionId: string) => void | Promise<void>;
++  onSelectSession?: (sessionId: string, workspaceId?: string) => void | Promise<void>;
++  onRenameSession?: (sessionId: string, title: string, workspaceId?: string) => void | Promise<void>;
++  onDeleteSession?: (sessionId: string, workspaceId?: string) => void | Promise<void>;
+   /** Topic labels for grouping mastery study conversations under their path. */
+   masteryTopics?: MasteryTopicLabel[];
+   /** Collection labels for grouping reading conversations under their shelf. */
+@@ -94,6 +98,7 @@ export interface SidebarShellProps {
+   onOrganizeSession?: (
+     sessionId: string,
+     patch: SessionOrganizationPatch,
++    workspaceId?: string,
+   ) => void | Promise<void>;
+   /**
+    * Footer content rendered below the nav. Pass a render function to receive
+@@ -111,10 +116,14 @@ export function SidebarShell({
+   initialWidth = 272,
+   widthStorageKey,
+   sessions = [],
++  accountSessions = sessions,
++  temporaryHistory,
+   activeSessionId = null,
+   liveSessionIds,
+   loadingSessions = false,
+   showSessions = false,
++  sessionLoadError = false,
++  onRetrySessions,
+   onNewChat,
+   onSelectSession,
+   onRenameSession,
+@@ -254,15 +263,21 @@ export function SidebarShell({
+   // Conversation history follows the category's entries in the same scroller.
+   const sessionContent = (
+     <>
+-      {STUDENT_EDITION && <StudentStudyProjects activeSessionId={activeSessionId} onNavigate={() => drawer?.close()} />}
+-      {showSessions &&
++      {sessionLoadError && <div role="alert" className="px-4 py-2 text-xs text-destructive">{t("Failed to load session")} <button type="button" className="underline" onClick={onRetrySessions}>{t("Retry")}</button></div>}
++      {STUDENT_EDITION && <StudentStudyProjects activeSessionId={activeSessionId} onNavigate={() => drawer?.close()}
++        sessions={accountSessions} workspaces={workspaces} onRename={onRenameSession} onDelete={onDeleteSession} onOrganize={onOrganizeSession} />}
++      {temporaryHistory && <section className="dt-navigation-section dt-session-section">
++        <RecordHeader title={t("navigation.chatRecords")} count={loadingSessions ? undefined : temporaryHistory.sessions.length} view={chatView} searchLabel={t("navigation.searchChats")} />
++        {loadingSessions ? <div aria-busy="true" className="h-12 animate-pulse rounded bg-muted/40" /> : temporaryHistory.render(chatView, () => drawer?.close())}
++      </section>}
++      {showSessions && (!temporaryHistory || visibleSessions.length > 0) &&
+       onSelectSession &&
+       onRenameSession &&
+       onDeleteSession &&
+       onOrganizeSession ? (
+         <section className="dt-navigation-section dt-session-section">
+           <RecordHeader
+-            title={t("navigation.chatRecords")}
++            title={temporaryHistory ? `${t("student.prompts.project")} · ${t("navigation.chatRecords")}` : t("navigation.chatRecords")}
+             count={loadingSessions ? undefined : visibleSessions.length}
+             view={chatView}
+             searchLabel={t("navigation.searchChats")}
+diff --git a/web/components/sidebar/StudentStudyProjects.module.css b/web/components/sidebar/StudentStudyProjects.module.css
+index 5932e6c..ce443ce 100644
+--- a/web/components/sidebar/StudentStudyProjects.module.css
++++ b/web/components/sidebar/StudentStudyProjects.module.css
+@@ -7,8 +7,9 @@
+ .subject > svg.rotated { transform: rotate(0); }
+ .settings { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; margin-right: 4px; opacity: .5; }
+ .settings:hover, .settings:focus-visible { opacity: 1; background: var(--background); }
+-.create { display: grid; place-items: center; flex: 0 0 28px; height: 28px; margin-right: 4px; border: 1px solid var(--border); border-radius: 8px; color: var(--foreground); background: var(--background); transition: background 120ms, transform 120ms; }
+-.create:hover { background: var(--muted); }
++.create { display: grid; place-items: center; flex: 0 0 28px; height: 28px; margin-right: 4px; border: 0; border-radius: 7px; color: var(--muted-foreground); background: transparent; opacity: .35; transition: opacity 120ms, background 120ms, transform 120ms; }
++.row:hover .create, .row:focus-within .create { opacity: .7; }
++.create:hover, .create:focus-visible { opacity: 1; background: var(--muted); }
+ .create:active { transform: scale(.94); }
+ .create:disabled { opacity: .5; cursor: wait; }
+ .conversations { border-left: 1px solid var(--border); margin: 4px 12px 7px 17px; padding-left: 10px; }
+@@ -18,3 +19,5 @@
+ .error { padding: 8px 10px; font-size: 11px; color: var(--destructive); }
+ .error button { text-decoration: underline; margin-left: 8px; }
+ @media (prefers-reduced-motion: reduce) { .subject > svg:last-child, .create { transition: none; } .create:active { transform: none; } }
++
++@media (pointer: coarse) { .create, .settings { min-width: 36px; height: 36px; } .create { opacity: .65; } }
+diff --git a/web/components/sidebar/StudentStudyProjects.tsx b/web/components/sidebar/StudentStudyProjects.tsx
+index 7a926da..df7b52e 100644
+--- a/web/components/sidebar/StudentStudyProjects.tsx
++++ b/web/components/sidebar/StudentStudyProjects.tsx
+@@ -1,6 +1,11 @@
+ 'use client'
+ 
+ import { useEffect, useRef, useState } from 'react'
++import dynamic from 'next/dynamic'
++import type { SessionSummary, SessionOrganizationPatch } from '@/lib/session-api'
++import type { ChatWorkspaceRegistration } from '@/lib/workspaces-api'
++import { sessionWorkspaceId } from '@/lib/session-api'
++const OrganizedSessionList = dynamic(() => import('@/components/sessions/OrganizedSessionList'), { ssr: false })
+ import { ChevronDown, FolderClosed, MessageCircle, MoreHorizontal, Plus } from 'lucide-react'
+ import { useTranslation } from 'react-i18next'
+ import { useAuthStatus } from '@/hooks/useAuthStatus'
+@@ -12,14 +17,20 @@ import StudentProjectInstructions from '@/components/chat/home/StudentProjectIns
+ import { Section } from './NavigationPrimitives'
+ import styles from './StudentStudyProjects.module.css'
+ 
+-type Props = { activeSessionId?: string | null; onNavigate: () => void }
++type Props = {
++  activeSessionId?: string | null; onNavigate: () => void
++  sessions?: SessionSummary[]; workspaces?: ChatWorkspaceRegistration[]
++  onRename?: (id: string, title: string, workspace: string) => void | Promise<void>
++  onDelete?: (id: string, workspace: string) => void | Promise<void>
++  onOrganize?: (id: string, patch: SessionOrganizationPatch, workspace: string) => void | Promise<void>
++}
+ 
+ export default function StudentStudyProjects(props: Props) {
+   const auth = useAuthStatus()
+   return auth.loading ? null : <ProjectList key={auth.userId || 'local'} account={auth.userId || 'local'} {...props} />
+ }
+ 
+-function ProjectList({ activeSessionId, onNavigate, account }: Props & { account: string }) {
++function ProjectList({ activeSessionId, onNavigate, account, sessions = [], workspaces = [], onRename, onDelete, onOrganize }: Props & { account: string }) {
+   const { t } = useTranslation()
+   const [projects, setProjects] = useState<StudentStudyProject[]>([])
+   const [open, setOpen] = useState('')
+@@ -47,6 +58,7 @@ function ProjectList({ activeSessionId, onNavigate, account }: Props & { account
+       if (!active) return
+       setProjects(rows)
+       setOpen(rows.find(row => row.workspace_id === activeWorkspaceId())?.subject || '')
++      notifySessionsChanged()
+     }).catch(() => { if (active) setError(true) })
+     const unsubscribe = subscribeSessionChanges(() => {
+       void studentStudyProjects().then(rows => { if (active) setProjects(rows) }).catch(() => { if (active) setError(true) })
+@@ -60,11 +72,23 @@ function ProjectList({ activeSessionId, onNavigate, account }: Props & { account
+     {projects.map(project => <div key={project.subject} className={styles.project}>
+       <div className={`${styles.row} ${open === project.subject ? styles.expanded : ''}`}>
+         <button type="button" className={styles.subject} aria-expanded={open === project.subject} aria-controls={`student-project-${project.subject}`} onClick={() => setOpen(old => old === project.subject ? '' : project.subject)}><FolderClosed size={14} strokeWidth={1.7} /><span>{project.name}</span><ChevronDown size={12} className={open === project.subject ? styles.rotated : ''} /></button>
+-        <button type="button" className={styles.create} disabled={Boolean(busy)} aria-label={`在${project.name}中新建对话`} title={`在${project.name}中新建对话`} aria-busy={busy === project.subject} onClick={() => void newConversation(project)}><Plus size={15} strokeWidth={1.9} /></button>
++        <button type="button" className={styles.create} disabled={Boolean(busy)} aria-label={`在${project.name}中新建对话`} title={`在${project.name}中新建对话`} aria-busy={busy === project.subject} onClick={() => void newConversation(project)}><Plus size={13} strokeWidth={1.5} /></button>
+         <button type="button" className={styles.settings} aria-label={`${project.name} · ${t('student.prompts.project')}`} aria-haspopup="dialog" onClick={event => setEditing({ project, origin: event.currentTarget.getBoundingClientRect() })}><MoreHorizontal size={15} /></button>
+       </div>
+       {open === project.subject && <div className={styles.conversations} id={`student-project-${project.subject}`}>
+-        {project.conversations.map(chat => <a key={chat.session_id} href={scopedUrl(`/chat/${encodeURIComponent(chat.session_id)}`, project.workspace_id)} onClick={event => {
++        {onRename && onDelete && onOrganize ? <OrganizedSessionList
++          sessions={project.conversations.map(chat => sessions.find(row => row.session_id === chat.session_id && sessionWorkspaceId(row) === project.workspace_id) ?? {
++            id: chat.session_id, session_id: chat.session_id, title: chat.title,
++            created_at: 0, updated_at: 0, message_count: 0, last_message: '',
++            content_workspace_id: project.workspace_id,
++          })}
++          workspaces={workspaces} nested={false}
++          activeSessionId={activeWorkspaceId() === project.workspace_id ? activeSessionId ?? null : null}
++          onSelect={id => { onNavigate(); void selectWorkspace(project.workspace_id, `/chat/${encodeURIComponent(id)}`) }}
++          onRename={(id, title) => onRename(id, title, project.workspace_id)}
++          onDelete={id => onDelete(id, project.workspace_id)}
++          onOrganize={(id, patch) => onOrganize(id, patch, project.workspace_id)}
++        /> : project.conversations.map(chat => <a key={chat.session_id} href={scopedUrl(`/chat/${encodeURIComponent(chat.session_id)}`, project.workspace_id)} onClick={event => {
+           if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+           event.preventDefault(); onNavigate()
+           void selectWorkspace(project.workspace_id, `/chat/${encodeURIComponent(chat.session_id)}`)
+diff --git a/web/components/sidebar/WorkspaceSidebar.tsx b/web/components/sidebar/WorkspaceSidebar.tsx
+index 8469bbf..4ae4c22 100644
+--- a/web/components/sidebar/WorkspaceSidebar.tsx
++++ b/web/components/sidebar/WorkspaceSidebar.tsx
+@@ -4,6 +4,13 @@ import { activeWorkspaceId, navigateTask } from "@/lib/workspace-scope";
+ import { sessionWorkspaceId } from "@/lib/session-api";
+ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ 
++import dynamic from "next/dynamic";
++import { STUDENT_EDITION } from "@/lib/student-edition";
++import { isNoteSession } from "@/lib/mastery-session";
++import { isLearningSession } from "@/lib/navigation";
++import { useChatWorkspaces } from "@/hooks/useChatWorkspaces";
++const OrganizedSessionList = dynamic(() => import("@/components/sessions/OrganizedSessionList"), { ssr: false });
++
+ import { useRouter } from "next/navigation";
+ import { useTranslation } from "react-i18next";
+ import { LayoutSidebarShell } from "@/features/ui-layout/slots";
+@@ -35,6 +42,8 @@ import { subscribeSessionChanges } from "@/lib/session-events";
+ export default function WorkspaceSidebar() {
+   const { t } = useTranslation();
+   const router = useRouter();
++  const workspaceId = activeWorkspaceId();
++  const { workspaces } = useChatWorkspaces();
+   const {
+     newSession,
+     configureSession,
+@@ -48,31 +57,32 @@ export default function WorkspaceSidebar() {
+   const [readingCollections, setReadingCollections] = useState<
+     ReadingCollectionLabel[]
+   >([]);
+-  const [loadingSessions, setLoadingSessions] = useState(false);
+-  const hasLoadedSessionsRef = useRef(false);
++  const [loadingSessions, setLoadingSessions] = useState(true);
++  const [sessionLoadError, setSessionLoadError] = useState(false);
++  const refreshVersion = useRef(0);
++  useEffect(() => () => { refreshVersion.current += 1; }, []);
+ 
+   const refreshSessions = useCallback(async () => {
+-    if (!hasLoadedSessionsRef.current) {
+-      setLoadingSessions(true);
+-    }
++    const version = ++refreshVersion.current;
+     try {
+-      // Only this workspace's conversations: switching workspace is switching
+-      // stores. Topic labels only name a group heading, so a failure to load
+-      // them must not cost the session list.
++      // The student sidebar retains General history across project switches.
++      // Rows keep their source scope; labels still belong to the current store.
+       const [nextSessions, nextTopics, nextCollections] =
+         await Promise.all([
+-          listAllSessions({ force: true }),
++          listAllSessions({ force: true, allWorkspaces: STUDENT_EDITION }),
+           fetchMasteryTopicIndex().catch(() => [] as MasteryTopicLabel[]),
+           fetchReadingCollectionIndex().catch(() => [] as ReadingCollectionLabel[]),
+         ]);
++      if (version !== refreshVersion.current) return;
++      setSessionLoadError(false);
+       setSessions(nextSessions);
+       setMasteryTopics(nextTopics);
+       setReadingCollections(nextCollections);
+-      hasLoadedSessionsRef.current = true;
+     } catch (error) {
++      if (version === refreshVersion.current) setSessionLoadError(true);
+       console.error("Failed to load sessions", error);
+     } finally {
+-      setLoadingSessions(false);
++      if (version === refreshVersion.current) setLoadingSessions(false);
+     }
+   }, []);
+ 
+@@ -82,6 +92,7 @@ export default function WorkspaceSidebar() {
+   // each refresh briefly re-renders the loading skeleton, which the
+   // user perceives as a flicker on every message send / Answer Now.
+   useEffect(() => {
++    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronizes the list with awaited external store reads.
+     void refreshSessions();
+   }, [refreshSessions, sidebarRefreshToken]);
+ 
+@@ -104,7 +115,7 @@ export default function WorkspaceSidebar() {
+   const liveSessions = useMemo(
+     () =>
+       sessions.map((session) => {
+-        const runtime = sessionStatuses[session.session_id];
++        const runtime = sessionWorkspaceId(session) === workspaceId ? sessionStatuses[session.session_id] : undefined;
+         return runtime
+           ? {
+               ...session,
+@@ -113,7 +124,7 @@ export default function WorkspaceSidebar() {
+             }
+           : session;
+       }),
+-    [sessionStatuses, sessions],
++    [sessionStatuses, sessions, workspaceId],
+   );
+   const liveSessionIds = useMemo(
+     () => new Set(Object.keys(sessionStatuses)),
+@@ -151,19 +162,19 @@ export default function WorkspaceSidebar() {
+   // outline, the waypoint header and the tutor's own composer are the context
+   // it was held in, and /chat would drop all three.
+   const handleSelectSession = useCallback(
+-    async (sessionId: string) => {
+-      const session = sessions.find((item) => item.session_id === sessionId);
++    async (sessionId: string, scope = activeWorkspaceId()) => {
++      const session = sessions.find((item) => item.session_id === sessionId && sessionWorkspaceId(item) === scope);
+       navigateTask(session ? sessionRoute(session) : `/chat/${sessionId}`, router.push);
+     },
+     [router, sessions],
+   );
+ 
+   const handleRenameSession = useCallback(
+-    async (sessionId: string, title: string) => {
+-      const updated = await updateSessionTitle(sessionId, title, sessionWorkspaceId(sessions.find(item => item.session_id === sessionId)));
++    async (sessionId: string, title: string, scope = activeWorkspaceId()) => {
++      const updated = await updateSessionTitle(sessionId, title, scope);
+       setSessions((prev) =>
+         prev.map((session) =>
+-          session.session_id === sessionId
++          session.session_id === sessionId && sessionWorkspaceId(session) === scope
+             ? {
+                 ...session,
+                 title: updated.title,
+@@ -173,18 +184,18 @@ export default function WorkspaceSidebar() {
+         ),
+       );
+     },
+-    [sessions],
++    [],
+   );
+ 
+   const handleDeleteSession = useCallback(
+-    async (sessionId: string) => {
++    async (sessionId: string, scope = activeWorkspaceId()) => {
+       if (!window.confirm(t("Permanently delete this chat and its tutor threads? This cannot be undone."))) return;
+-      const deleted = sessions.find(item => item.session_id === sessionId);
+-      await deleteSession(sessionId, sessionWorkspaceId(deleted));
++      const deleted = sessions.find(item => item.session_id === sessionId && sessionWorkspaceId(item) === scope);
++      await deleteSession(sessionId, scope);
+       setSessions((prev) =>
+-        prev.filter((session) => session.session_id !== sessionId),
++        prev.filter((session) => session.session_id !== sessionId || sessionWorkspaceId(session) !== scope),
+       );
+-      if (selectedSessionId === sessionId) {
++      if (selectedSessionId === sessionId && scope === activeWorkspaceId()) {
+         cancelStreamingTurn();
+         newSession({ workspaceId: activeWorkspaceId() || null });
+         // A reading conversation was open beside its material; deleting it
+@@ -202,35 +213,44 @@ export default function WorkspaceSidebar() {
+   );
+ 
+   const handleOrganizeSession = useCallback(
+-    async (sessionId: string, patch: SessionOrganizationPatch) => {
+-      const updated = await updateSessionOrganization(sessionId, patch, sessionWorkspaceId(sessions.find(item => item.session_id === sessionId)));
+-      if ("workspace_id" in patch) {
+-        configureSession({ workspaceId: updated.preferences?.workspace_id ?? null }, sessionId);
+-        if (selectedSessionId === sessionId) {
+-          navigateTask(sessionRoute({ ...sessions.find(row => row.session_id === sessionId)!,
+-            preferences: updated.preferences, content_workspace_id: updated.preferences?.workspace_id || "" }), router.push);
++    async (sessionId: string, patch: SessionOrganizationPatch, scope = activeWorkspaceId()) => {
++      const updated = await updateSessionOrganization(sessionId, patch, scope);
++      const destination = "workspace_id" in patch ? updated.preferences?.workspace_id || "" : scope;
++      const session = sessions.find(row => row.session_id === sessionId && sessionWorkspaceId(row) === scope);
++      if ("workspace_id" in patch && scope === activeWorkspaceId()) {
++        configureSession({ workspaceId: destination || null }, sessionId);
++        if (selectedSessionId === sessionId && session) {
++          navigateTask(sessionRoute({ ...session, preferences: updated.preferences, content_workspace_id: destination }), router.push);
+         }
+       }
+-      // A conversation moved to another workspace has left this list.
+-      const movedAway = "workspace_id" in patch &&
+-        (updated.preferences?.workspace_id || "") !== activeWorkspaceId();
+-      setSessions((previous) =>
+-        movedAway
+-          ? previous.filter((session) => session.session_id !== sessionId)
+-          : previous.map((session) =>
+-              session.session_id === sessionId
+-                ? { ...session, updated_at: updated.updated_at, preferences: updated.preferences }
+-                : session,
+-            ),
+-      );
++      setSessions(previous => previous.map(row =>
++        row.session_id === sessionId && sessionWorkspaceId(row) === scope
++          ? { ...row, updated_at: updated.updated_at, preferences: updated.preferences, content_workspace_id: destination }
++          : row));
+     },
+     [configureSession, sessions, selectedSessionId, router],
+   );
+ 
++  const temporarySessions = liveSessions.filter(row => !sessionWorkspaceId(row) &&
++    !row.preferences?.archived && !row.preferences?.parent_session_id && !isNoteSession(row) &&
++    !isLearningSession(row) && !row.session_id.startsWith("student-study-"));
++
+   return (
+     <LayoutSidebarShell
+       showSessions
+-      sessions={liveSessions}
++      sessionLoadError={sessionLoadError}
++      onRetrySessions={() => void refreshSessions()}
++      sessions={liveSessions.filter(row => sessionWorkspaceId(row) === workspaceId)}
++      accountSessions={liveSessions}
++      temporaryHistory={STUDENT_EDITION && workspaceId ? {
++        sessions: temporarySessions,
++        render: (view, onNavigate) => <OrganizedSessionList sessions={temporarySessions} workspaces={workspaces}
++          timeline={view} activeSessionId={null}
++          onSelect={id => { onNavigate?.(); return handleSelectSession(id, ""); }}
++          onRename={(id, title) => handleRenameSession(id, title, "")}
++          onDelete={id => handleDeleteSession(id, "")}
++          onOrganize={(id, patch) => handleOrganizeSession(id, patch, "")} />,
++      } : undefined}
+       liveSessionIds={liveSessionIds}
+       masteryTopics={masteryTopics}
+       readingCollections={readingCollections}
+diff --git a/web/features/ui-layout/classic/ClassicSidebarShell.tsx b/web/features/ui-layout/classic/ClassicSidebarShell.tsx
+index 338618d..f0e13e6 100644
+--- a/web/features/ui-layout/classic/ClassicSidebarShell.tsx
++++ b/web/features/ui-layout/classic/ClassicSidebarShell.tsx
+@@ -25,12 +25,8 @@ import SessionList from "@/components/SessionList";
+ import { useSidebarDrawer } from "@/components/layout/AppShell";
+ import { useDevice } from "@/hooks/useDevice";
+ import { VersionBadge } from "@/components/sidebar/VersionBadge";
+-import type {
+-  SessionOrganizationPatch,
+-  SessionSummary,
+-} from "@/lib/session-api";
+-import type { MasteryTopicLabel } from "@/lib/learning-api";
+-import type { ReadingCollectionLabel } from "@/lib/reading-workspace-api";
++import type { SidebarShellProps } from "@/components/sidebar/SidebarShell";
++import { RecordHeader, useRecordView } from "@/components/sidebar/RecordList";
+ import { useSidebarResize } from "@/hooks/useSidebarResize";
+ import { SidebarHome, SidebarNav } from "@/components/sidebar/SidebarNav";
+ import { SECONDARY_NAV, isNavActive } from "@/components/sidebar/nav-entries";
+@@ -60,36 +56,11 @@ const OrganizedSessionList = dynamic(
+   },
+ );
+ 
+-export interface SidebarShellProps {
+-  sessions?: SessionSummary[];
+-  activeSessionId?: string | null;
+-  /** Conversations the caller is streaming right now; they sort to the top. */
+-  liveSessionIds?: ReadonlySet<string>;
+-  loadingSessions?: boolean;
+-  showSessions?: boolean;
+-  /** Clicking the Chat nav item resets to a fresh session via this handler. */
+-  onNewChat?: () => void;
+-  onSelectSession?: (sessionId: string) => void | Promise<void>;
+-  onRenameSession?: (sessionId: string, title: string) => void | Promise<void>;
+-  onDeleteSession?: (sessionId: string) => void | Promise<void>;
+-  /** Topic labels for grouping mastery study conversations under their path. */
+-  masteryTopics?: MasteryTopicLabel[];
+-  /** Collection labels for grouping reading conversations under their shelf. */
+-  readingCollections?: ReadingCollectionLabel[];
+-  onOrganizeSession?: (
+-    sessionId: string,
+-    patch: SessionOrganizationPatch,
+-  ) => void | Promise<void>;
+-  /**
+-   * Footer content rendered below the nav. Pass a render function to receive
+-   * the current ``collapsed`` state so footer items (e.g. Admin / Sign out) can
+-   * switch to their icon-only variant when the rail is collapsed.
+-   */
+-  footerSlot?: ReactNode | ((collapsed: boolean) => ReactNode);
+-}
+-
+ export function ClassicSidebarShell({
+   sessions = [],
++  temporaryHistory,
++  sessionLoadError,
++  onRetrySessions,
+   activeSessionId = null,
+   liveSessionIds,
+   loadingSessions = false,
+@@ -113,6 +84,7 @@ export function ClassicSidebarShell({
+   // One load for the whole column: the workspace groups head their own
+   // section with it and the row menus offer it as a move destination.
+   const { workspaces } = useChatWorkspaces();
++  const chatView = useRecordView("deeptutor.navigation.chats.sort");
+ 
+   // Inside the mobile drawer the icon-only rail is pointless — the panel is
+   // already hidden when you don't want it, so it always opens fully expanded
+@@ -290,6 +262,11 @@ export function ClassicSidebarShell({
+           onNavigate={closeDrawerOnNav}
+         />
+ 
++        {sessionLoadError && <div role="alert" className="px-4 py-2 text-xs text-destructive">{t("Failed to load session")} <button type="button" className="underline" onClick={onRetrySessions}>{t("Retry")}</button></div>}
++        {temporaryHistory && <section className="mt-3 px-2 pt-0.5">
++          <RecordHeader title={t("navigation.chatRecords")} count={loadingSessions ? undefined : temporaryHistory.sessions.length} view={chatView} searchLabel={t("navigation.searchChats")} />
++          {loadingSessions ? <div aria-busy="true" className="h-12 animate-pulse rounded bg-muted/40" /> : temporaryHistory.render(chatView, () => drawer?.close())}
++        </section>}
+         {/* Conversation history follows the module entries in the same scroller. */}
+         {showSessions &&
+         onSelectSession &&
+diff --git a/web/features/ui-layout/types.ts b/web/features/ui-layout/types.ts
+index c9b19f5..3ab5567 100644
+--- a/web/features/ui-layout/types.ts
++++ b/web/features/ui-layout/types.ts
+@@ -1,5 +1,5 @@
+ import type { ComponentType } from "react";
+-import type { SidebarShellProps } from "./classic/ClassicSidebarShell";
++import type { SidebarShellProps } from "@/components/sidebar/SidebarShell";
+ 
+ export type { SidebarShellProps };
+ 
+diff --git a/web/lib/session-api.ts b/web/lib/session-api.ts
+index 7d255f7..4494150 100644
+--- a/web/lib/session-api.ts
++++ b/web/lib/session-api.ts
+@@ -255,7 +255,10 @@ export async function listSessions(
+           cache: "no-store",
+         },
+       );
+-      const data = await expectJson<{ sessions: SessionSummary[] }>(response);
++      const data = await expectJson<{ sessions: SessionSummary[]; unavailable_workspaces?: string[] }>(response);
++      if (options?.allWorkspaces && data.unavailable_workspaces?.includes("")) {
++        throw new Error("General conversation history could not be read");
++      }
+       return data.sessions ?? [];
+     },
+     {
+diff --git a/web/tests/project-history.audit.ts b/web/tests/project-history.audit.ts
+new file mode 100644
+index 0000000..133855b
+--- /dev/null
++++ b/web/tests/project-history.audit.ts
+@@ -0,0 +1,53 @@
++import { test, expect } from '@playwright/test'
++import catalog from '../lib/student-prompts/catalog.json'
++import { sourceModuleInventory } from './e2e/fixtures/modules'
++
++for (const viewport of [{ width: 1920, height: 1080 }, { width: 1180, height: 700 }, { width: 800, height: 1100 }, { width: 390, height: 844 }]) {
++  test(`project menus and General history at ${viewport.width}x${viewport.height}`, async ({ page }) => {
++    await page.setViewportSize(viewport)
++    await page.addInitScript(() => localStorage.setItem('deeptutor-language', 'en'))
++    const projects = catalog.studyProjects.map(subject => ({ subject: subject.id, name: subject.name,
++      workspace_id: `ws-${subject.id}`, conversations: subject.id === 'math' ? [{ session_id: 'math-new', title: '数学练习自建会话', mode: '' }] : [] }))
++    let rows = [{ id: 'math-new', session_id: 'math-new', title: '数学练习自建会话', content_workspace_id: 'ws-math', preferences: {}, created_at: 1, updated_at: 2, message_count: 1, last_message: '' },
++      { id: 'general-chat', session_id: 'general-chat', title: '保留的临时对话', content_workspace_id: '', preferences: {}, created_at: 1, updated_at: 2, message_count: 1, last_message: '' }]
++    const removed: string[] = []
++    await page.route('**/api/**', async route => {
++      const url = new URL(route.request().url()); const path = url.pathname
++      if (path === '/api/modules') return route.fulfill({ json: sourceModuleInventory })
++      if (path === '/api/auth/status') return route.fulfill({ json: { enabled: false, authenticated: true, role: 'admin', user_id: 'isolated-audit' } })
++      if (path === '/api/settings/ui') return route.fulfill({ json: { language: 'en' } })
++      if (path === '/api/settings/workspace/student-study') return route.fulfill({ json: projects })
++      if (path === '/api/settings/workspace/registrations') return route.fulfill({ json: { workspaces: projects.map(p => ({ ...p, kind: 'workspace', display_name: p.name, status: 'ready', archived: false })) } })
++      if (path === '/api/sessions') return route.fulfill({ json: { sessions: rows, unavailable_workspaces: [] } })
++      if (path === '/api/sessions/math-new' && route.request().method() === 'DELETE') {
++        removed.push(url.searchParams.get('dt_workspace') ?? 'missing')
++        rows = rows.filter(row => row.session_id !== 'math-new'); projects.find(p => p.subject === 'math')!.conversations = []
++        return route.fulfill({ json: { deleted: true } })
++      }
++      if (path === '/api/partners' || path === '/api/partner-groups') return route.fulfill({ json: [] })
++      return route.fulfill({ status: 404, json: { detail: 'Unused isolated audit endpoint' } })
++    })
++    await page.goto('/chat?dt_workspace=ws-math')
++    if (viewport.width < 768) await page.getByRole('button', { name: 'Open navigation' }).click()
++    const history = page.getByText('保留的临时对话', { exact: true })
++    await expect(history).toBeVisible()
++    const add = page.getByRole('button', { name: '在数学中新建对话' })
++    await expect(add).toBeVisible()
++    await expect(add).toHaveCSS('opacity', await page.evaluate(() => matchMedia('(pointer: coarse)').matches) ? '0.65' : '0.35')
++    const row = page.locator('#student-project-math').getByRole('button').filter({ has: page.getByText('数学练习自建会话', { exact: true }) })
++    await expect(row).toBeVisible()
++    await row.hover()
++    await row.getByRole('button', { name: 'Conversation actions' }).click()
++    await expect(page.getByRole('menuitem', { name: 'Rename chat' })).toBeVisible()
++    const menu = page.getByRole('menu')
++    const box = await menu.boundingBox()
++    expect(box!.x).toBeGreaterThanOrEqual(0)
++    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width)
++    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height)
++    await page.screenshot({ path: `test-results/project-history-${viewport.width}.png` })
++    page.once('dialog', dialog => dialog.accept())
++    await page.getByRole('menuitem', { name: 'Delete chat' }).click()
++    await expect.poll(() => removed).toEqual(['ws-math'])
++    await expect(history).toBeVisible()
++  })
++}
+diff --git a/web/tests/session-api-history.spec.ts b/web/tests/session-api-history.spec.ts
+new file mode 100644
+index 0000000..dc66402
+--- /dev/null
++++ b/web/tests/session-api-history.spec.ts
+@@ -0,0 +1,14 @@
++import { afterEach, expect, it, vi } from 'vitest'
++import { listAllSessions } from '@/lib/session-api'
++
++afterEach(() => vi.unstubAllGlobals())
++
++it('does not treat an unreadable General store as an empty history', async () => {
++  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ sessions: [], unavailable_workspaces: [''] })))
++  await expect(listAllSessions({ force: true, allWorkspaces: true })).rejects.toThrow('General conversation history could not be read')
++})
++
++it('accepts a genuinely empty history and tolerates an unavailable unrelated project', async () => {
++  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ sessions: [], unavailable_workspaces: ['math'] })))
++  await expect(listAllSessions({ force: true, allWorkspaces: true })).resolves.toEqual([])
++})
+diff --git a/web/tests/sidebar-lazy-history.spec.tsx b/web/tests/sidebar-lazy-history.spec.tsx
+index 8a9d5e2..cc7df10 100644
+--- a/web/tests/sidebar-lazy-history.spec.tsx
++++ b/web/tests/sidebar-lazy-history.spec.tsx
+@@ -1,9 +1,22 @@
+ import { act, fireEvent, render, screen } from "@testing-library/react";
+ import { expect, it, vi } from "vitest";
+ import { SidebarShell } from "@/components/sidebar/SidebarShell";
++import { ClassicSidebarShell } from "@/features/ui-layout/classic/ClassicSidebarShell";
+ 
+ const fixture = vi.hoisted(() => ({ push: vi.fn(), close: vi.fn() }));
+ 
++it.each([SidebarShell, ClassicSidebarShell])('retains General history and retry in either layout', async Shell => {
++  const retry = vi.fn(); const selected = vi.fn()
++  render(<Shell showSessions sessionLoadError onRetrySessions={retry}
++    temporaryHistory={{ sessions: [], render: (_view, close) => <button onClick={() => { close?.(); selected() }}>Temporary retained</button> }} />)
++  expect(screen.getByRole('alert')).toHaveTextContent('Failed to load session')
++  fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
++  expect(retry).toHaveBeenCalledOnce()
++  fireEvent.click(screen.getByRole('button', { name: 'Temporary retained' }))
++  expect(selected).toHaveBeenCalledOnce()
++  expect(fixture.close).toHaveBeenCalled()
++})
++
+ vi.mock("@/components/sidebar/StudentStudyProjects", () => ({ default: () => null }));
+ 
+ vi.mock("@/hooks/useAuthStatus", () => ({
+@@ -19,6 +32,9 @@ vi.mock("@/hooks/useAuthStatus", () => ({
+ }));
+ 
+ vi.mock("@/hooks/useChatWorkspaces", () => ({ useChatWorkspaces: () => ({ workspaces: [], error: "" }) }));
++vi.mock("@/hooks/useModules", async original => ({ ...await original<typeof import('@/hooks/useModules')>(),
++  useModules: () => ({ modules: [], error: false, reload: vi.fn(), available: () => true }),
++}));
+ 
+ vi.mock("next/navigation", () => ({
+   useSearchParams: () => new URLSearchParams(),
+diff --git a/web/tests/student-study-projects.spec.tsx b/web/tests/student-study-projects.spec.tsx
+index e3e52ef..e4aa1c7 100644
+--- a/web/tests/student-study-projects.spec.tsx
++++ b/web/tests/student-study-projects.spec.tsx
+@@ -125,3 +125,27 @@ it('stays in the current view and re-enables add after creation fails', async ()
+   expect(fixture.navigate).not.toHaveBeenCalled()
+   expect(navigate).not.toHaveBeenCalled()
+ })
++
++it('uses the standard menu for project chats and binds every action to the owning project', async () => {
++  const remove = vi.fn(); const organize = vi.fn(); const rename = vi.fn()
++  render(<StudentStudyProjects onNavigate={() => {}} onDelete={remove} onOrganize={organize} onRename={rename}
++    sessions={[{ id: 'student-study-math-2', session_id: 'student-study-math-2', title: '错题讲解',
++      created_at: 1, updated_at: 2, message_count: 1, last_message: '',
++      content_workspace_id: 'ws-math', preferences: { pinned: true } }]} />)
++  fireEvent.click(await screen.findByRole('button', { name: '数学' }))
++  const menu = await screen.findByRole('button', { name: 'Conversation actions' })
++  fireEvent.click(menu)
++  expect(screen.getByRole('menuitem', { name: 'Rename chat' })).toBeInTheDocument()
++  expect(screen.getByRole('menuitem', { name: 'Archive' })).toBeInTheDocument()
++  expect(screen.getByRole('menuitem', { name: 'Move to project' })).toBeInTheDocument()
++  fireEvent.click(screen.getByRole('menuitem', { name: 'Unpin' }))
++  expect(organize).toHaveBeenCalledWith('student-study-math-2', { pinned: false }, 'ws-math')
++  fireEvent.click(menu)
++  fireEvent.click(screen.getByRole('menuitem', { name: 'Delete chat' }))
++  expect(remove).toHaveBeenCalledWith('student-study-math-2', 'ws-math')
++  fireEvent.click(menu)
++  fireEvent.click(screen.getByRole('menuitem', { name: 'Rename chat' }))
++  fireEvent.change(screen.getByDisplayValue('错题讲解'), { target: { value: '保留原记录的新标题' } })
++  await act(async () => fireEvent.keyDown(screen.getByDisplayValue('保留原记录的新标题'), { key: 'Enter' }))
++  expect(rename).toHaveBeenCalledWith('student-study-math-2', '保留原记录的新标题', 'ws-math')
++})
+diff --git a/web/tests/workspace-session-menu.spec.tsx b/web/tests/workspace-session-menu.spec.tsx
+index 8e4eed3..2445a81 100644
+--- a/web/tests/workspace-session-menu.spec.tsx
++++ b/web/tests/workspace-session-menu.spec.tsx
+@@ -4,6 +4,8 @@ import OrganizedSessionList from '@/components/sessions/OrganizedSessionList'
+ import type { SessionSummary } from '@/lib/session-api'
+ import type { ChatWorkspaceRegistration } from '@/lib/workspaces-api'
+ 
++// These cases cover the generic workspace menu; student project actions have their own suite.
++vi.mock('@/lib/student-edition', () => ({ STUDENT_EDITION: false }))
+ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }))
+ afterEach(cleanup)
+ const workspace: ChatWorkspaceRegistration = { workspace_id: 'algebra', display_name: 'Algebra', kind: 'workspace', status: 'ready', archived: false, follows_root: true, path: '/algebra', error: '', created_at: '' }
+diff --git a/web/tests/workspace-sidebar-history.spec.tsx b/web/tests/workspace-sidebar-history.spec.tsx
+new file mode 100644
+index 0000000..6414511
+--- /dev/null
++++ b/web/tests/workspace-sidebar-history.spec.tsx
+@@ -0,0 +1,115 @@
++import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
++import { beforeEach, expect, it, vi } from 'vitest'
++import type { SidebarShellProps } from '@/components/sidebar/SidebarShell'
++import type { SessionSummary } from '@/lib/session-api'
++import WorkspaceSidebar from '@/components/sidebar/WorkspaceSidebar'
++
++const f = vi.hoisted(() => ({ scope: '', selected: 'same', props: null as SidebarShellProps | null,
++  list: vi.fn(), rename: vi.fn(), remove: vi.fn(), organize: vi.fn(), push: vi.fn(),
++  cancel: vi.fn(), fresh: vi.fn(), configure: vi.fn(), fail: false }))
++vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
++vi.mock('next/navigation', () => ({ useRouter: () => ({ push: f.push }) }))
++vi.mock('@/hooks/useChatWorkspaces', () => ({ useChatWorkspaces: () => ({ workspaces: [] }) }))
++vi.mock('@/components/auth/LogoutButton', () => ({ LogoutButton: () => null }))
++vi.mock('@/components/auth/AdminLink', () => ({ AdminLink: () => null }))
++vi.mock('@/components/auth/ProfileLink', () => ({ ProfileLink: () => null }))
++vi.mock('@/lib/session-unread', () => ({ reconcileUnread: vi.fn() }))
++vi.mock('@/lib/workspace-scope', () => ({ activeWorkspaceId: () => f.scope,
++  scopedUrl: (path: string, scope = f.scope) => `${path}?dt_workspace=${scope}`,
++  navigateTask: (path: string, push: (path: string) => void) => push(path) }))
++vi.mock('@/features/chat/ChatStateAdapter', () => ({ useChatStateAdapter: () => ({
++  newSession: f.fresh, configureSession: f.configure, cancelStreamingTurn: f.cancel,
++  selectedSessionId: f.selected, sessionStatuses: {}, sidebarRefreshToken: 0,
++}) }))
++vi.mock('@/lib/reading-workspace-api', () => ({ fetchReadingCollectionIndex: async () => [] }))
++vi.mock('@/lib/learning-api', () => ({ fetchMasteryTopicIndex: async () => [] }))
++vi.mock('@/lib/session-api', async original => ({ ...await original<typeof import('@/lib/session-api')>(),
++  listAllSessions: f.list, updateSessionTitle: f.rename, deleteSession: f.remove,
++  updateSessionOrganization: f.organize,
++}))
++vi.mock('@/components/sessions/OrganizedSessionList', () => ({ default: (p: {
++  sessions: SessionSummary[]; onSelect: (id: string) => void; onDelete: (id: string) => void;
++}) => <div>{p.sessions.map(s => <div key={s.session_id}>
++  <button onClick={() => p.onSelect(s.session_id)}>{s.title}</button>
++  <button onClick={() => p.onDelete(s.session_id)}>delete {s.title}</button>
++</div>)}</div> }))
++vi.mock('@/features/ui-layout/slots', () => ({ LayoutSidebarShell: (p: SidebarShellProps) => {
++  f.props = p
++  return <div>{p.sessions?.map(s => <span key={s.session_id}>{s.title}</span>)}
++    {p.temporaryHistory?.render({} as never)}</div>
++} }))
++
++const row = (id: string, title: string, scope: string): SessionSummary => ({
++  id, session_id: id, title, created_at: 1, updated_at: 1,
++  message_count: 1, last_message: '', content_workspace_id: scope, preferences: {},
++})
++const rows = [row('same', 'Temporary chat', ''), row('other', 'Another temporary chat', ''),
++  row('same', 'Math chat', 'math'), row('student-study-math-2', 'Mistake explanation', 'math')]
++
++beforeEach(() => {
++  vi.clearAllMocks(); f.scope = ''; f.selected = 'same'; f.fail = false
++  f.list.mockImplementation(async (options: { allWorkspaces?: boolean }) => {
++    if (f.fail) throw new Error('offline')
++    return structuredClone(options.allWorkspaces ? rows : rows.filter(s => s.content_workspace_id === f.scope))
++  })
++  f.rename.mockResolvedValue({ title: 'Renamed', updated_at: 2 })
++  f.organize.mockResolvedValue({ updated_at: 2, preferences: { workspace_id: 'math' } })
++  f.remove.mockResolvedValue(undefined)
++  vi.spyOn(window, 'confirm').mockReturnValue(true)
++})
++
++it('retains General temporary chats after entering a subject mistake conversation and navigates back to their store', async () => {
++  const first = render(<WorkspaceSidebar />)
++  await screen.findByText('Temporary chat')
++  first.unmount(); f.scope = 'math'; f.selected = 'student-study-math-2'
++  render(<WorkspaceSidebar />)
++  fireEvent.click(await screen.findByRole('button', { name: 'Temporary chat' }))
++  expect(screen.getByText('Another temporary chat')).toBeInTheDocument()
++  expect(screen.getByText('Mistake explanation')).toBeInTheDocument()
++  expect(f.list).toHaveBeenLastCalledWith({ force: true, allWorkspaces: true })
++  expect(f.push).toHaveBeenCalledWith('/chat/same?dt_workspace=')
++  expect(f.remove).not.toHaveBeenCalled()
++})
++
++it('deletes only the confirmed temporary chat, even when the open project reuses its id', async () => {
++  f.scope = 'math'
++  render(<WorkspaceSidebar />)
++  const remove = await screen.findByRole('button', { name: 'delete Temporary chat' })
++  vi.mocked(window.confirm).mockReturnValueOnce(false)
++  fireEvent.click(remove)
++  expect(f.remove).not.toHaveBeenCalled()
++  fireEvent.click(remove)
++  await waitFor(() => expect(screen.queryByRole('button', { name: 'Temporary chat' })).toBeNull())
++  expect(f.remove).toHaveBeenCalledWith('same', '')
++  expect(screen.getByText('Math chat')).toBeInTheDocument()
++  expect(f.cancel).not.toHaveBeenCalled()
++  expect(f.fresh).not.toHaveBeenCalled()
++})
++
++it('renames and files chats in the explicit source store without modifying a same-id project chat', async () => {
++  f.scope = 'math'; render(<WorkspaceSidebar />)
++  await screen.findByRole('button', { name: 'Temporary chat' })
++  await act(async () => { await f.props!.onRenameSession!('same', 'Renamed', '') })
++  expect(f.rename).toHaveBeenCalledWith('same', 'Renamed', '')
++  expect(screen.getByText('Math chat')).toBeInTheDocument()
++  await act(async () => { await f.props!.onOrganizeSession!('same', { workspace_id: 'math' }, '') })
++  expect(f.organize).toHaveBeenCalledWith('same', { workspace_id: 'math' }, '')
++  expect(f.configure).not.toHaveBeenCalled()
++  expect(f.push).not.toHaveBeenCalled()
++  expect(screen.queryByRole('button', { name: 'Renamed' })).toBeNull()
++})
++
++it('keeps loaded chats visible when refresh fails and retries without clearing records', async () => {
++  f.scope = 'math'; render(<WorkspaceSidebar />)
++  await screen.findByRole('button', { name: 'Temporary chat' })
++  f.fail = true
++  const report = vi.spyOn(console, 'error').mockImplementation(() => {})
++  await act(async () => { f.props!.onRetrySessions!() })
++  await waitFor(() => expect(f.props!.sessionLoadError).toBe(true))
++  expect(screen.getByRole('button', { name: 'Temporary chat' })).toBeInTheDocument()
++  expect(f.remove).not.toHaveBeenCalled()
++  f.fail = false
++  await act(async () => { f.props!.onRetrySessions!() })
++  await waitFor(() => expect(f.props!.sessionLoadError).toBe(false))
++  report.mockRestore()
++})
