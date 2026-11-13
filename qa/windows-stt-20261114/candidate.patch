@@ -1,19 +1,44 @@
+diff --git a/deeptutor/api/main.py b/deeptutor/api/main.py
+index 5ab6e8b..c700a81 100644
+--- a/deeptutor/api/main.py
++++ b/deeptutor/api/main.py
+@@ -302,7 +302,7 @@ async def lifespan(app: FastAPI):
+ 
+     async def prepare_voice() -> None:
+         try:
+-            await warm_local_stt()
++            await warm_local_stt(prefer_local=True)
+         except Exception:
+             logger.debug("Local STT startup warmup unavailable", exc_info=True)
+ 
 diff --git a/deeptutor/services/local_ai/__init__.py b/deeptutor/services/local_ai/__init__.py
-index d1180fb..f20f59b 100644
+index d1180fb..d468407 100644
 --- a/deeptutor/services/local_ai/__init__.py
 +++ b/deeptutor/services/local_ai/__init__.py
-@@ -17,6 +17,10 @@ _stt_language: str | None = None
- _stt_idle: asyncio.TimerHandle | None = None
+@@ -11,17 +11,16 @@ import sys
+ import threading
  
- 
+ _worker_lock = threading.Lock()
+-_STT_IDLE_SECONDS = 195  # Keep a prepared worker through a maximum-length recording.
+ _stt_process: asyncio.subprocess.Process | None = None
+ _stt_language: str | None = None
+-_stt_idle: asyncio.TimerHandle | None = None
++
++
 +class LocalAIWorkerError(RuntimeError):
 +    """An offline worker exited before returning its result."""
-+
-+
+ 
+ 
  def _detach_stt() -> asyncio.subprocess.Process | None:
-     global _stt_process, _stt_language, _stt_idle
-     if _stt_idle is not None:
-@@ -48,8 +52,10 @@ async def _start_worker(kind: str, language: str) -> asyncio.subprocess.Process:
+-    global _stt_process, _stt_language, _stt_idle
+-    if _stt_idle is not None:
+-        _stt_idle.cancel()
+-        _stt_idle = None
++    global _stt_process, _stt_language
+     process, _stt_process = _stt_process, None
+     _stt_language = None
+     if process is not None and process.returncode is None:
+@@ -48,16 +47,15 @@ async def _start_worker(kind: str, language: str) -> asyncio.subprocess.Process:
          language,
          stdin=asyncio.subprocess.PIPE,
          stdout=asyncio.subprocess.PIPE,
@@ -26,7 +51,16 @@ index d1180fb..f20f59b 100644
      )
  
  
-@@ -69,7 +75,11 @@ async def _request_stt(payload: bytes, language: str) -> bytes:
+ async def _request_stt(payload: bytes, language: str) -> bytes:
+-    global _stt_process, _stt_language, _stt_idle
+-    if _stt_idle is not None:
+-        _stt_idle.cancel()
+-        _stt_idle = None
++    global _stt_process, _stt_language
+     try:
+         if _stt_process is None or _stt_process.returncode is not None or _stt_language != language:
+             await close_stt_worker()
+@@ -69,12 +67,17 @@ async def _request_stt(payload: bytes, language: str) -> bytes:
          await process.stdin.drain()
          result = await process.stdout.readline()
          if not result:
@@ -39,6 +73,13 @@ index d1180fb..f20f59b 100644
      except BaseException:
          # A cancelled request must not leave a response for the next recording.
          await close_stt_worker()
+         raise
+-    _stt_idle = asyncio.get_running_loop().call_later(_STT_IDLE_SECONDS, _detach_stt)
++    # Keep the prepared decoder until app shutdown; an idle timeout made the
++    # first recording after a study session cold again.
+     return result
+ 
+ 
 diff --git a/deeptutor/services/local_ai/worker.py b/deeptutor/services/local_ai/worker.py
 index f17703c..30d0f28 100644
 --- a/deeptutor/services/local_ai/worker.py
@@ -112,6 +153,114 @@ index 6a92e60..a3759b7 100644
              raise VoiceProviderError(
                  "本机语音识别失败，请确认录音有效及本机模型完整后重试。"
              ) from exc
+diff --git a/tests/services/test_local_stt_failures.py b/tests/services/test_local_stt_failures.py
+new file mode 100644
+index 0000000..458a977
+--- /dev/null
++++ b/tests/services/test_local_stt_failures.py
+@@ -0,0 +1,102 @@
++import asyncio
++from types import SimpleNamespace
++
++import pytest
++
++from deeptutor.services import local_ai
++from deeptutor.services.voice.adapters.local import LocalSTTAdapter
++from deeptutor.services.voice.audio import pcm_to_wav
++from deeptutor.services.voice.base import VoiceProviderError
++from deeptutor.services.voice.config import STTConfig
++
++
++@pytest.mark.asyncio
++async def test_worker_exit_reports_code_and_reaps_child(monkeypatch):
++    from unittest.mock import AsyncMock
++
++    child = SimpleNamespace(
++        stdin=SimpleNamespace(write=lambda _: None, drain=AsyncMock()),
++        returncode=None,
++        wait=AsyncMock(),
++    )
++
++    async def exited():
++        child.returncode = 3221225781
++        return b""
++
++    child.stdout = SimpleNamespace(readline=exited)
++    monkeypatch.setattr(local_ai, "_stt_process", child)
++    monkeypatch.setattr(local_ai, "_stt_language", "auto")
++    with pytest.raises(local_ai.LocalAIWorkerError, match="3221225781"):
++        await local_ai._request_stt(b"synthetic-audio", "auto")
++    child.wait.assert_awaited()
++    assert local_ai._stt_process is None
++
++
++@pytest.mark.asyncio
++async def test_worker_stdio_is_utf8_and_native_errors_reach_runtime_log(monkeypatch):
++    from unittest.mock import AsyncMock
++
++    spawn = AsyncMock(return_value=object())
++    monkeypatch.setattr(asyncio, "create_subprocess_exec", spawn)
++    monkeypatch.setenv("PYTHONIOENCODING", "cp936")
++    await local_ai._start_worker("stt-session", "zh")
++    kwargs = spawn.await_args.kwargs
++    assert kwargs["stderr"] is None
++    assert kwargs["env"]["PYTHONIOENCODING"] == "utf-8"
++    assert kwargs["env"]["PYTHONUTF8"] == "1"
++
++
++@pytest.mark.asyncio
++async def test_voice_preserves_actionable_worker_failure(monkeypatch):
++    async def fail(*args, **kwargs):
++        raise local_ai.LocalAIWorkerError("本机语音识别组件意外退出（代码 7）。")
++
++    monkeypatch.setattr("deeptutor.services.voice.adapters.local.run_worker", fail)
++    with pytest.raises(VoiceProviderError, match="代码 7"):
++        await LocalSTTAdapter().transcribe(
++            pcm_to_wav(bytes(32000), 16000), STTConfig(model="sensevoice-small-int8")
++        )
++
++
++@pytest.mark.asyncio
++async def test_startup_warmup_stays_local_with_a_cloud_voice_selection(monkeypatch):
++    from unittest.mock import AsyncMock
++    from deeptutor.services import voice
++
++    monkeypatch.setenv("DEEPTUTOR_LOCAL_AI", "/bundled-models")
++    monkeypatch.setattr(
++        "deeptutor.services.config.provider_runtime.resolve_stt_runtime_config",
++        lambda **_: pytest.fail("Student warmup must not depend on a cloud voice service"),
++    )
++    worker = AsyncMock(return_value={})
++    monkeypatch.setattr(local_ai, "run_worker", worker)
++    await voice.warm_local_stt(prefer_local=True)
++    worker.assert_awaited_once_with("stt", b"", language="auto")
++
++
++@pytest.mark.asyncio
++async def test_prepared_speech_worker_is_reused_until_explicit_close(monkeypatch):
++    from unittest.mock import AsyncMock
++
++    child = SimpleNamespace(
++        stdin=SimpleNamespace(write=lambda _: None, drain=AsyncMock()),
++        stdout=SimpleNamespace(readline=AsyncMock(side_effect=[b"{}\n", b'{"text":"hello"}\n'])),
++        returncode=None,
++        wait=AsyncMock(),
++    )
++    def kill():
++        child.returncode = -9
++    child.kill = kill
++    spawn = AsyncMock(return_value=child)
++    monkeypatch.setattr(local_ai, "_start_worker", spawn)
++    monkeypatch.setattr(local_ai, "_stt_process", None)
++    monkeypatch.setattr(local_ai, "_stt_language", None)
++    loop = asyncio.get_running_loop()
++    monkeypatch.setattr(loop, "call_later", lambda *_, **__: pytest.fail("Warm decoder must not expire while studying"))
++    assert await local_ai._request_stt(b"", "auto") == b"{}\n"
++    assert await local_ai._request_stt(b"synthetic-audio", "auto") == b'{"text":"hello"}\n'
++    spawn.assert_awaited_once()
++    await local_ai.close_stt_worker()
++    assert child.returncode == -9
++    child.wait.assert_awaited_once()
 diff --git a/tests/services/test_local_stt_worker.py b/tests/services/test_local_stt_worker.py
 new file mode 100644
 index 0000000..409295a
@@ -205,69 +354,3 @@ index 0000000..409295a
 +    install_recognizer(monkeypatch, create)
 +    assert worker.speech_recognizer("auto") == "recognizer"
 +    assert Path.cwd() == original
-diff --git a/tests/services/test_local_stt_failures.py b/tests/services/test_local_stt_failures.py
-new file mode 100644
-index 0000000..6ced01a
---- /dev/null
-+++ b/tests/services/test_local_stt_failures.py
-@@ -0,0 +1,60 @@
-+import asyncio
-+from types import SimpleNamespace
-+
-+import pytest
-+
-+from deeptutor.services import local_ai
-+from deeptutor.services.voice.adapters.local import LocalSTTAdapter
-+from deeptutor.services.voice.audio import pcm_to_wav
-+from deeptutor.services.voice.base import VoiceProviderError
-+from deeptutor.services.voice.config import STTConfig
-+
-+
-+@pytest.mark.asyncio
-+async def test_worker_exit_reports_code_and_reaps_child(monkeypatch):
-+    from unittest.mock import AsyncMock
-+
-+    child = SimpleNamespace(
-+        stdin=SimpleNamespace(write=lambda _: None, drain=AsyncMock()),
-+        returncode=None,
-+        wait=AsyncMock(),
-+    )
-+
-+    async def exited():
-+        child.returncode = 3221225781
-+        return b""
-+
-+    child.stdout = SimpleNamespace(readline=exited)
-+    monkeypatch.setattr(local_ai, "_stt_process", child)
-+    monkeypatch.setattr(local_ai, "_stt_language", "auto")
-+    monkeypatch.setattr(local_ai, "_stt_idle", None)
-+    with pytest.raises(local_ai.LocalAIWorkerError, match="3221225781"):
-+        await local_ai._request_stt(b"synthetic-audio", "auto")
-+    child.wait.assert_awaited()
-+    assert local_ai._stt_process is None
-+
-+
-+@pytest.mark.asyncio
-+async def test_worker_stdio_is_utf8_and_native_errors_reach_runtime_log(monkeypatch):
-+    from unittest.mock import AsyncMock
-+
-+    spawn = AsyncMock(return_value=object())
-+    monkeypatch.setattr(asyncio, "create_subprocess_exec", spawn)
-+    monkeypatch.setenv("PYTHONIOENCODING", "cp936")
-+    await local_ai._start_worker("stt-session", "zh")
-+    kwargs = spawn.await_args.kwargs
-+    assert kwargs["stderr"] is None
-+    assert kwargs["env"]["PYTHONIOENCODING"] == "utf-8"
-+    assert kwargs["env"]["PYTHONUTF8"] == "1"
-+
-+
-+@pytest.mark.asyncio
-+async def test_voice_preserves_actionable_worker_failure(monkeypatch):
-+    async def fail(*args, **kwargs):
-+        raise local_ai.LocalAIWorkerError("本机语音识别组件意外退出（代码 7）。")
-+
-+    monkeypatch.setattr("deeptutor.services.voice.adapters.local.run_worker", fail)
-+    with pytest.raises(VoiceProviderError, match="代码 7"):
-+        await LocalSTTAdapter().transcribe(
-+            pcm_to_wav(bytes(32000), 16000), STTConfig(model="sensevoice-small-int8")
-+        )
