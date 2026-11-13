@@ -69,6 +69,11 @@ for row in json.loads((ROOT / 'OFFLINE_PACKAGES.json').read_text()):
 shutil.copyfile(ROOT / '本地更新包/先看更新步骤.txt', downloads / 'OFFLINE-UPDATE-20261113.txt')
 shutil.copyfile(ROOT / '安装步骤.txt', downloads / 'INSTALL-20261113.txt')
 run(['gh', 'release', 'upload', TAG, *downloads.iterdir(), *backups, '--clobber'])
+release = json.loads(subprocess.check_output(['gh', 'api', f'repos/1281504089-cell/kaixin-k12-tutor/releases/tags/{TAG}']))
+guide_hashes = {'sha256:' + sha(ROOT / '安装步骤.txt'), 'sha256:' + sha(ROOT / '本地更新包/先看更新步骤.txt')}
+for asset in release['assets']:
+    if asset['name'] == 'default.txt' and asset.get('digest') in guide_hashes:
+        run(['gh', 'release', 'delete-asset', TAG, 'default.txt', '--yes'])
 archives = [promotion / m['archive'] for m in BATCH['manifests'].values()]
 qualified = [promotion / name for name in BATCH['manifests'] if name not in {f'runtime-{t}.json' for t in BATCH['reports']}]
 run(['gh', 'release', 'upload', 'core-updates', *sorted(set(archives)), *qualified, '--clobber'])
