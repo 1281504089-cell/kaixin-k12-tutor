@@ -3288,7 +3288,7 @@ index 5e048cc..db199fb 100644
    base64?: string;
    url?: string;
 diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
-index 37503ee..c554017 100644
+index 37503ee..e55bac7 100644
 --- a/web/features/chat/components/ChatWorkspace.tsx
 +++ b/web/features/chat/components/ChatWorkspace.tsx
 @@ -11,7 +11,7 @@ import { COMMAND_CONFIRMATION_FAILED } from "@/features/chat/transport/command-d
@@ -3317,7 +3317,7 @@ index 37503ee..c554017 100644
 +
 +  useEffect(() => {
 +    let alive = true;
-+    const timer = setTimeout(() => { void consumePendingMaterial(activeWorkspaceId()).then(material => {
++    const timer = setTimeout(() => { void consumePendingMaterial(activeWorkspaceId(), () => alive).then(material => {
 +      if (!alive || !material) return;
 +      setAttachments(previous => previous.some(item => (item.attachmentId || item.id) === material.attachmentId) ? previous : [...previous, material]);
 +      viewerPanelRef.current?.openFileTab({ id: material.attachmentId, filename: material.filename, type: material.type, mime_type: material.mimeType, url: material.url });
@@ -3704,10 +3704,10 @@ index 0368feb..814899d 100644
   * `accept` attribute for the chat composer's file picker. Mirrors the formats
 diff --git a/web/lib/pending-material.ts b/web/lib/pending-material.ts
 new file mode 100644
-index 0000000..6e64d69
+index 0000000..5260b9d
 --- /dev/null
 +++ b/web/lib/pending-material.ts
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,50 @@
 +import { browserStorage } from '@/shared/storage'
 +import type { UploadedAttachment } from './student-upload'
 +import type { PendingAttachment } from '@/features/chat/controllers/pending-attachments'
@@ -3728,10 +3728,12 @@ index 0000000..6e64d69
 +  )) throw new Error('无法暂存附件引用，请检查浏览器储存空间。')
 +}
 +
-+export async function consumePendingMaterial(workspace: string): Promise<PendingAttachment | null> {
++export async function consumePendingMaterial(workspace: string, isCurrent = () => true): Promise<PendingAttachment | null> {
 +  if (!browserStorage.listRaw('session', prefix).length) return null
 +  try {
 +    const name = await key(workspace)
++    // Navigation may replace the composer while the account check is pending.
++    if (!isCurrent()) return null
 +    const value = browserStorage.readRaw('session', name)
 +    browserStorage.removeRaw('session', name)
 +    const row = JSON.parse(value || 'null')
@@ -4233,10 +4235,10 @@ index f91e90e..47d8c42 100644
 +})
 diff --git a/web/tests/pending-material.spec.ts b/web/tests/pending-material.spec.ts
 new file mode 100644
-index 0000000..5fcfba0
+index 0000000..5ba5b6b
 --- /dev/null
 +++ b/web/tests/pending-material.spec.ts
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,31 @@
 +import { beforeEach, expect, it, vi } from 'vitest';
 +import { fetchAuthStatus } from '@/lib/auth';
 +import { consumePendingMaterial, setPendingMaterial } from '@/lib/pending-material';
@@ -4253,6 +4255,19 @@ index 0000000..5fcfba0
 +  expect(await consumePendingMaterial('math')).toBeNull();
 +  vi.mocked(fetchAuthStatus).mockResolvedValue(identity('student-a'));
 +  expect(await consumePendingMaterial('math')).toMatchObject({ attachmentId: row.id, url: row.url });
++  expect(await consumePendingMaterial('math')).toBeNull();
++});
++
++it('keeps the original handoff if navigation replaces the composer during the account check', async () => {
++  await setPendingMaterial(row, 'math');
++  let finish!: (value: AuthStatus) => void;
++  vi.mocked(fetchAuthStatus).mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
++  let current = true;
++  const cancelled = consumePendingMaterial('math', () => current);
++  current = false;
++  finish(identity('student-a'));
++  expect(await cancelled).toBeNull();
++  expect(await consumePendingMaterial('math')).toMatchObject({ attachmentId: row.id });
 +  expect(await consumePendingMaterial('math')).toBeNull();
 +});
 diff --git a/web/tests/student-edition.spec.tsx b/web/tests/student-edition.spec.tsx
