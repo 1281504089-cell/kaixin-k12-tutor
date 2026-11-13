@@ -103,6 +103,11 @@
       "file": "student-uploads-models-stt-20261113.patch",
       "sha256": "54e489bb6fa73b26988e1f8723b86fb5ddc680539dcc836ec36093e59405c2cc",
       "description": "Optional persistent chat uploads via native knowledge storage, subject chat creation, offline student dictation with a live audio meter, provider-switch history compatibility, bounded DeepSeek reasoning recovery and history-summary failure notices"
+    },
+    {
+      "file": "student-math-choices-20261113.patch",
+      "sha256": "0c0ed77ec2433bce11d86f4e28333f442d4e6aa49d8e8a8ee8d8f5e7b91b1f4d",
+      "description": "Proactive static mathematics figures with bounded High reasoning and independent review, fast local parameter plots via the existing GeoGebra renderer, and complete multiple-choice answer cards across chat, reading and notes"
     }
   ]
 }

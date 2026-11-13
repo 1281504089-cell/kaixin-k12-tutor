@@ -1,0 +1,144 @@
+{
+  "date": "2026-11-13",
+  "status": "verified-source-only",
+  "sourceBase": "cea17d724b9a5470470cfb955d3ab172f481f34c",
+  "sourceCommit": "4c122fbec7fd26ecdd6ba0478702e797134b621e",
+  "distributionParent": "d2f99d6cb54accb73d48ad2277a232a91ffe4312",
+  "patch": {
+    "file": "student-math-choices-20261113.patch",
+    "sha256": "0c0ed77ec2433bce11d86f4e28333f442d4e6aa49d8e8a8ee8d8f5e7b91b1f4d",
+    "description": "Proactive static mathematics figures with bounded High reasoning and independent review, fast local parameter plots via the existing GeoGebra renderer, and complete multiple-choice answer cards across chat, reading and notes"
+  },
+  "tests": {
+    "python": 84,
+    "web": 92,
+    "typescript": "passed",
+    "patchAppliesAfterPreviousSourceUpdate": true
+  },
+  "benchmarkScope": "Single synthetic K12 question per route on Intel Mac; not a universal speed guarantee",
+  "model": "deepseek-flash",
+  "reasoningEffort": "high",
+  "originalNativeSVG": {
+    "sourceCommit": "cea17d7",
+    "seconds": 90.008,
+    "deliveredFigure": false,
+    "timeout": true,
+    "firstCompletedRound": {
+      "finishReason": "length",
+      "requestedMaxTokens": 16000,
+      "outputTokens": 16000,
+      "reasoningTokens": 16000,
+      "visibleContentCharacters": 0
+    },
+    "totalUsageComplete": false
+  },
+  "staticGenerationAndIndependentReview": {
+    "seconds": 22.334,
+    "generationUsage": {
+      "prompt_tokens": 601,
+      "completion_tokens": 2220,
+      "total_tokens": 2821,
+      "cache_read_input_tokens": 384,
+      "reasoning_tokens": 2001
+    },
+    "reviewSeconds": 7.296,
+    "reviewUsage": {
+      "prompt_tokens": 822,
+      "completion_tokens": 1219,
+      "total_tokens": 2041,
+      "cache_read_input_tokens": 0,
+      "reasoning_tokens": 1015
+    },
+    "approved": true
+  },
+  "interactiveGenerationAndIndependentReview": {
+    "seconds": 22.485,
+    "generationUsage": {
+      "prompt_tokens": 652,
+      "completion_tokens": 505,
+      "total_tokens": 1157,
+      "cache_read_input_tokens": 0,
+      "reasoning_tokens": 344
+    },
+    "reviewSeconds": 17.926,
+    "reviewUsage": {
+      "prompt_tokens": 990,
+      "completion_tokens": 2935,
+      "total_tokens": 3925,
+      "cache_read_input_tokens": 0,
+      "reasoning_tokens": 2661
+    },
+    "approved": true
+  },
+  "ordinaryQuestionWithoutDrawingRequest": {
+    "timings": {
+      "first_content_seconds": 11.561,
+      "figure_seconds": 26.757,
+      "total_seconds": 35.044
+    },
+    "generationSource": "answer_tool_arguments",
+    "totalCalls": 3,
+    "promptTokens": 16911,
+    "completionTokens": 5366,
+    "outputLimitReached": false
+  },
+  "browser": {
+    "checks": [
+      {
+        "a": 0.5,
+        "h": -2,
+        "x": -2,
+        "y": -1,
+        "values": [
+          -0.5,
+          1,
+          3.5
+        ],
+        "milliseconds": 14.900000035762787
+      },
+      {
+        "a": 1,
+        "h": 0,
+        "x": 0,
+        "y": -1,
+        "values": [
+          0,
+          -1,
+          0
+        ],
+        "milliseconds": 24.899999976158142
+      },
+      {
+        "a": 2,
+        "h": 2,
+        "x": 2,
+        "y": -1,
+        "values": [
+          17,
+          7,
+          1
+        ],
+        "milliseconds": 74
+      }
+    ],
+    "narrow": {
+      "width": 596,
+      "scroll": 596,
+      "parent": 594
+    },
+    "choiceFillsCompleteQuestion": true,
+    "pageErrors": []
+  },
+  "installersRebuilt": false,
+  "learningRecordsChanged": false,
+  "apiKeysIncluded": false,
+  "limits": [
+    "The fast adapter covers bounded two-dimensional function/coordinate plots and parameterized function diagrams; existing GeoGebra and Manim modes retain complex 3D and narrated scenes.",
+    "Actual video generation latency was not benchmarked again in this change.",
+    "New code has not been trial-installed on Windows or Apple Silicon; existing installers were not changed."
+  ],
+  "images": {
+    "math-static-20261113.png": "16ac469e5d9cc13c5332191275e3bbdef55bdb003a1485941abcf492e473077a",
+    "math-interactive-20261113.png": "02d911b816e7caf903622812654ae51a5972badc3b750ac7809960c05db5121b"
+  }
+}
