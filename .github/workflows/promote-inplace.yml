@@ -1,0 +1,29 @@
+name: Promote signed three-platform in-place updates
+on:
+  push:
+    branches: ['codex/inplace-release-*']
+    paths: ['online-update-manifests.json', '.github/workflows/promote-inplace.yml']
+permissions:
+  contents: write
+concurrency:
+  group: promote-student-core-updates
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate every signed archive before replacing any production feed
+        run: python ci-promote-inplace.py
