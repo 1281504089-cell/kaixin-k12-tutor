@@ -42,7 +42,9 @@ app.whenReady().then(async () => {
         return Promise.reject(new TypeError('fetch failed'));
       }
       try {
-        const response = await systemFetch(url, options);
+        const ciOptions = url.hostname === 'api.github.com' && process.env.GH_TOKEN
+          ? { ...options, headers: { ...options.headers, Authorization: `Bearer ${process.env.GH_TOKEN}` } } : options;
+        const response = await systemFetch(url, ciOptions);
         console.log('Proxy request:', url.hostname, response.status);
         return response;
       } catch (error) {
@@ -58,6 +60,7 @@ app.whenReady().then(async () => {
     writeFileSync(process.env.KX_PROXY_RESULT, JSON.stringify({
       native_platform: process.platform, native_arch: process.arch, proxy_connections: connections,
       proxy_used: true, direct_fetch_failed: true, api_fallback_download: 'passed',
+      ci_api_authenticated: Boolean(process.env.GH_TOKEN),
       signature_verified: true, archive_checksum_verified: true, runtime_id: offered.runtimeId,
     }, null, 2));
     clearTimeout(timer);

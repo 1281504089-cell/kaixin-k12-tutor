@@ -39,7 +39,9 @@ async function content() {
       const tag = process.env.KX_CANDIDATE_TAG;
       const original = String(url);
       const mapped = original.replace('/tags/core-updates', '/tags/' + tag).replace('/download/core-updates/', '/download/' + tag + '/');
-      const response = await originalFetch(mapped, options);
+      const ciOptions = new URL(mapped).hostname === 'api.github.com' && process.env.GH_TOKEN
+        ? { ...options, headers: { ...options?.headers, Authorization: `Bearer ${process.env.GH_TOKEN}` } } : options;
+      const response = await originalFetch(mapped, ciOptions);
       if (original.includes('/tags/core-updates') && response.ok) {
         const metadata = await response.json();
         return Response.json({ ...metadata, tag_name: 'core-updates' });
@@ -50,10 +52,6 @@ async function content() {
     await app.whenReady();
     let view;
     while (!(view = await content())) await pause(500);
-    const menu = await view.executeJavaScript(`(() => { document.querySelector('button[aria-label="资源"]')?.click(); return document.body.innerText; })()`);
-    for (const label of ['收藏夹', '学习日志', '题库', '书籍', '阅读']) assert.ok(!menu.split('\n').includes(label), label);
-    await view.executeJavaScript(`document.querySelector('button[aria-label="资源"]')?.click()`);
-    await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-ui-before.png'), (await view.capturePage()).toPNG());
     void view.executeJavaScript('window.kaixinDesktop.checkForUpdates()').catch(error => { invokeError = error.message; });
     while (!installed) await pause(500);
     const after = JSON.parse(readFileSync(path.join(home, 'active.json')));
@@ -66,6 +64,10 @@ async function content() {
     await pause(500);
     view = await content();
     assert.ok(view, 'Updated page did not expose the trusted desktop bridge');
+    const menu = await view.executeJavaScript(`(() => { document.querySelector('button[aria-label="资源"]')?.click(); return document.body.innerText; })()`);
+    for (const label of ['收藏夹', '学习日志', '题库', '书籍', '阅读']) assert.ok(!menu.split('\n').includes(label), label);
+    await view.executeJavaScript(`document.querySelector('button[aria-label="资源"]')?.click()`);
+    await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-ui-updated.png'), (await view.capturePage()).toPNG());
     await view.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
     assert.equal(current, true);
     writeFileSync(output, JSON.stringify({
