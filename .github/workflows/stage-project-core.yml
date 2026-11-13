@@ -23,4 +23,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release upload core-updates staged-projects/kaixin-core-20261114-projects.tar.gz staged-projects/staged-projects-core.json
+        run: gh release upload core-updates staged-projects/kaixin-core-20261114-projects-v2.tar.gz staged-projects/staged-projects-core-v2.json

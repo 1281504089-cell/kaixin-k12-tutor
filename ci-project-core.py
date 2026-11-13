@@ -18,11 +18,11 @@ for command in [['npm','ci','--legacy-peer-deps','--no-audit','--no-fund'],['npm
 subprocess.run(['npx','vitest','run','tests/workspace-sidebar-history.spec.tsx','tests/session-api-history.spec.ts','tests/student-study-projects.spec.tsx','tests/sidebar-lazy-history.spec.tsx','tests/sidebar-recents.spec.tsx','tests/workspace-session-menu.spec.tsx','tests/ui-layout.spec.tsx'],cwd=WEB,env=env,check=True)
 OUT=ROOT/'staged-projects';OUT.mkdir()
 original=OUT/'prior-core.tar.gz'
-url='https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-core-20261113-sync2.tar.gz'
+url='https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-core-20261114-stt.tar.gz'
 with urlopen(Request(url,headers={'User-Agent':'Kaixin-project-release'}),timeout=120) as response,original.open('wb') as stream:
  while chunk:=response.read(1024**2):stream.write(chunk)
-assert hashlib.sha256(original.read_bytes()).hexdigest()=='0b1102e17c2c9f08f0840d883ca583bf94c1dafff72c85d08ce5b4daf5b1a129'
-archive=OUT/'kaixin-core-20261114-projects.tar.gz'
+assert hashlib.sha256(original.read_bytes()).hexdigest()=='2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c'
+archive=OUT/'kaixin-core-20261114-projects-v2.tar.gz'
 count=0;required={'BUILD_COMMIT','core/deeptutor_cli/main.py','web/server.js','web/.next/BUILD_ID'}
 def add(output,name,data,mode=0o644):
  global count
@@ -37,7 +37,10 @@ with archive.open('wb') as raw,gzip.GzipFile(filename='',mode='wb',fileobj=raw,m
  with tarfile.open(original,'r:gz') as prior:
   for item in prior:
    if item.isfile() and item.name.startswith('core/'):
-    add(output,item.name,prior.extractfile(item).read(),item.mode)
+    data=prior.extractfile(item).read()
+    if item.name in {'core/deeptutor/api/main.py','core/deeptutor/services/local_ai/__init__.py','core/deeptutor/services/local_ai/worker.py','core/deeptutor/services/voice/adapters/local.py'}:
+     assert data==(SOURCE/item.name.removeprefix('core/')).read_bytes(),'Published dictation fix must be retained'
+    add(output,item.name,data,item.mode)
  add(output,'BUILD_COMMIT',(CONFIG['source_commit']+'\n').encode())
  standalone=WEB/'.next/standalone'
  for file in sorted(standalone.rglob('*')):
@@ -47,6 +50,6 @@ with archive.open('wb') as raw,gzip.GzipFile(filename='',mode='wb',fileobj=raw,m
   assert file.is_file() and not file.is_symlink(),str(relative)
   add(output,'web/'+relative.as_posix(),file.read_bytes(),file.stat().st_mode&0o777)
 assert not required,required
-receipt={'source_commit':CONFIG['source_commit'],'backend_source_commit':'a47b05f9136ca6fb72d2f1f8a04eeb425298f358','frontend_build':(WEB/'.next/BUILD_ID').read_text().strip(),'archive':archive.name,'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'bytes':archive.stat().st_size,'files':count,'native_modules_included':False,'unit_tests':29,'production_signature':'pending local maintainer signature'}
-(OUT/'staged-projects-core.json').write_text(json.dumps(receipt,indent=2)+'\n')
+receipt={'source_commit':CONFIG['source_commit'],'backend_source_commit':'525157ebded003193f2927960d983e4819e08513','frontend_build':(WEB/'.next/BUILD_ID').read_text().strip(),'archive':archive.name,'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'bytes':archive.stat().st_size,'files':count,'native_modules_included':False,'unit_tests':29,'production_signature':'pending local maintainer signature'}
+(OUT/'staged-projects-core-v2.json').write_text(json.dumps(receipt,indent=2)+'\n')
 print(json.dumps(receipt))
