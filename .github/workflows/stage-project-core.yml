@@ -1,0 +1,26 @@
+name: Build project menus and persistent General history
+on:
+  push:
+    branches: ['codex/inplace-release-20261114-projects']
+    paths: ['project-history.patch', 'project-release.json', 'ci-project-core.py', '.github/workflows/stage-project-core.yml']
+permissions:
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the frozen source and run sidebar regressions
+        run: python ci-project-core.py
+      - name: Upload staged bytes while retaining active update feeds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload core-updates staged-projects/kaixin-core-20261114-projects.tar.gz staged-projects/staged-projects-core.json
