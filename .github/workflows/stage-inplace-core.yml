@@ -1,0 +1,25 @@
+name: Stage platform-neutral in-place core
+on:
+  push:
+    branches: ['codex/inplace-release-*']
+    paths: ['ci-stage-core.py', '.github/workflows/stage-inplace-core.yml']
+permissions:
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen public build and remove platform-native modules
+        run: python ci-stage-core.py
+      - name: Upload staged bytes only, preserving active update feeds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release upload core-updates staged-core/kaixin-core-20261113-sync2.tar.gz staged-core/staged-core.json
