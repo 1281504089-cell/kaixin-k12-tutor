@@ -118,6 +118,11 @@
       "file": "student-search-20261113.patch",
       "sha256": "b9ba5ec4c2a3290759236341b71949da34af715453015e552af983a50b0713b7",
       "description": "Use explicit bounded free search backends; share per-turn retry/wait limits; preserve citations and source filtering; distinguish connectivity, empty results and configuration errors; do not reconstruct unverifiable exam text"
+    },
+    {
+      "file": "student-project-controls-20261113.patch",
+      "sha256": "18c9513c86d57db13a24839c3d641ef9dc5f90e279e1f73b8ebf658a8a342df4",
+      "description": "Keep a visible per-subject add-chat button, seed only the stable mistake conversation, retire preparation/review navigation without deleting prior records, and preserve subject teachers/instructions"
     }
   ]
 }
