@@ -1,0 +1,32 @@
+{
+  "source": "Authentic locally retained signed full77 delivery manifests. Raw bytes copied without modifying version, builtAt or signature. Original public payload manifests failed the final shell signature check and were not used.",
+  "manifests": [
+    {
+      "target": "windows-x64",
+      "file": "runtime-windows-x64.json",
+      "runtimeId": "1.7.1-77f2ba387-x64",
+      "builtAt": 1794028839353,
+      "sha256": "40fd0f5c00c055e67fa825732e381ee50f6dc0ed09021ac8612e943a2ed5469d",
+      "signature": "verified",
+      "sourceFile": "/Users/Admin1/Documents/ChatGPT/开心动力超级学霸-DeepTutor学生版/apps/desktop/.local/ci-bootstrap/final-delivery/delivery-signed-windows-x64.json"
+    },
+    {
+      "target": "macos-x64",
+      "file": "runtime-macos-x64.json",
+      "runtimeId": "1.7.1-77f2ba387-x64",
+      "builtAt": 1794029565753,
+      "sha256": "8ec14dba2d25c2ca50fbc44f32891ebb512e61f2160875ac936eb5c88f3e29ce",
+      "signature": "verified",
+      "sourceFile": "/Users/Admin1/Documents/ChatGPT/开心动力超级学霸-DeepTutor学生版/apps/desktop/.local/ci-bootstrap/final-delivery/delivery-signed-macos-x64.json"
+    },
+    {
+      "target": "macos-arm64",
+      "file": "runtime-macos-arm64.json",
+      "runtimeId": "1.7.1-77f2ba387-arm64",
+      "builtAt": 1794028651148,
+      "sha256": "995286d6079080eec3d5b33e3da984a2ba9c23813339d4f8cb6c5ff99ce6e84b",
+      "signature": "verified",
+      "sourceFile": "/Users/Admin1/Documents/ChatGPT/开心动力超级学霸-DeepTutor学生版/apps/desktop/.local/ci-bootstrap/final-delivery/delivery-signed-macos-arm64.json"
+    }
+  ]
+}

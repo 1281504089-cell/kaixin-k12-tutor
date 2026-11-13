@@ -1,0 +1,35 @@
+migration_offline
+test_all_targets_strip_archives_and_preserve_seed_bytes (__main__.MigrationTests.test_all_targets_strip_archives_and_preserve_seed_bytes) ... ok
+test_authentic_baselines_verify_with_production_public_key (__main__.MigrationTests.test_authentic_baselines_verify_with_production_public_key) ... ok
+test_external_app_symlink_rejected (__main__.MigrationTests.test_external_app_symlink_rejected) ... ok
+test_forged_active_signature_rejected (__main__.MigrationTests.test_forged_active_signature_rejected) ... ok
+test_missing_native_base_rejected (__main__.MigrationTests.test_missing_native_base_rejected) ... ok
+test_newer_042_profile_does_not_require_old77_runtime (__main__.MigrationTests.test_newer_042_profile_does_not_require_old77_runtime) ... ok
+test_output_overlap_rejected (__main__.MigrationTests.test_output_overlap_rejected) ... ok
+test_payload_tampering_rejected (__main__.MigrationTests.test_payload_tampering_rejected) ... ok
+test_production_freeze_rejects_fixture_trust_key (__main__.MigrationTests.test_production_freeze_rejects_fixture_trust_key) ... ok
+test_profile_snapshot_detects_lost_chat_or_key (__main__.MigrationTests.test_profile_snapshot_detects_lost_chat_or_key) ... ok
+test_real_update_module_callable_offline (__main__.MigrationTests.test_real_update_module_callable_offline) ... ok
+test_unmarked_profile_rejected (__main__.MigrationTests.test_unmarked_profile_rejected) ... ok
+test_wrong_executable_architecture_rejected (__main__.MigrationTests.test_wrong_executable_architecture_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 5.095s
+
+OK
+
+
+windows_template_static
+test_candidate_checker_precedes_backup_and_checks_processes_twice (__main__.WindowsMigrationTemplateTests.test_candidate_checker_precedes_backup_and_checks_processes_twice) ... ok
+test_only_fixed_existing_install_and_profile_can_migrate (__main__.WindowsMigrationTemplateTests.test_only_fixed_existing_install_and_profile_can_migrate) ... ok
+test_original_uninstaller_is_kept_without_replacing_registration (__main__.WindowsMigrationTemplateTests.test_original_uninstaller_is_kept_without_replacing_registration) ... ok
+test_test_mode_cannot_write_production_entry_points (__main__.WindowsMigrationTemplateTests.test_test_mode_cannot_write_production_entry_points) ... ok
+test_whole_old_directory_is_backed_up_and_failures_restore_it (__main__.WindowsMigrationTemplateTests.test_whole_old_directory_is_backed_up_and_failures_restore_it) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+
+
+node_syntax
