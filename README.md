@@ -8,7 +8,9 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261113-sync2)
 
-**20261113 三端同步发行。** Windows x64、Intel Mac 和 Apple 芯片 Mac 的完整包已同步到同一冻结核心，新装首次启动即使用本轮更新。已经安装的学生可直接点击「核心 → 检查更新」；不用 U 盘，也不用卸载重装。早期和 20261112 完整版的环境编号不同，本轮联网更新已兼容两批。三端原生新装和记录保留均通过；后续独立 personal agent 分支未随本批合并。[本次完整安装与原地更新说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/INSTALL-20261113.txt)
+**新电脑直接安装当前完整版，无需另跑补丁。** Windows x64、Intel Mac 和 Apple 芯片 Mac 均已包含 `20261113-sync2` 核心、运行环境及 136 册教材。请先看[新用户安装步骤与分系统下载文件](INSTALL-LATEST.md)，把对应系统的一整组文件下载齐，再安装。
+
+已安装用户可使用「核心 → 检查更新」。部分旧电脑仍有下载或等待问题，尚未逐台完成一键升级验收；旧版升级失败时请联系维护者处理，保留原程序、学习文件夹和 Key。[本批版本与验证范围](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261113-sync2/INSTALL-20261113.txt)
 
 **20261113 头像更新提示。** 有新版时，左上角头像旁显示提示卡；关闭后保留「有新版」标记，后台检查不打断学习。新完整包包含配套启动器；已有旧启动器仍可从「核心 → 检查更新」安装本轮核心。[单项操作与验证范围](AVATAR-UPDATES-20261113.md)
 
