@@ -149,6 +149,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     }
     console.log(JSON.stringify(result));
   } catch (error) {
+    if (options.reportFile && options.profile && !inside(path.resolve(options.profile), path.resolve(options.reportFile))) {
+      await writeFile(options.reportFile, JSON.stringify({ passed: false, error: error.message }, null, 2));
+    }
     console.error(`Migration preflight failed: ${error.message}`);
     process.exitCode = 2;
   }

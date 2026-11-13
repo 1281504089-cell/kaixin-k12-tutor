@@ -166,7 +166,13 @@ def build(args):
             defines = [f"/DSOURCE={stage}", f"/DOUTFILE={pending_artifact}", f"/DICON={icon}", f"/DVERSION={version}", "/DFILEVERSION=1.7.1.0"]
             if args.test_installer:
                 defines.append("/DTEST_MODE")
-            run([makensis, *defines, HERE / "windows-migration.nsi"], errors="replace")
+            run([makensis, "/INPUTCHARSET", "UTF8", *defines, HERE / "windows-migration.nsi"], errors="replace")
+            powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+            product_name = run([powershell, "-NoProfile", "-NonInteractive", "-Command",
+                "[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false); [Diagnostics.FileVersionInfo]::GetVersionInfo($env:KX_MIGRATION_SETUP).ProductName"],
+                env={**os.environ, "KX_MIGRATION_SETUP": str(pending_artifact)}).strip()
+            if product_name != APP:
+                raise ValueError("Compiled installer changed the Chinese application name: " + product_name)
             container = "per-user NSIS migration Setup; no Runtime parts"
         report = {"formatVersion": 1, "target": target, "frozenShellCommit": expected["commit"],
                   "artifact": artifact.name, "size": pending_artifact.stat().st_size, "sha256": digest(pending_artifact),

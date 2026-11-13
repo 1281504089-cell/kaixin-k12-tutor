@@ -1,4 +1,4 @@
-; Launcher-only migration. SOURCE is the already stripped, final packaged app.
+﻿; Launcher-only migration. SOURCE is the already stripped, final packaged app.
 ; Required: SOURCE, OUTFILE, ICON, VERSION, FILEVERSION.
 ; The audited helper and payload manifest are already inside SOURCE.
 Unicode true
@@ -75,6 +75,12 @@ FunctionEnd
 ; The checker receives only paths. It must reject an unverified profile, unsafe
 ; paths, unrelated old app directories and running app/backend processes.
 Function CheckMigration
+!ifdef TEST_MODE
+  ReadEnvStr $R9 "KX_MIGRATION_CHECK_REPORT"
+  ${If} $R9 != ""
+    StrCpy $CheckReport "$R9"
+  ${EndIf}
+!endif
   ReadEnvStr $SavedElectronMode "ELECTRON_RUN_AS_NODE"
   ClearErrors
   System::Call 'kernel32::SetEnvironmentVariableW(w "ELECTRON_RUN_AS_NODE", w "1") i .r0'

@@ -8,6 +8,9 @@ TEMPLATE = Path(__file__).with_name("windows-migration.nsi").read_text(encoding=
 
 
 class WindowsMigrationTemplateTests(unittest.TestCase):
+    def test_chinese_script_is_explicit_utf8_for_native_compilation(self):
+        self.assertTrue(Path(__file__).with_name('windows-migration.nsi').read_bytes().startswith(b'\xef\xbb\xbf'))
+
     def test_only_fixed_existing_install_and_profile_can_migrate(self):
         for text in (
             'InstallDirRegKey HKCU "${REG}" "InstallDir"',

@@ -1,4 +1,4 @@
-name: Build unified desktop installers and migration candidates
+name: Validate Windows launcher migration and unified installer
 on:
   push:
     branches: ['codex/unified-release-20261114-*']
@@ -49,11 +49,6 @@ jobs:
       - name: Install Windows packaging tool
         if: runner.os == 'Windows'
         run: choco install nsis --yes --no-progress
-      - name: Read previous isolated diagnostics
-        shell: bash
-        run: |
-          gh run download 43479655765 --name unified-windows-x64 --dir previous-windows
-          python -c "import pathlib; [print(p.name + ': ' + p.read_text()) for p in pathlib.Path('previous-windows').glob('*.json')]"
       - name: Build and test the final complete installer
         run: python ci-fresh-install.py --target ${{ matrix.target }}
       - name: Retain native proof and diagnostics
