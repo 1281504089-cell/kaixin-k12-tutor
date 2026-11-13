@@ -9,24 +9,12 @@ from urllib.request import Request, urlopen
 
 
 def prepare_candidate(root, target, install, resources, downloads, evidence, lock):
-    batch = json.loads((root / 'fetchfix-batch.json').read_text())
+    batch = json.loads((root / 'attachment-batch.json').read_text())
     manifest = batch['manifests'][target]
     assert manifest['baseRuntimeId'] == json.loads((resources / 'seed/runtime.json').read_text())['runtimeId']
-    sources = root / 'fetchfix-shell'
-    legacy = root / 'legacy-shell'
-    legacy.mkdir()
     for name, row in batch['shell_files'].items():
-        file = sources / name
-        assert hashlib.sha256(file.read_bytes()).hexdigest() == row['sha256']
-        destination = resources / 'app' / name
-        if row['before_sha256'] is None:
-            assert not destination.exists()
-        else:
-            assert hashlib.sha256(destination.read_bytes()).hexdigest() == row['before_sha256']
-            prior = legacy / name
-            prior.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(destination, prior)
-        shutil.copyfile(file, destination)
+        assert hashlib.sha256((resources / 'app' / name).read_bytes()).hexdigest() == row['sha256'], 'Reuse only the published launcher'
+    shutil.copytree(resources / 'update', root / 'prior-update')
     core = resources / 'update'
     for file in core.iterdir():
         file.unlink()
@@ -77,7 +65,7 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
         subprocess.run(['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)], check=True)
         shutil.rmtree(downloads)
         (install / 'Applications').symlink_to('/Applications')
-        stem = 'Kaixin-Super-Scholar-MacOS-' + ('Intel' if target == 'macos-x64' else 'Apple-Silicon') + '-v1.7.1-20261114-unified'
+        stem = 'Kaixin-Super-Scholar-MacOS-' + ('Intel' if target == 'macos-x64' else 'Apple-Silicon') + '-v1.7.1-20261114-attachments'
         image = out / (stem + '.dmg')
         subprocess.run(['/usr/bin/hdiutil', 'create', '-volname', '开心动力超级学霸', '-srcfolder', str(install),
                         '-fs', 'APFS', '-format', 'ULFO', str(image)], check=True)
@@ -107,7 +95,7 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
         # An installed copy has an uninstaller; it is generated again by NSIS.
         (install / 'Uninstall 开心动力超级学霸.exe').unlink(missing_ok=True)
         nsis = Path(os.environ['ProgramFiles(x86)']) / 'NSIS/makensis.exe'
-        subprocess.run([str(nsis), '-DSOURCE=' + str(install), '-DOUTFILE=' + str(setup),
+        subprocess.run([str(nsis), '/INPUTCHARSET', 'UTF8', '-DSOURCE=' + str(install), '-DOUTFILE=' + str(setup),
                         '-DICON=' + str(resources / 'app/assets/icon.ico'), '-DVERSION=1.7.1', '-DFILEVERSION=1.7.1.0',
                         '-DPARTS_MANIFEST=' + str(parts_file), '-DARCHIVE_NAME=' + base['archive'],
                         str(root / 'fetchfix-windows/installer.nsi')], check=True)
