@@ -1,0 +1,27 @@
+name: Publish signed speech updates
+on:
+  push:
+    branches: [codex/windows-stt-release-20261114]
+    paths: [qa/windows-stt-20261114/signed-manifests.json]
+permissions:
+  contents: write
+concurrency:
+  group: promote-student-core-updates
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify signed manifests and matching artifacts before publication
+        run: python qa/windows-stt-20261114/promote_stt.py
