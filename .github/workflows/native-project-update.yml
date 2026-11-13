@@ -1,0 +1,85 @@
+name: Validate three native in-place updates and full installers
+on:
+  push:
+    branches: ['codex/inplace-release-20261114-projects']
+    paths:
+      - '.github/workflows/native-project-update.yml'
+      - 'ci-project-native.py'
+      - 'ci-probe-runtime.mjs'
+      - 'ci-smoke-mac.mjs'
+      - 'project-core-release.json'
+      - 'project-history.patch'
+permissions:
+  contents: write
+concurrency:
+  group: native-inplace-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Create an isolated prerelease without changing active updates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=student-20261114-projects
+          if gh release view "$tag" --json isPrerelease > candidate.json 2>/dev/null; then
+            python -c "import json; assert json.load(open('candidate.json'))['isPrerelease'], 'A final release must never be overwritten'"
+          else
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '三端同步更新候选 · 2026-11-14' --notes '等待三端原生安装与记录保留验证；正式更新入口尚未切换。'
+          fi
+  native:
+    needs: candidate
+    timeout-minutes: 85
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Preserve byte-for-byte signed build inputs
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install native Windows packaging tools
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install nsis --yes --no-progress
+      - name: Validate existing records, build portable update and test real full installer
+        run: python ci-project-native.py --target ${{ matrix.target }}
+      - name: Retain diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-${{ matrix.target }}
+          path: |
+            student-source/apps/desktop/.local/*/*.log
+            student-source/apps/desktop/.local/*/*smoke*.json
+            validated-*/*native.json
+            validated-*/before-update.json
+          if-no-files-found: ignore
+  validated:
+    needs: native
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'All three native candidates passed. Production signing and feed promotion remain separate.'
