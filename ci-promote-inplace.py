@@ -34,6 +34,10 @@ native = ROOT / 'native-results'
 offline = ROOT / 'release-r2'
 for directory in (promotion, native, offline):
     directory.mkdir()
+previous = ROOT / 'current-feeds'
+previous.mkdir()
+for target in BATCH['reports']:
+    run(['gh', 'release', 'download', 'core-updates', '--dir', previous, '--pattern', f'runtime-{target}.json'])
 for name, manifest in BATCH['manifests'].items():
     (promotion / name).write_text(json.dumps(manifest, indent=2) + '\n')
     if name.count('-') == 2:  # Fixed feeds are named runtime-<platform>-<arch>.json.
@@ -45,6 +49,11 @@ core = json.loads((ROOT / 'ci-core-release.json').read_text())['core']
 run(['gh', 'release', 'download', 'core-updates', '--dir', promotion, '--pattern', core['archive']])
 assert sha(promotion / core['archive']) == core['sha256']
 run(['node', 'ci-verify-promotion.mjs'])
+backups = []
+for target in BATCH['reports']:
+    file = previous / f'previous-runtime-{target}.json'
+    shutil.copyfile(previous / f'runtime-{target}.json', file)
+    backups.append(file)
 shutil.copyfile(promotion / core['archive'], offline / core['archive'])
 for target in BATCH['reports']:
     shutil.copyfile(promotion / f'runtime-{target}-20261112.json', offline / f'runtime-{target}.json')
@@ -52,7 +61,7 @@ for target in BATCH['reports']:
 run(['python', 'package_offline.py'])
 small_updates = list((ROOT / '本地更新包').glob('*.zip'))
 assert len(small_updates) == 3
-run(['gh', 'release', 'upload', TAG, *small_updates, ROOT / '本地更新包/先看更新步骤.txt', ROOT / '安装步骤.txt', '--clobber'])
+run(['gh', 'release', 'upload', TAG, *small_updates, *backups, ROOT / '本地更新包/先看更新步骤.txt', ROOT / '安装步骤.txt', '--clobber'])
 archives = [promotion / m['archive'] for m in BATCH['manifests'].values()]
 qualified = [promotion / name for name in BATCH['manifests'] if name not in {f'runtime-{t}.json' for t in BATCH['reports']}]
 run(['gh', 'release', 'upload', 'core-updates', *sorted(set(archives)), *qualified, '--clobber'])
