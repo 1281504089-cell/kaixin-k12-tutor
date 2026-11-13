@@ -1,0 +1,46 @@
+name: Prepare STT core and bridge archives
+
+on:
+  push:
+    branches: [codex/windows-stt-release-20261114]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-stt-release-20261114
+  cancel-in-progress: false
+
+jobs:
+  repack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        target: [core, windows-x64, macos-x64, macos-arm64]
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SOURCE_COMMIT: 525157ebded003193f2927960d983e4819e08513
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify the patch and reconstruct the public source baseline
+        run: |
+          echo 'ea869d949c1fe08b8abf12e386e769329eeadd58e2871190d4fbb7325a1225fc  qa/windows-stt-20261114/candidate.patch' | sha256sum --check
+          python bootstrap_source.py --with-updates
+          git -C student-source apply --check ../qa/windows-stt-20261114/candidate.patch
+          git -C student-source apply ../qa/windows-stt-20261114/candidate.patch
+      - name: Check bounded streaming archive rewriting
+        run: python qa/windows-stt-20261114/repack_stt_update.py --self-test
+      - name: Repack only the four frozen Python files and BUILD_COMMIT
+        run: python qa/windows-stt-20261114/repack_stt_update.py --target '${{ matrix.target }}' --source student-source --output stt-release
+      - name: Upload unique archives and public provenance reports
+        # Deliberately no --clobber and no production runtime manifest upload.
+        run: gh release upload core-updates stt-release/kaixin-*.tar.gz stt-release/stt-repack-20261114-*.json
