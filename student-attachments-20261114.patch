@@ -1545,20 +1545,28 @@ index b6ee02d..80717c9 100644
  
    /* Below the drawer breakpoint the panel is a full-screen sheet, not a side
 diff --git a/web/components/chat/home/StandaloneComposer.tsx b/web/components/chat/home/StandaloneComposer.tsx
-index bf3d5c2..79d20b3 100644
+index bf3d5c2..4b628a2 100644
 --- a/web/components/chat/home/StandaloneComposer.tsx
 +++ b/web/components/chat/home/StandaloneComposer.tsx
-@@ -121,6 +121,9 @@ export interface StandaloneComposerSubmission {
+@@ -1,5 +1,7 @@
+ "use client";
+ 
++import type { PageNumbers } from "@/contracts/generated/turn-protocol";
++
+ /**
+  * StandaloneComposer — the main chat composer, wired up for a surface that
+  * is not the main chat page.
+@@ -121,6 +123,9 @@ export interface StandaloneComposerSubmission {
    config?: Record<string, unknown>;
    attachments: Array<{
      type: string;
 +    id?: string;
 +    url?: string;
-+    page_numbers?: number[];
++    page_numbers?: PageNumbers;
      filename?: string;
      base64?: string;
      mime_type?: string;
-@@ -915,6 +918,7 @@ function StandaloneComposerImpl({
+@@ -915,6 +920,7 @@ function StandaloneComposerImpl({
          onDrop={handleDrop}
          onPaste={handlePaste}
          onAddFiles={handleAddFiles}
@@ -1779,6 +1787,20 @@ index 25abc3f..cf68936 100644
 +
  export const learningSurface = (kind: LearningKind): LearningSurface =>
    LEARNING_SURFACES.find(surface => surface.kind === (kind === "watching" ? "reading" : kind))!
+diff --git a/web/components/reading/PdfPage.tsx b/web/components/reading/PdfPage.tsx
+index f10c82d..6217947 100644
+--- a/web/components/reading/PdfPage.tsx
++++ b/web/components/reading/PdfPage.tsx
+@@ -119,7 +119,8 @@ function PdfRegionPicker({ locator, onSelect }: {
+  */
+ /** Let pdf.js drop a page's decoded images and operator list. */
+ function releasePage(doc: PdfDocument, locator: number) {
+-  void doc.getPage(locator).then((page) => page.cleanup()).catch(() => undefined);
++  // A parent may already have destroyed the worker when its pages unmount.
++  void Promise.resolve().then(() => doc.getPage(locator)).then((page) => page.cleanup()).catch(() => undefined);
+ }
+ 
+ export function PdfPage({
 diff --git a/web/components/reading/library/ReadingFolder.tsx b/web/components/reading/library/ReadingFolder.tsx
 index da29e6f..963c5c2 100644
 --- a/web/components/reading/library/ReadingFolder.tsx
@@ -3267,15 +3289,24 @@ index d7470b9..61c1816 100644
            "title": "Type",
            "type": "string"
 diff --git a/web/features/chat/ChatStateAdapter.tsx b/web/features/chat/ChatStateAdapter.tsx
-index 5e048cc..30daad0 100644
+index 5e048cc..6ed92d1 100644
 --- a/web/features/chat/ChatStateAdapter.tsx
 +++ b/web/features/chat/ChatStateAdapter.tsx
+@@ -26,7 +26,7 @@ import React, {
+   useReducer,
+   useRef,
+ } from "react";
+-import type { ClientCommand } from "@/contracts/generated/turn-protocol";
++import type { ClientCommand, PageNumbers } from "@/contracts/generated/turn-protocol";
+ import {
+   RESPONSE_LANGUAGE_EVENT,
+   RESPONSE_LANGUAGE_STORAGE_KEY,
 @@ -121,6 +121,8 @@ type SessionRuntimeStatus =
  
  interface OutgoingAttachment {
    type: string;
 +  id?: string;
-+  page_numbers?: number[];
++  page_numbers?: PageNumbers;
    url?: string;
    base64?: string;
    filename?: string;
@@ -3283,7 +3314,7 @@ index 5e048cc..30daad0 100644
  
  export interface MessageAttachment {
    type: string;
-+  page_numbers?: number[];
++  page_numbers?: PageNumbers;
    filename?: string;
    base64?: string;
    url?: string;
@@ -3410,10 +3441,11 @@ index 37503ee..28f60af 100644
                  onCancelStreaming={cancelStreamingTurn}
                  prefillInputRef={prefillInputRef}
 diff --git a/web/features/chat/controllers/pending-attachments.ts b/web/features/chat/controllers/pending-attachments.ts
-index 77f5983..d58ca3b 100644
+index 77f5983..4dbb14e 100644
 --- a/web/features/chat/controllers/pending-attachments.ts
 +++ b/web/features/chat/controllers/pending-attachments.ts
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,8 @@
++import type { PageNumbers } from "@/contracts/generated/turn-protocol";
  import type { AttachmentLimits } from "@/lib/attachment-limits";
 +import { attachmentPage, attachmentPageVisited } from '@/lib/attachment-viewport';
 +import { MAX_UPLOAD_SOURCE_BYTES, uploadDocumentFile } from '@/lib/student-upload';
@@ -3422,7 +3454,7 @@ index 77f5983..d58ca3b 100644
  import { scopedUrl } from "@/lib/workspace-scope";
  import { attachmentMime, classifyFile, isSvgFilename } from "@/lib/doc-attachments";
  import {
-@@ -17,6 +18,10 @@ export interface PendingAttachment {
+@@ -17,6 +19,10 @@ export interface PendingAttachment {
    size?: number;
    mimeType?: string;
    preparing?: boolean;
@@ -3433,7 +3465,7 @@ index 77f5983..d58ca3b 100644
    /** A quote's own text (``type: "quote"``), for the composer to show. */
    text?: string;
  }
-@@ -24,14 +29,7 @@ export interface PendingAttachment {
+@@ -24,14 +30,7 @@ export interface PendingAttachment {
  export type AttachmentRetention = "temporary" | "library";
  
  export async function saveLibraryAttachments(files: File[], workspaceId: string): Promise<void> {
@@ -3449,18 +3481,18 @@ index 77f5983..d58ca3b 100644
  }
  
  export async function prepareTemporaryAttachment(file: File): Promise<void> {
-@@ -47,12 +45,22 @@ export function toOutgoingAttachment(attachment: PendingAttachment): {
+@@ -47,12 +46,22 @@ export function toOutgoingAttachment(attachment: PendingAttachment): {
    filename: string;
    base64?: string;
    mime_type?: string;
 +  id?: string;
 +  url?: string;
-+  page_numbers?: number[];
++  page_numbers?: PageNumbers;
  } {
 +  const part = attachment.filename.match(/-第(\d+)-\d+页\.pdf$/i);
 +  const deferPart = part && Number(part[1]) > 1 && attachment.url && !attachmentPageVisited(attachment.url);
-+  const pages = !attachmentPageVisited(attachment.url) && attachment.pageCount && attachment.pageCount <= 2
-+    ? Array.from({ length: attachment.pageCount }, (_, index) => index + 1)
++  const pages: PageNumbers = !attachmentPageVisited(attachment.url) && attachment.pageCount && attachment.pageCount <= 2
++    ? attachment.pageCount === 2 ? [1, 2] : [1]
 +    : [attachmentPage(attachment.url)];
    return {
      type: attachment.type,
@@ -3472,7 +3504,7 @@ index 77f5983..d58ca3b 100644
    };
  }
  
-@@ -70,16 +78,23 @@ export function selectAttachmentFiles(
+@@ -70,16 +79,23 @@ export function selectAttachmentFiles(
    files: File[],
    existingBytes: number,
    limits: AttachmentLimits,
@@ -3802,14 +3834,19 @@ index 0000000..5260b9d
 +  }
 +}
 diff --git a/web/lib/session-api.ts b/web/lib/session-api.ts
-index 4494150..08ced13 100644
+index 4494150..9b29997 100644
 --- a/web/lib/session-api.ts
 +++ b/web/lib/session-api.ts
-@@ -33,6 +33,7 @@ export interface SessionMessage {
+@@ -1,3 +1,4 @@
++import type { PageNumbers } from "@/contracts/generated/turn-protocol";
+ import { clearFailedSubmission } from "@/lib/failed-submissions";
+ import { scopedUrl } from "@/lib/workspace-scope";
+ import { notifySessionsChanged } from "@/lib/session-events";
+@@ -33,6 +34,7 @@ export interface SessionMessage {
      url?: string;
      mime_type?: string;
      id?: string;
-+    page_numbers?: number[];
++    page_numbers?: PageNumbers;
      extracted_text?: string;
      generated?: boolean;
      size_bytes?: number;
@@ -4054,6 +4091,28 @@ index 05c29b6..30308c2 100644
        openReadingTab: () => fixture.calls.push("reading"),
        currentReadingReference: () => null,
        removeFileTab: (id) => fixture.calls.push(`remove-file:${id}`),
+diff --git a/web/tests/pdf-page-render.spec.tsx b/web/tests/pdf-page-render.spec.tsx
+index fe46ae1..8ec953f 100644
+--- a/web/tests/pdf-page-render.spec.tsx
++++ b/web/tests/pdf-page-render.spec.tsx
+@@ -18,7 +18,8 @@ it("waits for asynchronous canvas cancellation and paints only the latest zoom w
+       return { promise, cancel };
+     }),
+   };
+-  const doc = { getPage: async () => page } as unknown as PdfDocument;
++  const getPage = vi.fn(async () => page);
++  const doc = { getPage } as unknown as PdfDocument;
+   const props = { doc, locator: 1, width: 400, fallbackRatio: 1.5, active: true, annotations: [] };
+   const view = render(<PdfPage {...props} />);
+   await waitFor(() => expect(page.render).toHaveBeenCalledTimes(1));
+@@ -33,4 +34,7 @@ it("waits for asynchronous canvas cancellation and paints only the latest zoom w
+   expect(paints[1].canvas.style.width).toBe("3300px");
+   expect(paints[1].canvas.width * paints[1].canvas.height).toBeLessThanOrEqual(12_000_000);
+   await act(async () => { paints[1].finish(); });
++  getPage.mockImplementation(() => { throw new TypeError('PDF worker has already been destroyed'); });
++  expect(() => view.unmount()).not.toThrow();
++  await act(async () => {});
+ });
 diff --git a/web/tests/pending-attachments.test.ts b/web/tests/pending-attachments.test.ts
 index bccb92a..1844a75 100644
 --- a/web/tests/pending-attachments.test.ts
