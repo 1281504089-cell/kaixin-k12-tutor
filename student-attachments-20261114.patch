@@ -480,15 +480,16 @@ index 696b5e9..b283791 100644
          # is percent-encoded so spaces/Unicode/punctuation in filenames flow
 diff --git a/deeptutor/services/student_learning/uploads.py b/deeptutor/services/student_learning/uploads.py
 new file mode 100644
-index 0000000..272a1b2
+index 0000000..db32b3b
 --- /dev/null
 +++ b/deeptutor/services/student_learning/uploads.py
-@@ -0,0 +1,382 @@
+@@ -0,0 +1,389 @@
 +"""Bounded local uploads. Original bytes are usable before parsing/indexing."""
 +from __future__ import annotations
 +
 +import asyncio
 +from contextlib import asynccontextmanager
++import errno
 +import json
 +import math
 +import mimetypes
@@ -735,11 +736,9 @@ index 0000000..272a1b2
 +
 +async def process(result: dict) -> None:
 +    """Called only after the upload response; never run OCR inside admission."""
-+    from deeptutor.services.session.pdf_pages import background_parse_slot, parse_in_background
++    from deeptutor.services.session.pdf_pages import parse_in_background
 +    if result["retention"] == "library":
-+        async with library_queue():
-+            async with background_parse_slot:
-+                await _save_library(result)
++        await _save_library(result)
 +    else:
 +        for row in result["records"]:
 +            await parse_in_background(file_for(row))
@@ -752,9 +751,6 @@ index 0000000..272a1b2
 +    path.parent.mkdir(parents=True, exist_ok=True)
 +    fd = os.open(path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600)
 +    with os.fdopen(fd, "r+b") as handle:
-+        if not handle.read(1):
-+            handle.write(b"\0")
-+            handle.flush()
 +        while True:
 +            try:
 +                if os.name == "nt":
@@ -765,31 +761,42 @@ index 0000000..272a1b2
 +                    import fcntl
 +                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
 +                break
-+            except OSError:
++            except OSError as exc:
++                if exc.errno not in {errno.EACCES, errno.EAGAIN, errno.EDEADLK}:
++                    raise
 +                await asyncio.sleep(.2)
-+        yield
++        try:
++            yield
++        finally:
++            if os.name == "nt":
++                handle.seek(0)
++                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
++            else:
++                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 +
 +
 +async def _save_library(result: dict) -> None:
 +    from fastapi import BackgroundTasks, UploadFile
 +    from deeptutor.api.routers.student_learning import save_library_attachments
++    from deeptutor.services.session.pdf_pages import background_parse_slot
 +    files = []
 +    try:
-+        files = [UploadFile(file=file_for(row).open("rb"), filename=row["filename"]) for row in result["records"]]
-+        tasks = BackgroundTasks()
-+        response = await save_library_attachments(tasks, files)
-+        payload = response.model_dump(mode="json") if hasattr(response, "model_dump") else response
-+        result["library_result"] = {key: payload[key] for key in ("kb_name", "name", "task_id") if key in payload}
-+        atomic_write_json(directory(result["upload_id"]) / "result.json", result)
-+        await tasks()
-+        from deeptutor.multi_user.knowledge_access import current_kb_base_dir
-+        from deeptutor.knowledge.progress_tracker import ProgressTracker
-+        progress = ProgressTracker("我的上传资料", current_kb_base_dir()).get_progress() or {}
-+        if progress.get("task_id") != payload.get("task_id") or progress.get("stage") != "completed":
-+            raise ValueError("Library indexing did not complete")
-+        result["library_status"] = "saved"
-+        result.pop("library_error", None)
-+        atomic_write_json(directory(result["upload_id"]) / "result.json", result)
++        async with library_queue(), background_parse_slot:
++            files = [UploadFile(file=file_for(row).open("rb"), filename=row["filename"]) for row in result["records"]]
++            tasks = BackgroundTasks()
++            response = await save_library_attachments(tasks, files)
++            payload = response.model_dump(mode="json") if hasattr(response, "model_dump") else response
++            result["library_result"] = {key: payload[key] for key in ("kb_name", "name", "task_id") if key in payload}
++            atomic_write_json(directory(result["upload_id"]) / "result.json", result)
++            await tasks()
++            from deeptutor.multi_user.knowledge_access import current_kb_base_dir
++            from deeptutor.knowledge.progress_tracker import ProgressTracker
++            progress = ProgressTracker("我的上传资料", current_kb_base_dir()).get_progress() or {}
++            if progress.get("task_id") != payload.get("task_id") or progress.get("stage") != "completed":
++                raise ValueError("Library indexing did not complete")
++            result["library_status"] = "saved"
++            result.pop("library_error", None)
++            atomic_write_json(directory(result["upload_id"]) / "result.json", result)
 +    except Exception as error:
 +        result["library_status"] = "failed"
 +        result["library_error"] = "长期资料已保留原件，但检索准备未完成，请稍后重试。"
@@ -958,10 +965,10 @@ index ab5534c..faf02ce 100644
  
 diff --git a/tests/api/test_student_uploads.py b/tests/api/test_student_uploads.py
 new file mode 100644
-index 0000000..61571ec
+index 0000000..557b443
 --- /dev/null
 +++ b/tests/api/test_student_uploads.py
-@@ -0,0 +1,227 @@
+@@ -0,0 +1,274 @@
 +import asyncio
 +import hashlib
 +from pathlib import Path
@@ -1144,6 +1151,46 @@ index 0000000..61571ec
 +
 +
 +@pytest.mark.asyncio
++async def test_windows_queue_never_reads_a_locked_byte_and_unlocks_on_exit(environment, monkeypatch):
++    import errno
++    import os
++    import sys
++    calls = []
++    original_fdopen = os.fdopen
++    class Lease:
++        def __init__(self, fd, mode): self.handle = original_fdopen(fd, mode)
++        def __enter__(self): return self
++        def __exit__(self, *args): return self.handle.__exit__(*args)
++        def fileno(self): return self.handle.fileno()
++        def seek(self, offset): return self.handle.seek(offset)
++        def read(self, *args): raise PermissionError('Another Windows handle owns this byte')
++    def lock(fd, mode, size):
++        calls.append(mode)
++        if len(calls) == 1: raise BlockingIOError(errno.EACCES, 'Busy')
++    monkeypatch.setattr(uploads, 'os', SimpleNamespace(name='nt', open=os.open, fdopen=Lease, O_RDWR=os.O_RDWR, O_CREAT=os.O_CREAT, O_NOFOLLOW=getattr(os, 'O_NOFOLLOW', 0)))
++    monkeypatch.setitem(sys.modules, 'msvcrt', SimpleNamespace(locking=lock, LK_NBLCK=2, LK_UNLCK=0))
++    async with uploads.library_queue():
++        assert calls == [2, 2]
++    assert calls == [2, 2, 0]
++
++
++@pytest.mark.asyncio
++async def test_queue_permission_failure_keeps_original_and_records_failure(environment, monkeypatch):
++    from contextlib import asynccontextmanager
++    meta = uploads.begin('locked.txt', 3, 'library')
++    (uploads.directory(meta['upload_id']) / '0.chunk').write_bytes(b'abc')
++    result = await uploads.finish(meta['upload_id'])
++    @asynccontextmanager
++    async def denied():
++        raise PermissionError('Read only directory')
++        yield
++    monkeypatch.setattr(uploads, 'library_queue', denied)
++    await REAL_PROCESS(result)
++    assert uploads.read(meta['upload_id'], 'result.json')['library_status'] == 'failed'
++    assert uploads.file_for(result['records'][0]).read_bytes() == b'abc'
++
++
++@pytest.mark.asyncio
 +async def test_native_index_failure_is_not_reported_as_saved(environment, monkeypatch):
 +    from deeptutor.api.routers import student_learning
 +    from deeptutor.knowledge.progress_tracker import ProgressTracker
@@ -1178,17 +1225,24 @@ index 0000000..61571ec
 +@pytest.mark.asyncio
 +async def test_library_and_temporary_parsing_share_one_background_slot(environment, monkeypatch):
 +    from deeptutor.services.session import pdf_pages
++    from deeptutor.api.routers import student_learning
++    from deeptutor.knowledge.progress_tracker import ProgressTracker
 +    monkeypatch.setattr(pdf_pages, 'background_parse_slot', asyncio.Semaphore(1))
++    meta = uploads.begin('queued.txt', 3, 'library')
++    (uploads.directory(meta['upload_id']) / '0.chunk').write_bytes(b'abc')
++    result = await uploads.finish(meta['upload_id'])
 +    saved = []
-+    async def save(result):
-+        saved.append(result)
-+    monkeypatch.setattr(uploads, '_save_library', save)
++    async def save(background, files):
++        saved.append(files[0].filename)
++        return {'task_id': 'queued-task', 'name': '我的上传资料'}
++    monkeypatch.setattr(student_learning, 'save_library_attachments', save)
++    monkeypatch.setattr(ProgressTracker, 'get_progress', lambda self: {'stage': 'completed', 'task_id': 'queued-task'})
 +    async with pdf_pages.background_parse_slot:
-+        task = asyncio.create_task(REAL_PROCESS({'retention': 'library'}))
++        task = asyncio.create_task(REAL_PROCESS(result))
 +        await asyncio.sleep(.05)
 +        assert not saved
 +    await task
-+    assert saved == [{'retention': 'library'}]
++    assert saved == ['queued.txt']
 diff --git a/tests/services/config/test_runtime_settings.py b/tests/services/config/test_runtime_settings.py
 index afff880..6d38d17 100644
 --- a/tests/services/config/test_runtime_settings.py
