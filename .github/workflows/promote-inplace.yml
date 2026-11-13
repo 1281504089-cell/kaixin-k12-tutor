@@ -26,4 +26,5 @@ jobs:
         with:
           node-version: '22'
       - name: Validate every signed archive before replacing any production feed
+        # GitHub normalizes non-ASCII attachment basenames; downloads use distinct ASCII names.
         run: python ci-promote-inplace.py
