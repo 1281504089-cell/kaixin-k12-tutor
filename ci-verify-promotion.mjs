@@ -12,6 +12,10 @@ assert.equal(batch.desktop_patch_sha256, config.desktop_patch_sha256);
 for (const [target, thin] of Object.entries(config.thin)) {
   const main = batch.manifests[`runtime-${target}.json`];
   assert.equal(main.baseRuntimeId, undefined);
+  const previous = JSON.parse(await readFile(`current-feeds/runtime-${target}.json`));
+  verifyManifest(previous, key, thin.arch, thin.platform);
+  assert.ok((previous.builtAt ?? 0) <= main.builtAt, 'Refusing to replace a newer production release');
+  if (previous.builtAt === main.builtAt) assert.equal(previous.sha256, main.sha256, 'A different release already has this timestamp');
   for (const suffix of ['20261112', 'early']) {
     const value = batch.manifests[`runtime-${target}-${suffix}.json`];
     verifyManifest(value, key, thin.arch, thin.platform);
