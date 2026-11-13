@@ -1,0 +1,43 @@
+name: Verify public latest installers from zero
+on:
+  push:
+    branches: ['codex/fresh-install-20261114-*']
+    paths: ['ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'fresh-install-lock.json', '.github/workflows/fresh-install.yml']
+permissions:
+  contents: read
+jobs:
+  native:
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download public release, install and launch with an empty learning profile
+        run: python ci-fresh-install.py --target ${{ matrix.target }}
+      - name: Retain native proof and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fresh-install-${{ matrix.target }}
+          path: fresh-evidence/${{ matrix.target }}/
+          if-no-files-found: error
