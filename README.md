@@ -18,6 +18,10 @@
 
 Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaking students from primary through high school.
 
+## 20261113 源码修复
+
+[查看本次修复、使用方式和验证范围](SOURCE-FIXES-20261113.md)：附件可选临时／长期保存、科目项目新建对话、离线语音转写和录音声波反馈、模型切换兼容、DeepSeek 分级生成预算与摘要失败提示。**下方 20261112 安装包尚未包含本次补丁，源码合入不代表已安装客户端自动升级。**
+
 ## 下载安装
 
 完整安装包基础版本为 **1.7.1**，已合入 20261111 辅导与阅读修复，以及 20261112 语音连接组件修复，自带本机运行环境和 136 册教材。第一次安装只用下表对应系统的这一套文件；装好后在设置填写自己的 API。界面默认简体中文。

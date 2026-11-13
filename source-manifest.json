@@ -98,6 +98,11 @@
       "file": "student-voice-proxy-20261112.patch",
       "sha256": "7342bba1dda00b46937844332c7d79853fb33efb3bd378eff1420a394ef5208c",
       "description": "Ship the missing SOCKS voice transport in fresh and refreshed runtimes, verify it during packaging and report voice failures without exposing credentials"
+    },
+    {
+      "file": "student-uploads-models-stt-20261113.patch",
+      "sha256": "54e489bb6fa73b26988e1f8723b86fb5ddc680539dcc836ec36093e59405c2cc",
+      "description": "Optional persistent chat uploads via native knowledge storage, subject chat creation, offline student dictation with a live audio meter, provider-switch history compatibility, bounded DeepSeek reasoning recovery and history-summary failure notices"
     }
   ]
 }
