@@ -1,10 +1,10 @@
 {
   "tag": "student-20261114-attachments",
   "launcher_build": "20261114-unified",
-  "core_commit": "dce36f12dc4f135981a15540bd87794c9e4740a1",
-  "combined_source_commit": "dce36f12dc4f135981a15540bd87794c9e4740a1",
+  "core_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+  "combined_source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
   "prior_tag": "student-20261114-unified",
-  "builtAt": 1794605940215,
+  "builtAt": 1794607833322,
   "manifests": {
     "windows-x64": {
       "formatVersion": 1,
@@ -14,12 +14,12 @@
       "coreVersion": "1.7.1",
       "runtimeId": "1.7.1-kaixin-20261114-attachments-windows-x64-20261112",
       "baseRuntimeId": "1.7.1-04276f68a-x64",
-      "commit": "dce36f12dc4f135981a15540bd87794c9e4740a1",
-      "builtAt": 1794605940215,
+      "commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+      "builtAt": 1794607833322,
       "archive": "kaixin-core-20261114-attachments.tar.gz",
-      "sha256": "451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-      "corePayloadSha256": "451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-      "signature": "WCe+QC4pg/oemYsAL6KqXjcp09z7me4o8SXGa3H2i8t+5cPZXJFf0Qm7izUzhbuzm/3HLwyWTYxhhNH3GBz6DQ=="
+      "sha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+      "corePayloadSha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+      "signature": "svdeRZj4umwA61mT/QxKC0CJ39C6C9nAeN0Q6u2mYAHESN5FJGEm2Lzos5rst1cuTCW6zujY9ItQqIP+UwdBCg=="
     },
     "macos-x64": {
       "formatVersion": 1,
@@ -29,12 +29,12 @@
       "coreVersion": "1.7.1",
       "runtimeId": "1.7.1-kaixin-20261114-attachments-macos-x64-20261112",
       "baseRuntimeId": "1.7.1-04276f68a-x64",
-      "commit": "dce36f12dc4f135981a15540bd87794c9e4740a1",
-      "builtAt": 1794605940215,
+      "commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+      "builtAt": 1794607833322,
       "archive": "kaixin-core-20261114-attachments.tar.gz",
-      "sha256": "451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-      "corePayloadSha256": "451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-      "signature": "dZpkIZEAMDqHtowIQH1zgH/ldO1NSzHlzIqPADSLbZ16xZ76rKjxg0dSekbmIZr7xp+6eEuU3FS6gNCzepfADg=="
+      "sha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+      "corePayloadSha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+      "signature": "THVtTn9POl7r1oCWmExgqu41sq7c9MJcE3qBLXX+9dp3xtjZ5cHlK22IRmzOVD6Ft7PAoq6Lkh6+XMQK8yWyBg=="
     },
     "macos-arm64": {
       "formatVersion": 1,
@@ -44,21 +44,49 @@
       "coreVersion": "1.7.1",
       "runtimeId": "1.7.1-kaixin-20261114-attachments-macos-arm64-20261112",
       "baseRuntimeId": "1.7.1-04276f68a-arm64",
-      "commit": "dce36f12dc4f135981a15540bd87794c9e4740a1",
-      "builtAt": 1794605940215,
+      "commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+      "builtAt": 1794607833322,
       "archive": "kaixin-core-20261114-attachments.tar.gz",
-      "sha256": "451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-      "corePayloadSha256": "451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-      "signature": "uEEeBtTwRY9EvSFbLDeVXHfMyZjzOZYf7DAItQz+he2ZhXQXEL/+6EcG5jibZ+Hbs4dfdmjhKDXelQReE6/EBw=="
+      "sha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+      "corePayloadSha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+      "signature": "r/YrUCPFUdEhSl3jrr2vKmcqwkP1+flhXuT2xkWcOfSooLOeZyh+nnyvH375BSh1YzjvgcN31h5wxyiAa5BlBQ=="
     }
   },
   "core_asset": {
-    "id": 745273470,
+    "url": "https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/745362669",
+    "id": 745362669,
+    "node_id": "RA_kwDOVlRP084sbVTt",
     "name": "kaixin-core-20261114-attachments.tar.gz",
-    "size": 44863549,
-    "digest": "sha256:451df149cbb07831d66c8c98f67c0e78c7f0ac8d6fdae261673ebaa1b393a42c",
-    "browser_download_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-attachments/kaixin-core-20261114-attachments.tar.gz",
-    "url": "https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/745273470"
+    "label": "",
+    "uploader": {
+      "login": "github-actions[bot]",
+      "id": 41898282,
+      "node_id": "MDM6Qm90NDE4OTgyODI=",
+      "avatar_url": "https://avatars.githubusercontent.com/in/15368?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/github-actions%5Bbot%5D",
+      "html_url": "https://github.com/apps/github-actions",
+      "followers_url": "https://api.github.com/users/github-actions%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/github-actions%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/github-actions%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/github-actions%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/github-actions%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "content_type": "application/x-gtar",
+    "state": "uploaded",
+    "size": 44863616,
+    "digest": "sha256:7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+    "download_count": 0,
+    "created_at": "2026-11-13T22:09:48Z",
+    "updated_at": "2026-11-13T22:09:49Z",
+    "browser_download_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-attachments/kaixin-core-20261114-attachments.tar.gz"
   },
   "shell_files": {
     "src/main.mjs": {
