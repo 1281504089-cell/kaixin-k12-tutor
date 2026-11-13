@@ -1,0 +1,42 @@
+name: Windows spoken STT verification
+
+on:
+  push:
+    branches: [codex/windows-stt-20261114]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spoken-stt:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+      PYTHONDONTWRITEBYTECODE: '1'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.13'
+      - name: Verify source and apply the candidate
+        run: |
+          python bootstrap_source.py --with-updates
+          cp student-source/deeptutor/services/local_ai/worker.py baseline-stt-worker.py
+          git -C student-source apply ../qa/windows-stt-20261114/candidate.patch
+      - name: Install the locked CPU speech decoder and test-only container reader
+        run: python -m pip install numpy==2.2.6 sherpa-onnx==1.12.40 sherpa-onnx-core==1.12.40 imageio-ffmpeg==0.6.0
+      - name: Decode real spoken audio in ASCII and Chinese model paths
+        working-directory: student-source
+        run: python ../qa/windows-stt-20261114/verify_windows_stt.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-spoken-stt
+          path: stt-evidence/
+          retention-days: 7
