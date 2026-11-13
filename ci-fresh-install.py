@@ -1,4 +1,4 @@
-"""Install the exact public GitHub downloads on a fresh native test profile."""
+"""Verify anonymous GitHub downloads and a fresh native installation of the pinned release."""
 import argparse
 import hashlib
 import json
