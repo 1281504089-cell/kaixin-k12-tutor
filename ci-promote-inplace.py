@@ -61,7 +61,14 @@ for target in BATCH['reports']:
 run(['python', 'package_offline.py'])
 small_updates = list((ROOT / '本地更新包').glob('*.zip'))
 assert len(small_updates) == 3
-run(['gh', 'release', 'upload', TAG, *small_updates, *backups, ROOT / '本地更新包/先看更新步骤.txt', ROOT / '安装步骤.txt', '--clobber'])
+downloads = ROOT / 'release-downloads'
+downloads.mkdir()
+labels = {'windows-x64': 'Windows', 'macos-x64': 'Mac-Intel', 'macos-arm64': 'Mac-Apple'}
+for row in json.loads((ROOT / 'OFFLINE_PACKAGES.json').read_text()):
+    shutil.copyfile(row['path'], downloads / f'Kaixin-{labels[row["target"]]}-Update-20261113.zip')
+shutil.copyfile(ROOT / '本地更新包/先看更新步骤.txt', downloads / 'OFFLINE-UPDATE-20261113.txt')
+shutil.copyfile(ROOT / '安装步骤.txt', downloads / 'INSTALL-20261113.txt')
+run(['gh', 'release', 'upload', TAG, *downloads.iterdir(), *backups, '--clobber'])
 archives = [promotion / m['archive'] for m in BATCH['manifests'].values()]
 qualified = [promotion / name for name in BATCH['manifests'] if name not in {f'runtime-{t}.json' for t in BATCH['reports']}]
 run(['gh', 'release', 'upload', 'core-updates', *sorted(set(archives)), *qualified, '--clobber'])
