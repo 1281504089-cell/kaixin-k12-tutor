@@ -1,0 +1,31 @@
+name: Publish verified unified desktop batch
+on:
+  push:
+    branches: ['codex/unified-publish-20261114-*']
+    paths: ['ci-promote-unified.py', 'unified-publication.json', 'signed-unified/**', '.github/workflows/unified-publish.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify all native receipts and promote one coherent release
+        run: python ci-promote-unified.py
+      - name: Keep publication receipts and previous signed defaults
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unified-publication-receipt
+          path: |
+            PUBLICATION-RECEIPT.json
+            publication-work/previous/
+          if-no-files-found: warn

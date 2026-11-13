@@ -1,0 +1,19 @@
+{
+  "source_commit": "d3214451efd0a392aca1000805362626632cc858",
+  "all_tracked_source_files_match": true,
+  "excluded_generated_metadata": [
+    "SOURCE_FREEZE.json"
+  ],
+  "new_patch_sha256": "21ca8b6d32551ab3321925c4ce64158de4b624f0224ffa37509c0b5a8b289e63",
+  "patched_files": [
+    ".github/workflows/desktop-release.yml",
+    "AGENTS.md",
+    "apps/desktop/src/main.mjs",
+    "apps/desktop/src/release-updates.mjs",
+    "apps/desktop/src/update-network.mjs",
+    "apps/desktop/test/release-updates.test.mjs",
+    "apps/desktop/test/update-network.test.mjs",
+    "apps/desktop/test/update-notice.test.mjs",
+    "tests/test_desktop_release_batch.py"
+  ]
+}

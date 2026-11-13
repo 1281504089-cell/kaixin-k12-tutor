@@ -133,6 +133,21 @@
       "file": "student-stt-preload-20261114.patch",
       "sha256": "ea869d949c1fe08b8abf12e386e769329eeadd58e2871190d4fbb7325a1225fc",
       "description": "Fix offline Windows dictation in Chinese installation paths, preload the local speech decoder independently of cloud voice selection, keep it ready until exit, and retain native worker failure diagnostics"
+    },
+    {
+      "file": "student-desktop-inplace-20261114.patch",
+      "sha256": "72bbd65332d66ca0252d034df0cd902f14983a974f40cb8044e4af2e4c051ef9",
+      "description": "Include the validated desktop launcher, matched signed core updates and three-platform release guard"
+    },
+    {
+      "file": "student-project-history-20261114.patch",
+      "sha256": "be728475042b7dc999e29417854c8f18eb58a56fad40417f34b6cd56c5f633e8",
+      "description": "Keep General chat history visible across subjects, offer the standard scoped project conversation menu, and make add controls subtle"
+    },
+    {
+      "file": "student-desktop-update-network-20261114.patch",
+      "sha256": "21ca8b6d32551ab3321925c4ce64158de4b624f0224ffa37509c0b5a8b289e63",
+      "description": "Use guarded Chromium system proxy downloads, retry public GitHub routes after connection or stream failure, preserve cancellation and signed updates, and enforce three-platform publication"
     }
   ]
 }

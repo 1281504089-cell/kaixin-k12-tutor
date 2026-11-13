@@ -1,0 +1,19 @@
+{
+  "combined_source_commit": "d3214451efd0a392aca1000805362626632cc858",
+  "learning_source_commit": "f61912e0da2b821ed3739aeb4765296a7ddfef53",
+  "backend_source_commit": "525157ebded003193f2927960d983e4819e08513",
+  "frontend_build_id": "3Z48lqOkysYS-aVa8ATjs",
+  "core_archive": "kaixin-core-20261114-projects-v2.tar.gz",
+  "core_sha256": "918fffe063172304fac7ae119970f1b7dfee207572eb17ed4f14c82573261a54",
+  "only_launcher_files_differ_from_learning_handoff": [
+    "apps/desktop/src/main.mjs",
+    "apps/desktop/src/release-updates.mjs",
+    "apps/desktop/src/update-network.mjs",
+    "apps/desktop/test/release-updates.test.mjs",
+    "apps/desktop/test/update-network.test.mjs",
+    "apps/desktop/test/update-notice.test.mjs"
+  ],
+  "brand_preserved": true,
+  "personal_agent_included": false,
+  "image_optimization_contacted": false
+}

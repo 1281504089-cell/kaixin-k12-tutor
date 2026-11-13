@@ -1,11 +1,10 @@
-name: Validate Windows launcher migration and unified installer
+name: Build unified desktop installers and migration candidates
 on:
   push:
     branches: ['codex/unified-release-20261114-*']
     paths: ['ci-*.py', 'ci_*.py', 'ci-*.mjs', 'ci-*.cjs', 'fetchfix-*', 'fetchfix-shell/**', 'fetchfix-tests/**', 'fetchfix-windows/**', 'launcher-migration/**', 'migration-seeds/**', '.github/workflows/unified-release.yml']
 permissions:
   contents: write
-  actions: read
 jobs:
   candidate:
     runs-on: ubuntu-latest
@@ -29,6 +28,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
           - target: windows-x64
             runner: windows-2025
     runs-on: ${{ matrix.runner }}
