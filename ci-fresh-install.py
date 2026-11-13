@@ -96,7 +96,8 @@ if target.startswith('macos-'):
     executable = app / 'Contents/MacOS/开心动力超级学霸'
 else:
     installer = next(downloads.glob('*-Setup.exe'))
-    setup = subprocess.run([str(installer), '/S', '/D=' + str(install)], timeout=900)
+    # NSIS requires its final /D argument to stay unquoted, including spaces.
+    setup = subprocess.run('"' + str(installer) + '" /S /D=' + str(install), timeout=900)
     assert setup.returncode == 0, 'Windows installer failed'
     resources = install / 'resources'
     executable = install / '开心动力超级学霸.exe'
