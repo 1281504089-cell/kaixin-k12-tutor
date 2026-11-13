@@ -3267,7 +3267,7 @@ index d7470b9..61c1816 100644
            "title": "Type",
            "type": "string"
 diff --git a/web/features/chat/ChatStateAdapter.tsx b/web/features/chat/ChatStateAdapter.tsx
-index 5e048cc..db199fb 100644
+index 5e048cc..30daad0 100644
 --- a/web/features/chat/ChatStateAdapter.tsx
 +++ b/web/features/chat/ChatStateAdapter.tsx
 @@ -121,6 +121,8 @@ type SessionRuntimeStatus =
@@ -3287,8 +3287,34 @@ index 5e048cc..db199fb 100644
    filename?: string;
    base64?: string;
    url?: string;
+@@ -1868,6 +1871,7 @@ export function hydrateMessageAttachments(
+         url: item.url,
+         mime_type: item.mime_type,
+         id: item.id,
++        page_numbers: item.page_numbers,
+         extracted_text: item.extracted_text,
+         generated: item.generated,
+         size_bytes: item.size_bytes,
+@@ -3125,6 +3129,8 @@ export function ChatStateAdapterProvider({
+         base64: a.base64,
+         url: a.url,
+         mime_type: a.mime_type,
++        id: a.id,
++        page_numbers: a.page_numbers,
+       }));
+       const currentState = stateRef.current;
+       let key = currentState.selectedKey;
+@@ -3197,6 +3203,8 @@ export function ChatStateAdapterProvider({
+           base64: a.base64,
+           url: a.url,
+           mime_type: a.mime_type,
++          id: a.id,
++          page_numbers: a.page_numbers,
+         })) ?? (exactReplay ? undefined : msgAttachments);
+       const effectiveConfig = exactReplay ? replaySnapshot?.config : config ?? replaySnapshot?.config;
+       const effectiveNotebookReferences =
 diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
-index 37503ee..e55bac7 100644
+index 37503ee..28f60af 100644
 --- a/web/features/chat/components/ChatWorkspace.tsx
 +++ b/web/features/chat/components/ChatWorkspace.tsx
 @@ -11,7 +11,7 @@ import { COMMAND_CONFIRMATION_FAILED } from "@/features/chat/transport/command-d
@@ -3300,7 +3326,15 @@ index 37503ee..e55bac7 100644
  import { watchingRoute } from "@/lib/learning-routes";
  
  import { useChatWorkspaces } from "@/hooks/useChatWorkspaces";
-@@ -111,6 +111,7 @@ import { useSetupSync } from "@/hooks/useSetupSync";
+@@ -93,6 +93,7 @@ import {
+ } from "@/lib/file-attachments";
+ import {
+   toOutgoingAttachment,
++  type PendingAttachment,
+ } from "@/features/chat/controllers/pending-attachments";
+ import { readChatLaunchIntent } from "@/lib/chat-launch-intent";
+ import { usePendingChatAttachments } from "@/features/chat/controllers/usePendingChatAttachments";
+@@ -111,6 +112,7 @@ import { useSetupSync } from "@/hooks/useSetupSync";
  import { selectedMessagePassage } from "@/lib/selection-text";
  import { captureMistake, MISTAKE_PRACTICE_SCOPE, prepareMistakePractice } from "@/lib/student-learning-api";
  import { consumePendingPrompt } from "@/lib/pending-prompt";
@@ -3308,26 +3342,35 @@ index 37503ee..e55bac7 100644
  import {
    deleteSession,
    fetchSessionAskHint,
-@@ -653,7 +654,17 @@ export default function ChatWorkspace() {
+@@ -653,7 +655,26 @@ export default function ChatWorkspace() {
      };
      timer = setTimeout(attempt, 0);
      return () => clearTimeout(timer);
 -  }, [handlePrefillComposer]);
 +  }, [handlePrefillComposer, setAttachments]);
 +
++  const materialDraft = useRef<{ key: string; material: PendingAttachment } | null>(null);
 +  useEffect(() => {
 +    let alive = true;
 +    const timer = setTimeout(() => { void consumePendingMaterial(activeWorkspaceId(), () => alive).then(material => {
 +      if (!alive || !material) return;
-+      setAttachments(previous => previous.some(item => (item.attachmentId || item.id) === material.attachmentId) ? previous : [...previous, material]);
-+      viewerPanelRef.current?.openFileTab({ id: material.attachmentId, filename: material.filename, type: material.type, mime_type: material.mimeType, url: material.url });
++      // Bind after route initialization, like the existing mistake-practice handoff.
++      materialDraft.current = { key: newSession({ workspaceId: requestedWorkspaceId }), material };
 +    }); }, 0);
 +    return () => { alive = false; clearTimeout(timer); };
-+  }, [setAttachments]);
++  }, [newSession, requestedWorkspaceId]);
++  useEffect(() => {
++    const pending = materialDraft.current;
++    if (!pending || pending.key !== state.sessionKey) return;
++    materialDraft.current = null;
++    const material = pending.material;
++    setAttachments(previous => previous.some(item => (item.attachmentId || item.id) === material.attachmentId) ? previous : [...previous, material]);
++    viewerPanelRef.current?.openFileTab({ id: material.attachmentId, filename: material.filename, type: material.type, mime_type: material.mimeType, url: material.url });
++  }, [setAttachments, state.sessionKey]);
  
    // A clickable node inside an inlined visualization SVG (data-prompt) — and the
    // html widget's sendPrompt bridge — dispatch this window event; mirror it into
-@@ -1623,13 +1634,20 @@ export default function ChatWorkspace() {
+@@ -1623,13 +1644,20 @@ export default function ChatWorkspace() {
    const removeAttachment = useCallback((index: number) => {
      const file = attachments[index];
      if (file?.id) viewerPanelRef.current?.removeFileTab(file.id);
@@ -3349,7 +3392,7 @@ index 37503ee..e55bac7 100644
    }, [attachments]);
  
    // Fold all messages once per state.messages change to power the
-@@ -2015,6 +2033,8 @@ export default function ChatWorkspace() {
+@@ -2015,6 +2043,8 @@ export default function ChatWorkspace() {
        }
  
        let extraAttachments = attachments.map(toOutgoingAttachment);
@@ -3358,7 +3401,7 @@ index 37503ee..e55bac7 100644
        let config: Record<string, unknown> | undefined;
  
        if (isQuizMode) {
-@@ -2966,6 +2986,7 @@ export default function ChatWorkspace() {
+@@ -2966,6 +2996,7 @@ export default function ChatWorkspace() {
                  onDrop={handleDrop}
                  onPaste={handlePaste}
                  onAddFiles={handleAddFiles}
@@ -3758,6 +3801,18 @@ index 0000000..5260b9d
 +    return null
 +  }
 +}
+diff --git a/web/lib/session-api.ts b/web/lib/session-api.ts
+index 4494150..08ced13 100644
+--- a/web/lib/session-api.ts
++++ b/web/lib/session-api.ts
+@@ -33,6 +33,7 @@ export interface SessionMessage {
+     url?: string;
+     mime_type?: string;
+     id?: string;
++    page_numbers?: number[];
+     extracted_text?: string;
+     generated?: boolean;
+     size_bytes?: number;
 diff --git a/web/lib/student-edition.ts b/web/lib/student-edition.ts
 index ce98c5a..604e5b4 100644
 --- a/web/lib/student-edition.ts
@@ -3910,6 +3965,69 @@ index a81570b..20a8dfe 100644
 +    "/((?!_next/static|_next/image|favicon.ico|api/knowledge-bases(?:$|/[^/]+/upload(?:/|$))|api/student/attachments/uploads(?:/|$)).*)",
    ],
  };
+diff --git a/web/tests/chat-failed-submission-recovery.spec.tsx b/web/tests/chat-failed-submission-recovery.spec.tsx
+index f1bab83..8e5b242 100644
+--- a/web/tests/chat-failed-submission-recovery.spec.tsx
++++ b/web/tests/chat-failed-submission-recovery.spec.tsx
+@@ -8,6 +8,7 @@ import {
+ import { buildVisiblePath } from "@/lib/message-branches";
+ import { initI18n } from "@/i18n/init";
+ import { updateRecoveryPrincipal } from "@/lib/recovery-principal";
++import { writeStoredResponseLanguage } from "@/context/app-shell-storage";
+ import * as notifications from "@/lib/notifications";
+ import {
+   resetReadingTurnState, setReadingMaterial, setReadingViewport,
+@@ -182,6 +183,7 @@ function Harness() {
+       <button onClick={() => sendMessage("Hello offline")}>Send</button>
+       <button onClick={() => sendMessage("Second offline")}>Send another</button>
+       <button onClick={() => sendMessage("", [{ type: "image", filename: "figure.png", base64: "YWJj" }])}>Send image only</button>
++      <button onClick={() => sendMessage("Read these pages", [{ type: "file", filename: "formula.pdf", url: "/files/attachments/_pending/abc/formula.pdf", id: "abc", page_numbers: [1, 2] }])}>Send PDF pages</button>
+       <button onClick={() => void resendLastMessage()}>Resend</button>
+       <button onClick={() => {
+         const draft = state.messages.find((message) => message.failedSubmission);
+@@ -351,7 +353,7 @@ it("durably edits an unsent message with its original attachment and request sco
+   fixture.connected = true;
+   storeFailedSubmission("s1", { submissionId: "original-edit", content: "Original", requestSnapshot: {
+     content: "Original", capability: "chat", language: "en", enabledTools: ["reason"], knowledgeBases: ["original-kb"],
+-    attachments: [{ type: "image", base64: "YWJj", filename: "source.png" }],
++    attachments: [{ type: "file", id: "pdf-original", url: "/files/attachments/_pending/pdf/formula.pdf", filename: "formula.pdf", page_numbers: [7] }],
+   } });
+   render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+   await act(async () => fireEvent.click(screen.getByText("Load")));
+@@ -360,7 +362,7 @@ it("durably edits an unsent message with its original attachment and request sco
+   expect(fixture.replacementCalls[0].original).toBe("original-edit");
+   const command = fixture.replacementCalls[0].request;
+   expect(command).toMatchObject({ content: "Edited offline", knowledge_bases: ["original-kb"], tools: ["reason"],
+-    attachments: [{ type: "image", base64: "YWJj", filename: "source.png" }] });
++    attachments: [{ type: "file", id: "pdf-original", url: "/files/attachments/_pending/pdf/formula.pdf", filename: "formula.pdf", page_numbers: [7] }] });
+   expect(command.client_submission_id).not.toBe("original-edit");
+   expect(fixture.sent).toEqual([{ type: "subscribe_turn", turn_id: "edited-turn", after_seq: 0 }]);
+   expect(readFailedSubmissions("s1")).toHaveLength(1);
+@@ -529,6 +531,16 @@ it("preserves a stopped-before-admission draft across reload", async () => {
+   expect(fixture.sent).toHaveLength(0);
+ });
+ 
++it("sends the original PDF identity and selected pages and retains them for recovery", async () => {
++  fixture.connected = true;
++  render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
++  fireEvent.click(screen.getByRole("button", { name: "Send PDF pages" }));
++  await act(async () => {});
++  const expected = { id: "abc", filename: "formula.pdf", page_numbers: [1, 2] };
++  expect(fixture.sent.find(message => message.type === "start_turn")?.attachments).toMatchObject([expected]);
++  expect(readFailedSubmissions("draft:general")[0].requestSnapshot).toMatchObject({ attachments: [expected] });
++});
++
+ it("tracks attachment-only submissions with a stable identity for resend", async () => {
+   fixture.connected = true;
+   render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
+@@ -866,6 +878,7 @@ it("restores a failed first message in a draft and can retry after reload", asyn
+ });
+ 
+ it("retries a failed draft with its original settings after live settings change", async () => {
++  writeStoredResponseLanguage("en");
+   vi.useFakeTimers();
+   try {
+     render(<ChatStateAdapterProvider><Harness /></ChatStateAdapterProvider>);
 diff --git a/web/tests/doc-attachments.test.ts b/web/tests/doc-attachments.test.ts
 index 59d1117..c4b2118 100644
 --- a/web/tests/doc-attachments.test.ts

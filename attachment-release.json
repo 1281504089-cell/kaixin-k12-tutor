@@ -1,8 +1,8 @@
 {
   "tag": "student-20261114-attachments",
-  "source_commit": "ff61da12e22cb5dca5de5ac749f8035219a5de4c",
+  "source_commit": "1af16e9f3c6b1046c5688cfc8e7e0892d310bfd0",
   "baseline_source_commit": "d3214451efd0a392aca1000805362626632cc858",
-  "patch_sha256": "54980d653ba234f3416decd43996ce725b674b50eec457edb4f117dba15ebb54",
+  "patch_sha256": "7c98faf3cd48fa65fb7ce2f978407472fa14b195f5e0a72df6364e24e9b0b00e",
   "archive": "kaixin-core-20261114-attachments.tar.gz",
   "prior_core": {
     "archive": "kaixin-core-20261114-projects-v2.tar.gz",
@@ -23,7 +23,8 @@
     "tests/pdf-preview-quote.spec.tsx",
     "tests/viewer-launcher.spec.tsx",
     "tests/learning-navigation.spec.tsx",
-    "tests/chat-reading-navigation.spec.tsx"
+    "tests/chat-reading-navigation.spec.tsx",
+    "tests/chat-failed-submission-recovery.spec.tsx"
   ],
-  "source_files_sha256": "0eb5be0aaeef90f4ed839a355863cbe6a9bb1f9ceb1e8895d5bf102615be5a17"
+  "source_files_sha256": "f59a637817047e5ffa70a44c494044c24d291749ec4672d5da06abdcd3ee9786"
 }
