@@ -109,6 +109,14 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     assert.match(result.text, /分之/);
     speech.push({ milliseconds: Date.now() - started, spoken_audio_decoded: true });
   }
+  const attachmentProof = execFileSync(python, [path.join(process.cwd(), 'ci-attachment-native.py'), frontend, path.join(evidence, 'attachments.json'), backend], {
+    encoding: 'utf8', timeout: 480000, env: { ...process.env, PYTHONPATH: path.join(runtime, 'core'),
+      DEEPTUTOR_HOME: path.join(home, 'workspace'), DEEPTUTOR_LOCAL_AI: path.join(native, 'support/local-ai'),
+      DEEPTUTOR_FONT_DIR: path.join(native, 'support/fonts'), PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1',
+      OMP_NUM_THREADS: '2', OPENBLAS_NUM_THREADS: '2' } });
+  const attachments = JSON.parse(attachmentProof.trim().split('\n').at(-1));
+  assert.equal(attachments.scanned_pdf_retrievable, true);
+  assert.equal(attachments.raw_originals_verified, true);
   // Exercise the installed launcher's automatic compatibility selection without altering live feeds.
   const { findReleaseUpdate, downloadReleaseUpdate } = await import(pathToFileURL(path.join(resources, 'app/src/release-updates.mjs')));
   const trace = [];

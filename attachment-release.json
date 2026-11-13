@@ -1,0 +1,32 @@
+{
+  "tag": "student-20261114-attachments",
+  "source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+  "baseline_source_commit": "d3214451efd0a392aca1000805362626632cc858",
+  "patch_sha256": "e4cf7b85404e965e5c7b540bc8f2d7cb13da934dc4150fdca301f9c370aa2c42",
+  "archive": "kaixin-core-20261114-attachments.tar.gz",
+  "prior_core": {
+    "archive": "kaixin-core-20261114-projects-v2.tar.gz",
+    "sha256": "918fffe063172304fac7ae119970f1b7dfee207572eb17ed4f14c82573261a54"
+  },
+  "new_backend_files": [
+    "deeptutor/api/routers/student_uploads.py",
+    "deeptutor/services/student_learning/uploads.py"
+  ],
+  "web_tests": [
+    "tests/pending-material.spec.ts",
+    "tests/student-materials.spec.tsx",
+    "tests/student-upload.spec.ts",
+    "tests/student-edition.spec.tsx",
+    "tests/pending-chat-attachments.spec.tsx",
+    "tests/student-hidden-resources.spec.tsx",
+    "tests/lazy-session-viewer-panel.spec.tsx",
+    "tests/pdf-preview-quote.spec.tsx",
+    "tests/viewer-launcher.spec.tsx",
+    "tests/learning-navigation.spec.tsx",
+    "tests/chat-reading-navigation.spec.tsx",
+    "tests/chat-failed-submission-recovery.spec.tsx",
+    "tests/pdf-page-render.spec.tsx",
+    "tests/pdf-reading-resize.spec.tsx"
+  ],
+  "source_files_sha256": "1dabe4c0e239c03a57312a8da381e8f0aa2ccf26381d38f0fdf52ba143d4f658"
+}

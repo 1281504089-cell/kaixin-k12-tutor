@@ -1,5 +1,5 @@
 // Test-only entry in a disposable Electron copy; production modules remain unchanged.
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, session } = require('electron');
 const { readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -32,10 +32,31 @@ async function content() {
 }
 (async () => {
   try {
+    await app.whenReady();
+    const updates = session.fromPartition('kaixin-updates');
+    const originalFetch = updates.fetch.bind(updates);
+    updates.fetch = async (url, options) => {
+      const tag = process.env.KX_CANDIDATE_TAG;
+      const original = String(url);
+      const mapped = original.replace('/tags/core-updates', '/tags/' + tag).replace('/download/core-updates/', '/download/' + tag + '/');
+      const ciOptions = new URL(mapped).hostname === 'api.github.com' && process.env.GH_TOKEN
+        ? { ...options, headers: { ...options?.headers, Authorization: `Bearer ${process.env.GH_TOKEN}` } } : options;
+      const response = await originalFetch(mapped, ciOptions);
+      if (original.includes('/tags/core-updates') && response.ok) {
+        const metadata = await response.json();
+        return Response.json({ ...metadata, tag_name: 'core-updates' });
+      }
+      return response;
+    };
     await import(pathToFileURL(path.join(__dirname, 'main.mjs')));
     await app.whenReady();
     let view;
-    while (!(view = await content())) await pause(500);
+    const readyDeadline = Date.now() + 120000;
+    while (!(view = await content())) {
+      assert.ok(Date.now() < readyDeadline, 'The old installed core did not open the update test interface');
+      await pause(500);
+    }
+    await pause(1000);
     void view.executeJavaScript('window.kaixinDesktop.checkForUpdates()').catch(error => { invokeError = error.message; });
     while (!installed) await pause(500);
     const after = JSON.parse(readFileSync(path.join(home, 'active.json')));
@@ -48,12 +69,21 @@ async function content() {
     await pause(500);
     view = await content();
     assert.ok(view, 'Updated page did not expose the trusted desktop bridge');
+    const uiDeadline = Date.now() + 60000;
+    while (!await view.executeJavaScript('Boolean(document.querySelector("textarea")?.offsetHeight) && document.body.innerText.includes("默认学习助手") && !document.body.innerText.includes("加载中...")')) {
+      assert.ok(Date.now() < uiDeadline, 'The updated learning interface did not finish rendering');
+      await pause(200);
+    }
+    const menu = await view.executeJavaScript(`(() => { document.querySelector('button[aria-label="资源"]')?.click(); return document.body.innerText; })()`);
+    for (const label of ['收藏夹', '学习日志', '题库', '书籍', '阅读']) assert.ok(!menu.split('\n').includes(label), label);
+    await view.executeJavaScript(`document.querySelector('button[aria-label="资源"]')?.click()`);
+    await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-ui-updated.png'), (await view.capturePage()).toPNG());
     await view.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
     assert.equal(current, true);
     writeFileSync(output, JSON.stringify({
       native_platform: process.platform, native_arch: process.arch,
       entry: 'renderer IPC desktop:check-release', native_dialogs_auto_confirmed: true,
-      production_main_unchanged: true, from_runtime: before.runtimeId, to_runtime: after.runtimeId,
+      production_main_unchanged: true, candidate_feed_routed_only_in_test: true, from_runtime: before.runtimeId, to_runtime: after.runtimeId,
       actual_download_install_backup_restart: 'passed', transaction: transaction.phase,
       check_again_current: true, old_renderer_closed_after_update: Boolean(invokeError),
     }, null, 2));

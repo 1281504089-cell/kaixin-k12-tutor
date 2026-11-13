@@ -115,8 +115,10 @@ included = json.loads((resources / 'update/runtime.json').read_text())
 assert included == batch['manifests'][target]
 environment = {**os.environ, 'KX_EXPECTED_PLATFORM': expected['platform'], 'KX_EXPECTED_ARCH': expected['arch']}
 run(['node', 'ci-fresh-smoke.mjs', executable, resources, work / '全新学习目录', evidence], env=environment, timeout=1100)
+from ci_attachment_bridge import prepare_bridge
+prepare_bridge(root, target, resources, work / '全新学习目录', evidence, batch)
 from ci_update_probe import verify_update_entry
-update_entry, migration_out, migration_report = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence)
+update_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence)
 after = release_metadata()
 assert after['id'] == lock['release_id'], 'Latest release changed during validation'
 for file in expected['files']:
@@ -129,12 +131,12 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'native_smoke': json.loads((evidence / 'app.json').read_text()),
           'network': json.loads((evidence / 'network.json').read_text()),
           'update_entry': update_entry,
-          'launcher_migration': migration_report,
+          'launcher_migration': {'reused_unchanged_launcher_proof': lock['tag']},
           'shell_files': batch['shell_files'],
           'full_files': [{'file': file.name, 'bytes': file.stat().st_size, 'sha256': sha(file)} for file in sorted(candidate_out.iterdir())],
           'real_keys_used': False, 'real_learning_records_modified': False}
 (evidence / 'verified.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
 report_file = evidence / ('verification-' + target + '.json')
 report_file.write_text(json.dumps(report, ensure_ascii=False, indent=2))
-run(['gh', 'release', 'upload', batch['tag'], report_file, *candidate_out.iterdir(), *migration_out.iterdir(), '--clobber'])
+run(['gh', 'release', 'upload', batch['tag'], report_file, *candidate_out.iterdir(), '--clobber'])
 print('PASS: public download, native fresh install and included latest core: ' + target, flush=True)

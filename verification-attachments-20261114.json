@@ -1,0 +1,79 @@
+{
+  "source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+  "source_files_sha256": "1dabe4c0e239c03a57312a8da381e8f0aa2ccf26381d38f0fdf52ba143d4f658",
+  "patch_sha256": "e4cf7b85404e965e5c7b540bc8f2d7cb13da934dc4150fdca301f9c370aa2c42",
+  "automated": {
+    "backend_targeted_passed": 162,
+    "web_targeted_passed": 124,
+    "node_targeted_passed": 37,
+    "typescript": "passed"
+  },
+  "actual_browser_upload": {
+    "large_pdf_bytes": 134462773,
+    "pages": 105,
+    "raw_upload_seconds": 3.179,
+    "preview_opened": true,
+    "retained_pdf_raw_seconds": 1.165,
+    "library_to_chat": true
+  },
+  "wire_validation": {
+    "account_check_delay_ms": 600,
+    "reference_survives_draft_initialization": true,
+    "reference_sent_after_closing_preview": true,
+    "identity_and_page_numbers_preserved": true,
+    "unopened_short_pdf_pages": [
+      1,
+      2
+    ],
+    "model_calls_forwarded_in_interception_tests": false,
+    "browser_errors_after_close": []
+  },
+  "local_native_upload": {
+    "raw_originals_verified": true,
+    "temporary_excluded_from_library": true,
+    "short_pdf_pages": 2,
+    "concurrent_library_uploads_saved": true,
+    "scanned_pdf_retrievable": true,
+    "sources": 5,
+    "interactive_page_ready_while_indexing_seconds": 1.13,
+    "temporary_raw_seconds": 0.554,
+    "library_raw_seconds": [
+      0.174,
+      0.725
+    ],
+    "background_and_retrieval_seconds": 20.348,
+    "health_max_seconds": 0.072,
+    "real_api_key_used": false,
+    "cloud_models_used": false
+  },
+  "model_sample": {
+    "model": "kimi-k3.1-pro",
+    "reasoning": "high",
+    "plain_before_first_prose_seconds": 6.112,
+    "plain_after_first_prose_seconds": 6.293,
+    "scanned_pdf_first_prose_seconds": 32.865,
+    "scan_formula_result": "1/2 + 1/3 = 5/6",
+    "scan_native_model_calls": 2,
+    "sample_is_not_a_speed_guarantee": true,
+    "production_ui_graphical_formula": {
+      "first_prose_seconds": 34.887,
+      "complete_seconds": 36.28,
+      "result": "1/2 + 1/3 = 5/6",
+      "image_only_pdf": true,
+      "preview_closed_before_send": true,
+      "expected_pdf_textlayer_navigation_abort_only": true
+    }
+  },
+  "limitations": [
+    "Background parsing needs the app to stay running; large scanned documents may reach the existing parser time limit. Originals remain available.",
+    "No real student computer microphone hardware tested in this batch; native bundled spoken audio decoding is checked in each platform run."
+  ],
+  "real_keys_in_delivery": false,
+  "real_learning_records_in_delivery": false,
+  "windows_queue_regression": {
+    "native_run": 43515368435,
+    "windows_2025_python_312": "passed",
+    "concurrent_lease_and_exception_release": "passed",
+    "no_locked_byte_read": true
+  }
+}
