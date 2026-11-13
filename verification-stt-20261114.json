@@ -27,7 +27,7 @@
         "ok": false,
         "returncode": 1,
         "seconds": 2.8910000000000196,
-        "failure": "IndexError: invalid unordered_map<K, T> key\r"
+        "failure": "IndexError: invalid unordered_map<K, T> key"
       },
       "candidate_chinese": {
         "ok": true,
@@ -56,9 +56,30 @@
     "Mac Intel adapter was tested; Apple Silicon microphone was not tested.",
     "No API calls or user keys used."
   ],
+  "mac_installed": {
+    "runtime_id": "1.7.1-kaixin-20261114-stt-macos-x64-early",
+    "update_transaction": "complete",
+    "startup_preload_observed": true,
+    "worker_alive_before_synthetic_request": true,
+    "speech_route": {
+      "scope": "Updated Mac application HTTP route with existing synthetic fixture; no microphone or speech API",
+      "calls": [
+        {
+          "seconds": 1.369683731,
+          "text": "请帮我讲解这道数学题，2分之1加3分之1等于多少？"
+        },
+        {
+          "seconds": 0.4024209350000001,
+          "text": "请帮我讲解这道数学题，2分之1加3分之1等于多少？"
+        }
+      ]
+    },
+    "learner_tables_unchanged": true,
+    "api_and_user_settings_unchanged": true,
+    "physical_microphone_tested": false
+  },
   "packaging": {
-    "run_id": 43467374584,
-    "head_sha": "6fcdde7506f752425c6e0601c58a927c3cc4354c",
+    "source_commit": "525157ebded003193f2927960d983e4819e08513",
     "reports": {
       "macos-x64": {
         "target": "macos-x64",
@@ -161,6 +182,7 @@
         "validation_scope": "Reused the previously validated public native-resource baseline; overlaid four Python files and BUILD_COMMIT only. No physical Apple Silicon Mac microphone test."
       }
     },
+    "live_manifest_signature_readbacks": 9,
     "full_installers_rebuilt": false
   }
 }
