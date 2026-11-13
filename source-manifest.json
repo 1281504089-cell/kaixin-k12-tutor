@@ -148,6 +148,11 @@
       "file": "student-desktop-update-network-20261114.patch",
       "sha256": "21ca8b6d32551ab3321925c4ce64158de4b624f0224ffa37509c0b5a8b289e63",
       "description": "Use guarded Chromium system proxy downloads, retry public GitHub routes after connection or stream failure, preserve cancellation and signed updates, and enforce three-platform publication"
+    },
+    {
+      "file": "student-attachments-20261114.patch",
+      "sha256": "c4a64ea2dabc8e6cc6100b68b39f06c55914bb6f0f98b1c93e8ef64c072ddc8f",
+      "description": "Hide the five unused entry points throughout student menus; upload originals in bounded verified chunks, make attachments readable while retained materials index in the background, and serialize library writes"
     }
   ]
 }

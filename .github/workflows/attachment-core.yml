@@ -1,0 +1,40 @@
+name: Build frozen attachment core
+on:
+  push:
+    branches: ['codex/attachments-core-20261114-*']
+    paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-attachments-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
+permissions:
+  contents: write
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Create isolated prerelease
+        run: |
+          set -euo pipefail
+          tag=$(python -c 'import json;print(json.load(open("attachment-release.json"))["tag"])')
+          if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
+            python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
+          else
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '附件与资料库优化候选 · 2026-11-14' --notes '正在验证三端安装、原地更新及原件先用、后台索引。验证完成后再设为正式版。'
+          fi
+      - name: Build and verify core
+        run: python ci-attachment-core.py
+      - name: Keep core receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attachment-core
+          path: attachment-core/attachment-core.json
+          if-no-files-found: warn

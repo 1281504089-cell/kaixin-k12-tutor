@@ -1,0 +1,4448 @@
+diff --git a/deeptutor/api/routers/student_learning.py b/deeptutor/api/routers/student_learning.py
+index 9d8985c..ff1a68b 100644
+--- a/deeptutor/api/routers/student_learning.py
++++ b/deeptutor/api/routers/student_learning.py
+@@ -9,11 +9,16 @@ from deeptutor.services.student_learning import mistakes, reports, textbooks
+ 
+ router = APIRouter()
+ 
++from deeptutor.api.routers.student_uploads import router as upload_router
++router.include_router(upload_router)
++
+ 
+ @router.post("/attachments/save")
+ async def save_library_attachments(background: BackgroundTasks, files: list[UploadFile] = File(...)):
+     """Retain chat uploads through the native, workspace-owned knowledge library."""
+-    from deeptutor.api.routers import knowledge
++    import asyncio
++    import importlib
++    knowledge = await asyncio.to_thread(importlib.import_module, "deeptutor.api.routers.knowledge")
+ 
+     name = "我的上传资料"
+     manager = knowledge.get_kb_manager()
+@@ -63,12 +68,12 @@ async def prepare_temporary_attachment(file: UploadFile, background: BackgroundT
+                 pages = await prepare_pdf_pages(source)
+             except Exception:
+                 pages = {"images": []}
+-            if pages["images"]:
++            if pages.get("page_count"):
+                 background.add_task(parse_in_background, source, temporary)
+                 queued = True
+                 return {
+                     "status": "ready",
+-                    "strategy": "vision",
++                    "strategy": "vision" if pages["images"] else "document",
+                     "page_count": pages["page_count"],
+                     "background_parsing": True,
+                 }
+diff --git a/deeptutor/api/routers/student_uploads.py b/deeptutor/api/routers/student_uploads.py
+new file mode 100644
+index 0000000..b8b2b77
+--- /dev/null
++++ b/deeptutor/api/routers/student_uploads.py
+@@ -0,0 +1,127 @@
++"""Small transport chunks and immediate original-file references for student chat."""
++import asyncio
++import hashlib
++import os
++import re
++from typing import Literal
++import uuid
++
++from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
++from pydantic import BaseModel, Field
++
++from deeptutor.services.student_learning import uploads
++
++router = APIRouter()
++
++
++class UploadStart(BaseModel):
++    filename: str = Field(min_length=1, max_length=240)
++    size: int = Field(gt=0, le=uploads.MAX_SOURCE_BYTES)
++    retention: Literal["temporary", "library"] = "temporary"
++
++
++def error(exc):
++    return HTTPException(404 if isinstance(exc, LookupError) else 400, detail=str(exc))
++
++
++@router.post("/attachments/uploads")
++async def begin_upload(body: UploadStart):
++    try:
++        return await asyncio.to_thread(uploads.begin, body.filename, body.size, body.retention)
++    except (ValueError, LookupError) as exc:
++        raise error(exc) from None
++
++
++@router.put("/attachments/uploads/{upload_id}/chunks/{index}")
++async def upload_chunk(upload_id: str, index: int, request: Request):
++    temporary = None
++    try:
++        meta = uploads.read(upload_id)
++        expected = uploads.expected_chunk(meta, index)
++        wanted = request.headers.get("x-upload-sha256", "")
++        if not re.fullmatch(r"[0-9a-f]{64}", wanted):
++            raise ValueError("上传分段缺少有效校验值。")
++        directory = uploads.directory(upload_id)
++        if (directory / "result.json").exists() or (directory / "finishing").exists():
++            raise ValueError("文件已提交，不能继续修改分段。")
++        temporary = directory / f"{index}.{uuid.uuid4().hex}.receiving"
++        size = 0
++        digest = hashlib.sha256()
++        with temporary.open("xb") as output:
++            async for data in request.stream():
++                size += len(data)
++                if size > expected:
++                    raise HTTPException(413, detail="上传分段超过当前大小上限。")
++                digest.update(data)
++                await asyncio.to_thread(output.write, data)
++        if size != expected or digest.hexdigest() != wanted:
++            raise ValueError("上传分段不完整或校验失败，请重试。")
++        target = directory / f"{index}.chunk"
++        try:
++            os.link(temporary, target)
++        except FileExistsError:
++            def existing_hash():
++                with target.open("rb") as handle:
++                    return hashlib.file_digest(handle, "sha256").hexdigest()
++            if await asyncio.to_thread(existing_hash) != wanted:
++                raise ValueError("重复分段的内容不同，请重新上传。")
++        return {"received": size, "index": index}
++    except (ValueError, LookupError) as exc:
++        raise error(exc) from None
++    finally:
++        if temporary:
++            temporary.unlink(missing_ok=True)
++
++
++@router.post("/attachments/uploads/{upload_id}/complete")
++async def complete_upload(upload_id: str, background: BackgroundTasks):
++    try:
++        was_complete = (uploads.directory(upload_id) / "result.json").is_file()
++        result = await uploads.finish(upload_id)
++        if not was_complete:
++            background.add_task(uploads.process, result)
++        return result
++    except (ValueError, LookupError) as exc:
++        raise error(exc) from None
++
++
++@router.get("/attachments/uploads/library")
++async def list_long_term_uploads():
++    from deeptutor.services.workspace.navigation import read_workspace_indexes
++
++    async def read():
++        return await asyncio.to_thread(uploads.library_uploads)
++
++    rows, unavailable = await read_workspace_indexes(read)
++    return {"uploads": rows, "unavailable_workspaces": unavailable}
++
++
++@router.delete("/attachments/uploads/{upload_id}")
++async def cancel_upload(upload_id: str):
++    try:
++        await asyncio.to_thread(uploads.cancel, upload_id)
++        return {"cancelled": True}
++    except (ValueError, LookupError) as exc:
++        raise error(exc) from None
++
++
++class ExistingMaterial(BaseModel):
++    kb_ref: str = Field(min_length=1, max_length=500)
++    filename: str = Field(min_length=1, max_length=1000)
++
++
++@router.post("/materials/attach")
++async def attach_library_material(body: ExistingMaterial):
++    from deeptutor.api.routers.knowledge import _resolve_kb_raw_file_or_404
++    from deeptutor.services.workspace.knowledge import library_request
++    token = library_request.set(True)
++    try:
++        source = _resolve_kb_raw_file_or_404(body.kb_ref, body.filename)
++        # The resolver enforces the existing account/library ACL and raw-root boundary.
++        attachment_id = uuid.uuid4().hex
++        url = await uploads.store().import_file(session_id=uploads.PENDING, attachment_id=attachment_id, filename=source.name, source=source)
++        import mimetypes
++        return {"id": attachment_id, "filename": source.name, "url": url, "type": "file",
++                "mime_type": mimetypes.guess_type(source.name)[0] or "application/octet-stream", "size": source.stat().st_size}
++    finally:
++        library_request.reset(token)
+diff --git a/deeptutor/core/turn_request.py b/deeptutor/core/turn_request.py
+index f0e5f3f..8ca9a2b 100644
+--- a/deeptutor/core/turn_request.py
++++ b/deeptutor/core/turn_request.py
+@@ -2,7 +2,7 @@
+ 
+ from __future__ import annotations
+ 
+-from typing import Any, Literal
++from typing import Annotated, Any, Literal
+ import warnings
+ 
+ from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator, model_validator
+@@ -40,6 +40,7 @@ class OutgoingAttachment(BaseModel):
+     filename: str | None = None
+     mime_type: str | None = None
+     id: str | None = None
++    page_numbers: list[Annotated[int, Field(ge=1, le=100_000)]] | None = Field(default=None, max_length=2)
+ 
+ 
+ class NotebookReference(BaseModel):
+diff --git a/deeptutor/services/config/runtime_settings.py b/deeptutor/services/config/runtime_settings.py
+index 855e7e9..7705fb9 100644
+--- a/deeptutor/services/config/runtime_settings.py
++++ b/deeptutor/services/config/runtime_settings.py
+@@ -57,8 +57,9 @@ DEFAULT_SYSTEM_SETTINGS: dict[str, Any] = {
+     # changes apply to the next message — but uploads whose base64 payload
+     # exceeds the WebSocket frame ceiling need a restart (see
+     # ``compute_ws_max_size``, wired at every uvicorn launch point).
+-    "chat_attachment_max_file_mb": 20,
+-    "chat_attachment_max_total_mb": 25,
++    "chat_attachment_limits_version": 2,
++    "chat_attachment_max_file_mb": 200,
++    "chat_attachment_max_total_mb": 200,
+     "chat_attachment_max_chars_per_doc": 200_000,
+     "chat_attachment_max_chars_total": 150_000,
+     # Images the manifest cannot carry across turns are re-attached by the
+@@ -868,6 +869,8 @@ class RuntimeSettingsService:
+         path = self.path_for(name)
+         loaded = _json_object(path)
+         if loaded:
++            if name == "system" and "chat_attachment_limits_version" not in loaded:
++                loaded = {**loaded, "chat_attachment_limits_version": 1}
+             normalized = normalizer({**defaults, **loaded})
+             if normalized != loaded:
+                 _atomic_write_json(path, normalized)
+@@ -1362,6 +1365,14 @@ class RuntimeSettingsService:
+             DEFAULT_SYSTEM_SETTINGS["chat_attachment_max_total_mb"],
+             *CHAT_ATTACHMENT_MAX_TOTAL_MB_RANGE,
+         )
++        # Upgrade the old seeded caps once; later explicit limits remain user-owned.
++        # shortcut: old manual 20/25 caps look like defaults; they can be restored explicitly after migration.
++        if (
++            _coerce_int(settings.get("chat_attachment_limits_version"), 1) < 2
++            and (max_file_mb, max_total_mb) == (20, 25)
++        ):
++            max_file_mb = DEFAULT_SYSTEM_SETTINGS["chat_attachment_max_file_mb"]
++            max_total_mb = DEFAULT_SYSTEM_SETTINGS["chat_attachment_max_total_mb"]
+         # A per-message total below the per-file cap is contradictory; lift it.
+         max_total_mb = max(max_total_mb, max_file_mb)
+         raw_guard = settings.get("security_guard")
+@@ -1395,6 +1406,7 @@ class RuntimeSettingsService:
+                 ),
+                 "use_moderation": _coerce_bool(source_filter.get("use_moderation"), False),
+             },
++            "chat_attachment_limits_version": 2,
+             "chat_attachment_max_file_mb": max_file_mb,
+             "chat_attachment_max_total_mb": max_total_mb,
+             "chat_prior_image_reinject_max": _coerce_clamped_int(
+diff --git a/deeptutor/services/session/attachment_parsing.py b/deeptutor/services/session/attachment_parsing.py
+index d4dbbae..593e69a 100644
+--- a/deeptutor/services/session/attachment_parsing.py
++++ b/deeptutor/services/session/attachment_parsing.py
+@@ -50,6 +50,12 @@ async def parse_chat_pdf_attachments(
+             attachment_id=str(record.get("id") or ""),
+             filename=filename,
+         )
++        selected_pages = record.get("page_numbers") or None
++        if record.pop('_defer_pdf', False):
++            text = '[这部分原件已上传，未选中本次需要的页面。全文解析在后台进行；不要假装已读完，请根据指定页或片段回答。]'
++            record.update(extracted_text=text, extracted_chars=len(text))
++            _replace_context(contexts, filename, text, '')
++            continue
+         if path is not None and attachment_id:
+             try:
+                 from deeptutor.services.session.pdf_pages import (
+@@ -61,7 +67,13 @@ async def parse_chat_pdf_attachments(
+                     MAX_EMBEDDED_IMAGES_PER_TURN,
+                 )
+ 
+-                pages = await prepare_pdf_pages(path)
++                pages = await prepare_pdf_pages(path, selected_pages) if selected_pages else await prepare_pdf_pages(path)
++                if selected_pages and not pages["images"]:
++                    text = pages["text"]
++                    record.update(extracted_text=text, extracted_chars=len(text))
++                    _replace_context(contexts, filename, text, "")
++                    start_background_parse(path)
++                    continue
+                 if pages["images"]:
+                     retained = [
+                         item
+@@ -83,7 +95,11 @@ async def parse_chat_pdf_attachments(
+                         len(other_images) + len(pages["images"]) <= MAX_EMBEDDED_IMAGES_PER_TURN
+                         and other_bytes + page_bytes <= MAX_EMBEDDED_IMAGE_BYTES_PER_TURN
+                     ):
+-                        text = pages["text"][
++                        text = pages["text"]
++                        part = re.search(r'-第(\d+)-(\d+)页\.pdf$', filename, re.IGNORECASE)
++                        if part:
++                            text += '\n[分段页码对应：' + '；'.join(f"本段第 {image['page']} 页 = 拆分前原件第 {int(part[1]) + image['page'] - 1} 页" for image in pages['images']) + '。引用时请注明原件页码。]'
++                        text = text[
+                             : max(
+                                 0,
+                                 min(limits.max_chars_per_doc, limits.max_chars_total - total_chars),
+@@ -121,6 +137,12 @@ async def parse_chat_pdf_attachments(
+                     "PDF page preparation unavailable (%s); using document parser",
+                     type(exc).__name__,
+                 )
++            if selected_pages:
++                text = "[当前页原图暂未能提供（渲染失败或本轮图片数量达到上限）。请减少附件或截图需要的题目；不要猜测图形、公式或声称已读完整本。全文解析继续在后台进行。]"
++                record.update(extracted_text=text, extracted_chars=len(text))
++                _replace_context(contexts, filename, text, "")
++                start_background_parse(path)
++                continue
+         if on_progress:
+             on_progress(attachment_id, "submitting", "Submitting to the configured document parser")
+         error = ""
+diff --git a/deeptutor/services/session/pdf_pages.py b/deeptutor/services/session/pdf_pages.py
+index 33d8654..a37186e 100644
+--- a/deeptutor/services/session/pdf_pages.py
++++ b/deeptutor/services/session/pdf_pages.py
+@@ -21,7 +21,7 @@ _tasks: set[asyncio.Task] = set()
+ logger = logging.getLogger(__name__)
+ 
+ 
+-def render_pdf_pages(source: str) -> dict:
++def render_pdf_pages(source: str, page_numbers: list[int] | None = None) -> dict:
+     """Fixed isolated-worker task: inspect all pages, rasterize only short PDFs."""
+     import pymupdf
+ 
+@@ -31,11 +31,16 @@ def render_pdf_pages(source: str) -> dict:
+         if doc.needs_pass or doc.page_count < 1:
+             raise ValueError("PDF is locked or has no pages")
+         result = {"page_count": doc.page_count, "images": [], "text": ""}
+-        if doc.page_count > SHORT_PDF_PAGE_LIMIT:
++        if page_numbers is None and doc.page_count > SHORT_PDF_PAGE_LIMIT:
++            return result
++        selected = [n for n in dict.fromkeys(page_numbers or range(1, doc.page_count + 1)) if 1 <= n <= doc.page_count][:SHORT_PDF_PAGE_LIMIT]
++        if not selected:
++            result["text"] = f"[原件共 {doc.page_count} 页，请求的页码超出范围。请确认页码；不要猜测未读内容。]"
+             return result
+         budget = ImageBudget(max_images=SHORT_PDF_PAGE_LIMIT, max_inline_edge=0, min_image_bytes=0)
+         texts = []
+-        for number, page in enumerate(doc, 1):
++        for number in selected:
++            page = doc[number - 1]
+             area = page.rect.width * page.rect.height
+             if area <= 0:
+                 raise ValueError("PDF page has invalid dimensions")
+@@ -60,7 +65,8 @@ def render_pdf_pages(source: str) -> dict:
+             )
+         result["text"] = (
+             "\n\n".join(texts)
+-            + "\n[已附上全部原页图片；公式、图形与题目条件以原页为准。文字解析在后台进行，不是读图前置条件。]"
++            + f"\n[本文件共 {doc.page_count} 页，当前附上第 {', '.join(map(str, selected))} 页原图。公式、图形与条件以原页为准。"
++              "全文解析在后台进行，不是读图前置条件；不要声称已读完未提供的页面。]"
+         )
+         return result
+ 
+@@ -71,9 +77,13 @@ def _cache_path(source: Path):
+     return digest, get_path_service().get_parse_cache_root() / "chat-pages-v1" / f"{digest}.json"
+ 
+ 
+-async def prepare_pdf_pages(source: Path) -> dict:
++async def prepare_pdf_pages(source: Path, page_numbers: list[int] | None = None) -> dict:
+     """Cache before OCR starts so sending never queues a raster job behind OCR."""
+     digest, target = await asyncio.to_thread(_cache_path, source)
++    if page_numbers is not None:
++        if not 1 <= len(page_numbers) <= SHORT_PDF_PAGE_LIMIT or any(type(n) is not int or n < 1 or n > 100_000 for n in page_numbers):
++            raise ValueError("Invalid PDF page selection")
++        target = target.with_name(f"{digest}-view-{'-'.join(map(str, page_numbers))}.json")
+     try:
+         cached = json.loads(await asyncio.to_thread(target.read_text, encoding="utf-8"))
+         count = cached["page_count"]
+@@ -82,9 +92,9 @@ async def prepare_pdf_pages(source: Path) -> dict:
+             isinstance(count, int)
+             and count > 0
+             and isinstance(cached["text"], str)
+-            and len(images) == (count if count <= SHORT_PDF_PAGE_LIMIT else 0)
++            and len(images) == (len([n for n in dict.fromkeys(page_numbers) if n <= count]) if page_numbers is not None else (count if count <= SHORT_PDF_PAGE_LIMIT else 0))
+             and all(
+-                image["page"] == number
++                image["page"] == ([n for n in dict.fromkeys(page_numbers) if n <= count][number - 1] if page_numbers else number)
+                 and image["mime_type"] in {"image/png", "image/jpeg"}
+                 and isinstance(image["base64"], str)
+                 for number, image in enumerate(images, 1)
+@@ -94,7 +104,7 @@ async def prepare_pdf_pages(source: Path) -> dict:
+     except (OSError, ValueError, KeyError, TypeError):
+         pass
+     result = await run_in_isolated_process(
+-        "deeptutor.services.session.pdf_pages:render_pdf_pages", str(source)
++        "deeptutor.services.session.pdf_pages:render_pdf_pages", str(source), page_numbers
+     )
+     if (await asyncio.to_thread(_cache_path, source))[0] != digest:
+         raise ValueError("PDF changed while preparing its page images")
+diff --git a/deeptutor/services/session/turns/executor.py b/deeptutor/services/session/turns/executor.py
+index a242e4c..563a2c0 100644
+--- a/deeptutor/services/session/turns/executor.py
++++ b/deeptutor/services/session/turns/executor.py
+@@ -327,6 +327,8 @@ class TurnExecutor:
+                     "mime_type": item.get("mime_type", ""),
+                     "id": item.get("id", "") or _uuid.uuid4().hex[:12],
+                 }
++                if item.get('page_numbers') is not None:
++                    record['page_numbers'] = item['page_numbers']
+                 attachment_records.append(record)
+ 
+             # Persist original bytes to the attachment store before extraction
+@@ -335,6 +337,9 @@ class TurnExecutor:
+             # but the URL we record here outlives that pruning. Upload errors
+             # are non-fatal — extraction still runs from the in-memory base64.
+             attachment_store = get_attachment_store()
++            from deeptutor.services.student_learning.uploads import adopt, select_requested_pages
++            stored_documents = await adopt(attachment_records, session_id, attachment_store)
++            select_requested_pages([record for record in attachment_records if record['id'] in stored_documents], raw_user_content)
+             materialize_session = getattr(attachment_store, "materialize_session", None)
+             if callable(materialize_session):
+                 try:
+@@ -381,10 +386,12 @@ class TurnExecutor:
+             # back as-is and keep it out of extraction.
+             quotes = read_quotes(attachment_records)
+             quote_records = [r for r in attachment_records if is_quote(r)]
++            direct_pdfs = [r for r in attachment_records if (r.get("page_numbers") or r.get('_defer_pdf')) and str(r.get("filename", "")).lower().endswith(".pdf") and r["id"] in stored_documents]
+             document_texts, attachment_records = extract_documents_from_records(
+-                [r for r in attachment_records if not is_quote(r)]
++                [r for r in attachment_records if not is_quote(r) and r not in direct_pdfs],
++                stored_documents=stored_documents,
+             )
+-            attachment_records = quote_records + attachment_records
++            attachment_records = quote_records + attachment_records + direct_pdfs
+             pdf_records = [
+                 record
+                 for record in attachment_records
+diff --git a/deeptutor/services/session/turns/request_preparer.py b/deeptutor/services/session/turns/request_preparer.py
+index 02af00f..94c436e 100644
+--- a/deeptutor/services/session/turns/request_preparer.py
++++ b/deeptutor/services/session/turns/request_preparer.py
+@@ -1132,7 +1132,7 @@ class TurnRequestPreparer:
+             "attachments": [
+                 {
+                     key: att.get(key)
+-                    for key in ("type", "url", "base64", "filename", "mime_type", "id")
++                    for key in ("type", "url", "base64", "filename", "mime_type", "id", "page_numbers")
+                     if isinstance(att, dict) and key in att
+                 }
+                 for att in (last_user.get("attachments") or [])
+diff --git a/deeptutor/services/storage/attachment_store.py b/deeptutor/services/storage/attachment_store.py
+index 696b5e9..b283791 100644
+--- a/deeptutor/services/storage/attachment_store.py
++++ b/deeptutor/services/storage/attachment_store.py
+@@ -162,6 +162,33 @@ class LocalDiskAttachmentStore:
+         loop = asyncio.get_running_loop()
+         await loop.run_in_executor(None, self._write_sync, target, data)
+ 
++        return self.public_url(session_id, attachment_id, filename)
++
++    async def import_file(self, *, session_id: str, attachment_id: str, filename: str, source: Path) -> str:
++        """Publish immutable local bytes without materializing them as base64."""
++        target = self._safe_join(session_id, self._stored_filename(attachment_id, filename))
++        if target is None or source.is_symlink() or not source.is_file():
++            raise ValueError("Invalid local attachment")
++
++        def copy():
++            target.parent.mkdir(parents=True, exist_ok=True)
++            import uuid
++            temporary = target.with_suffix(target.suffix + f".{uuid.uuid4().hex}.importing")
++            try:
++                try:
++                    os.link(source, temporary)
++                except OSError:
++                    shutil.copyfile(source, temporary)
++                os.replace(temporary, target)
++            finally:
++                temporary.unlink(missing_ok=True)
++
++        await asyncio.to_thread(copy)
++        return self.public_url(session_id, attachment_id, filename)
++
++    @staticmethod
++    def public_url(session_id: str, attachment_id: str, filename: str) -> str:
++
+         # The router uses the same _coerce_filename rules to look up the file,
+         # so the public URL must use the sanitised pieces. Each path segment
+         # is percent-encoded so spaces/Unicode/punctuation in filenames flow
+diff --git a/deeptutor/services/student_learning/uploads.py b/deeptutor/services/student_learning/uploads.py
+new file mode 100644
+index 0000000..13a6c95
+--- /dev/null
++++ b/deeptutor/services/student_learning/uploads.py
+@@ -0,0 +1,381 @@
++"""Bounded local uploads. Original bytes are usable before parsing/indexing."""
++from __future__ import annotations
++
++import asyncio
++from contextlib import asynccontextmanager
++import json
++import math
++import mimetypes
++import os
++from pathlib import Path
++import re
++import shutil
++import time
++from urllib.parse import unquote, urlsplit
++import uuid
++
++from deeptutor.services.config.runtime_settings import get_chat_attachment_limits
++from deeptutor.services.file_io import atomic_write_json
++from deeptutor.services.storage import LocalDiskAttachmentStore, get_attachment_store
++from deeptutor.utils.document_extractor import is_document_extension
++from deeptutor.utils.document_images import SUPPORTED_IMAGE_EXTENSIONS
++
++CHUNK_BYTES = 8 * 1024 * 1024
++MAX_SOURCE_BYTES = 1024 * 1024 * 1024
++MAX_PARTS = 64
++PENDING = "_pending"
++_ID = re.compile(r"^[0-9a-f]{32}$")
++_TEXT = {".txt", ".md", ".markdown", ".log"}
++
++
++def store() -> LocalDiskAttachmentStore:
++    value = get_attachment_store()
++    if not isinstance(value, LocalDiskAttachmentStore):
++        raise ValueError("当前附件存储不支持本机分段上传。")
++    return value
++
++
++def directory(upload_id: str) -> Path:
++    if not _ID.fullmatch(upload_id):
++        raise ValueError("上传编号不正确。")
++    root = store().root / ".uploads"
++    target = root / upload_id
++    if root.is_symlink() or target.is_symlink():
++        raise ValueError("上传目录不正确。")
++    return target
++
++
++def read(upload_id: str, name="upload.json") -> dict:
++    try:
++        return json.loads((directory(upload_id) / name).read_text(encoding="utf-8"))
++    except FileNotFoundError:
++        raise LookupError("上传记录不存在，请重新选择文件。") from None
++
++
++def begin(filename: str, size: int, retention: str) -> dict:
++    from deeptutor.utils.filenames import safe_filename
++    filename = safe_filename(Path(filename.replace("\\", "/")).name)
++    if not filename or not (is_document_extension(filename) or Path(filename).suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS):
++        raise ValueError("不支持这种文件类型。")
++    if not 0 < size <= MAX_SOURCE_BYTES:
++        raise ValueError("文件为空或超过单份原件 1 GB 上限。")
++    limits = get_chat_attachment_limits()
++    limit = min(limits.max_file_bytes, limits.max_total_bytes, 200 * 1024 * 1024)
++    suffix = Path(filename).suffix.lower()
++    if size > limit and suffix not in _TEXT | {".pdf"}:
++        raise ValueError("这种格式暂不能无损自动拆分；请导出为 PDF 或文本后再上传。")
++    if retention not in {"temporary", "library"}:
++        raise ValueError("附件保存方式不正确。")
++    cleanup_expired()
++    upload_id = uuid.uuid4().hex
++    target = directory(upload_id)
++    target.mkdir(parents=True, mode=0o700)
++    chunk_bytes = min(CHUNK_BYTES, limit)
++    result = {"upload_id": upload_id, "filename": filename, "size": size, "retention": retention,
++              "chunk_bytes": chunk_bytes, "chunks": math.ceil(size / chunk_bytes), "part_limit": limit,
++              "created_at": time.time()}
++    atomic_write_json(target / "upload.json", result)
++    return result
++
++
++def pdf_counts(paths: list[Path]) -> list[int | None]:
++    import pymupdf
++    counts = []
++    for path in paths:
++        if path.suffix.lower() != ".pdf":
++            counts.append(None)
++            continue
++        with pymupdf.open(path) as doc:
++            if doc.needs_pass or not doc.page_count:
++                raise ValueError("PDF 已加密或没有可读页面。")
++            counts.append(doc.page_count)
++    return counts
++
++
++def expected_chunk(meta: dict, index: int) -> int:
++    if not 0 <= index < meta["chunks"]:
++        raise ValueError("分段编号超出范围。")
++    return min(meta["chunk_bytes"], meta["size"] - index * meta["chunk_bytes"])
++
++
++def _pdf_parts(source: Path, filename: str, limit: int, destination: Path) -> list[Path]:
++    import pymupdf
++    with pymupdf.open(source) as doc:
++        if doc.needs_pass or not doc.page_count:
++            raise ValueError("PDF 已加密或没有可读页面。")
++        pages = max(1, int(doc.page_count * limit / max(source.stat().st_size, 1) * .85))
++        output = []
++
++        def emit(first, last):
++            if len(output) >= MAX_PARTS:
++                raise ValueError("拆分部分过多，请按章节分批选择。")
++            target = destination / f"{Path(filename).stem}-第{first + 1:04d}-{last:04d}页.pdf"
++            with pymupdf.open() as part:
++                part.insert_pdf(doc, from_page=first, to_page=last - 1)
++                part.set_metadata(doc.metadata)
++                part.save(target, garbage=3, deflate=True)
++            if target.stat().st_size <= limit:
++                output.append(target)
++            else:
++                target.unlink()
++                if last - first == 1:
++                    raise ValueError(f"第 {first + 1} 页本身已超限，无法在不降低清晰度的情况下继续拆分。")
++                middle = (first + last) // 2
++                emit(first, middle)
++                emit(middle, last)
++
++        for first in range(0, doc.page_count, pages):
++            emit(first, min(doc.page_count, first + pages))
++        return output
++
++
++def split_source(source: Path, filename: str, limit: int, destination: Path) -> list[Path]:
++    """PDFs split at page boundaries; text splits at UTF-8 code-point boundaries."""
++    if source.stat().st_size <= limit:
++        return [source]
++    if source.suffix.lower() == ".pdf":
++        return _pdf_parts(source, filename, limit, destination)
++    if source.suffix.lower() not in _TEXT:
++        raise ValueError("文件超过上限，无法无损拆分这种格式。")
++    # Strict UTF-8 avoids silently corrupting non-UTF-8 source documents.
++    import codecs
++    decoder = codecs.getincrementaldecoder("utf-8")("strict")
++    output = []
++    carry = b""
++    with source.open("rb") as stream:
++        while data := stream.read(min(limit, 1024 * 1024)):
++            carry += decoder.decode(data).encode("utf-8")
++            while len(carry) >= limit:
++                end = limit
++                while end and end < len(carry) and carry[end] & 0xC0 == 0x80:
++                    end -= 1
++                if not end:
++                    raise ValueError("单个字符超过当前分段上限。")
++                target = destination / f"{Path(filename).stem}-第{len(output) + 1:03d}部分{source.suffix}"
++                target.write_bytes(carry[:end]); output.append(target); carry = carry[end:]
++                if len(output) > MAX_PARTS:
++                    raise ValueError("拆分部分过多，请分批上传。")
++        carry += decoder.decode(b"", final=True).encode("utf-8")
++    if carry:
++        if len(output) >= MAX_PARTS:
++            raise ValueError("拆分部分过多，请分批上传。")
++        target = destination / f"{Path(filename).stem}-第{len(output) + 1:03d}部分{source.suffix}"
++        target.write_bytes(carry); output.append(target)
++    return output
++
++
++async def finish(upload_id: str) -> dict:
++    target = directory(upload_id)
++    if (target / "result.json").is_file():
++        return read(upload_id, "result.json")
++    meta = read(upload_id)
++    lock = target / "finishing"
++    try:
++        fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++    except FileExistsError:
++        raise ValueError("文件正在完成上传，请稍后重试。") from None
++    os.close(fd)
++    source = target / f"source{Path(meta['filename']).suffix.lower()}"
++    try:
++        def assemble():
++            with source.open("wb") as output:
++                for index in range(meta["chunks"]):
++                    chunk = target / f"{index}.chunk"
++                    if not chunk.is_file() or chunk.stat().st_size != expected_chunk(meta, index):
++                        raise ValueError("上传分段不完整，请重试。")
++                    with chunk.open("rb") as handle:
++                        shutil.copyfileobj(handle, output, 1024 * 1024)
++            limits = get_chat_attachment_limits()
++            return min(meta["part_limit"], limits.max_file_bytes, limits.max_total_bytes)
++
++        limit = await asyncio.to_thread(assemble)
++        if source.suffix == '.pdf' and source.stat().st_size > limit:
++            from deeptutor.runtime.isolated_worker import IsolatedWorkerError, run_in_isolated_process
++            try:
++                paths = await run_in_isolated_process(
++                    "deeptutor.services.student_learning.uploads:split_source", source, meta["filename"], limit, target
++                )
++            except IsolatedWorkerError as exc:
++                raise ValueError(str(exc)) from None
++        else:
++            paths = await asyncio.to_thread(split_source, source, meta["filename"], limit, target)
++        if (target / "cancelled").exists():
++            raise ValueError("已取消上传。")
++        from deeptutor.runtime.isolated_worker import run_in_isolated_process
++        from deeptutor.runtime.isolated_worker import IsolatedWorkerError
++        try:
++            counts = await run_in_isolated_process("deeptutor.services.student_learning.uploads:pdf_counts", paths) if source.suffix == ".pdf" else [None] * len(paths)
++        except IsolatedWorkerError as exc:
++            raise ValueError(str(exc)) from None
++        records = []
++        for path, count in zip(paths, counts):
++            filename = meta["filename"] if path == source else path.name
++            attachment_id = uuid.uuid4().hex
++            url = await store().import_file(session_id=PENDING, attachment_id=attachment_id, filename=filename, source=path)
++            records.append({"id": attachment_id, "filename": filename, "url": url, "type": "file",
++                            "mime_type": mimetypes.guess_type(filename)[0] or "application/octet-stream", "size": path.stat().st_size,
++                            **({"page_count": count} if count is not None else {})})
++        result = {**meta, "records": records, "library_status": "saving" if meta["retention"] == "library" else "temporary"}
++        atomic_write_json(target / "result.json", result)
++        # The immutable pending store now owns the bytes; discard transfer copies.
++        for file in target.iterdir():
++            if file.is_file() and file.name not in {"upload.json", "result.json", "finishing"}:
++                file.unlink()
++        return result
++    finally:
++        lock.unlink(missing_ok=True)
++        if (target / "cancelled").exists():
++            for row in locals().get("records", []):
++                await store().delete_attachment(PENDING, row["id"])
++            shutil.rmtree(target, ignore_errors=True)
++
++
++def cancel(upload_id: str) -> None:
++    target = directory(upload_id)
++    if not target.exists() or (target / "result.json").exists():
++        return
++    if (target / "finishing").exists():
++        (target / "cancelled").touch()
++    else:
++        shutil.rmtree(target)
++
++
++def file_for(record: dict) -> Path:
++    target = store().resolve_path(session_id=PENDING, attachment_id=record["id"], filename=record["filename"])
++    if target is None:
++        raise LookupError("原件暂时不可用，请重新上传。")
++    return target
++
++
++async def process(result: dict) -> None:
++    """Called only after the upload response; never run OCR inside admission."""
++    from deeptutor.services.session.pdf_pages import parse_in_background
++    if result["retention"] == "library":
++        async with library_queue():
++            await _save_library(result)
++    else:
++        for row in result["records"]:
++            await parse_in_background(file_for(row))
++
++
++@asynccontextmanager
++async def library_queue():
++    # One native index per workspace; concurrent uploads keep their originals usable.
++    path = store().root / ".library-upload.lock"
++    path.parent.mkdir(parents=True, exist_ok=True)
++    fd = os.open(path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600)
++    with os.fdopen(fd, "r+b") as handle:
++        if not handle.read(1):
++            handle.write(b"\0")
++            handle.flush()
++        while True:
++            try:
++                if os.name == "nt":
++                    import msvcrt
++                    handle.seek(0)
++                    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
++                else:
++                    import fcntl
++                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
++                break
++            except OSError:
++                await asyncio.sleep(.2)
++        yield
++
++
++async def _save_library(result: dict) -> None:
++    from fastapi import BackgroundTasks, UploadFile
++    from deeptutor.api.routers.student_learning import save_library_attachments
++    files = []
++    try:
++        files = [UploadFile(file=file_for(row).open("rb"), filename=row["filename"]) for row in result["records"]]
++        tasks = BackgroundTasks()
++        response = await save_library_attachments(tasks, files)
++        payload = response.model_dump(mode="json") if hasattr(response, "model_dump") else response
++        result["library_result"] = {key: payload[key] for key in ("kb_name", "name", "task_id") if key in payload}
++        atomic_write_json(directory(result["upload_id"]) / "result.json", result)
++        await tasks()
++        from deeptutor.multi_user.knowledge_access import current_kb_base_dir
++        from deeptutor.knowledge.progress_tracker import ProgressTracker
++        progress = ProgressTracker("我的上传资料", current_kb_base_dir()).get_progress() or {}
++        if progress.get("task_id") != payload.get("task_id") or progress.get("stage") != "completed":
++            raise ValueError("Library indexing did not complete")
++        result["library_status"] = "saved"
++        result.pop("library_error", None)
++        atomic_write_json(directory(result["upload_id"]) / "result.json", result)
++    except Exception as error:
++        result["library_status"] = "failed"
++        result["library_error"] = "长期资料已保留原件，但检索准备未完成，请稍后重试。"
++        atomic_write_json(directory(result["upload_id"]) / "result.json", result)
++        import logging
++        logging.getLogger(__name__).warning("Library preparation failed (%s)", type(error).__name__)
++    finally:
++        for file in files:
++            await file.close()
++
++
++async def adopt(records: list[dict], session_id: str, attachment_store) -> dict[str, Path]:
++    """Resolve references only inside this request's authorized content workspace."""
++    if not isinstance(attachment_store, LocalDiskAttachmentStore):
++        return {}
++    paths = {}
++    for record in records:
++        parsed = urlsplit(str(record.get("url") or ""))
++        pieces = [unquote(part) for part in parsed.path.split("/")]
++        if len(pieces) == 6 and pieces[1:4] == ["files", "attachments", PENDING]:
++            if parsed.scheme or parsed.netloc or pieces[4] != record["id"] or not _ID.fullmatch(pieces[4]):
++                raise ValueError("附件引用不正确。")
++            source = attachment_store.resolve_path(session_id=PENDING, attachment_id=record["id"], filename=record["filename"])
++            if source is None or pieces[5] != record["filename"]:
++                raise ValueError("附件尚未上传完成或已失效，请重新上传。")
++            record["url"] = await attachment_store.import_file(session_id=session_id, attachment_id=record["id"], filename=record["filename"], source=source)
++        path = attachment_store.resolve_path(session_id=session_id, attachment_id=record["id"], filename=record["filename"])
++        if path is not None:
++            paths[record["id"]] = path
++    return paths
++
++
++def select_requested_pages(records: list[dict], content: str) -> None:
++    requested = re.findall(r"第\s*(\d{1,5})\s*页|\bp\.?\s*(\d{1,5})\b", content, re.IGNORECASE)
++    pages = list(dict.fromkeys(int(a or b) for a, b in requested if int(a or b) > 0))[:2]
++    for record in records:
++        if not str(record.get('filename', '')).lower().endswith('.pdf'):
++            continue
++        if pages:
++            part = re.search(r'-第(\d+)-(\d+)页\.pdf$', record['filename'], re.IGNORECASE)
++            record['page_numbers'] = [p - int(part[1]) + 1 for p in pages if int(part[1]) <= p <= int(part[2])] if part else pages
++        if record.get('page_numbers') == []:
++            record['_defer_pdf'] = True
++
++
++def library_uploads() -> list[dict]:
++    root = store().root / ".uploads"
++    rows = []
++    if root.is_dir():
++        for target in root.iterdir():
++            if not target.is_symlink() and _ID.fullmatch(target.name) and (target / "result.json").is_file():
++                row = read(target.name, "result.json")
++                if row["retention"] == "library":
++                    rows.append(row)
++    return sorted(rows, key=lambda row: row["created_at"], reverse=True)
++
++
++def cleanup_expired() -> None:
++    root = store().root / ".uploads"
++    if not root.is_dir():
++        return
++    for target in root.iterdir():
++        if target.is_symlink() or not _ID.fullmatch(target.name):
++            continue
++        try:
++            meta = read(target.name)
++            if time.time() - meta["created_at"] < 7 * 86400:
++                continue
++            result = read(target.name, "result.json") if (target / "result.json").exists() else {}
++            if result and meta["retention"] == "library":
++                continue
++            for row in result.get("records", []):
++                file_for(row).unlink(missing_ok=True)
++            shutil.rmtree(target)
++        except (OSError, ValueError, LookupError):
++            continue
+diff --git a/deeptutor/utils/document_extractor.py b/deeptutor/utils/document_extractor.py
+index a9d3a8c..c1e873c 100644
+--- a/deeptutor/utils/document_extractor.py
++++ b/deeptutor/utils/document_extractor.py
+@@ -1305,6 +1305,8 @@ def _embedded_images_for_document(filename: str, data: bytes) -> tuple[EmbeddedI
+ 
+ def extract_documents_from_records(
+     records: Iterable[dict],
++    *,
++    stored_documents: dict[str, Path] | None = None,
+ ) -> tuple[list[str], list[dict]]:
+     """Process a list of attachment records from the WS payload.
+ 
+@@ -1349,7 +1351,8 @@ def extract_documents_from_records(
+             continue
+ 
+         b64 = record.get("base64") or ""
+-        if not b64:
++        stored = (stored_documents or {}).get(str(record.get("id") or ""))
++        if not b64 and stored is None:
+             updated.append(record)
+             continue
+ 
+@@ -1361,9 +1364,15 @@ def extract_documents_from_records(
+             continue
+ 
+         try:
+-            data = base64.b64decode(b64, validate=False)
++            if stored is not None and not b64:
++                if stored.stat().st_size > max_file_bytes:
++                    raise DocumentTooLargeError("stored file exceeds the configured size limit", filename=filename)
++                data = stored.read_bytes()
++            else:
++                data = base64.b64decode(b64, validate=False)
+         except Exception as exc:
+-            doc_texts.append(f"[File: {filename} — could not be read: invalid base64 ({exc})]")
++            reason = "stored original unavailable" if stored is not None and not b64 else "invalid base64"
++            doc_texts.append(f"[File: {filename} — could not be read: {reason} ({exc})]")
+             record["base64"] = ""
+             record["extracted_chars"] = 0
+             updated.append(record)
+diff --git a/tests/api/test_settings_router.py b/tests/api/test_settings_router.py
+index ab9321c..1d2e776 100644
+--- a/tests/api/test_settings_router.py
++++ b/tests/api/test_settings_router.py
+@@ -425,8 +425,8 @@ async def test_chat_attachment_settings_roundtrip(
+     monkeypatch.setattr(settings_router, "get_runtime_settings_service", lambda: service)
+ 
+     initial = await settings_router.get_chat_attachment_settings()
+-    assert initial["settings"]["max_file_mb"] == 20
+-    assert initial["effective"]["max_file_bytes"] == 20 * 1024 * 1024
++    assert initial["settings"]["max_file_mb"] == 200
++    assert initial["effective"]["max_file_bytes"] == 200 * 1024 * 1024
+ 
+     payload = settings_router.ChatAttachmentSettingsUpdate(
+         max_file_mb=100,
+diff --git a/tests/api/test_student_attachment_preparation.py b/tests/api/test_student_attachment_preparation.py
+index ab5534c..faf02ce 100644
+--- a/tests/api/test_student_attachment_preparation.py
++++ b/tests/api/test_student_attachment_preparation.py
+@@ -55,8 +55,9 @@ def test_temporary_upload_reuses_parser_without_creating_library_record(monkeypa
+         )
+ 
+ 
+-def test_short_pdf_response_is_sent_before_background_parsing_and_temp_cleanup(
+-    tmp_path, monkeypatch
++@pytest.mark.parametrize("page_count", [2, 105])
++def test_pdf_response_is_sent_before_background_parsing_and_temp_cleanup(
++    tmp_path, monkeypatch, page_count
+ ):
+     import pymupdf
+ 
+@@ -67,7 +68,7 @@ def test_short_pdf_response_is_sent_before_background_parsing_and_temp_cleanup(
+     sources = []
+ 
+     async def pages(_):
+-        return {"page_count": 2, "images": [{"base64": "eA=="}, {"base64": "eA=="}], "text": ""}
++        return {"page_count": page_count, "images": [{"base64": "eA=="}] * 2 if page_count == 2 else [], "text": ""}
+ 
+     monkeypatch.setattr(pdf_pages, "prepare_pdf_pages", pages)
+ 
+@@ -97,7 +98,7 @@ def test_short_pdf_response_is_sent_before_background_parsing_and_temp_cleanup(
+         response = client.post(
+             "/api/student/attachments/prepare", files={"file": ("exam.pdf", data)}
+         )
+-        assert response.json()["strategy"] == "vision"
++        assert response.json()["strategy"] == ("vision" if page_count == 2 else "document")
+         assert response.json()["background_parsing"] is True
+         assert sources and not sources[0].exists()
+ 
+diff --git a/tests/api/test_student_uploads.py b/tests/api/test_student_uploads.py
+new file mode 100644
+index 0000000..85730c5
+--- /dev/null
++++ b/tests/api/test_student_uploads.py
+@@ -0,0 +1,209 @@
++import asyncio
++import hashlib
++from pathlib import Path
++from types import SimpleNamespace
++
++from fastapi import FastAPI
++from fastapi.testclient import TestClient
++import pymupdf
++import pytest
++
++from deeptutor.api.routers import student_uploads as api
++from deeptutor.services.student_learning import uploads
++from deeptutor.services.storage import LocalDiskAttachmentStore
++
++
++@pytest.fixture
++def environment(tmp_path, monkeypatch):
++    local = LocalDiskAttachmentStore(tmp_path / 'attachments')
++    monkeypatch.setattr(uploads, 'get_attachment_store', lambda: local)
++    monkeypatch.setattr(uploads, 'get_chat_attachment_limits', lambda: SimpleNamespace(max_file_bytes=3000, max_total_bytes=3000))
++    calls = []
++
++    async def process(result):
++        calls.append(result)
++
++    monkeypatch.setattr(uploads, 'process', process)
++    app = FastAPI()
++    app.include_router(api.router, prefix='/api/student')
++    return app, local, calls
++
++
++def upload(client, filename, data, retention='temporary'):
++    response = client.post('/api/student/attachments/uploads', json={'filename': filename, 'size': len(data), 'retention': retention})
++    assert response.status_code == 200, response.text
++    meta = response.json()
++    for index, offset in enumerate(range(0, len(data), meta['chunk_bytes'])):
++        chunk = data[offset:offset + meta['chunk_bytes']]
++        response = client.put(f"/api/student/attachments/uploads/{meta['upload_id']}/chunks/{index}", content=chunk, headers={'X-Upload-SHA256': hashlib.sha256(chunk).hexdigest()})
++        assert response.status_code == 200, response.text
++    response = client.post(f"/api/student/attachments/uploads/{meta['upload_id']}/complete")
++    assert response.status_code == 200, response.text
++    return response.json()
++
++
++def test_original_ready_before_background_processing_and_idempotent_complete(environment, monkeypatch):
++    app, local, calls = environment
++    body_sent = False
++    async def process(result):
++        assert body_sent, 'Do not begin parsing/indexing before the raw upload response'
++        calls.append(result)
++    monkeypatch.setattr(uploads, 'process', process)
++
++    async def traced(scope, receive, send):
++        async def capture(message):
++            nonlocal body_sent
++            if scope.get('path', '').endswith('/complete') and message['type'] == 'http.response.body' and not message.get('more_body'):
++                body_sent = True
++            await send(message)
++        await app(scope, receive, capture)
++
++    with TestClient(traced) as client:
++        result = upload(client, '../公式.txt', '向量 a·b = |a||b|cosθ'.encode())
++        assert body_sent and len(calls) == 1
++        row = result['records'][0]
++        assert row['filename'] == '公式.txt'
++        assert uploads.file_for(row).read_text() == '向量 a·b = |a||b|cosθ'
++        assert row['url'].startswith('/files/attachments/_pending/')
++        again = client.post(f"/api/student/attachments/uploads/{result['upload_id']}/complete")
++        assert again.json() == result and len(calls) == 1
++        # Removing a sent draft must not delete a published original.
++        client.delete(f"/api/student/attachments/uploads/{result['upload_id']}")
++        assert uploads.file_for(row).is_file()
++        assert not uploads.library_uploads()
++        assert sorted(p.name for p in uploads.directory(result['upload_id']).iterdir()) == ['result.json', 'upload.json']
++
++
++def test_checksums_limits_incomplete_and_cancellation(environment):
++    app, _, calls = environment
++    with TestClient(app) as client:
++        meta = client.post('/api/student/attachments/uploads', json={'filename': 'x.txt', 'size': 5}).json()
++        path = f"/api/student/attachments/uploads/{meta['upload_id']}"
++        assert client.put(path + '/chunks/0', content=b'12345', headers={'X-Upload-SHA256': '0' * 64}).status_code == 400
++        assert client.put(path + '/chunks/0', content=b'123456', headers={'X-Upload-SHA256': '0' * 64}).status_code == 413
++        assert client.post(path + '/complete').status_code == 400
++        assert client.delete(path).status_code == 200
++        assert not uploads.directory(meta['upload_id']).exists()
++        assert not calls
++        for filename, size in [('x.exe', 3), ('x.docx', 3001), ('x.pdf', uploads.MAX_SOURCE_BYTES + 1)]:
++            assert client.post('/api/student/attachments/uploads', json={'filename': filename, 'size': size}).status_code in (400, 422)
++        assert client.put('/api/student/attachments/uploads/../chunks/0', content=b'x').status_code != 200
++
++
++@pytest.mark.asyncio
++async def test_adopt_is_workspace_scoped_and_original_bytes_survive(environment, tmp_path):
++    _, local, _ = environment
++    meta = uploads.begin('upload.json.txt', 3, 'library')
++    (uploads.directory(meta['upload_id']) / '0.chunk').write_bytes(b'abc')
++    result = await uploads.finish(meta['upload_id'])
++    record = dict(result['records'][0])
++    assert uploads.library_uploads()[0]['records'] == [record]
++    other = LocalDiskAttachmentStore(tmp_path / 'other-workspace')
++    with pytest.raises(ValueError):
++        await uploads.adopt([dict(record)], 'chat', other)
++    paths = await uploads.adopt([record], 'chat', local)
++    assert paths[record['id']].read_bytes() == b'abc'
++    assert '/chat/' in record['url'] and uploads.file_for(result['records'][0]).exists()
++    escaped = dict(result['records'][0], url=result['records'][0]['url'].replace('/files/', 'https://example.com/files/'))
++    with pytest.raises(ValueError):
++        await uploads.adopt([escaped], 'chat', local)
++
++
++def test_large_pdf_splits_on_pages_without_ocr_or_formula_changes(environment):
++    app, _, _ = environment
++    with pymupdf.open() as doc:
++        for page in range(12):
++            doc.new_page().insert_text((72, 72), f'Page {page + 1}: x^2 + y^2 = 25; 1/2 + 1/3 = 5/6')
++        data = doc.tobytes()
++        expected = [page.get_text() for page in doc]
++    assert len(data) > 3000
++    with TestClient(app) as client:
++        result = upload(client, '数学.pdf', data, 'library')
++    actual = []
++    assert len(result['records']) > 1
++    for row in result['records']:
++        assert row['size'] <= 3000
++        with pymupdf.open(uploads.file_for(row)) as part:
++            actual.extend(page.get_text() for page in part)
++    assert actual == expected
++    assert uploads.library_uploads()[0]['retention'] == 'library'
++
++
++def test_text_splits_at_utf8_boundaries_and_rejects_lossy_input(tmp_path):
++    original = ('数学αβ，' * 20).encode()
++    source = tmp_path / 'source.txt'
++    source.write_bytes(original)
++    parts = uploads.split_source(source, '题目.txt', 31, tmp_path)
++    assert b''.join(part.read_bytes() for part in parts) == original
++    assert all(part.stat().st_size <= 31 and part.read_text() for part in parts)
++    source.write_bytes(b'\xff' * 100)
++    with pytest.raises(UnicodeDecodeError):
++        uploads.split_source(source, 'bad.txt', 31, tmp_path)
++
++
++def test_explicit_page_uses_original_book_page_after_splitting():
++    records = [{'filename': '数学-第0001-0020页.pdf', 'page_numbers': [1]}, {'filename': '数学-第0021-0040页.pdf', 'page_numbers': []}]
++    uploads.select_requested_pages(records, '解释第25页的公式')
++    assert records[0]['_defer_pdf'] is True
++    assert records[1]['page_numbers'] == [5]
++    assert '_defer_pdf' not in records[1]
++    legacy = [{'filename': 'old.pdf'}]
++    uploads.select_requested_pages(legacy, '做这两道题')
++    assert legacy == [{'filename': 'old.pdf'}]
++
++
++@pytest.mark.asyncio
++async def test_library_uploads_wait_for_each_other_without_blocking_original_access(environment):
++    _, local, _ = environment
++    order = []
++    release = asyncio.Event()
++    async def first():
++        async with uploads.library_queue():
++            order.append('first')
++            await release.wait()
++    async def second():
++        async with uploads.library_queue():
++            order.append('second')
++    a = asyncio.create_task(first())
++    await asyncio.sleep(.01)
++    b = asyncio.create_task(second())
++    await asyncio.sleep(.05)
++    assert order == ['first']
++    assert uploads.begin('原件可立即上传.txt', 3, 'library')['size'] == 3
++    release.set()
++    await asyncio.gather(a, b)
++    assert order == ['first', 'second']
++    async with uploads.library_queue():
++        pass
++
++
++@pytest.mark.asyncio
++async def test_native_index_failure_is_not_reported_as_saved(environment, monkeypatch):
++    from deeptutor.api.routers import student_learning
++    from deeptutor.knowledge.progress_tracker import ProgressTracker
++    meta = uploads.begin('failed.txt', 3, 'library')
++    (uploads.directory(meta['upload_id']) / '0.chunk').write_bytes(b'abc')
++    result = await uploads.finish(meta['upload_id'])
++    async def failed(background, files):
++        return {'task_id': 'failed-task', 'name': '我的上传资料'}
++    monkeypatch.setattr(student_learning, 'save_library_attachments', failed)
++    monkeypatch.setattr(ProgressTracker, 'get_progress', lambda self: {'stage': 'error', 'task_id': 'failed-task'})
++    await uploads._save_library(result)
++    assert uploads.read(meta['upload_id'], 'result.json')['library_status'] == 'failed'
++    assert uploads.file_for(result['records'][0]).read_bytes() == b'abc'
++
++
++def test_two_page_upload_preserves_page_count_and_rejects_locked_pdf(environment):
++    app, _, _ = environment
++    with pymupdf.open() as doc:
++        doc.new_page(); doc.new_page()
++        data = doc.tobytes()
++        locked = doc.tobytes(encryption=pymupdf.PDF_ENCRYPT_AES_256, owner_pw='owner', user_pw='reader')
++    with TestClient(app) as client:
++        result = upload(client, 'two.pdf', data)
++        assert result['records'][0]['page_count'] == 2
++        meta = client.post('/api/student/attachments/uploads', json={'filename': 'locked.pdf', 'size': len(locked)}).json()
++        for index, offset in enumerate(range(0, len(locked), meta['chunk_bytes'])):
++            chunk = locked[offset:offset + meta['chunk_bytes']]
++            client.put(f"/api/student/attachments/uploads/{meta['upload_id']}/chunks/{index}", content=chunk, headers={'X-Upload-SHA256': hashlib.sha256(chunk).hexdigest()}).raise_for_status()
++        assert client.post(f"/api/student/attachments/uploads/{meta['upload_id']}/complete").status_code == 400
+diff --git a/tests/services/config/test_runtime_settings.py b/tests/services/config/test_runtime_settings.py
+index afff880..6d38d17 100644
+--- a/tests/services/config/test_runtime_settings.py
++++ b/tests/services/config/test_runtime_settings.py
+@@ -654,8 +654,8 @@ def test_auth_private_login_hosts_process_env_override(tmp_path: Path) -> None:
+ def test_chat_attachment_limits_defaults_and_clamping(tmp_path: Path) -> None:
+     service = RuntimeSettingsService(tmp_path / "settings", process_env={})
+     system = service.load_system()
+-    assert system["chat_attachment_max_file_mb"] == 20
+-    assert system["chat_attachment_max_total_mb"] == 25
++    assert system["chat_attachment_max_file_mb"] == 200
++    assert system["chat_attachment_max_total_mb"] == 200
+     assert system["chat_attachment_max_chars_per_doc"] == 200_000
+     assert system["chat_attachment_max_chars_total"] == 150_000
+ 
+@@ -699,7 +699,30 @@ def test_chat_attachment_limits_env_overrides(tmp_path: Path) -> None:
+     assert effective["chat_attachment_max_chars_per_doc"] == 400_000
+     assert effective["chat_attachment_max_chars_total"] == 300_000
+     # The file keeps the stored (default) values — env is a process override.
+-    assert _read_json(service.path_for("system"))["chat_attachment_max_file_mb"] == 20
++    assert _read_json(service.path_for("system"))["chat_attachment_max_file_mb"] == 200
++
++
++@pytest.mark.parametrize("file_mb,total_mb,expected", [(20, 25, (200, 200)), (50, 80, (50, 80)), (5, 10, (5, 10))])
++def test_legacy_attachment_defaults_upgrade_without_changing_other_settings(tmp_path, file_mb, total_mb, expected):
++    settings = tmp_path / "settings"
++    settings.mkdir()
++    source = settings / "system.json"
++    source.write_text(json.dumps({"chat_attachment_max_file_mb": file_mb, "chat_attachment_max_total_mb": total_mb,
++                                  "chat_attachment_max_chars_total": 123456, "backend_port": 8009}))
++    service = RuntimeSettingsService(settings, process_env={})
++    result = service.load_system()
++    assert (result["chat_attachment_max_file_mb"], result["chat_attachment_max_total_mb"]) == expected
++    assert result["chat_attachment_max_chars_total"] == 123456
++    assert result["backend_port"] == 8009
++    assert _read_json(source)["chat_attachment_limits_version"] == 2
++    assert service.load_system() == result
++
++
++def test_explicit_small_attachment_limits_stay_small_after_upgrade(tmp_path):
++    service = RuntimeSettingsService(tmp_path / "settings", process_env={})
++    service.save_system({"chat_attachment_max_file_mb": 20, "chat_attachment_max_total_mb": 25})
++    result = service.load_system()
++    assert (result["chat_attachment_max_file_mb"], result["chat_attachment_max_total_mb"]) == (20, 25)
+ 
+ 
+ def test_compute_ws_max_size_floor_and_inflation() -> None:
+diff --git a/tests/services/session/test_pdf_pages.py b/tests/services/session/test_pdf_pages.py
+index 37b0520..c33b225 100644
+--- a/tests/services/session/test_pdf_pages.py
++++ b/tests/services/session/test_pdf_pages.py
+@@ -26,6 +26,27 @@ def pdf_bytes(pages=2):
+         return doc.tobytes()
+ 
+ 
++@pytest.mark.asyncio
++async def test_selected_original_pages_of_a_book_do_not_wait_for_ocr(cache, tmp_path, monkeypatch):
++    source = tmp_path / 'book.pdf'
++    source.write_bytes(pdf_bytes(8))
++    result = await pdf_pages.prepare_pdf_pages(source, [8, 3])
++    assert [row['page'] for row in result['images']] == [8, 3]
++    assert '--- Page 8 ---' in result['text'] and '--- Page 1 ---' not in result['text']
++    async def unexpected(*args, **kwargs):
++        raise AssertionError('selected pages must come from cache')
++    monkeypatch.setattr(pdf_pages, 'run_in_isolated_process', unexpected)
++    assert await pdf_pages.prepare_pdf_pages(source, [8, 3]) == result
++
++
++@pytest.mark.asyncio
++async def test_out_of_range_selected_page_reports_it_without_ocr(cache, tmp_path, monkeypatch):
++    source = tmp_path / 'book.pdf'
++    source.write_bytes(pdf_bytes(8))
++    result = await pdf_pages.prepare_pdf_pages(source, [99])
++    assert not result['images'] and '超出范围' in result['text']
++
++
+ @pytest.fixture
+ def cache(tmp_path, monkeypatch):
+     paths = PathService(workspace_root=tmp_path / "account-a")
+diff --git a/web/app/(utility)/space/page.tsx b/web/app/(utility)/space/page.tsx
+index b8fc708..98f1615 100644
+--- a/web/app/(utility)/space/page.tsx
++++ b/web/app/(utility)/space/page.tsx
+@@ -1,5 +1,7 @@
+ import SpaceDashboard from "@/components/space/SpaceDashboard";
++import StudentMaterials from '@/components/student/StudentMaterials';
++import { STUDENT_EDITION } from '@/lib/student-edition';
+ 
+ export default function SpaceIndexPage() {
+-  return <SpaceDashboard />;
++  return STUDENT_EDITION ? <StudentMaterials /> : <SpaceDashboard />;
+ }
+diff --git a/web/app/(workspace)/learning/reading/page.tsx b/web/app/(workspace)/learning/reading/page.tsx
+index 69a6c0b..e5eda96 100644
+--- a/web/app/(workspace)/learning/reading/page.tsx
++++ b/web/app/(workspace)/learning/reading/page.tsx
+@@ -1,8 +1,11 @@
+ import { Suspense } from "react";
+ 
+ import { ReadingLibraryPage } from "@/components/reading/library/ReadingLibrary";
++import { redirect } from 'next/navigation';
++import { STUDENT_EDITION } from '@/lib/student-edition';
+ 
+ export default function ImmersiveReadingLibraryRoute() {
++  if (STUDENT_EDITION) redirect('/space');
+   return (
+     <Suspense fallback={null}>
+       <ReadingLibraryPage />
+diff --git a/web/app/api/student/attachments/uploads/[...path]/route.ts b/web/app/api/student/attachments/uploads/[...path]/route.ts
+new file mode 100644
+index 0000000..a44624f
+--- /dev/null
++++ b/web/app/api/student/attachments/uploads/[...path]/route.ts
+@@ -0,0 +1,7 @@
++import { forwardBackendUpload } from '@/lib/streaming-upload-proxy';
++export const runtime = 'nodejs';
++export const dynamic = 'force-dynamic';
++export const POST = (request: Request) => forwardBackendUpload(request);
++export const PUT = (request: Request) => forwardBackendUpload(request);
++export const GET = (request: Request) => forwardBackendUpload(request);
++export const DELETE = (request: Request) => forwardBackendUpload(request);
+diff --git a/web/app/api/student/attachments/uploads/route.ts b/web/app/api/student/attachments/uploads/route.ts
+new file mode 100644
+index 0000000..abb4b89
+--- /dev/null
++++ b/web/app/api/student/attachments/uploads/route.ts
+@@ -0,0 +1,4 @@
++import { forwardBackendUpload } from '@/lib/streaming-upload-proxy';
++export const runtime = 'nodejs';
++export const dynamic = 'force-dynamic';
++export const POST = (request: Request) => forwardBackendUpload(request);
+diff --git a/web/components/chat/home/ChatComposer.tsx b/web/components/chat/home/ChatComposer.tsx
+index 1b240b6..506cede 100644
+--- a/web/components/chat/home/ChatComposer.tsx
++++ b/web/components/chat/home/ChatComposer.tsx
+@@ -1,6 +1,8 @@
+ "use client";
+ 
+ import { STUDENT_EDITION, studentCapabilityVisible } from '@/lib/student-edition';
++import { apiFetch, apiUrl } from '@/lib/api';
++import { notify } from '@/lib/notifications';
+ 
+ import {
+   memo,
+@@ -52,7 +54,7 @@ import type { SelectedHistorySession } from "@/components/chat/HistorySessionPic
+ import type { SelectedQuestionEntry } from "@/components/chat/QuestionBankPicker";
+ import type { SelectedRecord } from "@/lib/notebook-selection-types";
+ import type { LLMSelection } from "@/features/chat/model/protocol";
+-import type { AttachmentRetention } from "@/features/chat/controllers/pending-attachments";
++import type { AttachmentRetention, PendingAttachment } from "@/features/chat/controllers/pending-attachments";
+ import { recordMediaSend, type MediaSendOrigin } from "@/features/chat/media/send-origin";
+ import type { LLMOption, RefreshLLMOptions } from "@/lib/llm-options";
+ import ChatSpaceMenu from "@/components/chat/space/ChatSpaceMenu";
+@@ -108,16 +110,6 @@ import { useCapabilityLabel } from "@/features/ui-layout/tokens";
+ import { usePageCustomization } from "@/context/PageCustomizationContext";
+ import { useUiLayout } from "@/hooks/useUiLayout";
+ 
+-interface PendingAttachment {
+-  type: string;
+-  filename: string;
+-  base64?: string;
+-  previewUrl?: string;
+-  size?: number;
+-  mimeType?: string;
+-  text?: string;
+-}
+-
+ interface KnowledgeBase {
+   name: string;
+ }
+@@ -221,6 +213,7 @@ export default memo(function ChatComposer({
+   spaceMenuOpen,
+   hasMessages,
+   attachments,
++  onRestoreAttachments,
+   attachmentError,
+   preparingAttachments = false,
+   attachmentProcessing = [],
+@@ -339,6 +332,7 @@ export default memo(function ChatComposer({
+   spaceMenuOpen: boolean;
+   hasMessages: boolean;
+   attachments: PendingAttachment[];
++  onRestoreAttachments?: (files: PendingAttachment[]) => void;
+   attachmentError: string | null;
+   preparingAttachments?: boolean;
+   attachmentProcessing?: AttachmentProcessingItem[];
+@@ -541,6 +535,8 @@ export default memo(function ChatComposer({
+   const attachmentRetention = useRef<AttachmentRetention>("temporary");
+   const [choosingUpload, setChoosingUpload] = useState(false);
+   const draftAttachmentsRef = useRef(attachments);
++  const restoreAttachmentsRef = useRef(onRestoreAttachments);
++  restoreAttachmentsRef.current = onRestoreAttachments;
+   const addDraftFilesRef = useRef(onAddFiles);
+   useEffect(() => {
+     draftAttachmentsRef.current = attachments;
+@@ -571,8 +567,8 @@ export default memo(function ChatComposer({
+       // Keep the last value in a ref: the imperative handle may already be
+       // detached when the unmount cleanup runs.
+       text: draftTextRef.current,
+-      attachments: draftAttachmentsRef.current.map(
+-        ({ filename, base64, mimeType }) => ({ filename, base64, mimeType }),
++      attachments: draftAttachmentsRef.current.filter(item => !item.preparing).map(
++        ({ filename, base64, mimeType, id, attachmentId, url, type, size, pageCount }) => ({ filename, base64, mimeType, id, attachmentId, url: url?.startsWith('blob:') ? undefined : url, type, size, pageCount }),
+       ),
+     }),
+     [],
+@@ -667,6 +663,16 @@ export default memo(function ChatComposer({
+               });
+             });
+           if (files.length) addDraftFilesRef.current(files);
++          const stored = draft.attachments.filter(item => item.url?.startsWith('/files/attachments/') && /^[0-9a-f]{32}$/.test(item.attachmentId || item.id || ''));
++          const local = stored.filter(item => new URL(item.url!, window.location.origin).searchParams.get('dt_workspace') === location.workspaceId);
++          if (local.length) restoreAttachmentsRef.current?.(local.map(item => ({ ...item, type: item.type || 'file' })));
++          for (const item of stored.filter(item => !local.includes(item))) {
++            void apiFetch(apiUrl(item.url!)).then(async response => {
++              if (!response.ok) throw new Error('原件暂时无法恢复，请重新选择文件。');
++              const blob = await response.blob();
++              if (alive) addDraftFilesRef.current([new File([blob], item.filename, { type: item.mimeType || blob.type })]);
++            }).catch(error => { if (alive) notify(error instanceof Error ? error.message : '附件恢复失败', { tone: 'error' }); });
++          }
+         })
+         .catch((error) => {
+           if (!alive) return;
+diff --git a/web/components/chat/home/LazySessionViewerPanel.tsx b/web/components/chat/home/LazySessionViewerPanel.tsx
+index 10541fc..03872eb 100644
+--- a/web/components/chat/home/LazySessionViewerPanel.tsx
++++ b/web/components/chat/home/LazySessionViewerPanel.tsx
+@@ -89,6 +89,8 @@ const LazySessionViewerPanel = forwardRef<
+     () => ({
+       openFileTab: (attachment) =>
+         callPanel((panel) => panel.openFileTab(attachment)),
++      updateFileTab: (id, attachment) => callPanel(panel => panel.updateFileTab(id, attachment)),
++      currentFileReference: () => panelRef.current?.currentFileReference() ?? null,
+       openReadingTab: (target) => callPanel(panel => panel.openReadingTab(target)),
+       currentReadingReference: () => {
+         if (panelRef.current) return panelRef.current.currentReadingReference();
+diff --git a/web/components/chat/home/SessionActivityPanel.tsx b/web/components/chat/home/SessionActivityPanel.tsx
+index eb8b008..fa18843 100644
+--- a/web/components/chat/home/SessionActivityPanel.tsx
++++ b/web/components/chat/home/SessionActivityPanel.tsx
+@@ -1,6 +1,7 @@
+ "use client";
+ 
+ import { BOOKS_HOME } from "@/lib/learning-routes";
++import { studentRouteVisible } from '@/lib/student-edition';
+ 
+ /**
+  * The Activity home lists the conversation's tools, references, and files.
+@@ -463,6 +464,7 @@ function SpaceSubsection({
+ }) {
+   const Icon = category.icon;
+   const { t } = useTranslation();
++  if (!studentRouteVisible(category.href)) return <ul className="ml-5 border-l border-border pl-2">{children}</ul>;
+   return (
+     <div>
+       <Link
+diff --git a/web/components/chat/home/SessionViewerPanel.tsx b/web/components/chat/home/SessionViewerPanel.tsx
+index b6ee02d..80717c9 100644
+--- a/web/components/chat/home/SessionViewerPanel.tsx
++++ b/web/components/chat/home/SessionViewerPanel.tsx
+@@ -35,6 +35,7 @@ import {
+   useState,
+   type ReactNode,
+ } from "react";
++import { attachmentPage, rememberAttachmentPage, splitPdfPage } from '@/lib/attachment-viewport';
+ import dynamic from "next/dynamic";
+ import type { ChatReadingDocument } from "./ChatReadingTab";
+ import type { SelectionPayload } from "@/components/reading/PdfDocumentView";
+@@ -186,6 +187,8 @@ function readStoredViewerWidth(): number {
+ 
+ export interface SessionViewerPanelHandle {
+   openFileTab(a: MessageAttachment): void;
++  updateFileTab(id: string, attachment: MessageAttachment): void;
++  currentFileReference(): MessageAttachment | null;
+   openReadingTab(target?: ReadingCitationTarget): void;
+   currentReadingReference(): ReadingReferencePayload | null;
+   removeFileTab(attachmentId: string): void;
+@@ -556,6 +559,21 @@ function SessionViewerPanelInner(
+     [onAutoOpen],
+   );
+ 
++  const updateFileTab = useCallback((id: string, attachment: MessageAttachment) => {
++    setTabs(previous => previous.map(tab => {
++      if (tab.kind !== 'file' || tab.id !== `file:${id}`) return tab;
++      if (tab.source.url && attachment.url) rememberAttachmentPage(attachment.url, tab.source.filename === attachment.filename ? attachmentPage(tab.source.url) : splitPdfPage(attachment.filename || '', attachmentPage(tab.source.url)) || 1);
++      return { ...tab, label: attachment.filename || tab.label, source: attachmentToPreviewSource(attachment) };
++    }));
++  }, []);
++  const currentFileReference = useCallback((): MessageAttachment | null => {
++    const tab = open ? tabs.find(item => item.id === activeTabId) : null;
++    if (tab?.kind !== 'file' || !tab.source.id || !tab.source.url || tab.source.url.startsWith('blob:')) return null;
++    return { id: tab.source.id, filename: tab.source.filename, type: tab.source.type || 'file', url: tab.source.url,
++      mime_type: tab.source.mimeType,
++      ...(tab.source.filename.toLowerCase().endsWith('.pdf') ? { page_numbers: [attachmentPage(tab.source.url)] } : {}) };
++  }, [activeTabId, open, tabs]);
++
+   const openWebTab = useCallback(
+     (url: string) => {
+       setTabs((prev) => {
+@@ -1028,6 +1046,8 @@ function SessionViewerPanelInner(
+     ref,
+     () => ({
+       openFileTab,
++      updateFileTab,
++      currentFileReference,
+       openReadingTab,
+       currentReadingReference,
+       removeFileTab,
+@@ -1044,6 +1064,8 @@ function SessionViewerPanelInner(
+     }),
+     [
+       openFileTab,
++      updateFileTab,
++      currentFileReference,
+       openReadingTab,
+       currentReadingReference,
+       removeFileTab,
+@@ -1178,25 +1200,26 @@ function SessionViewerPanelInner(
+ 
+   const openLocalFile = useCallback(
+     async (file: File) => {
++      const url = URL.createObjectURL(file);
++      localUrls.current.push(url);
++      const id = `local:${crypto.randomUUID()}`;
++      openFileTab({ id, type: file.type.startsWith('image/') ? 'image' : 'file', filename: file.name, mime_type: file.type, url });
+       if (onAddFiles) {
+         const key = activeConversation.current;
+         const added = await onAddFiles([file]);
+         if (activeConversation.current !== key) return false;
+-        for (const item of added) openFileTab({ id: item.id, type: item.type, filename: item.filename, mime_type: item.mimeType, base64: item.base64 });
++        closeTab(`file:${id}`, { remember: false });
++        const preferred = added.find(item => splitPdfPage(item.filename, attachmentPage(url)) !== null);
++        for (const item of [...added.filter(item => item !== preferred), ...(preferred ? [preferred] : [])]) {
++          const page = splitPdfPage(item.filename, attachmentPage(url));
++          if (item.url && page !== null) rememberAttachmentPage(item.url, page);
++          openFileTab({ id: item.attachmentId || item.id, type: item.type, filename: item.filename, mime_type: item.mimeType, base64: item.base64, url: item.url });
++        }
+         return added.length > 0;
+       }
+-      const url = URL.createObjectURL(file);
+-      localUrls.current.push(url);
+-      openFileTab({
+-        id: `local:${crypto.randomUUID()}`,
+-        type: file.type.startsWith("image/") ? "image" : "file",
+-        filename: file.name,
+-        mime_type: file.type,
+-        url,
+-      });
+       return true;
+     },
+-    [openFileTab, onAddFiles],
++    [openFileTab, onAddFiles, closeTab],
+   );
+ 
+   /* Below the drawer breakpoint the panel is a full-screen sheet, not a side
+diff --git a/web/components/chat/home/StandaloneComposer.tsx b/web/components/chat/home/StandaloneComposer.tsx
+index bf3d5c2..79d20b3 100644
+--- a/web/components/chat/home/StandaloneComposer.tsx
++++ b/web/components/chat/home/StandaloneComposer.tsx
+@@ -121,6 +121,9 @@ export interface StandaloneComposerSubmission {
+   config?: Record<string, unknown>;
+   attachments: Array<{
+     type: string;
++    id?: string;
++    url?: string;
++    page_numbers?: number[];
+     filename?: string;
+     base64?: string;
+     mime_type?: string;
+@@ -915,6 +918,7 @@ function StandaloneComposerImpl({
+         onDrop={handleDrop}
+         onPaste={handlePaste}
+         onAddFiles={handleAddFiles}
++        onRestoreAttachments={files => setAttachments(previous => [...previous, ...files])}
+         onSelectCapability={selectCapability}
+         showCapabilityChip={showCapabilityChip}
+         docked={docked}
+diff --git a/web/components/chat/preview/previewers/PdfPreview.tsx b/web/components/chat/preview/previewers/PdfPreview.tsx
+index 893e9ab..429d572 100644
+--- a/web/components/chat/preview/previewers/PdfPreview.tsx
++++ b/web/components/chat/preview/previewers/PdfPreview.tsx
+@@ -5,6 +5,7 @@ import { PdfDocumentView, type JumpRequest, type SelectionPayload } from "@/comp
+ import { PreviewControls, clampPreviewZoom, usePreviewGestures } from "../PreviewControls";
+ import { QuotedPassage } from "@/components/chat/home/QuotedPassage";
+ import { Button } from "@/shared/ui/Button";
++import { attachmentPage, rememberAttachmentPage } from '@/lib/attachment-viewport';
+ 
+ const ignoreSelection = () => {};
+ 
+@@ -17,7 +18,7 @@ function AttachmentPdf({ url, filename, onQuote }: { url: string; filename: stri
+   const nonce = useRef(0);
+   const [zoom, setZoom] = useState(1);
+   const [pages, setPages] = useState(0);
+-  const [page, setPage] = useState(1);
++  const [page, setPage] = useState(() => attachmentPage(url));
+   const [jump, setJump] = useState<JumpRequest | null>(null);
+   const [selection, setSelection] = useState<SelectionPayload | null>(null);
+   const [region, setRegion] = useState(false);
+@@ -46,8 +47,12 @@ function AttachmentPdf({ url, filename, onQuote }: { url: string; filename: stri
+       <Button size="sm" variant="ghost" aria-pressed={region} onClick={() => region ? setRegion(false) : startRegion()}>{region ? "取消框选" : "截图引用"}</Button>
+       <span className="text-xs text-muted-foreground">{region ? "拖动框选，按 Esc 取消" : "划选文字，或截图引用公式与图片"}</span>
+     </div>}
+-    <div className="min-h-0 flex-1"><PdfDocumentView materialId="temporary-attachment-preview" sourceUrl={url} zoom={zoom} onDocumentLoad={setPages} unitCount={pages} annotations={[]} jump={jump}
+-      onSelection={onQuote ? setSelection : ignoreSelection} onVisibleLocatorChange={setPage}
++    <div className="min-h-0 flex-1"><PdfDocumentView materialId="temporary-attachment-preview" sourceUrl={url} zoom={zoom} onDocumentLoad={count => {
++      setPages(count);
++      const locator = Math.min(count, attachmentPage(url));
++      if (locator > 1) setJump({ locator, nonce: ++nonce.current });
++    }} unitCount={pages} annotations={[]} jump={jump}
++      onSelection={onQuote ? setSelection : ignoreSelection} onVisibleLocatorChange={value => { setPage(value); rememberAttachmentPage(url, value); }}
+       onRequestRegion={onQuote ? startRegion : undefined}
+       onRegionSelect={region && onQuote ? value => {
+         if (!value.image) { setError("截图还未准备好，请等页面显示完整后重试。"); return; }
+diff --git a/web/components/customization/PageCustomizeDialog.tsx b/web/components/customization/PageCustomizeDialog.tsx
+index 73aad8a..43abfa7 100644
+--- a/web/components/customization/PageCustomizeDialog.tsx
++++ b/web/components/customization/PageCustomizeDialog.tsx
+@@ -18,7 +18,7 @@ import {
+ } from '@/lib/page-customization'
+ import type { CapabilityDef } from '@/features/capabilities/presentation'
+ import { useCapabilityLabel } from '@/features/ui-layout/tokens'
+-import { LEARNING_SURFACES } from '@/components/learning/surfaces'
++import { VISIBLE_LEARNING_SURFACES as LEARNING_SURFACES } from '@/components/learning/surfaces'
+ 
+ const inputClass =
+   'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-shadow focus:border-ring focus:ring-2 focus:ring-ring/15'
+diff --git a/web/components/layout/instance-crumbs.tsx b/web/components/layout/instance-crumbs.tsx
+index 4a5f353..ea10c27 100644
+--- a/web/components/layout/instance-crumbs.tsx
++++ b/web/components/layout/instance-crumbs.tsx
+@@ -19,6 +19,7 @@ import {
+   readingFolderRoute,
+ } from '@/lib/learning-routes'
+ import type { Book } from '@/lib/book-types'
++import { STUDENT_EDITION } from '@/lib/student-edition'
+ 
+ /**
+  * The instance crumb of each kind of record, handed up into the page bar:
+@@ -57,7 +58,7 @@ export function ReadingFolderCrumb({ id, label, onRename, bare }: CrumbProps) {
+       currentId={id}
+       load={load}
+       onRename={onRename}
+-      all={{ label: t('All collections'), href: READING_HOME }}
++      all={{ label: STUDENT_EDITION ? '资料库' : t('All collections'), href: STUDENT_EDITION ? '/space' : READING_HOME }}
+     />
+   )
+ }
+@@ -109,7 +110,7 @@ export function BookCrumb({ id, label, onRename, bare }: CrumbProps) {
+       currentId={id}
+       load={load}
+       onRename={onRename}
+-      all={{ label: t('All books'), href: BOOKS_HOME }}
++      all={{ label: STUDENT_EDITION ? '资料库' : t('All books'), href: STUDENT_EDITION ? '/space' : BOOKS_HOME }}
+     />
+   )
+ }
+diff --git a/web/components/learning/LearningDashboard.tsx b/web/components/learning/LearningDashboard.tsx
+index fb659de..5ce79fc 100644
+--- a/web/components/learning/LearningDashboard.tsx
++++ b/web/components/learning/LearningDashboard.tsx
+@@ -3,12 +3,11 @@
+ import { pageGridClass } from '@/components/layout/FeaturePage'
+ import Link from 'next/link'
+ import { useState } from 'react'
+-import { BookOpen, Route } from 'lucide-react'
++import { Route } from 'lucide-react'
+ import { useTranslation } from 'react-i18next'
+ import { useLearningIndex } from '@/hooks/useLearningIndex'
+ import { LearningCreateMenu } from './LearningCreateMenu'
+ import { scopedUrl } from '@/lib/workspace-scope'
+-import { bookRoute } from '@/lib/learning-routes'
+ import {
+   masterySessionRoute,
+   masteryOpeningMessage,
+@@ -28,7 +27,7 @@ import {
+ } from './LearningShell'
+ import { LearningCard } from './LearningCard'
+ import { LearningWays } from './LearningWays'
+-import { LEARNING_SURFACES, learningSurface } from './surfaces'
++import { VISIBLE_LEARNING_SURFACES as LEARNING_SURFACES, learningSurface } from './surfaces'
+ 
+ export function LearningDashboard() {
+   const { t } = useTranslation()
+@@ -69,7 +68,7 @@ export function LearningDashboard() {
+         <LearningSkeleton count={4} />
+       ) : (
+         <>
+-          {(todos.reviews.length > 0 || todos.books.length > 0) && (
++          {todos.reviews.length > 0 && (
+             <section aria-labelledby="learning-todos" className="mb-9">
+               <h2 id="learning-todos" className="mb-3 text-[13.5px] font-semibold">
+                 {t('What needs your attention')}
+@@ -97,22 +96,6 @@ export function LearningDashboard() {
+                     }
+                   />
+                 ))}
+-                {todos.books.map(book => (
+-                  <LearningCard
+-                    key={`${book.content_workspace_id}:${book.id}`}
+-                    href={scopedUrl(bookRoute(book.id, null, ""), book.content_workspace_id || "")}
+-                    title={book.title}
+-                    icon={<BookOpen size={19} />}
+-                    subtitle={
+-                      <>
+-                        {book.status === 'paused' ? t('Paused') : t('Compiling')}
+-                        {book.status === 'paused' && book.metadata.pause_reason
+-                          ? ` · ${book.metadata.pause_reason}`
+-                          : ''}
+-                      </>
+-                    }
+-                  />
+-                ))}
+               </div>
+             </section>
+           )}
+diff --git a/web/components/learning/LearningWays.tsx b/web/components/learning/LearningWays.tsx
+index bb672a2..06d4909 100644
+--- a/web/components/learning/LearningWays.tsx
++++ b/web/components/learning/LearningWays.tsx
+@@ -11,7 +11,7 @@ import { AnimatePresence, m as motion, useReducedMotion, type Transition } from
+ import { ArrowUpRight, ArrowRight, Check, X } from 'lucide-react'
+ import { useTranslation } from 'react-i18next'
+ type LearningKind = LearningSurface['kind']
+-import { LEARNING_SURFACES, type LearningSurface } from './surfaces'
++import { VISIBLE_LEARNING_SURFACES as LEARNING_SURFACES, type LearningSurface } from './surfaces'
+ 
+ const FOCUSABLE = 'a[href], input:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+ const tileClass = (accent: string) =>
+diff --git a/web/components/learning/NewLearningPage.tsx b/web/components/learning/NewLearningPage.tsx
+index b5ed84f..b9ef6a7 100644
+--- a/web/components/learning/NewLearningPage.tsx
++++ b/web/components/learning/NewLearningPage.tsx
+@@ -9,7 +9,7 @@ import { useModules } from '@/hooks/useModules'
+ import { usePageCustomization } from '@/context/PageCustomizationContext'
+ import { PageCustomizeButton } from '@/components/customization/PageCustomizeButton'
+ import { navigateTask } from '@/lib/workspace-scope'
+-import { LEARNING_SURFACES } from './surfaces'
++import { VISIBLE_LEARNING_SURFACES as LEARNING_SURFACES } from './surfaces'
+ import {
+   LearningShell,
+   LearningSkeleton,
+diff --git a/web/components/learning/practice/ReviewHome.tsx b/web/components/learning/practice/ReviewHome.tsx
+index 3564223..8cc98a1 100644
+--- a/web/components/learning/practice/ReviewHome.tsx
++++ b/web/components/learning/practice/ReviewHome.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { useCallback, useEffect, useRef, useState } from 'react'
+ import Link from 'next/link'
++import { studentRouteVisible } from '@/lib/student-edition'
+ import { useTranslation } from 'react-i18next'
+ import { ArrowRight, Check, ChevronDown, FileUp, Loader2, Library } from 'lucide-react'
+ import {
+@@ -170,14 +171,14 @@ export function ReviewHome() {
+           </section>
+           <div className="flex flex-wrap items-center justify-between gap-3 px-1 text-xs text-muted-foreground">
+             <p>{t('Recall first, then check. Forgotten questions come back in this round.')}</p>
+-            <Link
++            {studentRouteVisible('/space/questions') && <Link
+               href="/space/questions"
+               className="inline-flex items-center gap-1.5 text-foreground hover:underline"
+             >
+               <Library size={14} />
+               {t('Manage question bank')}
+               <ArrowRight size={13} />
+-            </Link>
++            </Link>}
+           </div>
+           <details className="group rounded-xl border border-border">
+             <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-medium">
+diff --git a/web/components/learning/surfaces.ts b/web/components/learning/surfaces.ts
+index 25abc3f..cf68936 100644
+--- a/web/components/learning/surfaces.ts
++++ b/web/components/learning/surfaces.ts
+@@ -1,6 +1,7 @@
+ import { BookOpen, BookText, ClipboardCheck, Route, type LucideIcon } from 'lucide-react'
+ import type { LearningKind } from '@/lib/learning-dashboard'
+ import { BOOKS_HOME, MASTERY_HOME, PRACTICE_HOME, READING_HOME } from '@/lib/learning-routes'
++import { studentRouteVisible } from '@/lib/student-edition'
+ 
+ export interface LearningSurface {
+   kind: LearningKind | "practice"
+@@ -90,5 +91,7 @@ export const LEARNING_SURFACES: readonly LearningSurface[] = [
+ 
+ ] as const
+ 
++export const VISIBLE_LEARNING_SURFACES = LEARNING_SURFACES.filter(surface => studentRouteVisible(surface.href))
++
+ export const learningSurface = (kind: LearningKind): LearningSurface =>
+   LEARNING_SURFACES.find(surface => surface.kind === (kind === "watching" ? "reading" : kind))!
+diff --git a/web/components/reading/library/ReadingFolder.tsx b/web/components/reading/library/ReadingFolder.tsx
+index da29e6f..963c5c2 100644
+--- a/web/components/reading/library/ReadingFolder.tsx
++++ b/web/components/reading/library/ReadingFolder.tsx
+@@ -1,4 +1,5 @@
+ "use client";
++import { STUDENT_EDITION } from '@/lib/student-edition';
+ 
+ import { FeaturePage, PageHeader, PAGE_SECTION_TITLE_CLASS } from '@/components/layout/FeaturePage'
+ import {
+@@ -137,10 +138,10 @@ export function ReadingFolderPage({ folderId }: { folderId: string }) {
+           <CircleAlert size={24} className="text-[var(--primary)]" />
+           <p className="mt-3 text-[13px] font-medium">{error}</p>
+           <Link
+-            href={scopedUrl(READING_HOME)}
++            href={scopedUrl(STUDENT_EDITION ? '/space' : READING_HOME)}
+             className="mt-5 rounded-lg bg-[var(--primary)] px-3.5 py-2 text-[12px] font-semibold text-[var(--primary-foreground)]"
+           >
+-            {t("Back to collections")}
++            {STUDENT_EDITION ? '返回资料库' : t("Back to collections")}
+           </Link>
+         </div>
+       </FolderFrame>
+@@ -158,10 +159,10 @@ export function ReadingFolderPage({ folderId }: { folderId: string }) {
+         className="dt-section-back flex min-w-0 items-center gap-1 text-[12px] text-[var(--muted-foreground)]"
+       >
+         <Link
+-          href={scopedUrl(READING_HOME)}
++          href={scopedUrl(STUDENT_EDITION ? '/space' : READING_HOME)}
+           className="shrink-0 hover:text-[var(--foreground)]"
+         >
+-          {t("Immersive Reading")}
++          {STUDENT_EDITION ? '资料库' : t("Immersive Reading")}
+         </Link>
+         <ChevronRight size={12} className="shrink-0 opacity-60" />
+         <span className="truncate text-[var(--foreground)]">{folder.title}</span>
+@@ -343,7 +344,7 @@ export function ReadingFolderPage({ folderId }: { folderId: string }) {
+           collection={collection}
+           onClose={() => setDialog(null)}
+           onDeleted={async () => {
+-            router.push(scopedUrl(READING_HOME));
++            router.push(scopedUrl(STUDENT_EDITION ? '/space' : READING_HOME));
+           }}
+         />
+       )}
+diff --git a/web/components/reading/workspace/ReadingWorkspace.tsx b/web/components/reading/workspace/ReadingWorkspace.tsx
+index d7fc576..af2aa0b 100644
+--- a/web/components/reading/workspace/ReadingWorkspace.tsx
++++ b/web/components/reading/workspace/ReadingWorkspace.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { scopedUrl } from "@/lib/workspace-scope";
+ import { READING_HOME, readingFolderRoute, readingSessionIdFromPath } from "@/lib/learning-routes";
++import { STUDENT_EDITION } from '@/lib/student-edition';
+ 
+ import Link from "next/link";
+ import dynamic from "next/dynamic";
+@@ -398,7 +399,7 @@ export function ReadingWorkspacePage() {
+         <CircleAlert size={25} className="text-[var(--primary)]" />
+         <p className="mt-3 text-[13px] font-medium">{error}</p>
+         <Link
+-          href={scopedUrl(READING_HOME)}
++          href={scopedUrl(STUDENT_EDITION ? '/space' : READING_HOME)}
+           className="mt-5 rounded-xl bg-[var(--primary)] px-4 py-2 text-[11px] font-semibold text-[var(--primary-foreground)]"
+         >
+           {t("Back to library")}
+@@ -611,7 +612,7 @@ export function ReadingWorkspacePage() {
+                 onToggleBookmark={(locator, label) =>
+                   void toggleBookmark(locator, label)
+                 }
+-                onClose={() => router.push(scopedUrl(READING_HOME))}
++                onClose={() => router.push(scopedUrl(STUDENT_EDITION ? '/space' : READING_HOME))}
+                 headSlot={docSlot}
+               />
+             </div>
+diff --git a/web/components/sidebar/ResourcesNavigation.tsx b/web/components/sidebar/ResourcesNavigation.tsx
+index 11a9905..80991f2 100644
+--- a/web/components/sidebar/ResourcesNavigation.tsx
++++ b/web/components/sidebar/ResourcesNavigation.tsx
+@@ -10,6 +10,7 @@ import {
+ } from '@/components/space/dashboard-groups'
+ import { useCapabilityFilter } from '@/features/capabilities/useCapabilityCatalog'
+ import { navVisibleUnderPolicy } from './nav-entries'
++import { STUDENT_EDITION } from '@/lib/student-edition'
+ 
+ function Shelf({ groups, titled }: { groups: DashboardGroup[]; titled: boolean }) {
+   const { t, i18n } = useTranslation()
+@@ -34,6 +35,7 @@ function Shelf({ groups, titled }: { groups: DashboardGroup[]; titled: boolean }
+ /** The workspace's materials. */
+ export function ResourcesNavigation() {
+   const { t } = useTranslation()
++  if (STUDENT_EDITION) return <OverviewRow href="/space" label="资料库 · 教材与长期资料" icon={ResourcesShelfIcon} />
+   return (
+     <>
+       <OverviewRow href="/space" label={t('navigation.allResources')} icon={ResourcesShelfIcon} />
+diff --git a/web/components/sidebar/page-sections.ts b/web/components/sidebar/page-sections.ts
+index bbf9e1b..5bb7ce3 100644
+--- a/web/components/sidebar/page-sections.ts
++++ b/web/components/sidebar/page-sections.ts
+@@ -13,7 +13,7 @@ import {
+   visibleGroups,
+   type DashboardGroup,
+ } from '@/components/space/dashboard-groups'
+-import { LEARNING_SURFACES } from '@/components/learning/surfaces'
++import { VISIBLE_LEARNING_SURFACES as LEARNING_SURFACES } from '@/components/learning/surfaces'
+ import { categoryForPath } from '@/lib/navigation'
+ import { navVisibleUnderPolicy } from './nav-entries'
+ 
+diff --git a/web/components/student/StudentMaterials.tsx b/web/components/student/StudentMaterials.tsx
+new file mode 100644
+index 0000000..cd7fbe6
+--- /dev/null
++++ b/web/components/student/StudentMaterials.tsx
+@@ -0,0 +1,358 @@
++'use client'
++
++import { useEffect, useState } from 'react'
++import { FileText, Library, Loader2, MessageCircle, RefreshCw, Search } from 'lucide-react'
++import { Dialog } from '@/shared/ui/Dialog'
++import TextbookLibrary from './TextbookLibrary'
++import KbFilePreview from '@/components/knowledge/KbFilePreview'
++import { apiFetch, apiUrl } from '@/lib/api'
++import { activeWorkspaceId, scopedUrl, selectWorkspace } from '@/lib/workspace-scope'
++import {
++  listKnowledgeBases,
++  listKnowledgeBaseFiles,
++  knowledgeBaseFilePath,
++} from '@/features/knowledge/api/client'
++import { formatFileSize, knowledgeBaseRef } from '@/lib/knowledge-helpers'
++import { learningLibrary } from '@/lib/learning-library'
++import { createReadingWorkspace, type ReadingLibraryMaterial } from '@/lib/reading-workspace-api'
++import { readingCollectionRoute } from '@/lib/learning-routes'
++import { setPendingMaterial } from '@/lib/pending-material'
++import type { UploadResult, UploadedAttachment } from '@/lib/student-upload'
++import type { FilePreviewSource } from '@/components/chat/preview/previewerFor'
++import styles from './StudentLearning.module.css'
++
++type Row = {
++  key: string
++  name: string
++  detail: string
++  size?: number
++  source?: FilePreviewSource
++  attachment?: UploadedAttachment
++  workspace?: string
++  kb?: string
++  retainedKb?: string
++  material?: ReadingLibraryMaterial
++}
++type SavedUpload = UploadResult & {
++  content_workspace_id?: string
++  content_workspace_name?: string
++  library_error?: string
++}
++
++/** One shelf for original files; readiness of a search index never gates reading. */
++export default function StudentMaterials() {
++  const [rows, setRows] = useState<Row[]>([])
++  const [view, setView] = useState('textbooks')
++  const [query, setQuery] = useState('')
++  const [selected, setSelected] = useState<Row | null>(null)
++  const [busy, setBusy] = useState('')
++  const [loading, setLoading] = useState(true)
++  const [error, setError] = useState('')
++  const [revision, setRevision] = useState(0)
++  useEffect(() => {
++    const refresh = () => setRevision(value => value + 1)
++    window.addEventListener('focus', refresh)
++    window.addEventListener('student:materials-updated', refresh)
++    return () => {
++      window.removeEventListener('focus', refresh)
++      window.removeEventListener('student:materials-updated', refresh)
++    }
++  }, [])
++  useEffect(() => {
++    let alive = true
++    setLoading(true)
++    setError('')
++    const failures: string[] = []
++    const saved = async (): Promise<Row[]> => {
++      const response = await apiFetch(apiUrl('/api/student/attachments/uploads/library'), {
++        cache: 'no-store',
++      })
++      if (!response.ok) throw new Error('长期资料')
++      const result = (await response.json()) as {
++        uploads: SavedUpload[]
++        unavailable_workspaces?: string[]
++      }
++      if (result.unavailable_workspaces?.length) failures.push('部分项目的长期资料')
++      return result.uploads.flatMap(upload =>
++        upload.records.map(row => ({
++          key: `upload:${row.id}`,
++          name: row.filename,
++          size: row.size,
++          detail:
++            upload.library_error ||
++            (upload.library_status === 'saving' ? '原件可用 · 检索准备中' : '长期保存 · 原件可用'),
++          attachment: row,
++          workspace: upload.content_workspace_id || '',
++          retainedKb: upload.content_workspace_id
++            ? `workspace:${upload.content_workspace_id}:kb:我的上传资料`
++            : 'account:kb:我的上传资料',
++          source: { id: row.id, filename: row.filename, mimeType: row.mime_type, url: row.url },
++        }))
++      )
++    }
++    const knowledge = async (): Promise<Row[]> => {
++      const bases = await listKnowledgeBases({ library: true, force: true })
++      const lists = await Promise.allSettled(
++        bases.map(async kb => {
++          const ref = knowledgeBaseRef(kb)
++          const files = await listKnowledgeBaseFiles(ref, { library: true, force: true })
++          return files
++            .filter(file => file.type !== 'folder')
++            .map(file => {
++              const path = knowledgeBaseFilePath(ref, file.name)
++              return {
++                key: `kb:${ref}:${file.name}`,
++                name: file.name,
++                size: file.size,
++                detail: kb.name,
++                kb: ref,
++                source: {
++                  filename: file.name,
++                  mimeType: file.mime_type || undefined,
++                  url: `${path}${path.includes('?') ? '&' : '?'}resource_library=true`,
++                },
++              }
++            })
++        })
++      )
++      return lists.flatMap(result => {
++        if (result.status === 'fulfilled') return result.value
++        failures.push('部分资料原件')
++        return []
++      })
++    }
++    const reading = async (): Promise<Row[]> => {
++      const result = await learningLibrary<ReadingLibraryMaterial>('materials')
++      return result.items
++        .filter(
++          material =>
++            material.source_kind === 'file' &&
++            !material.collections?.some(c => c.workspace_id.startsWith('rw_tb_'))
++        )
++        .map(material => ({
++          key: `material:${material.content_workspace_id}:${material.material_id}`,
++          name: material.title || material.filename,
++          size: material.size_bytes,
++          detail: '已保存资料',
++          material,
++        }))
++    }
++    const values: Row[][] = [[], [], []]
++    const publish = () => {
++      if (!alive) return
++      // The native index's raw copy and the new upload row refer to the same retained file.
++      const pending = values[0]
++      const existing = values[1].filter(
++        row =>
++          !pending.some(
++            item => item.retainedKb === row.kb && item.name === row.name && item.size === row.size
++          )
++      )
++      setRows([...pending, ...existing, ...values[2]])
++    }
++    const jobs = [saved(), knowledge(), reading()].map(async (job, index) => {
++      values[index] = await job
++      publish()
++    })
++    void Promise.allSettled(jobs).then(results => {
++      if (!alive) return
++      results.forEach((result, index) => {
++        if (result.status === 'rejected') failures.push(['长期资料', '已有知识资料', '已有阅读资料'][index])
++      })
++      setError(
++        failures.length
++          ? `${Array.from(new Set(failures)).join('、')}暂时未能读取，可点击刷新重试。`
++          : ''
++      )
++      setLoading(false)
++    })
++    return () => {
++      alive = false
++    }
++  }, [revision])
++
++  async function openMaterial(row: Row) {
++    if (!row.material) {
++      setSelected(row)
++      return
++    }
++    setBusy(row.key)
++    setError('')
++    try {
++      const material = row.material
++      const workspace = material.content_workspace_id || ''
++      const collection =
++        material.collections?.[0]?.workspace_id ||
++        (
++          await createReadingWorkspace(
++            { title: material.title, material_ids: [material.material_id] },
++            workspace
++          )
++        ).workspace_id
++      await selectWorkspace(workspace, readingCollectionRoute(collection, workspace))
++    } catch {
++      setError('这份原件暂时无法打开，请刷新后重试。')
++    } finally {
++      setBusy('')
++    }
++  }
++  async function useInChat(row: Row) {
++    setBusy(row.key)
++    setError('')
++    try {
++      const workspace = row.workspace ?? activeWorkspaceId()
++      let attachment = row.attachment
++      if (!attachment && row.kb) {
++        const response = await apiFetch(
++          apiUrl(scopedUrl('/api/student/materials/attach', workspace)),
++          {
++            method: 'POST',
++            headers: { 'Content-Type': 'application/json' },
++            body: JSON.stringify({ kb_ref: row.kb, filename: row.name }),
++          }
++        )
++        if (!response.ok) throw new Error('原件引用失败，请重试。')
++        attachment = await response.json()
++      }
++      if (!attachment) throw new Error('请先打开原件，再选择需要提问的片段。')
++      await setPendingMaterial(attachment, workspace)
++      await selectWorkspace(workspace, '/chat')
++    } catch (caught) {
++      setError(caught instanceof Error ? caught.message : '引用失败，请重试。')
++    } finally {
++      setBusy('')
++    }
++  }
++  const filtered = rows.filter(
++    row => !query || `${row.name} ${row.detail}`.toLowerCase().includes(query.toLowerCase())
++  )
++  return (
++    <main className={styles.page} aria-label="资料库">
++      <header className={styles.header}>
++        <div>
++          <div className={styles.eyebrow}>
++            <Library size={14} /> 本机资料库
++          </div>
++          <h1>教材与长期资料</h1>
++          <p>打开原件就能阅读和提问。全文解析、检索索引在后台准备；临时附件只留在对话中。</p>
++        </div>
++        <button
++          className={styles.button}
++          onClick={() => setRevision(value => value + 1)}
++          disabled={loading}
++        >
++          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
++          刷新资料
++        </button>
++      </header>
++      <div className={styles.tabs}>
++        <button
++          className={styles.tab}
++          aria-pressed={view === 'textbooks'}
++          onClick={() => setView('textbooks')}
++        >
++          已有教材
++        </button>
++        <button
++          className={styles.tab}
++          aria-pressed={view === 'saved'}
++          onClick={() => setView('saved')}
++        >
++          长期资料 <small>{rows.length}</small>
++        </button>
++      </div>
++      {error && (
++        <p role="alert" className={styles.error}>
++          {error}
++        </p>
++      )}
++      {view === 'textbooks' ? (
++        <TextbookLibrary embedded />
++      ) : (
++        <>
++          <div className={styles.search}>
++            <Search size={16} />
++            <input
++              aria-label="搜索长期资料"
++              placeholder="搜索资料名称…"
++              value={query}
++              onChange={event => setQuery(event.target.value)}
++            />
++          </div>
++          {loading && !rows.length ? (
++            <div className={styles.empty} role="status">
++              <Loader2 className="animate-spin" />
++              正在读取原件目录…
++            </div>
++          ) : (
++            <div className={styles.books}>
++              {filtered.map(row => (
++                <article className={styles.book} key={row.key}>
++                  <div className={styles.bookTop}>
++                    <FileText size={24} />
++                    <span className={styles.tag}>
++                      {row.size ? formatFileSize(row.size) : '原件'}
++                    </span>
++                  </div>
++                  <h2>{row.name}</h2>
++                  <p>{row.detail}</p>
++                  <div className={styles.actions}>
++                    <button
++                      className={styles.button}
++                      disabled={!!busy}
++                      onClick={() => void openMaterial(row)}
++                    >
++                      打开原件
++                    </button>
++                    {!row.material && (
++                      <button
++                        className={styles.button}
++                        disabled={!!busy}
++                        onClick={() => void useInChat(row)}
++                      >
++                        <MessageCircle size={13} />
++                        引用到对话
++                      </button>
++                    )}
++                  </div>
++                </article>
++              ))}
++            </div>
++          )}
++          {!loading && !filtered.length && (
++            <p className={styles.notice}>
++              还没有长期资料。在对话框点加号，选择“长期保存到资料库”后上传。
++            </p>
++          )}
++        </>
++      )}
++      <Dialog
++        open={!!selected?.source}
++        title={selected?.name || '原件预览'}
++        description="可直接阅读原件，无需等待全文解析。"
++        closeLabel="关闭原件预览"
++        onClose={() => setSelected(null)}
++        size="xl"
++        className={`${styles.dialog} !max-w-[95vw]`}
++        footer={
++          selected && (
++            <button
++              className={styles.button}
++              disabled={!!busy}
++              onClick={() => void useInChat(selected)}
++            >
++              <MessageCircle size={14} />
++              带到对话中提问
++            </button>
++          )
++        }
++      >
++        {selected?.source && (
++          <div className="h-[65dvh] min-h-0">
++            <KbFilePreview source={selected.source} />
++          </div>
++        )}
++      </Dialog>
++    </main>
++  )
++}
+diff --git a/web/components/student/TextbookLibrary.tsx b/web/components/student/TextbookLibrary.tsx
+index 22f8ad4..ee94c8e 100644
+--- a/web/components/student/TextbookLibrary.tsx
++++ b/web/components/student/TextbookLibrary.tsx
+@@ -4,12 +4,11 @@ import { useEffect, useState, type CSSProperties } from 'react'
+ import { BookOpen, Library, Loader2, Search } from 'lucide-react'
+ import { getTextbooks, openTextbook, STUDENT_SUBJECTS as subjects, type TextbookCatalog } from '@/lib/student-learning-api'
+ import { selectWorkspace } from '@/lib/workspace-scope'
+-import Link from 'next/link'
+ import styles from './StudentLearning.module.css'
+ 
+ const colors: Record<string, string> = { chinese: '#ad7366', math: '#577e6b', english: '#6388a4', physics: '#8d7ba8', chemistry: '#a38b55', biology: '#6f9159', history: '#a07652', geography: '#578d8b', politics: '#ac7184' }
+ 
+-export default function TextbookLibrary() {
++export default function TextbookLibrary({ embedded = false }: { embedded?: boolean }) {
+   const [catalog, setCatalog] = useState<TextbookCatalog | null>(null)
+   const [subject, setSubject] = useState('all')
+   const [stage, setStage] = useState('all')
+@@ -32,12 +31,13 @@ export default function TextbookLibrary() {
+     try { const result = await openTextbook(id); await selectWorkspace('', result.url) } catch (caught) { setError(caught instanceof Error ? caught.message : '这册教材暂时无法打开') } finally { setBusy('') }
+   }
+   const books = catalog?.books.filter(book => (subject === 'all' || book.subject === subject) && (stage === 'all' || (book.stage || (book.grade && book.grade > 6 ? '初中' : '小学')) === stage) && (!query || `${book.title} ${book.publisher} ${book.grade || ''} ${subjects[book.subject]}`.toLowerCase().includes(query.toLowerCase()))) || []
+-  return <main className={styles.page} aria-label="默认教材库"><header className={styles.header}><div><div className={styles.eyebrow}><Library size={14} /> YOUR TEXTBOOK SHELF</div><h1>读到哪里，问到哪里。</h1><p>整册原页随时打开，划选文字或围绕当前页提问。日常解题，也能参考相关的已核对教材要点。</p></div><div className={styles.actions}><span className={styles.tag}>{catalog?.books.length || 0} 册 · 本机资料库</span><Link href="/learning/reading" className={styles.button}><BookOpen size={14} />个人阅读资料 ↗</Link></div></header>
++  const Root = embedded ? 'section' : 'main';
++  return <Root className={embedded ? undefined : styles.page} aria-label="默认教材库"><header className={styles.header}><div><div className={styles.eyebrow}><Library size={14} /> 教材原件</div><h1>{embedded ? '已有教材' : '读到哪里，问到哪里。'}</h1><p>整册原页随时打开，划选文字或围绕当前页提问。日常解题，也能参考相关的已核对教材要点。</p></div><div className={styles.actions}><span className={styles.tag}>{catalog?.books.length || 0} 册 · 本机资料库</span></div></header>
+     <div className={styles.search}><Search size={16} /><input aria-label="搜索教材" value={query} onChange={event => setQuery(event.target.value)} placeholder="搜索科目、册名或年级…" /><select aria-label="按学段筛选" className={styles.select} value={stage} onChange={event => setStage(event.target.value)}>{['all', '小学', '初中', '高中'].map(id => <option key={id} value={id}>{id === 'all' ? '全部学段' : id}</option>)}</select></div>
+     <div className={styles.tabs} aria-label="按学科筛选教材">{Object.entries({ all: '全部', ...subjects }).filter(([id]) => id !== 'general').map(([id, name]) => <button type="button" key={id} className={styles.tab} aria-pressed={id === subject} onClick={() => setSubject(id)}>{name}<small>{id === 'all' ? catalog?.books.length || 0 : catalog?.books.filter(book => book.subject === id).length || 0}</small></button>)}</div>
+     {error && <p role="alert" className={styles.error}>{error} <button type="button" className={styles.button} onClick={() => { setError(''); setAttempt(attempt + 1) }}>重试</button></p>}
+     <p className={styles.notice}>{catalog ? `${catalog.passage_count} 个已核对要点用于默认参考。${catalog.notice}` : '正在读取本机教材目录…'}</p>
+     {!catalog && !error ? <div className={styles.empty} role="status"><Loader2 size={24} className="animate-spin" />正在打开教材库…</div> : <div className={styles.books}>{books.map(book => <article key={book.id} className={styles.book} style={{ '--book-color': colors[book.subject] } as CSSProperties}><div className={styles.bookTop}><div className={styles.bookIcon}><BookOpen size={22} strokeWidth={1.5} /></div><span className={styles.tag}>{subjects[book.subject]}</span></div><h2>{book.title}</h2><p>{book.stage || (book.grade && book.grade > 6 ? '初中' : '小学')}{book.grade ? ` · ${book.grade} 年级` : ''} · {book.volume}<br />{book.page_count} 页原件 · {book.reviewed_count} 个已核对要点</p><button type="button" className={styles.button} disabled={Boolean(busy)} onClick={() => void open(book.id)}>{busy === book.id ? <Loader2 size={14} className="animate-spin" /> : <BookOpen size={14} />}打开 · 边读边问</button></article>)}</div>}
+     {catalog && !books.length && <div className={styles.empty}><BookOpen size={30} />没有符合条件的教材。</div>}
+-  </main>
++  </Root>
+ }
+diff --git a/web/contracts/generated/api.ts b/web/contracts/generated/api.ts
+index 87aff00..fca064c 100644
+--- a/web/contracts/generated/api.ts
++++ b/web/contracts/generated/api.ts
+@@ -10598,6 +10598,108 @@ export interface paths {
+     readonly patch?: never;
+     readonly trace?: never;
+   };
++  readonly "/api/student/attachments/uploads": {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: never;
++      readonly path?: never;
++      readonly cookie?: never;
++    };
++    readonly get?: never;
++    readonly put?: never;
++    /** Begin Upload */
++    readonly post: operations["begin_upload_api_student_attachments_uploads_post"];
++    readonly delete?: never;
++    readonly options?: never;
++    readonly head?: never;
++    readonly patch?: never;
++    readonly trace?: never;
++  };
++  readonly "/api/student/attachments/uploads/{upload_id}": {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: never;
++      readonly path?: never;
++      readonly cookie?: never;
++    };
++    readonly get?: never;
++    readonly put?: never;
++    readonly post?: never;
++    /** Cancel Upload */
++    readonly delete: operations["cancel_upload_api_student_attachments_uploads__upload_id__delete"];
++    readonly options?: never;
++    readonly head?: never;
++    readonly patch?: never;
++    readonly trace?: never;
++  };
++  readonly "/api/student/attachments/uploads/{upload_id}/chunks/{index}": {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: never;
++      readonly path?: never;
++      readonly cookie?: never;
++    };
++    readonly get?: never;
++    /** Upload Chunk */
++    readonly put: operations["upload_chunk_api_student_attachments_uploads__upload_id__chunks__index__put"];
++    readonly post?: never;
++    readonly delete?: never;
++    readonly options?: never;
++    readonly head?: never;
++    readonly patch?: never;
++    readonly trace?: never;
++  };
++  readonly "/api/student/attachments/uploads/{upload_id}/complete": {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: never;
++      readonly path?: never;
++      readonly cookie?: never;
++    };
++    readonly get?: never;
++    readonly put?: never;
++    /** Complete Upload */
++    readonly post: operations["complete_upload_api_student_attachments_uploads__upload_id__complete_post"];
++    readonly delete?: never;
++    readonly options?: never;
++    readonly head?: never;
++    readonly patch?: never;
++    readonly trace?: never;
++  };
++  readonly "/api/student/attachments/uploads/library": {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: never;
++      readonly path?: never;
++      readonly cookie?: never;
++    };
++    /** List Long Term Uploads */
++    readonly get: operations["list_long_term_uploads_api_student_attachments_uploads_library_get"];
++    readonly put?: never;
++    readonly post?: never;
++    readonly delete?: never;
++    readonly options?: never;
++    readonly head?: never;
++    readonly patch?: never;
++    readonly trace?: never;
++  };
++  readonly "/api/student/materials/attach": {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: never;
++      readonly path?: never;
++      readonly cookie?: never;
++    };
++    readonly get?: never;
++    readonly put?: never;
++    /** Attach Library Material */
++    readonly post: operations["attach_library_material_api_student_materials_attach_post"];
++    readonly delete?: never;
++    readonly options?: never;
++    readonly head?: never;
++    readonly patch?: never;
++    readonly trace?: never;
++  };
+   readonly "/api/student/mistakes": {
+     readonly parameters: {
+       readonly query?: never;
+@@ -14526,6 +14628,13 @@ export interface components {
+        */
+       readonly scope: "this" | "following" | "all";
+     };
++    /** ExistingMaterial */
++    readonly ExistingMaterial: {
++      /** Filename */
++      readonly filename: string;
++      /** Kb Ref */
++      readonly kb_ref: string;
++    };
+     /** ExportDocxRequest */
+     readonly ExportDocxRequest: {
+       /**
+@@ -16341,6 +16450,11 @@ export interface components {
+        * @default null
+        */
+       readonly mime_type: string | null;
++      /**
++       * Page Numbers
++       * @default null
++       */
++      readonly page_numbers: readonly number[] | null;
+       /** Type */
+       readonly type: string;
+       /**
+@@ -18825,6 +18939,19 @@ export interface components {
+       readonly name?: string | null;
+       readonly resources?: components["schemas"]["WorkspaceResources"] | null;
+     };
++    /** UploadStart */
++    readonly UploadStart: {
++      /** Filename */
++      readonly filename: string;
++      /**
++       * Retention
++       * @default temporary
++       * @enum {string}
++       */
++      readonly retention: "temporary" | "library";
++      /** Size */
++      readonly size: number;
++    };
+     /** UpsertEntryRequest */
+     readonly UpsertEntryRequest: {
+       /**
+@@ -19609,6 +19736,7 @@ export type SchemaEventInput = components["schemas"]["EventInput"];
+ export type SchemaEventPatch = components["schemas"]["EventPatch"];
+ export type SchemaEventPatchRequest =
+   components["schemas"]["EventPatchRequest"];
++export type SchemaExistingMaterial = components["schemas"]["ExistingMaterial"];
+ export type SchemaExportDocxRequest =
+   components["schemas"]["ExportDocxRequest"];
+ export type SchemaFetchModelsPayload =
+@@ -19989,6 +20117,7 @@ export type SchemaUpdateVideoNoteRequest =
+   components["schemas"]["UpdateVideoNoteRequest"];
+ export type SchemaUpdateWorkspacePayload =
+   components["schemas"]["UpdateWorkspacePayload"];
++export type SchemaUploadStart = components["schemas"]["UploadStart"];
+ export type SchemaUpsertEntryRequest =
+   components["schemas"]["UpsertEntryRequest"];
+ export type SchemaUrlImportRequest = components["schemas"]["UrlImportRequest"];
+@@ -43672,6 +43801,219 @@ export interface operations {
+       };
+     };
+   };
++  readonly begin_upload_api_student_attachments_uploads_post: {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: {
++        readonly Authorization?: string | null;
++      };
++      readonly path?: never;
++      readonly cookie?: {
++        readonly dt_token?: string | null;
++      };
++    };
++    readonly requestBody: {
++      readonly content: {
++        readonly "application/json": components["schemas"]["UploadStart"];
++      };
++    };
++    readonly responses: {
++      /** @description Successful Response */
++      readonly 200: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": unknown;
++        };
++      };
++      /** @description Validation Error */
++      readonly 422: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": components["schemas"]["HTTPValidationError"];
++        };
++      };
++    };
++  };
++  readonly cancel_upload_api_student_attachments_uploads__upload_id__delete: {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: {
++        readonly Authorization?: string | null;
++      };
++      readonly path: {
++        readonly upload_id: string;
++      };
++      readonly cookie?: {
++        readonly dt_token?: string | null;
++      };
++    };
++    readonly requestBody?: never;
++    readonly responses: {
++      /** @description Successful Response */
++      readonly 200: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": unknown;
++        };
++      };
++      /** @description Validation Error */
++      readonly 422: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": components["schemas"]["HTTPValidationError"];
++        };
++      };
++    };
++  };
++  readonly upload_chunk_api_student_attachments_uploads__upload_id__chunks__index__put: {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: {
++        readonly Authorization?: string | null;
++      };
++      readonly path: {
++        readonly index: number;
++        readonly upload_id: string;
++      };
++      readonly cookie?: {
++        readonly dt_token?: string | null;
++      };
++    };
++    readonly requestBody?: never;
++    readonly responses: {
++      /** @description Successful Response */
++      readonly 200: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": unknown;
++        };
++      };
++      /** @description Validation Error */
++      readonly 422: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": components["schemas"]["HTTPValidationError"];
++        };
++      };
++    };
++  };
++  readonly complete_upload_api_student_attachments_uploads__upload_id__complete_post: {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: {
++        readonly Authorization?: string | null;
++      };
++      readonly path: {
++        readonly upload_id: string;
++      };
++      readonly cookie?: {
++        readonly dt_token?: string | null;
++      };
++    };
++    readonly requestBody?: never;
++    readonly responses: {
++      /** @description Successful Response */
++      readonly 200: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": unknown;
++        };
++      };
++      /** @description Validation Error */
++      readonly 422: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": components["schemas"]["HTTPValidationError"];
++        };
++      };
++    };
++  };
++  readonly list_long_term_uploads_api_student_attachments_uploads_library_get: {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: {
++        readonly Authorization?: string | null;
++      };
++      readonly path?: never;
++      readonly cookie?: {
++        readonly dt_token?: string | null;
++      };
++    };
++    readonly requestBody?: never;
++    readonly responses: {
++      /** @description Successful Response */
++      readonly 200: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": unknown;
++        };
++      };
++      /** @description Validation Error */
++      readonly 422: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": components["schemas"]["HTTPValidationError"];
++        };
++      };
++    };
++  };
++  readonly attach_library_material_api_student_materials_attach_post: {
++    readonly parameters: {
++      readonly query?: never;
++      readonly header?: {
++        readonly Authorization?: string | null;
++      };
++      readonly path?: never;
++      readonly cookie?: {
++        readonly dt_token?: string | null;
++      };
++    };
++    readonly requestBody: {
++      readonly content: {
++        readonly "application/json": components["schemas"]["ExistingMaterial"];
++      };
++    };
++    readonly responses: {
++      /** @description Successful Response */
++      readonly 200: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": unknown;
++        };
++      };
++      /** @description Validation Error */
++      readonly 422: {
++        headers: {
++          readonly [name: string]: unknown;
++        };
++        content: {
++          readonly "application/json": components["schemas"]["HTTPValidationError"];
++        };
++      };
++    };
++  };
+   readonly list_mistakes_api_student_mistakes_get: {
+     readonly parameters: {
+       readonly query?: {
+diff --git a/web/contracts/generated/turn-protocol.ts b/web/contracts/generated/turn-protocol.ts
+index fbd2a40..a1a3610 100644
+--- a/web/contracts/generated/turn-protocol.ts
++++ b/web/contracts/generated/turn-protocol.ts
+@@ -22,6 +22,7 @@ export type Base64 = string | null;
+ export type Filename = string | null;
+ export type Id = string | null;
+ export type MimeType = string | null;
++export type PageNumbers = [] | [number] | [number, number] | null;
+ export type Type = string;
+ export type Url = string | null;
+ export type Attachments = OutgoingAttachment[];
+@@ -358,6 +359,7 @@ export interface OutgoingAttachment {
+   filename?: Filename;
+   id?: Id;
+   mime_type?: MimeType;
++  page_numbers?: PageNumbers;
+   type: Type;
+   url?: Url;
+ }
+diff --git a/web/contracts/schema/openapi.json b/web/contracts/schema/openapi.json
+index 93f836b..943ab28 100644
+--- a/web/contracts/schema/openapi.json
++++ b/web/contracts/schema/openapi.json
+@@ -5140,6 +5140,28 @@
+         "title": "EventPatchRequest",
+         "type": "object"
+       },
++      "ExistingMaterial": {
++        "properties": {
++          "filename": {
++            "maxLength": 1000,
++            "minLength": 1,
++            "title": "Filename",
++            "type": "string"
++          },
++          "kb_ref": {
++            "maxLength": 500,
++            "minLength": 1,
++            "title": "Kb Ref",
++            "type": "string"
++          }
++        },
++        "required": [
++          "kb_ref",
++          "filename"
++        ],
++        "title": "ExistingMaterial",
++        "type": "object"
++      },
+       "ExportDocxRequest": {
+         "properties": {
+           "content": {
+@@ -8901,6 +8923,24 @@
+             "default": null,
+             "title": "Mime Type"
+           },
++          "page_numbers": {
++            "anyOf": [
++              {
++                "items": {
++                  "maximum": 100000,
++                  "minimum": 1,
++                  "type": "integer"
++                },
++                "maxItems": 2,
++                "type": "array"
++              },
++              {
++                "type": "null"
++              }
++            ],
++            "default": null,
++            "title": "Page Numbers"
++          },
+           "type": {
+             "title": "Type",
+             "type": "string"
+@@ -14780,6 +14820,37 @@
+         "title": "UpdateWorkspacePayload",
+         "type": "object"
+       },
++      "UploadStart": {
++        "properties": {
++          "filename": {
++            "maxLength": 240,
++            "minLength": 1,
++            "title": "Filename",
++            "type": "string"
++          },
++          "retention": {
++            "default": "temporary",
++            "enum": [
++              "temporary",
++              "library"
++            ],
++            "title": "Retention",
++            "type": "string"
++          },
++          "size": {
++            "exclusiveMinimum": 0.0,
++            "maximum": 1073741824.0,
++            "title": "Size",
++            "type": "integer"
++          }
++        },
++        "required": [
++          "filename",
++          "size"
++        ],
++        "title": "UploadStart",
++        "type": "object"
++      },
+       "UpsertEntryRequest": {
+         "properties": {
+           "assessment_type": {
+@@ -64857,6 +64928,440 @@
+         ]
+       }
+     },
++    "/api/student/attachments/uploads": {
++      "post": {
++        "operationId": "begin_upload_api_student_attachments_uploads_post",
++        "parameters": [
++          {
++            "in": "header",
++            "name": "Authorization",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Authorization"
++            }
++          },
++          {
++            "in": "cookie",
++            "name": "dt_token",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Dt Token"
++            }
++          }
++        ],
++        "requestBody": {
++          "content": {
++            "application/json": {
++              "schema": {
++                "$ref": "#/components/schemas/UploadStart"
++              }
++            }
++          },
++          "required": true
++        },
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {}
++              }
++            },
++            "description": "Successful Response"
++          },
++          "422": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/HTTPValidationError"
++                }
++              }
++            },
++            "description": "Validation Error"
++          }
++        },
++        "summary": "Begin Upload",
++        "tags": [
++          "student-learning"
++        ]
++      }
++    },
++    "/api/student/attachments/uploads/library": {
++      "get": {
++        "operationId": "list_long_term_uploads_api_student_attachments_uploads_library_get",
++        "parameters": [
++          {
++            "in": "header",
++            "name": "Authorization",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Authorization"
++            }
++          },
++          {
++            "in": "cookie",
++            "name": "dt_token",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Dt Token"
++            }
++          }
++        ],
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {}
++              }
++            },
++            "description": "Successful Response"
++          },
++          "422": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/HTTPValidationError"
++                }
++              }
++            },
++            "description": "Validation Error"
++          }
++        },
++        "summary": "List Long Term Uploads",
++        "tags": [
++          "student-learning"
++        ]
++      }
++    },
++    "/api/student/attachments/uploads/{upload_id}": {
++      "delete": {
++        "operationId": "cancel_upload_api_student_attachments_uploads__upload_id__delete",
++        "parameters": [
++          {
++            "in": "path",
++            "name": "upload_id",
++            "required": true,
++            "schema": {
++              "title": "Upload Id",
++              "type": "string"
++            }
++          },
++          {
++            "in": "header",
++            "name": "Authorization",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Authorization"
++            }
++          },
++          {
++            "in": "cookie",
++            "name": "dt_token",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Dt Token"
++            }
++          }
++        ],
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {}
++              }
++            },
++            "description": "Successful Response"
++          },
++          "422": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/HTTPValidationError"
++                }
++              }
++            },
++            "description": "Validation Error"
++          }
++        },
++        "summary": "Cancel Upload",
++        "tags": [
++          "student-learning"
++        ]
++      }
++    },
++    "/api/student/attachments/uploads/{upload_id}/chunks/{index}": {
++      "put": {
++        "operationId": "upload_chunk_api_student_attachments_uploads__upload_id__chunks__index__put",
++        "parameters": [
++          {
++            "in": "path",
++            "name": "upload_id",
++            "required": true,
++            "schema": {
++              "title": "Upload Id",
++              "type": "string"
++            }
++          },
++          {
++            "in": "path",
++            "name": "index",
++            "required": true,
++            "schema": {
++              "title": "Index",
++              "type": "integer"
++            }
++          },
++          {
++            "in": "header",
++            "name": "Authorization",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Authorization"
++            }
++          },
++          {
++            "in": "cookie",
++            "name": "dt_token",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Dt Token"
++            }
++          }
++        ],
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {}
++              }
++            },
++            "description": "Successful Response"
++          },
++          "422": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/HTTPValidationError"
++                }
++              }
++            },
++            "description": "Validation Error"
++          }
++        },
++        "summary": "Upload Chunk",
++        "tags": [
++          "student-learning"
++        ]
++      }
++    },
++    "/api/student/attachments/uploads/{upload_id}/complete": {
++      "post": {
++        "operationId": "complete_upload_api_student_attachments_uploads__upload_id__complete_post",
++        "parameters": [
++          {
++            "in": "path",
++            "name": "upload_id",
++            "required": true,
++            "schema": {
++              "title": "Upload Id",
++              "type": "string"
++            }
++          },
++          {
++            "in": "header",
++            "name": "Authorization",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Authorization"
++            }
++          },
++          {
++            "in": "cookie",
++            "name": "dt_token",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Dt Token"
++            }
++          }
++        ],
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {}
++              }
++            },
++            "description": "Successful Response"
++          },
++          "422": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/HTTPValidationError"
++                }
++              }
++            },
++            "description": "Validation Error"
++          }
++        },
++        "summary": "Complete Upload",
++        "tags": [
++          "student-learning"
++        ]
++      }
++    },
++    "/api/student/materials/attach": {
++      "post": {
++        "operationId": "attach_library_material_api_student_materials_attach_post",
++        "parameters": [
++          {
++            "in": "header",
++            "name": "Authorization",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Authorization"
++            }
++          },
++          {
++            "in": "cookie",
++            "name": "dt_token",
++            "required": false,
++            "schema": {
++              "anyOf": [
++                {
++                  "type": "string"
++                },
++                {
++                  "type": "null"
++                }
++              ],
++              "title": "Dt Token"
++            }
++          }
++        ],
++        "requestBody": {
++          "content": {
++            "application/json": {
++              "schema": {
++                "$ref": "#/components/schemas/ExistingMaterial"
++              }
++            }
++          },
++          "required": true
++        },
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {}
++              }
++            },
++            "description": "Successful Response"
++          },
++          "422": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/HTTPValidationError"
++                }
++              }
++            },
++            "description": "Validation Error"
++          }
++        },
++        "summary": "Attach Library Material",
++        "tags": [
++          "student-learning"
++        ]
++      }
++    },
+     "/api/student/mistakes": {
+       "get": {
+         "operationId": "list_mistakes_api_student_mistakes_get",
+diff --git a/web/contracts/schema/turn-protocol.json b/web/contracts/schema/turn-protocol.json
+index d7470b9..61c1816 100644
+--- a/web/contracts/schema/turn-protocol.json
++++ b/web/contracts/schema/turn-protocol.json
+@@ -386,6 +386,24 @@
+           "default": null,
+           "title": "Mime Type"
+         },
++        "page_numbers": {
++          "anyOf": [
++            {
++              "items": {
++                "maximum": 100000,
++                "minimum": 1,
++                "type": "integer"
++              },
++              "maxItems": 2,
++              "type": "array"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Page Numbers"
++        },
+         "type": {
+           "title": "Type",
+           "type": "string"
+diff --git a/web/features/chat/ChatStateAdapter.tsx b/web/features/chat/ChatStateAdapter.tsx
+index 5e048cc..db199fb 100644
+--- a/web/features/chat/ChatStateAdapter.tsx
++++ b/web/features/chat/ChatStateAdapter.tsx
+@@ -121,6 +121,8 @@ type SessionRuntimeStatus =
+ 
+ interface OutgoingAttachment {
+   type: string;
++  id?: string;
++  page_numbers?: number[];
+   url?: string;
+   base64?: string;
+   filename?: string;
+@@ -291,6 +293,7 @@ interface SessionStatusSnapshot {
+ 
+ export interface MessageAttachment {
+   type: string;
++  page_numbers?: number[];
+   filename?: string;
+   base64?: string;
+   url?: string;
+diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
+index 37503ee..b6cccff 100644
+--- a/web/features/chat/components/ChatWorkspace.tsx
++++ b/web/features/chat/components/ChatWorkspace.tsx
+@@ -11,7 +11,7 @@ import { COMMAND_CONFIRMATION_FAILED } from "@/features/chat/transport/command-d
+ import { ResourceReuseContext, useResourceReusePolicy } from "@/components/chat/home/ResourceReuse";
+ import { retainedKnowledgeBases } from "@/lib/resource-reuse";
+ import { knowledgeBaseRef } from "@/lib/knowledge-helpers";
+-import { navigateTask, scopedUrl } from "@/lib/workspace-scope";
++import { activeWorkspaceId, navigateTask, scopedUrl } from "@/lib/workspace-scope";
+ import { watchingRoute } from "@/lib/learning-routes";
+ 
+ import { useChatWorkspaces } from "@/hooks/useChatWorkspaces";
+@@ -111,6 +111,7 @@ import { useSetupSync } from "@/hooks/useSetupSync";
+ import { selectedMessagePassage } from "@/lib/selection-text";
+ import { captureMistake, MISTAKE_PRACTICE_SCOPE, prepareMistakePractice } from "@/lib/student-learning-api";
+ import { consumePendingPrompt } from "@/lib/pending-prompt";
++import { consumePendingMaterial } from '@/lib/pending-material';
+ import {
+   deleteSession,
+   fetchSessionAskHint,
+@@ -653,7 +654,17 @@ export default function ChatWorkspace() {
+     };
+     timer = setTimeout(attempt, 0);
+     return () => clearTimeout(timer);
+-  }, [handlePrefillComposer]);
++  }, [handlePrefillComposer, setAttachments]);
++
++  useEffect(() => {
++    let alive = true;
++    const timer = setTimeout(() => { void consumePendingMaterial(activeWorkspaceId()).then(material => {
++      if (!alive || !material) return;
++      setAttachments(previous => [...previous, material]);
++      viewerPanelRef.current?.openFileTab({ id: material.attachmentId, filename: material.filename, type: material.type, mime_type: material.mimeType, url: material.url });
++    }); }, 0);
++    return () => { alive = false; clearTimeout(timer); };
++  }, [setAttachments]);
+ 
+   // A clickable node inside an inlined visualization SVG (data-prompt) — and the
+   // html widget's sendPrompt bridge — dispatch this window event; mirror it into
+@@ -1623,13 +1634,20 @@ export default function ChatWorkspace() {
+   const removeAttachment = useCallback((index: number) => {
+     const file = attachments[index];
+     if (file?.id) viewerPanelRef.current?.removeFileTab(file.id);
++    if (file?.attachmentId) viewerPanelRef.current?.removeFileTab(file.attachmentId);
+     setAttachments(previous => previous.filter((_, i) => i !== index));
+   }, [attachments, setAttachments]);
+ 
+   const handlePreviewPendingAttachment = useCallback((index: number) => {
+     const file = attachments[index];
+     if (!file) return;
+-    viewerPanelRef.current?.openFileTab({ id: file.id, filename: file.filename, mime_type: file.mimeType, type: file.type, base64: file.base64 });
++    viewerPanelRef.current?.openFileTab({ id: file.attachmentId || file.id, filename: file.filename, mime_type: file.mimeType, type: file.type, base64: file.base64, url: file.url || file.previewUrl });
++  }, [attachments]);
++
++  useEffect(() => {
++    for (const file of attachments) if (file.id && file.attachmentId && file.url && !file.preparing) {
++      viewerPanelRef.current?.updateFileTab?.(file.id, { id: file.attachmentId, filename: file.filename, mime_type: file.mimeType, type: file.type, url: file.url });
++    }
+   }, [attachments]);
+ 
+   // Fold all messages once per state.messages change to power the
+@@ -2015,6 +2033,8 @@ export default function ChatWorkspace() {
+       }
+ 
+       let extraAttachments = attachments.map(toOutgoingAttachment);
++      const visibleFile = viewerPanelRef.current?.currentFileReference?.();
++      if (visibleFile?.url && !extraAttachments.some(item => item.id === visibleFile.id)) extraAttachments.push({ ...visibleFile, filename: visibleFile.filename || '附件' });
+       let config: Record<string, unknown> | undefined;
+ 
+       if (isQuizMode) {
+@@ -2966,6 +2986,7 @@ export default function ChatWorkspace() {
+                 onDrop={handleDrop}
+                 onPaste={handlePaste}
+                 onAddFiles={handleAddFiles}
++                onRestoreAttachments={files => setAttachments(previous => [...previous, ...files])}
+                 onSelectCapability={handleSelectCapability}
+                 onCancelStreaming={cancelStreamingTurn}
+                 prefillInputRef={prefillInputRef}
+diff --git a/web/features/chat/controllers/pending-attachments.ts b/web/features/chat/controllers/pending-attachments.ts
+index 77f5983..d58ca3b 100644
+--- a/web/features/chat/controllers/pending-attachments.ts
++++ b/web/features/chat/controllers/pending-attachments.ts
+@@ -1,6 +1,7 @@
+ import type { AttachmentLimits } from "@/lib/attachment-limits";
++import { attachmentPage, attachmentPageVisited } from '@/lib/attachment-viewport';
++import { MAX_UPLOAD_SOURCE_BYTES, uploadDocumentFile } from '@/lib/student-upload';
+ import { apiFetch, apiUrl } from "@/lib/api";
+-import { invalidateKnowledgeCaches } from "@/features/knowledge/api/client";
+ import { scopedUrl } from "@/lib/workspace-scope";
+ import { attachmentMime, classifyFile, isSvgFilename } from "@/lib/doc-attachments";
+ import {
+@@ -17,6 +18,10 @@ export interface PendingAttachment {
+   size?: number;
+   mimeType?: string;
+   preparing?: boolean;
++  url?: string;
++  attachmentId?: string;
++  progress?: number;
++  pageCount?: number;
+   /** A quote's own text (``type: "quote"``), for the composer to show. */
+   text?: string;
+ }
+@@ -24,14 +29,7 @@ export interface PendingAttachment {
+ export type AttachmentRetention = "temporary" | "library";
+ 
+ export async function saveLibraryAttachments(files: File[], workspaceId: string): Promise<void> {
+-  const body = new FormData();
+-  for (const file of files) body.append("files", file);
+-  const response = await apiFetch(apiUrl(scopedUrl("/api/student/attachments/save", workspaceId)), { method: "POST", body });
+-  if (!response.ok) {
+-    const detail = await response.json().catch(() => null);
+-    throw new Error(typeof detail?.detail === "string" ? detail.detail : "资料库保存失败，请重试。");
+-  }
+-  invalidateKnowledgeCaches();
++  for (const file of files) await uploadDocumentFile(file, 'library', workspaceId);
+ }
+ 
+ export async function prepareTemporaryAttachment(file: File): Promise<void> {
+@@ -47,12 +45,22 @@ export function toOutgoingAttachment(attachment: PendingAttachment): {
+   filename: string;
+   base64?: string;
+   mime_type?: string;
++  id?: string;
++  url?: string;
++  page_numbers?: number[];
+ } {
++  const part = attachment.filename.match(/-第(\d+)-\d+页\.pdf$/i);
++  const deferPart = part && Number(part[1]) > 1 && attachment.url && !attachmentPageVisited(attachment.url);
++  const pages = !attachmentPageVisited(attachment.url) && attachment.pageCount && attachment.pageCount <= 2
++    ? Array.from({ length: attachment.pageCount }, (_, index) => index + 1)
++    : [attachmentPage(attachment.url)];
+   return {
+     type: attachment.type,
+     filename: attachment.filename,
+     base64: attachment.base64,
+     mime_type: attachment.mimeType,
++    ...(attachment.url && !attachment.url.startsWith('blob:') ? { id: attachment.attachmentId || attachment.id, url: attachment.url,
++      ...(attachment.filename.toLowerCase().endsWith('.pdf') ? { page_numbers: deferPart ? [] : pages } : {}) } : {}),
+   };
+ }
+ 
+@@ -70,16 +78,23 @@ export function selectAttachmentFiles(
+   files: File[],
+   existingBytes: number,
+   limits: AttachmentLimits,
++  hostedDocuments = false,
+ ): { accepted: File[]; rejected: AttachmentRejection[] } {
+   let runningTotal = existingBytes;
+   const accepted: File[] = [];
+   const rejected: AttachmentRejection[] = [];
+ 
+   for (const file of files) {
+-    if (!classifyFile(file)) {
++    const kind = classifyFile(file);
++    if (!kind) {
+       rejected.push({ name: file.name, reason: "unsupported" });
+       continue;
+     }
++    if (hostedDocuments && kind === 'doc') {
++      if (!file.size || file.size > MAX_UPLOAD_SOURCE_BYTES) rejected.push({ name: file.name, reason: 'too_large' });
++      else accepted.push(file);
++      continue;
++    }
+     if (file.size > limits.maxFileBytes) {
+       rejected.push({ name: file.name, reason: "too_large" });
+       continue;
+diff --git a/web/features/chat/controllers/usePendingChatAttachments.ts b/web/features/chat/controllers/usePendingChatAttachments.ts
+index b710875..15a5383 100644
+--- a/web/features/chat/controllers/usePendingChatAttachments.ts
++++ b/web/features/chat/controllers/usePendingChatAttachments.ts
+@@ -3,9 +3,13 @@
+ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type SetStateAction } from "react";
+ import { useTranslation } from "react-i18next";
+ import { useAttachmentLimits } from "@/lib/attachment-limits";
+-import { fileToPendingAttachment, prepareTemporaryAttachment, saveLibraryAttachments, selectAttachmentFiles, type AttachmentRetention, type PendingAttachment } from "./pending-attachments";
++import { fileToPendingAttachment, saveLibraryAttachments, selectAttachmentFiles, type AttachmentRetention, type PendingAttachment } from "./pending-attachments";
+ import { activeWorkspaceId } from "@/lib/workspace-scope";
+ import { notify } from "@/lib/notifications";
++import { formatFileSize } from "@/lib/knowledge-helpers";
++import { attachmentMime, classifyFile } from '@/lib/doc-attachments';
++import { MAX_UPLOAD_SOURCE_BYTES, uploadDocumentFile } from '@/lib/student-upload';
++import { attachmentPage, attachmentPageVisited, rememberAttachmentPage, splitPdfPage } from '@/lib/attachment-viewport';
+ 
+ const EMPTY: PendingAttachment[] = [];
+ 
+@@ -33,13 +37,19 @@ export function usePendingChatAttachments(key: string, reboundFromKey?: string |
+   const [error, setError] = useState<{ key: string; text: string } | null>(null);
+   const queue = useRef<Promise<unknown>>(Promise.resolve());
+   const alive = useRef(true);
+-  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
++  const controllers = useRef(new Map<string, AbortController>());
++  const objectUrls = useRef<string[]>([]);
++  useEffect(() => { alive.current = true; return () => {
++    alive.current = false;
++    objectUrls.current.forEach(url => URL.revokeObjectURL(url));
++  }; }, []);
+   const resolve = useCallback((scope: string) => aliasRef.current[scope] || scope, []);
+   const write = useCallback((scope: string, update: SetStateAction<PendingAttachment[]>) => {
+     if (!alive.current) return;
+     scope = resolve(scope);
+     const previous = latest.current[scope] || EMPTY;
+     const items = typeof update === "function" ? update(previous) : update;
++    for (const old of previous) if (old.preparing && !items.some(item => item.id === old.id)) controllers.current.get(old.id || '')?.abort();
+     const next = { ...latest.current, [scope]: items };
+     if (!items.length) delete next[scope];
+     latest.current = next;
+@@ -53,50 +63,72 @@ export function usePendingChatAttachments(key: string, reboundFromKey?: string |
+     setError(null);
+     setReading(previous => ({ ...previous, [key]: (previous[key] || 0) + 1 }));
+     // Serialise admission so simultaneous picks cannot each spend the same quota.
+-    const task = queue.current.catch(() => {}).then(async () => {
+-      if (!alive.current) return [];
++    const admission = queue.current.catch(() => {}).then(() => {
++      if (!alive.current) return null;
+       const scope = resolve(key);
+-      const bytes = (latest.current[scope] || EMPTY).reduce((sum, item) => sum + (item.size || 0), 0);
+-      const { accepted, rejected } = selectAttachmentFiles(files, bytes, limits);
++      const bytes = (latest.current[scope] || EMPTY).filter(item => item.type === 'image').reduce((sum, item) => sum + (item.size || 0), 0);
++      const { accepted, rejected } = selectAttachmentFiles(files, bytes, limits, true);
+       if (rejected.length) {
+         const first = rejected[0];
+-        const text = first.reason === "too_large" ? t("File too large: {{name}}", { name: first.name }) : first.reason === "quota" ? t("Too many files, skipped some") : t("Unsupported file type: {{name}}", { name: first.name });
++        const file = files.find(item => item.name === first.name);
++        const text = first.reason === "too_large"
++          ? `${t("File too large: {{name}}", { name: first.name })} (${formatFileSize(file?.size || 0)} > ${formatFileSize(file && classifyFile(file) === 'doc' ? MAX_UPLOAD_SOURCE_BYTES : limits.maxFileBytes)})`
++          : first.reason === "quota"
++            ? `${t("Total")}: ${formatFileSize(bytes + accepted.reduce((sum, item) => sum + item.size, 0) + (file?.size || 0))} > ${formatFileSize(limits.maxTotalBytes)} (${t("Max total per message (MB)")})`
++            : t("Unsupported file type: {{name}}", { name: first.name });
+         if (alive.current) setError({ key: scope, text });
+       }
++      const placeholders = accepted.map(file => {
++        const previewUrl = typeof URL.createObjectURL === 'function' ? URL.createObjectURL(file) : undefined;
++        if (previewUrl) objectUrls.current.push(previewUrl);
++        return { id: `draft:${crypto.randomUUID()}`, type: classifyFile(file) === 'image' ? 'image' : 'file',
++          filename: file.name, mimeType: attachmentMime(file), size: file.size, previewUrl, url: previewUrl, preparing: true, progress: 0 } satisfies PendingAttachment;
++      });
++      write(key, previous => [...previous, ...placeholders]);
++      return { accepted, placeholders };
++    });
++    queue.current = admission.then(() => {});
++    const task = admission.then(async (selection) => {
++      if (!selection) return [];
+       const added: PendingAttachment[] = [];
+-      const retained: File[] = [];
+-      const documents: { file: File; attachment: PendingAttachment }[] = [];
+-      for (const file of accepted) {
++      for (const [index, file] of selection.accepted.entries()) {
++        const draft = selection.placeholders[index];
++        if (!(latest.current[resolve(key)] || EMPTY).some(item => item.id === draft.id)) continue;
++        const controller = new AbortController();
++        controllers.current.set(draft.id, controller);
+         try {
+-          const attachment = await fileToPendingAttachment(file);
+-          if (attachment.type === "file" && !file.name.toLowerCase().endsWith(".svg")) {
+-            attachment.preparing = true;
+-            documents.push({ file, attachment });
++          let completed: PendingAttachment[];
++          if (draft.type === 'file') {
++            const result = await uploadDocumentFile(file, retention, workspaceId, percent => write(key, previous => previous.map(item => item.id === draft.id ? { ...item, progress: percent } : item)), controller.signal);
++            const originalPage = attachmentPage(draft.previewUrl);
++            const preferred = Math.max(0, result.records.findIndex(row => splitPdfPage(row.filename, originalPage) !== null));
++            if (attachmentPageVisited(draft.previewUrl)) rememberAttachmentPage(result.records[preferred].url, splitPdfPage(result.records[preferred].filename, originalPage) || 1);
++            completed = result.records.map((row, part) => ({ id: part === preferred ? draft.id : `draft:${crypto.randomUUID()}`, attachmentId: row.id,
++              type: row.type, filename: row.filename, url: row.url, mimeType: row.mime_type, size: row.size, pageCount: row.page_count,
++              previewUrl: result.records.length === 1 ? draft.previewUrl : row.url, preparing: false, progress: 100 }));
++            if (retention === 'library' && alive.current) notify('原件已保存，可立即阅读和提问；长期资料正在后台加入资料库。', { tone: 'success' });
++          } else {
++            const attachment = await fileToPendingAttachment(file);
++            completed = [{ ...attachment, id: draft.id, preparing: false }];
++            if (retention === 'library') void saveLibraryAttachments([file], workspaceId).catch(error => {
++              if (alive.current) setError({ key: resolve(key), text: `附件可在本对话使用，但未保存到资料库：${error instanceof Error ? error.message : '请重试'}` });
++            });
++          }
++          controllers.current.delete(draft.id);
++          if (!controller.signal.aborted) {
++            write(key, previous => previous.flatMap(item => item.id === draft.id ? completed : [item]));
++            added.push(...completed);
+           }
+-          added.push(attachment);
+-          retained.push(file);
++        } catch (error) {
++          controllers.current.delete(draft.id);
++          write(key, previous => previous.filter(item => item.id !== draft.id));
++          if (alive.current && !controller.signal.aborted) setError({ key: resolve(key), text: `${t('Could not read attachment: {{name}}', { name: file.name })}${error instanceof Error ? ` · ${error.message}` : ''}` });
+         }
+-        catch { if (alive.current) setError({ key: resolve(key), text: t("Could not read attachment: {{name}}", { name: file.name }) }); }
+-      }
+-      write(key, previous => [...previous, ...added]);
+-      if (retention === "library" && retained.length && alive.current) {
+-        void saveLibraryAttachments(retained, workspaceId).then(() => {
+-          if (alive.current) notify("已保存到资料库「我的上传资料」，正在后台处理，可继续提问。", { tone: "success" });
+-        }).catch((error: unknown) => {
+-          if (alive.current) setError({ key: resolve(key), text: `附件可在本对话使用，但未保存到资料库：${error instanceof Error ? error.message : "请重试"}` });
+-        });
+-      }
+-      // Show the preview immediately while the local parser warms chat's cache.
+-      for (const { file, attachment } of documents) {
+-        void prepareTemporaryAttachment(file).catch(() => {
+-          if (alive.current) setError({ key: resolve(key), text: t("Could not prepare attachment; sending will retry: {{name}}", { name: file.name }) });
+-        }).finally(() => write(key, previous => previous.map(item => item.id === attachment.id ? { ...item, preparing: false } : item)));
+       }
+       return alive.current && resolve(key) === currentKey.current ? added : [];
+     }).finally(() => {
+       if (alive.current) setReading(previous => ({ ...previous, [key]: Math.max(0, (previous[key] || 1) - 1) }));
+     });
+-    queue.current = task;
+     return task;
+   }, [key, limits, resolve, t, write]);
+ 
+diff --git a/web/features/knowledge/api/client.ts b/web/features/knowledge/api/client.ts
+index f80b4d4..aee3116 100644
+--- a/web/features/knowledge/api/client.ts
++++ b/web/features/knowledge/api/client.ts
+@@ -686,13 +686,13 @@ function withDockerUpgradeHint(
+ 
+ export async function listKnowledgeBaseFiles(
+   name: string,
+-  options?: { force?: boolean },
++  options?: { force?: boolean; library?: boolean },
+ ): Promise<KnowledgeBaseFile[]> {
+   return withClientCache<KnowledgeBaseFile[]>(
+-    `${KNOWLEDGE_CACHE_PREFIX}files:${name}`,
++    `${KNOWLEDGE_CACHE_PREFIX}files:${options?.library || inKnowledgeLibrary() ? 'library:' : ''}${name}`,
+     async () => {
+       const response = await apiFetch(
+-        apiUrl(`/api/knowledge-bases/${encodeURIComponent(name)}/files`),
++        apiUrl(`/api/knowledge-bases/${encodeURIComponent(name)}/files${options?.library ? '?resource_library=true' : ''}`),
+         { cache: "no-store" },
+       );
+       if (!response.ok) {
+diff --git a/web/features/ui-layout/classic/ClassicLearningDashboard.tsx b/web/features/ui-layout/classic/ClassicLearningDashboard.tsx
+index 15548e6..ec52398 100644
+--- a/web/features/ui-layout/classic/ClassicLearningDashboard.tsx
++++ b/web/features/ui-layout/classic/ClassicLearningDashboard.tsx
+@@ -6,11 +6,10 @@
+ 
+ import { pageGridClass } from '@/components/layout/FeaturePage'
+ import { useEffect, useState } from 'react'
+-import { BookOpen, Route } from 'lucide-react'
++import { Route } from 'lucide-react'
+ import { useTranslation } from 'react-i18next'
+ import { apiFetch, apiUrl } from '@/lib/api'
+ import { scopedUrl } from '@/lib/workspace-scope'
+-import { bookRoute } from '@/lib/learning-routes'
+ import {
+   masterySessionRoute,
+   masteryOpeningMessage,
+@@ -111,7 +110,7 @@ export function ClassicLearningDashboard() {
+         <LearningSkeleton count={4} />
+       ) : (
+         <>
+-          {(todos.reviews.length > 0 || todos.books.length > 0) && (
++          {todos.reviews.length > 0 && (
+             <section aria-labelledby="learning-todos" className="mb-9">
+               <h2 id="learning-todos" className="mb-3 text-[13.5px] font-semibold">
+                 {t('What needs your attention')}
+@@ -139,22 +138,6 @@ export function ClassicLearningDashboard() {
+                     }
+                   />
+                 ))}
+-                {todos.books.map(book => (
+-                  <LearningCard
+-                    key={`${book.content_workspace_id}:${book.id}`}
+-                    href={scopedUrl(bookRoute(book.id, null, ""), book.content_workspace_id || "")}
+-                    title={book.title}
+-                    icon={<BookOpen size={19} />}
+-                    subtitle={
+-                      <>
+-                        {book.status === 'paused' ? t('Paused') : t('Compiling')}
+-                        {book.status === 'paused' && book.metadata.pause_reason
+-                          ? ` · ${book.metadata.pause_reason}`
+-                          : ''}
+-                      </>
+-                    }
+-                  />
+-                ))}
+               </div>
+             </section>
+           )}
+diff --git a/web/lib/attachment-viewport.ts b/web/lib/attachment-viewport.ts
+new file mode 100644
+index 0000000..c8905ea
+--- /dev/null
++++ b/web/lib/attachment-viewport.ts
+@@ -0,0 +1,14 @@
++// Original-file preview state is local to this window; it never becomes a learning-memory record.
++const pages = new Map<string, number>()
++export const attachmentPageVisited = (url?: string) => Boolean(url && pages.has(url))
++export function splitPdfPage(filename: string, originalPage: number): number | null {
++  const range = filename.match(/-第(\d+)-(\d+)页\.pdf$/i)
++  if (!range) return originalPage
++  return originalPage >= Number(range[1]) && originalPage <= Number(range[2]) ? originalPage - Number(range[1]) + 1 : null
++}
++export function rememberAttachmentPage(url: string, page: number) {
++  if (!url || !Number.isInteger(page) || page < 1) return
++  pages.set(url, page)
++  if (pages.size > 100) pages.delete(pages.keys().next().value!)
++}
++export const attachmentPage = (url?: string) => (url ? pages.get(url) || 1 : 1)
+diff --git a/web/lib/doc-attachments.ts b/web/lib/doc-attachments.ts
+index 0368feb..814899d 100644
+--- a/web/lib/doc-attachments.ts
++++ b/web/lib/doc-attachments.ts
+@@ -200,8 +200,8 @@ export const SUPPORTED_DOC_MIMES = new Set<string>([
+  * `lib/attachment-limits.ts` / the /settings#attachments page) and must match
+  * the backend defaults in `deeptutor/services/config/runtime_settings.py`.
+  */
+-export const DEFAULT_MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
+-export const DEFAULT_MAX_TOTAL_ATTACHMENT_BYTES = 25 * 1024 * 1024;
++export const DEFAULT_MAX_ATTACHMENT_BYTES = 200 * 1024 * 1024;
++export const DEFAULT_MAX_TOTAL_ATTACHMENT_BYTES = 200 * 1024 * 1024;
+ 
+ /**
+  * `accept` attribute for the chat composer's file picker. Mirrors the formats
+diff --git a/web/lib/pending-material.ts b/web/lib/pending-material.ts
+new file mode 100644
+index 0000000..6e64d69
+--- /dev/null
++++ b/web/lib/pending-material.ts
+@@ -0,0 +1,48 @@
++import { browserStorage } from '@/shared/storage'
++import type { UploadedAttachment } from './student-upload'
++import type { PendingAttachment } from '@/features/chat/controllers/pending-attachments'
++import { fetchAuthStatus } from './auth'
++
++const prefix = 'student:material-for-chat:'
++async function key(workspace: string) {
++  const status = await fetchAuthStatus()
++  if (!status || (status.enabled && (!status.authenticated || !status.user_id))) throw new Error('账号暂时不可用，请重试。')
++  return `${prefix}${status.user_id || 'local-admin'}:${workspace}`
++}
++
++export async function setPendingMaterial(row: UploadedAttachment, workspace: string) {
++  if (!browserStorage.writeRaw(
++    'session',
++    await key(workspace),
++    JSON.stringify({ ...row, selected_at: Date.now() })
++  )) throw new Error('无法暂存附件引用，请检查浏览器储存空间。')
++}
++
++export async function consumePendingMaterial(workspace: string): Promise<PendingAttachment | null> {
++  if (!browserStorage.listRaw('session', prefix).length) return null
++  try {
++    const name = await key(workspace)
++    const value = browserStorage.readRaw('session', name)
++    browserStorage.removeRaw('session', name)
++    const row = JSON.parse(value || 'null')
++    if (
++      !row ||
++      Date.now() - row.selected_at > 300_000 ||
++      !/^[0-9a-f]{32}$/.test(row.id) ||
++      !String(row.url).startsWith('/files/attachments/')
++    )
++      return null
++    return {
++      id: row.id,
++      attachmentId: row.id,
++      type: row.type,
++      filename: row.filename,
++      url: row.url,
++      mimeType: row.mime_type,
++      size: row.size,
++      pageCount: row.page_count,
++    }
++  } catch {
++    return null
++  }
++}
+diff --git a/web/lib/student-edition.ts b/web/lib/student-edition.ts
+index ce98c5a..604e5b4 100644
+--- a/web/lib/student-edition.ts
++++ b/web/lib/student-edition.ts
+@@ -19,8 +19,9 @@ export function studentSettingsVisible(key: string): boolean {
+ 
+ export function studentRouteVisible(href: string): boolean {
+   const pathname = href.split(/[?#]/, 1)[0];
++  if (["/learning/books", "/learning/reading", "/learning/practice"].includes(pathname)) return false;
+   if (pathname.startsWith("/settings/")) return studentSettingsVisible(pathname.slice(10));
+-  return !["/partners", "/agents", "/admin", "/space/mcp", "/space/cli-apps", "/knowledge-bases"]
++  return !["/partners", "/agents", "/admin", "/space/mcp", "/space/cli-apps", "/knowledge-bases", "/notebooks", "/notebook", "/space/journal", "/space/questions"]
+     .some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`));
+ }
+ 
+@@ -33,5 +34,5 @@ export function studentToolVisible(name: string): boolean {
+ }
+ 
+ export function studentResourceVisible(kind: string): boolean {
+-  return !["my_agents", "agents", "agent", "partner", "partners", "partner_group", "mcp", "cli_apps"].includes(kind);
++  return !["my_agents", "agents", "agent", "partner", "partners", "partner_group", "mcp", "cli_apps", "books", "book", "reading", "notebooks", "notebook", "question_bank", "questionBank", "journal"].includes(kind);
+ }
+diff --git a/web/lib/student-upload.ts b/web/lib/student-upload.ts
+new file mode 100644
+index 0000000..72f2ac3
+--- /dev/null
++++ b/web/lib/student-upload.ts
+@@ -0,0 +1,99 @@
++import { apiFetch, apiUrl } from '@/lib/api'
++import { scopedUrl } from '@/lib/workspace-scope'
++import { invalidateKnowledgeCaches } from '@/features/knowledge/api/client'
++
++export const MAX_UPLOAD_SOURCE_BYTES = 1024 * 1024 * 1024
++export interface UploadedAttachment {
++  id: string
++  type: string
++  filename: string
++  url: string
++  size: number
++  mime_type: string
++  page_count?: number
++}
++export interface UploadResult {
++  upload_id: string
++  records: UploadedAttachment[]
++  library_status: string
++  filename: string
++  created_at: number
++}
++
++async function checked(response: Response) {
++  const result = await response.json().catch(() => null)
++  if (!response.ok)
++    throw new Error(
++      typeof result?.detail === 'string' ? result.detail : `上传失败 (${response.status})，请重试。`
++    )
++  return result
++}
++
++/** Send bounded raw chunks once; never encode a whole PDF into a chat message. */
++export async function uploadDocumentFile(
++  file: File,
++  retention: 'temporary' | 'library',
++  workspaceId: string,
++  progress?: (percent: number) => void,
++  signal?: AbortSignal
++): Promise<UploadResult> {
++  const url = (suffix = '') =>
++    apiUrl(scopedUrl(`/api/student/attachments/uploads${suffix}`, workspaceId))
++  const meta = await checked(
++    await apiFetch(url(), {
++      method: 'POST',
++      signal,
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify({ filename: file.name, size: file.size, retention }),
++    })
++  )
++  try {
++    if (
++      !/^[0-9a-f]{32}$/.test(meta.upload_id) ||
++      !Number.isInteger(meta.chunk_bytes) ||
++      meta.chunk_bytes < 1 ||
++      meta.chunk_bytes > 8 * 1024 * 1024
++    )
++      throw new Error('上传分段设置不正确。')
++    for (let offset = 0, index = 0; offset < file.size; index++) {
++      const chunk = file.slice(offset, Math.min(file.size, offset + meta.chunk_bytes))
++      const hash = Array.from(
++        new Uint8Array(await crypto.subtle.digest('SHA-256', await chunk.arrayBuffer()))
++      )
++        .map(value => value.toString(16).padStart(2, '0'))
++        .join('')
++      let response: Response | null = null
++      for (let attempt = 0; attempt < 2; attempt++) {
++        try {
++          response = await apiFetch(url(`/${meta.upload_id}/chunks/${index}`), {
++            method: 'PUT',
++            signal,
++            body: chunk,
++            headers: { 'X-Upload-SHA256': hash },
++          })
++        } catch (error) {
++          if (attempt || signal?.aborted) throw error
++          continue
++        }
++        if (response.status < 500 || attempt) break
++      }
++      await checked(response!)
++      offset += chunk.size
++      progress?.(Math.round((offset / file.size) * 95))
++    }
++    const result = (await checked(
++      await apiFetch(url(`/${meta.upload_id}/complete`), { method: 'POST', signal })
++    )) as UploadResult
++    if (!Array.isArray(result.records) || !result.records.length)
++      throw new Error('上传完成，但未返回可读取的原件。')
++    progress?.(100)
++    if (retention === 'library') {
++      invalidateKnowledgeCaches()
++      window.dispatchEvent(new Event('student:materials-updated'))
++    }
++    return result
++  } catch (error) {
++    void apiFetch(url(`/${meta.upload_id}`), { method: 'DELETE' }).catch(() => {})
++    throw error
++  }
++}
+diff --git a/web/lib/workspace-drafts.ts b/web/lib/workspace-drafts.ts
+index cf3c52c..566a1ec 100644
+--- a/web/lib/workspace-drafts.ts
++++ b/web/lib/workspace-drafts.ts
+@@ -3,7 +3,7 @@ import { fetchAuthStatus } from './auth'
+ 
+ export type WorkspaceDraft = {
+   text: string
+-  attachments: { filename: string; base64?: string; mimeType?: string }[]
++  attachments: { filename: string; base64?: string; mimeType?: string; id?: string; attachmentId?: string; url?: string; type?: string; size?: number; pageCount?: number }[]
+ }
+ 
+ export type WorkspaceDraftLocation = {
+diff --git a/web/proxy.ts b/web/proxy.ts
+index a81570b..20a8dfe 100644
+--- a/web/proxy.ts
++++ b/web/proxy.ts
+@@ -104,6 +104,6 @@ export const config = {
+   // optimizer's loopback fetch for the source image (e.g. /logo.png) is let
+   // through the auth gate by isAuthExempt.
+   matcher: [
+-    "/((?!_next/static|_next/image|favicon.ico|api/knowledge-bases(?:$|/[^/]+/upload(?:/|$))).*)",
++    "/((?!_next/static|_next/image|favicon.ico|api/knowledge-bases(?:$|/[^/]+/upload(?:/|$))|api/student/attachments/uploads(?:/|$)).*)",
+   ],
+ };
+diff --git a/web/tests/doc-attachments.test.ts b/web/tests/doc-attachments.test.ts
+index 59d1117..c4b2118 100644
+--- a/web/tests/doc-attachments.test.ts
++++ b/web/tests/doc-attachments.test.ts
+@@ -124,6 +124,6 @@ test("docIconFor: fallback for unknown extension", () => {
+ 
+ // Limits sanity check -------------------------------------------------------
+ 
+-test("DEFAULT_MAX_ATTACHMENT_BYTES is 20 MB", () => {
+-  assert.equal(DEFAULT_MAX_ATTACHMENT_BYTES, 20 * 1024 * 1024);
++test("DEFAULT_MAX_ATTACHMENT_BYTES is 200 MB", () => {
++  assert.equal(DEFAULT_MAX_ATTACHMENT_BYTES, 200 * 1024 * 1024);
+ });
+diff --git a/web/tests/lazy-session-viewer-panel.spec.tsx b/web/tests/lazy-session-viewer-panel.spec.tsx
+index 05c29b6..30308c2 100644
+--- a/web/tests/lazy-session-viewer-panel.spec.tsx
++++ b/web/tests/lazy-session-viewer-panel.spec.tsx
+@@ -21,6 +21,8 @@ vi.mock("next/dynamic", async () => {
+   ) {
+     useImperativeHandle(ref, () => ({
+       openFileTab: () => fixture.calls.push("file"),
++      updateFileTab: (id) => fixture.calls.push(`update-file:${id}`),
++      currentFileReference: () => null,
+       openReadingTab: () => fixture.calls.push("reading"),
+       currentReadingReference: () => null,
+       removeFileTab: (id) => fixture.calls.push(`remove-file:${id}`),
+diff --git a/web/tests/pending-attachments.test.ts b/web/tests/pending-attachments.test.ts
+index bccb92a..1844a75 100644
+--- a/web/tests/pending-attachments.test.ts
++++ b/web/tests/pending-attachments.test.ts
+@@ -1,7 +1,9 @@
+ import assert from "node:assert/strict";
+ import test from "node:test";
+ 
+-import { selectAttachmentFiles } from "../features/chat/controllers/pending-attachments";
++import { selectAttachmentFiles, toOutgoingAttachment } from "../features/chat/controllers/pending-attachments";
++import { rememberAttachmentPage, splitPdfPage } from '../lib/attachment-viewport';
++import { DEFAULT_MAX_ATTACHMENT_BYTES, DEFAULT_MAX_TOTAL_ATTACHMENT_BYTES } from "../lib/doc-attachments";
+ 
+ function file(name: string, size: number, type: string): File {
+   return { name, size, type } as File;
+@@ -29,3 +31,24 @@ test("attachment selection applies type, per-file, and total limits once", () =>
+     { name: "more.txt", reason: "quota" },
+   ]);
+ });
++
++test("the exam booklet and answer PDF fit together without raising text-context budgets", () => {
++  const result = selectAttachmentFiles([
++    file("2023版名校题库数学9上.pdf", 134462773, "application/pdf"),
++    file("2023版名校题库数学9上答案.pdf", 36212967, "application/pdf"),
++  ], 0, { maxFileBytes: DEFAULT_MAX_ATTACHMENT_BYTES, maxTotalBytes: DEFAULT_MAX_TOTAL_ATTACHMENT_BYTES });
++  assert.equal(result.accepted.length, 2);
++  assert.deepEqual(result.rejected, []);
++  assert.equal(DEFAULT_MAX_ATTACHMENT_BYTES, 200 * 1024 * 1024);
++});
++
++test('oversized sources use hosted chunks; unopened PDF parts do not trigger full OCR on send', () => {
++  const result = selectAttachmentFiles([file('exam.pdf', 300 * 1024**2, 'application/pdf')], 10, { maxFileBytes: 10, maxTotalBytes: 10 }, true);
++  assert.equal(result.accepted.length, 1);
++  const part = { filename: '数学-第0021-0040页.pdf', type: 'file', url: '/files/attachments/_pending/id/part.pdf' };
++  assert.deepEqual(toOutgoingAttachment(part).page_numbers, []);
++  rememberAttachmentPage(part.url, 5);
++  assert.deepEqual(toOutgoingAttachment(part).page_numbers, [5]);
++  assert.equal(splitPdfPage(part.filename, 25), 5);
++  assert.equal(splitPdfPage(part.filename, 5), null);
++});
+diff --git a/web/tests/pending-chat-attachments.spec.tsx b/web/tests/pending-chat-attachments.spec.tsx
+index f91e90e..47d8c42 100644
+--- a/web/tests/pending-chat-attachments.spec.tsx
++++ b/web/tests/pending-chat-attachments.spec.tsx
+@@ -1,79 +1,177 @@
+-import { act, renderHook, waitFor } from "@testing-library/react";
+-import { describe, expect, it, vi } from "vitest";
+-import { usePendingChatAttachments } from "@/features/chat/controllers/usePendingChatAttachments";
+-import { toOutgoingAttachment, prepareTemporaryAttachment, saveLibraryAttachments } from "@/features/chat/controllers/pending-attachments";
++import { act, renderHook, waitFor } from '@testing-library/react'
++import { beforeEach, describe, expect, it, vi } from 'vitest'
++import { usePendingChatAttachments } from '@/features/chat/controllers/usePendingChatAttachments'
++import {
++  toOutgoingAttachment,
++  saveLibraryAttachments,
++} from '@/features/chat/controllers/pending-attachments'
++import { uploadDocumentFile, type UploadResult } from '@/lib/student-upload'
++import { rememberAttachmentPage } from '@/lib/attachment-viewport'
+ 
+-vi.mock("@/features/chat/controllers/pending-attachments", async (original) => ({ ...await original<typeof import("@/features/chat/controllers/pending-attachments")>(), prepareTemporaryAttachment: vi.fn().mockResolvedValue(undefined), saveLibraryAttachments: vi.fn().mockResolvedValue(undefined) }));
++vi.mock('@/lib/student-upload', () => ({
++  MAX_UPLOAD_SOURCE_BYTES: 1024 ** 3,
++  uploadDocumentFile: vi.fn(),
++}))
++vi.mock('@/features/chat/controllers/pending-attachments', async original => ({
++  ...(await original<typeof import('@/features/chat/controllers/pending-attachments')>()),
++  saveLibraryAttachments: vi.fn().mockResolvedValue(undefined),
++}))
++vi.mock('@/lib/attachment-limits', () => ({
++  useAttachmentLimits: () => ({ maxFileBytes: 10, maxTotalBytes: 10 }),
++}))
++vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (s: string) => s }) }))
+ 
+-vi.mock("@/lib/attachment-limits", () => ({ useAttachmentLimits: () => ({ maxFileBytes: 10, maxTotalBytes: 10 }) }));
+-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (s: string) => s }) }));
++const uploaded = (name: string): UploadResult => ({
++  upload_id: 'a'.repeat(32),
++  filename: name,
++  created_at: 1,
++  library_status: 'temporary',
++  records: [
++    {
++      id: 'b'.repeat(32),
++      filename: name,
++      type: 'file',
++      url: `/files/attachments/_pending/${'b'.repeat(32)}/${name}`,
++      mime_type: 'application/pdf',
++      size: 20,
++    },
++  ],
++})
++beforeEach(() => {
++  vi.mocked(uploadDocumentFile).mockImplementation(async file => uploaded(file.name))
++  vi.stubGlobal(
++    'URL',
++    Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:preview'), revokeObjectURL: vi.fn() })
++  )
++})
+ 
+-describe("one temporary attachment draft for both entrances", () => {
+-  it("only saves explicitly retained accepted files and keeps failed saves usable in chat", async () => {
+-    vi.mocked(saveLibraryAttachments).mockClear();
+-    const { result } = renderHook(() => usePendingChatAttachments("draft:retain"));
+-    const file = new File(["data"], "math.txt");
+-    await act(async () => { await result.current.addFiles([file]); });
+-    expect(saveLibraryAttachments).not.toHaveBeenCalled();
+-    act(() => result.current.setAttachments([]));
+-    vi.mocked(saveLibraryAttachments).mockRejectedValueOnce(new Error("disk full"));
+-    await act(async () => { await result.current.addFiles([file], "library"); });
+-    expect(saveLibraryAttachments).toHaveBeenCalledWith([file], expect.any(String));
+-    expect(result.current.attachments).toHaveLength(1);
+-    expect(result.current.error).toContain("未保存到资料库");
+-    expect(result.current.error).toContain("disk full");
+-  });
+-  it("starts parsing before send, keeps the preview available, and does not resurrect a removed attachment", async () => {
+-    let finish!: () => void;
+-    vi.mocked(prepareTemporaryAttachment).mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+-    const { result } = renderHook(() => usePendingChatAttachments("draft:early"));
+-    const pdf = new File(["pdf"], "math.pdf");
+-    await act(async () => { await result.current.addFiles([pdf]); });
+-    expect(prepareTemporaryAttachment).toHaveBeenCalledWith(pdf);
+-    expect(result.current.attachments[0].filename).toBe("math.pdf");
+-    expect(result.current.preparing).toBe(true);
+-    act(() => result.current.setAttachments([]));
+-    expect(result.current.preparing).toBe(false);
+-    await act(async () => finish());
+-    expect(result.current.attachments).toEqual([]);
+-  });
+-  it("serialises simultaneous picks against the same total quota and sends the native payload", async () => {
+-    const { result } = renderHook(() => usePendingChatAttachments("draft:a"));
+-    let added: Awaited<ReturnType<typeof result.current.addFiles>> = [];
+-    await act(async () => { const [first, second] = await Promise.all([result.current.addFiles([new File(["abcdef"], "right.txt")]), result.current.addFiles([new File(["123456"], "composer.txt")])]); added = [...first, ...second]; });
+-    expect(added.map(a => a.filename)).toEqual(["right.txt"]);
+-    expect(result.current.attachments).toHaveLength(1);
+-    expect(result.current.error).toBe("Too many files, skipped some");
+-    expect(toOutgoingAttachment(added[0])).toEqual({ type: "file", filename: "right.txt", base64: "YWJjZGVm", mime_type: "application/octet-stream" });
+-    expect(added[0].id).toMatch(/^draft:/);
+-    expect(result.current.preparing).toBe(false);
+-  });
++describe('shared, original-first attachment draft', () => {
++  it('passes explicit retention and workspace to the same raw upload path, without waiting for OCR', async () => {
++    const { result } = renderHook(() => usePendingChatAttachments('draft:retain'))
++    const file = new File(['data'], 'math.pdf')
++    await act(async () => {
++      await result.current.addFiles([file])
++    })
++    expect(uploadDocumentFile).toHaveBeenLastCalledWith(
++      file,
++      'temporary',
++      expect.any(String),
++      expect.any(Function),
++      expect.any(AbortSignal)
++    )
++    act(() => result.current.setAttachments([]))
++    await act(async () => {
++      await result.current.addFiles([file], 'library')
++    })
++    expect(uploadDocumentFile).toHaveBeenLastCalledWith(
++      file,
++      'library',
++      expect.any(String),
++      expect.any(Function),
++      expect.any(AbortSignal)
++    )
++    expect(saveLibraryAttachments).not.toHaveBeenCalled()
++    expect(result.current.preparing).toBe(false)
++    expect(result.current.attachments[0].url).toContain('/_pending/')
++  })
++  it('publishes a local preview before transfer completes and never resurrects a removed draft', async () => {
++    let complete!: (value: UploadResult) => void
++    vi.mocked(uploadDocumentFile).mockImplementationOnce(
++      () =>
++        new Promise(resolve => {
++          complete = resolve
++        })
++    )
++    const { result } = renderHook(() => usePendingChatAttachments('draft:early'))
++    let pending!: Promise<unknown>
++    act(() => {
++      pending = result.current.addFiles([new File(['pdf'], 'math.pdf')])
++    })
++    await waitFor(() => expect(result.current.attachments[0]?.previewUrl).toBe('blob:preview'))
++    expect(result.current.attachments[0].preparing).toBe(true)
++    const signal = vi.mocked(uploadDocumentFile).mock.calls[0][4]
++    act(() => result.current.setAttachments([]))
++    expect(signal?.aborted).toBe(true)
++    await act(async () => {
++      complete(uploaded('math.pdf'))
++      await pending
++    })
++    expect(result.current.attachments).toEqual([])
++    expect(result.current.preparing).toBe(false)
++  })
++  it('accepts large documents through bounded transport and sends only the selected original page reference', async () => {
++    const { result } = renderHook(() => usePendingChatAttachments('draft:pdf'))
++    await act(async () => {
++      await result.current.addFiles([new File(['x'.repeat(20)], 'math.pdf')])
++    })
++    const file = result.current.attachments[0]
++    rememberAttachmentPage(file.url!, 7)
++    expect(toOutgoingAttachment(file)).toMatchObject({
++      id: 'b'.repeat(32),
++      page_numbers: [7],
++      url: expect.stringContaining('/_pending/'),
++    })
++    expect(toOutgoingAttachment(file).base64).toBeUndefined()
++  })
++  it('serializes admission for concurrent image picks against one inline quota', async () => {
++    const { result } = renderHook(() => usePendingChatAttachments('draft:quota'))
++    await act(async () => {
++      await Promise.all([
++        result.current.addFiles([new File(['123456'], 'right.png')]),
++        result.current.addFiles([new File(['abcdef'], 'composer.png')]),
++      ])
++    })
++    expect(result.current.attachments.map(file => file.filename)).toEqual(['right.png'])
++    expect(result.current.error).toContain('Total')
++    expect(uploadDocumentFile).not.toHaveBeenCalled()
++    expect(toOutgoingAttachment(result.current.attachments[0]).base64).toBe('MTIzNDU2')
++  })
++  it('keeps an upload in its originating conversation through navigation and draft rebinding', async () => {
++    let complete!: (value: UploadResult) => void
++    vi.mocked(uploadDocumentFile).mockImplementationOnce(
++      () =>
++        new Promise(resolve => {
++          complete = resolve
++        })
++    )
++    const { result, rerender } = renderHook(
++      ({ scope, rebound }: { scope: string; rebound?: string }) =>
++        usePendingChatAttachments(scope, rebound),
++      { initialProps: { scope: 'draft:a' } as { scope: string; rebound?: string } }
++    )
++    let pending!: Promise<unknown>
++    act(() => {
++      pending = result.current.addFiles([new File(['pdf'], 'a.pdf')])
++    })
++    await waitFor(() => expect(uploadDocumentFile).toHaveBeenCalled())
++    rerender({ scope: 'draft:b' })
++    await act(async () => {
++      complete(uploaded('a.pdf'))
++      expect(await pending).toEqual([])
++    })
++    expect(result.current.attachments).toEqual([])
++    rerender({ scope: 'draft:a' })
++    expect(result.current.attachments[0].filename).toBe('a.pdf')
++    rerender({ scope: 'session:a', rebound: 'draft:a' })
++    expect(result.current.attachments[0].filename).toBe('a.pdf')
++  })
++  it('reports transfer errors without leaving a spinner or resurrecting incomplete files', async () => {
++    vi.mocked(uploadDocumentFile).mockRejectedValueOnce(new Error('校验失败'))
++    const { result } = renderHook(() => usePendingChatAttachments('draft:error'))
++    await act(async () => {
++      await result.current.addFiles([new File(['pdf'], 'a.pdf')])
++    })
++    expect(result.current.attachments).toEqual([])
++    expect(result.current.preparing).toBe(false)
++    expect(result.current.error).toContain('校验失败')
++  })
++})
+ 
+-  it("keeps picks in their original conversation while a read is pending, then rebinds only that draft", async () => {
+-    const { result, rerender } = renderHook(({ scope, rebound }: { scope: string; rebound?: string }) => usePendingChatAttachments(scope, rebound), { initialProps: { scope: "draft:a" } as { scope: string; rebound?: string } });
+-    let pending!: Promise<unknown>;
+-    act(() => { pending = result.current.addFiles([new File(["notes"], "a.txt")]); });
+-    expect(result.current.preparing).toBe(true);
+-    rerender({ scope: "draft:b" });
+-    await act(async () => { expect(await pending).toEqual([]); });
+-    expect(result.current.attachments).toEqual([]);
+-    rerender({ scope: "draft:a" });
+-    expect(result.current.attachments[0].filename).toBe("a.txt");
+-    rerender({ scope: "session:a", rebound: "draft:a" });
+-    expect(result.current.attachments[0].filename).toBe("a.txt");
+-    act(() => result.current.setAttachments([]));
+-    expect(result.current.attachments).toEqual([]);
+-  });
+-
+-  it("recognises empty-MIME images and recovers from a per-file read failure", async () => {
+-    vi.mocked(prepareTemporaryAttachment).mockClear();
+-    const reader = vi.spyOn(FileReader.prototype, "readAsDataURL");
+-    reader.mockImplementationOnce(function(this: FileReader) { queueMicrotask(() => this.onerror?.(new ProgressEvent("error") as ProgressEvent<FileReader>)); });
+-    const { result } = renderHook(() => usePendingChatAttachments("draft:a"));
+-    await act(async () => { await result.current.addFiles([new File(["bad"], "bad.txt"), new File(["png"], "photo.PNG")]); });
+-    expect(result.current.error).toBe("Could not read attachment: {{name}}");
+-    expect(result.current.attachments[0]).toMatchObject({ filename: "photo.PNG", type: "image", mimeType: "image/png" });
+-    expect(prepareTemporaryAttachment).not.toHaveBeenCalled();
+-    await waitFor(() => expect(result.current.preparing).toBe(false));
+-  });
+-});
++it('sends both original pages of an unopened short PDF, and only the chosen page after viewing', async () => {
++  vi.mocked(uploadDocumentFile).mockResolvedValueOnce({ ...uploaded('two.pdf'), records: [{ ...uploaded('two.pdf').records[0], url: '/files/attachments/_pending/two/two.pdf', page_count: 2 }] })
++  const { result } = renderHook(() => usePendingChatAttachments('draft:two-page'))
++  await act(async () => { await result.current.addFiles([new File(['pdf'], 'two.pdf')]) })
++  expect(toOutgoingAttachment(result.current.attachments[0]).page_numbers).toEqual([1, 2])
++  rememberAttachmentPage(result.current.attachments[0].url!, 2)
++  expect(toOutgoingAttachment(result.current.attachments[0]).page_numbers).toEqual([2])
++})
+diff --git a/web/tests/pending-material.spec.ts b/web/tests/pending-material.spec.ts
+new file mode 100644
+index 0000000..5fcfba0
+--- /dev/null
++++ b/web/tests/pending-material.spec.ts
+@@ -0,0 +1,18 @@
++import { beforeEach, expect, it, vi } from 'vitest';
++import { fetchAuthStatus } from '@/lib/auth';
++import { consumePendingMaterial, setPendingMaterial } from '@/lib/pending-material';
++import type { AuthStatus } from '@/lib/auth';
++
++vi.mock('@/lib/auth', () => ({ fetchAuthStatus: vi.fn() }));
++const identity = (user_id: string) => ({ user_id, enabled: true, authenticated: true }) as AuthStatus;
++const row = { id: 'a'.repeat(32), type: 'file', filename: '公式.pdf', url: '/files/attachments/_pending/a/公式.pdf', size: 10, mime_type: 'application/pdf' };
++beforeEach(() => { sessionStorage.clear(); vi.mocked(fetchAuthStatus).mockResolvedValue(identity('student-a')); });
++it('hands an original to chat once, scoped by account and workspace', async () => {
++  await setPendingMaterial(row, 'math');
++  expect(await consumePendingMaterial('english')).toBeNull();
++  vi.mocked(fetchAuthStatus).mockResolvedValue(identity('student-b'));
++  expect(await consumePendingMaterial('math')).toBeNull();
++  vi.mocked(fetchAuthStatus).mockResolvedValue(identity('student-a'));
++  expect(await consumePendingMaterial('math')).toMatchObject({ attachmentId: row.id, url: row.url });
++  expect(await consumePendingMaterial('math')).toBeNull();
++});
+diff --git a/web/tests/student-edition.spec.tsx b/web/tests/student-edition.spec.tsx
+index 9be0676..30ae488 100644
+--- a/web/tests/student-edition.spec.tsx
++++ b/web/tests/student-edition.spec.tsx
+@@ -30,14 +30,14 @@ vi.mock('@/lib/api', () => ({ apiFetch: (...args: unknown[]) => fixture.fetch(..
+ beforeEach(() => { fixture.fetch.mockReset() })
+ 
+ it('hides management from shared navigation even for the local administrator, preserving learning and maintenance paths', () => {
+-  const hidden = ['/partners', '/partners/groups/new', '/agents', '/space/mcp', '/space/cli-apps', '/knowledge-bases', '/admin/users']
++  const hidden = ['/partners', '/partners/groups/new', '/agents', '/space/mcp', '/space/cli-apps', '/knowledge-bases', '/admin/users', '/learning/reading', '/learning/books', '/learning/practice', '/space/questions', '/space/journal', '/notebooks']
+   const displayed = [...PRIMARY_NAV_HREFS, ...visibleGroups([...DASHBOARD_GROUPS, ...PERSONALIZATION_GROUPS], () => true).flatMap(group => group.items.map(item => item.href))]
+   for (const href of hidden) {
+     expect(studentRouteVisible(href)).toBe(false)
+     expect(navVisibleUnderPolicy(href, null)).toBe(false)
+     expect(displayed).not.toContain(href)
+   }
+-  for (const href of ['/chat', '/learning', '/learning/reading', '/learning/watching', '/space/questions', '/settings/connections', '/settings/voice', '/settings/data-migration']) {
++  for (const href of ['/chat', '/learning', '/learning/reading/existing-record', '/learning/watching', '/space', '/settings/connections', '/settings/voice', '/settings/data-migration']) {
+     expect(studentRouteVisible(href)).toBe(true)
+   }
+   const keys = visibleSettingsPages(access).map(page => page.key)
+diff --git a/web/tests/student-hidden-resources.spec.tsx b/web/tests/student-hidden-resources.spec.tsx
+new file mode 100644
+index 0000000..1f42e59
+--- /dev/null
++++ b/web/tests/student-hidden-resources.spec.tsx
+@@ -0,0 +1,57 @@
++import { render, screen } from '@testing-library/react'
++import { expect, it, vi } from 'vitest'
++import ChatSpaceMenu from '@/components/chat/space/ChatSpaceMenu'
++import { studentRouteVisible, studentResourceVisible } from '@/lib/student-edition'
++import { VISIBLE_LEARNING_SURFACES, learningSurface } from '@/components/learning/surfaces'
++
++vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (value: string) => value }) }))
++const counts = {
++  attachments: 0,
++  knowledge: 0,
++  chatHistory: 0,
++  myAgents: 0,
++  books: 0,
++  reading: 0,
++  notebooks: 0,
++  questionBank: 0,
++  persona: 0,
++  memory: 0,
++}
++for (const variant of ['toolbar', 'mention', 'resources'] as const)
++  it(`hides unused resource entrances in the ${variant} menu`, () => {
++    render(
++      <ChatSpaceMenu
++        variant={variant}
++        selectedCounts={counts}
++        readingAvailable
++        onSelectItem={vi.fn()}
++      />
++    )
++    for (const label of ['Books', 'Reading', 'Notebooks', 'Question Bank'])
++      expect(screen.queryByText(label)).toBeNull()
++    expect(screen.getAllByRole(variant === 'mention' ? 'option' : 'button').length).toBeGreaterThan(
++      0
++    )
++  })
++it('keeps stored reading history and native note actions while hiding all five feature launchers', () => {
++  for (const path of [
++    '/notebooks',
++    '/space/journal',
++    '/space/questions',
++    '/learning/books',
++    '/learning/reading',
++    '/learning/practice',
++  ])
++    expect(studentRouteVisible(path)).toBe(false)
++  for (const kind of ['books', 'reading', 'notebooks', 'question_bank', 'journal'])
++    expect(studentResourceVisible(kind)).toBe(false)
++  expect(studentRouteVisible('/space')).toBe(true)
++  expect(studentRouteVisible('/co-writer')).toBe(true)
++  expect(studentRouteVisible('/learning/reading/existing-study')).toBe(true)
++  expect(learningSurface('reading')).toBeDefined()
++  expect(
++    VISIBLE_LEARNING_SURFACES.some(surface =>
++      ['books', 'reading', 'practice'].includes(surface.kind)
++    )
++  ).toBe(false)
++})
+diff --git a/web/tests/student-materials.spec.tsx b/web/tests/student-materials.spec.tsx
+new file mode 100644
+index 0000000..f9b18d9
+--- /dev/null
++++ b/web/tests/student-materials.spec.tsx
+@@ -0,0 +1,70 @@
++import { fireEvent, render, screen } from '@testing-library/react'
++import { expect, it, vi } from 'vitest'
++import StudentMaterials from '@/components/student/StudentMaterials'
++import { apiFetch } from '@/lib/api'
++import { listKnowledgeBases, listKnowledgeBaseFiles } from '@/features/knowledge/api/client'
++
++vi.mock('@/components/student/TextbookLibrary', () => ({ default: () => <div>默认教材原件</div> }))
++vi.mock('@/components/knowledge/KbFilePreview', () => ({
++  default: ({ source }: { source: { filename: string } }) => (
++    <div>原件已打开：{source.filename}</div>
++  ),
++}))
++vi.mock('@/lib/api', () => ({ apiUrl: (url: string) => url, apiFetch: vi.fn() }))
++vi.mock('@/features/knowledge/api/client', () => ({
++  listKnowledgeBases: vi.fn(),
++  listKnowledgeBaseFiles: vi.fn(),
++  knowledgeBaseFilePath: (kb: string, file: string) => `/api/knowledge-bases/${kb}/files/${file}`,
++}))
++vi.mock('@/lib/learning-library', () => ({ learningLibrary: async () => ({ items: [] }) }))
++
++it('shows default textbooks and lets a retained original open while indexing is pending', async () => {
++  vi.mocked(apiFetch).mockResolvedValue(
++    new Response(
++      JSON.stringify({
++        uploads: [
++          {
++            upload_id: 'a'.repeat(32),
++            filename: '公式.pdf',
++            created_at: 1,
++            library_status: 'saving',
++            records: [
++              {
++                id: 'b'.repeat(32),
++                filename: '公式.pdf',
++                type: 'file',
++                url: '/files/attachments/_pending/b/公式.pdf',
++                size: 100,
++                mime_type: 'application/pdf',
++              },
++            ],
++          },
++        ],
++      })
++    )
++  )
++  vi.mocked(listKnowledgeBases).mockResolvedValue([
++    { name: '我的旧资料', id: 'account:kb:我的旧资料' },
++  ])
++  vi.mocked(listKnowledgeBaseFiles).mockResolvedValue([
++    { name: '旧讲义.pdf', type: 'file', size: 20 },
++  ])
++  render(<StudentMaterials />)
++  expect(screen.getByText('默认教材原件')).toBeInTheDocument()
++  fireEvent.click(screen.getByRole('button', { name: /长期资料/ }))
++  expect(await screen.findByText('公式.pdf')).toBeInTheDocument()
++  expect(screen.getByText('原件可用 · 检索准备中')).toBeInTheDocument()
++  expect(await screen.findByText('旧讲义.pdf')).toBeInTheDocument()
++  fireEvent.click(screen.getAllByRole('button', { name: '打开原件' })[0])
++  expect(await screen.findByText('原件已打开：公式.pdf')).toBeInTheDocument()
++  expect(screen.getByRole('button', { name: '带到对话中提问' })).toBeEnabled()
++})
++
++it('shows uploaded originals without waiting for a slow knowledge catalog', async () => {
++  vi.mocked(apiFetch).mockResolvedValue(new Response(JSON.stringify({ uploads: [{ upload_id: 'c'.repeat(32), filename: '新资料.pdf', created_at: 1, library_status: 'saving', records: [{ id: 'd'.repeat(32), filename: '新资料.pdf', type: 'file', url: '/files/attachments/_pending/d/新资料.pdf', size: 100, mime_type: 'application/pdf' }] }] })))
++  vi.mocked(listKnowledgeBases).mockReturnValue(new Promise(() => {}))
++  render(<StudentMaterials />)
++  fireEvent.click(screen.getByRole('button', { name: /长期资料/ }))
++  expect(await screen.findByText('新资料.pdf')).toBeInTheDocument()
++  expect(screen.getByRole('button', { name: '打开原件' })).toBeEnabled()
++})
+diff --git a/web/tests/student-upload.spec.ts b/web/tests/student-upload.spec.ts
+new file mode 100644
+index 0000000..2554fa2
+--- /dev/null
++++ b/web/tests/student-upload.spec.ts
+@@ -0,0 +1,60 @@
++import { Blob } from 'node:buffer'
++import { webcrypto } from 'node:crypto'
++import { beforeEach, expect, it, vi } from 'vitest'
++import { apiFetch } from '@/lib/api'
++import { uploadDocumentFile } from '@/lib/student-upload'
++
++vi.mock('@/lib/api', () => ({ apiUrl: (url: string) => url, apiFetch: vi.fn() }))
++vi.mock('@/features/knowledge/api/client', () => ({ invalidateKnowledgeCaches: vi.fn() }))
++const id = 'a'.repeat(32)
++beforeEach(() => {
++  vi.stubGlobal('crypto', webcrypto)
++})
++const file = () =>
++  Object.assign(new Blob(['123456789']), { name: 'formula.pdf' }) as unknown as File
++
++it('sends hashed bounded blobs, retries one transient chunk failure and never sends base64', async () => {
++  const chunks: Blob[] = []
++  let failed = false
++  vi.mocked(apiFetch).mockImplementation(async (url, init) => {
++    if (String(url).includes('/chunks/')) {
++      expect(init?.headers).toHaveProperty(
++        'X-Upload-SHA256',
++        expect.stringMatching(/^[0-9a-f]{64}$/)
++      )
++      if (!failed) {
++        failed = true
++        return new Response('{}', { status: 503 })
++      }
++      chunks.push(init!.body as Blob)
++      return new Response('{}')
++    }
++    if (String(url).includes('/complete'))
++      return new Response(
++        JSON.stringify({
++          upload_id: id,
++          records: [{ id, url: '/files/attachments/_pending/file', filename: 'formula.pdf' }],
++        })
++      )
++    return new Response(JSON.stringify({ upload_id: id, chunk_bytes: 4 }))
++  })
++  const progress = vi.fn()
++  const result = await uploadDocumentFile(file(), 'temporary', 'math', progress)
++  expect(result.records).toHaveLength(1)
++  expect(chunks.map(chunk => chunk.size)).toEqual([4, 4, 1])
++  expect(await new Blob(chunks).text()).toBe('123456789')
++  expect(progress).toHaveBeenLastCalledWith(100)
++})
++
++it('rejects failed transfers and discards unfinished chunks', async () => {
++  vi.mocked(apiFetch).mockImplementation(async (url, init) => {
++    if (init?.method === 'DELETE') return new Response('{}')
++    if (String(url).includes('/chunks/'))
++      return new Response(JSON.stringify({ detail: '校验失败' }), { status: 400 })
++    return new Response(JSON.stringify({ upload_id: id, chunk_bytes: 4 }))
++  })
++  await expect(uploadDocumentFile(file(), 'library', '')).rejects.toThrow('校验失败')
++  expect(apiFetch).toHaveBeenLastCalledWith(expect.stringContaining(`/${id}?`), {
++    method: 'DELETE',
++  })
++})

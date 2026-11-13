@@ -1,0 +1,28 @@
+{
+  "tag": "student-20261114-attachments",
+  "source_commit": "c079dc740ab8d9c7c2d874c736d216938f2cc5ec",
+  "baseline_source_commit": "d3214451efd0a392aca1000805362626632cc858",
+  "patch_sha256": "c4a64ea2dabc8e6cc6100b68b39f06c55914bb6f0f98b1c93e8ef64c072ddc8f",
+  "archive": "kaixin-core-20261114-attachments.tar.gz",
+  "prior_core": {
+    "archive": "kaixin-core-20261114-projects-v2.tar.gz",
+    "sha256": "918fffe063172304fac7ae119970f1b7dfee207572eb17ed4f14c82573261a54"
+  },
+  "new_backend_files": [
+    "deeptutor/api/routers/student_uploads.py",
+    "deeptutor/services/student_learning/uploads.py"
+  ],
+  "web_tests": [
+    "tests/pending-material.spec.ts",
+    "tests/student-materials.spec.tsx",
+    "tests/student-upload.spec.ts",
+    "tests/student-edition.spec.tsx",
+    "tests/pending-chat-attachments.spec.tsx",
+    "tests/student-hidden-resources.spec.tsx",
+    "tests/lazy-session-viewer-panel.spec.tsx",
+    "tests/pdf-preview-quote.spec.tsx",
+    "tests/viewer-launcher.spec.tsx",
+    "tests/learning-navigation.spec.tsx",
+    "tests/chat-reading-navigation.spec.tsx"
+  ]
+}
