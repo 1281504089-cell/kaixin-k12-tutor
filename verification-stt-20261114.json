@@ -1,0 +1,166 @@
+{
+  "date": "2026-11-14",
+  "source_commit": "525157ebded003193f2927960d983e4819e08513",
+  "parent_source_commit": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
+  "windows": {
+    "run_id": 43466263408,
+    "job_id": 132026097584,
+    "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43466263408",
+    "cases": {
+      "baseline_ascii": {
+        "ok": true,
+        "returncode": 0,
+        "seconds": 3.093999999999994,
+        "result": {
+          "warmup_seconds": 1.7340000000000089,
+          "first": {
+            "seconds": 0.5159999999999911,
+            "text": "请帮我讲解这道数学题，2分之1加3分之1等于多少？"
+          },
+          "second": {
+            "seconds": 0.26499999999998636,
+            "text": "请帮我讲解这道数学题，2分之1加3分之1等于多少？"
+          }
+        }
+      },
+      "baseline_chinese": {
+        "ok": false,
+        "returncode": 1,
+        "seconds": 2.8910000000000196,
+        "failure": "IndexError: invalid unordered_map<K, T> key\r"
+      },
+      "candidate_chinese": {
+        "ok": true,
+        "returncode": 0,
+        "seconds": 3.2029999999999745,
+        "result": {
+          "warmup_seconds": 1.875,
+          "first": {
+            "seconds": 0.4679999999999893,
+            "text": "请帮我讲解这道数学题，2分之1加3分之1等于多少？"
+          },
+          "second": {
+            "seconds": 0.26600000000001955,
+            "text": "请帮我讲解这道数学题，2分之1加3分之1等于多少？"
+          }
+        }
+      }
+    }
+  },
+  "tests": {
+    "local": 37,
+    "result": "passed"
+  },
+  "limits": [
+    "Synthetic spoken fixture, not the user's physical microphone.",
+    "Mac Intel adapter was tested; Apple Silicon microphone was not tested.",
+    "No API calls or user keys used."
+  ],
+  "packaging": {
+    "run_id": 43467374584,
+    "head_sha": "6fcdde7506f752425c6e0601c58a927c3cc4354c",
+    "reports": {
+      "macos-x64": {
+        "target": "macos-x64",
+        "source_commit": "525157ebded003193f2927960d983e4819e08513",
+        "baseline_archive": "kaixin-bridge-20261113-sync2-macos-x64.tar.gz",
+        "baseline_sha256": "a8304460b78e4dd6b93a335b5403a16d6d79bd5a16f4ad7027742138df85e358",
+        "baseline_sha256_verified": true,
+        "archive": "kaixin-bridge-20261114-stt-macos-x64.tar.gz",
+        "sha256": "c3ae430728309d025996b123197bf41869363854f3aab74b810ada58c9384065",
+        "bytes": 1253961172,
+        "member_count": 78502,
+        "replaced_member_count": 5,
+        "replaced_members": {
+          "BUILD_COMMIT": "a4b21bd31f4fb0e046f631483d3f6ca7f76cae12a604cb3f09af9183fcddd0cf",
+          "core/deeptutor/api/main.py": "9ac66c355c4e5c4f61593b436b9bc246bd16c3704a0e1742523fb03b26e5aa96",
+          "core/deeptutor/services/local_ai/__init__.py": "4a8329855a88c06944fca84ab98c5374d88586ef7358199b456bb9e633951f5f",
+          "core/deeptutor/services/local_ai/worker.py": "057a2f9c0f0ff9311d09bd26f1f3031cd9ecf42505d3523865675945176afaed",
+          "core/deeptutor/services/voice/adapters/local.py": "95126dc3d215d9890c3244126e2910f56ca9fbb69c9b9f1d07daeade180af3ce"
+        },
+        "unchanged_members": 78497,
+        "all_member_contents_and_metadata_verified": true,
+        "new_members": 0,
+        "private_signing_key_used": false,
+        "production_manifest_changed": false,
+        "validation_scope": "Reused the previously validated public native-resource baseline; overlaid four Python files and BUILD_COMMIT only. No physical Apple Silicon Mac microphone test."
+      },
+      "core": {
+        "target": "core",
+        "source_commit": "525157ebded003193f2927960d983e4819e08513",
+        "baseline_archive": "kaixin-core-20261113-sync2.tar.gz",
+        "baseline_sha256": "0b1102e17c2c9f08f0840d883ca583bf94c1dafff72c85d08ce5b4daf5b1a129",
+        "baseline_sha256_verified": true,
+        "archive": "kaixin-core-20261114-stt.tar.gz",
+        "sha256": "2354938ac93edb321c723051cf71a2b0f7d57864e658c48a896e676b209fea8c",
+        "bytes": 44834247,
+        "member_count": 3954,
+        "replaced_member_count": 5,
+        "replaced_members": {
+          "BUILD_COMMIT": "a4b21bd31f4fb0e046f631483d3f6ca7f76cae12a604cb3f09af9183fcddd0cf",
+          "core/deeptutor/api/main.py": "9ac66c355c4e5c4f61593b436b9bc246bd16c3704a0e1742523fb03b26e5aa96",
+          "core/deeptutor/services/local_ai/__init__.py": "4a8329855a88c06944fca84ab98c5374d88586ef7358199b456bb9e633951f5f",
+          "core/deeptutor/services/local_ai/worker.py": "057a2f9c0f0ff9311d09bd26f1f3031cd9ecf42505d3523865675945176afaed",
+          "core/deeptutor/services/voice/adapters/local.py": "95126dc3d215d9890c3244126e2910f56ca9fbb69c9b9f1d07daeade180af3ce"
+        },
+        "unchanged_members": 3949,
+        "all_member_contents_and_metadata_verified": true,
+        "new_members": 0,
+        "private_signing_key_used": false,
+        "production_manifest_changed": false,
+        "validation_scope": "Reused the previously validated public native-resource baseline; overlaid four Python files and BUILD_COMMIT only. No physical Apple Silicon Mac microphone test."
+      },
+      "macos-arm64": {
+        "target": "macos-arm64",
+        "source_commit": "525157ebded003193f2927960d983e4819e08513",
+        "baseline_archive": "kaixin-bridge-20261113-sync2-macos-arm64.tar.gz",
+        "baseline_sha256": "e531791f8355607d2ba4eb9b2b2d1ab3500f5aecfbad5a9ac66382ca4947d960",
+        "baseline_sha256_verified": true,
+        "archive": "kaixin-bridge-20261114-stt-macos-arm64.tar.gz",
+        "sha256": "45c7a82584fe92237c88187289c8ad130be20cea57a61c133b038f80dc607b0e",
+        "bytes": 1190579480,
+        "member_count": 72514,
+        "replaced_member_count": 5,
+        "replaced_members": {
+          "BUILD_COMMIT": "a4b21bd31f4fb0e046f631483d3f6ca7f76cae12a604cb3f09af9183fcddd0cf",
+          "core/deeptutor/api/main.py": "9ac66c355c4e5c4f61593b436b9bc246bd16c3704a0e1742523fb03b26e5aa96",
+          "core/deeptutor/services/local_ai/__init__.py": "4a8329855a88c06944fca84ab98c5374d88586ef7358199b456bb9e633951f5f",
+          "core/deeptutor/services/local_ai/worker.py": "057a2f9c0f0ff9311d09bd26f1f3031cd9ecf42505d3523865675945176afaed",
+          "core/deeptutor/services/voice/adapters/local.py": "95126dc3d215d9890c3244126e2910f56ca9fbb69c9b9f1d07daeade180af3ce"
+        },
+        "unchanged_members": 72509,
+        "all_member_contents_and_metadata_verified": true,
+        "new_members": 0,
+        "private_signing_key_used": false,
+        "production_manifest_changed": false,
+        "validation_scope": "Reused the previously validated public native-resource baseline; overlaid four Python files and BUILD_COMMIT only. No physical Apple Silicon Mac microphone test."
+      },
+      "windows-x64": {
+        "target": "windows-x64",
+        "source_commit": "525157ebded003193f2927960d983e4819e08513",
+        "baseline_archive": "kaixin-bridge-20261113-sync2-windows-x64.tar.gz",
+        "baseline_sha256": "e7ea03c8d66eb755aaff380631cad70567e0bcbe841a4658a3dfdada237c3754",
+        "baseline_sha256_verified": true,
+        "archive": "kaixin-bridge-20261114-stt-windows-x64.tar.gz",
+        "sha256": "57f92b19557b2ebb90d100c9eb73ff0f98d70294165b79dad8b174a87736ae66",
+        "bytes": 1165807603,
+        "member_count": 71599,
+        "replaced_member_count": 5,
+        "replaced_members": {
+          "BUILD_COMMIT": "a4b21bd31f4fb0e046f631483d3f6ca7f76cae12a604cb3f09af9183fcddd0cf",
+          "core/deeptutor/api/main.py": "9ac66c355c4e5c4f61593b436b9bc246bd16c3704a0e1742523fb03b26e5aa96",
+          "core/deeptutor/services/local_ai/__init__.py": "4a8329855a88c06944fca84ab98c5374d88586ef7358199b456bb9e633951f5f",
+          "core/deeptutor/services/local_ai/worker.py": "057a2f9c0f0ff9311d09bd26f1f3031cd9ecf42505d3523865675945176afaed",
+          "core/deeptutor/services/voice/adapters/local.py": "95126dc3d215d9890c3244126e2910f56ca9fbb69c9b9f1d07daeade180af3ce"
+        },
+        "unchanged_members": 71594,
+        "all_member_contents_and_metadata_verified": true,
+        "new_members": 0,
+        "private_signing_key_used": false,
+        "production_manifest_changed": false,
+        "validation_scope": "Reused the previously validated public native-resource baseline; overlaid four Python files and BUILD_COMMIT only. No physical Apple Silicon Mac microphone test."
+      }
+    },
+    "full_installers_rebuilt": false
+  }
+}

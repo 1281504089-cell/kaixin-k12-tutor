@@ -128,6 +128,11 @@
       "file": "student-avatar-update-20261113.patch",
       "sha256": "d471e08dbb1172e8625017cc67a0c0a7023dbe732cd23085b5aa40dc89ca1b3c",
       "description": "Surface verified desktop updates at the avatar with a dismissible anchored notice, a persistent version marker and direct update action; keep background checks passive, periodically refresh status, replay state on reload and preserve signed updates and backups"
+    },
+    {
+      "file": "student-stt-preload-20261114.patch",
+      "sha256": "ea869d949c1fe08b8abf12e386e769329eeadd58e2871190d4fbb7325a1225fc",
+      "description": "Fix offline Windows dictation in Chinese installation paths, preload the local speech decoder independently of cloud voice selection, keep it ready until exit, and retain native worker failure diagnostics"
     }
   ]
 }
