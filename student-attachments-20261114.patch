@@ -296,10 +296,17 @@ index d4dbbae..593e69a 100644
              on_progress(attachment_id, "submitting", "Submitting to the configured document parser")
          error = ""
 diff --git a/deeptutor/services/session/pdf_pages.py b/deeptutor/services/session/pdf_pages.py
-index 33d8654..a37186e 100644
+index 33d8654..585656d 100644
 --- a/deeptutor/services/session/pdf_pages.py
 +++ b/deeptutor/services/session/pdf_pages.py
-@@ -21,7 +21,7 @@ _tasks: set[asyncio.Task] = set()
+@@ -15,13 +15,13 @@ from deeptutor.services.file_io import atomic_write_json
+ from deeptutor.services.path_service import get_path_service
+ 
+ SHORT_PDF_PAGE_LIMIT = 2
+-_background_slots = asyncio.Semaphore(1)
++background_parse_slot = asyncio.Semaphore(1)
+ _background: dict[str, asyncio.Future] = {}
+ _tasks: set[asyncio.Task] = set()
  logger = logging.getLogger(__name__)
  
  
@@ -373,6 +380,15 @@ index 33d8654..a37186e 100644
      )
      if (await asyncio.to_thread(_cache_path, source))[0] != digest:
          raise ValueError("PDF changed while preparing its page images")
+@@ -114,7 +124,7 @@ async def parse_in_background(source: Path, temporary=None) -> None:
+         completion = asyncio.get_running_loop().create_future()
+         _background[key] = completion
+         # Leave the other default worker slot available for interactive tools.
+-        async with _background_slots:
++        async with background_parse_slot:
+             from deeptutor.modules.catalog import require_module
+             from deeptutor.services.parsing import get_parse_service
+ 
 diff --git a/deeptutor/services/session/turns/executor.py b/deeptutor/services/session/turns/executor.py
 index a242e4c..563a2c0 100644
 --- a/deeptutor/services/session/turns/executor.py
@@ -464,10 +480,10 @@ index 696b5e9..b283791 100644
          # is percent-encoded so spaces/Unicode/punctuation in filenames flow
 diff --git a/deeptutor/services/student_learning/uploads.py b/deeptutor/services/student_learning/uploads.py
 new file mode 100644
-index 0000000..13a6c95
+index 0000000..272a1b2
 --- /dev/null
 +++ b/deeptutor/services/student_learning/uploads.py
-@@ -0,0 +1,381 @@
+@@ -0,0 +1,382 @@
 +"""Bounded local uploads. Original bytes are usable before parsing/indexing."""
 +from __future__ import annotations
 +
@@ -719,10 +735,11 @@ index 0000000..13a6c95
 +
 +async def process(result: dict) -> None:
 +    """Called only after the upload response; never run OCR inside admission."""
-+    from deeptutor.services.session.pdf_pages import parse_in_background
++    from deeptutor.services.session.pdf_pages import background_parse_slot, parse_in_background
 +    if result["retention"] == "library":
 +        async with library_queue():
-+            await _save_library(result)
++            async with background_parse_slot:
++                await _save_library(result)
 +    else:
 +        for row in result["records"]:
 +            await parse_in_background(file_for(row))
@@ -941,10 +958,10 @@ index ab5534c..faf02ce 100644
  
 diff --git a/tests/api/test_student_uploads.py b/tests/api/test_student_uploads.py
 new file mode 100644
-index 0000000..85730c5
+index 0000000..61571ec
 --- /dev/null
 +++ b/tests/api/test_student_uploads.py
-@@ -0,0 +1,209 @@
+@@ -0,0 +1,227 @@
 +import asyncio
 +import hashlib
 +from pathlib import Path
@@ -958,6 +975,8 @@ index 0000000..85730c5
 +from deeptutor.api.routers import student_uploads as api
 +from deeptutor.services.student_learning import uploads
 +from deeptutor.services.storage import LocalDiskAttachmentStore
++
++REAL_PROCESS = uploads.process
 +
 +
 +@pytest.fixture
@@ -1154,6 +1173,22 @@ index 0000000..85730c5
 +            chunk = locked[offset:offset + meta['chunk_bytes']]
 +            client.put(f"/api/student/attachments/uploads/{meta['upload_id']}/chunks/{index}", content=chunk, headers={'X-Upload-SHA256': hashlib.sha256(chunk).hexdigest()}).raise_for_status()
 +        assert client.post(f"/api/student/attachments/uploads/{meta['upload_id']}/complete").status_code == 400
++
++
++@pytest.mark.asyncio
++async def test_library_and_temporary_parsing_share_one_background_slot(environment, monkeypatch):
++    from deeptutor.services.session import pdf_pages
++    monkeypatch.setattr(pdf_pages, 'background_parse_slot', asyncio.Semaphore(1))
++    saved = []
++    async def save(result):
++        saved.append(result)
++    monkeypatch.setattr(uploads, '_save_library', save)
++    async with pdf_pages.background_parse_slot:
++        task = asyncio.create_task(REAL_PROCESS({'retention': 'library'}))
++        await asyncio.sleep(.05)
++        assert not saved
++    await task
++    assert saved == [{'retention': 'library'}]
 diff --git a/tests/services/config/test_runtime_settings.py b/tests/services/config/test_runtime_settings.py
 index afff880..6d38d17 100644
 --- a/tests/services/config/test_runtime_settings.py
@@ -3253,7 +3288,7 @@ index 5e048cc..db199fb 100644
    base64?: string;
    url?: string;
 diff --git a/web/features/chat/components/ChatWorkspace.tsx b/web/features/chat/components/ChatWorkspace.tsx
-index 37503ee..b6cccff 100644
+index 37503ee..c554017 100644
 --- a/web/features/chat/components/ChatWorkspace.tsx
 +++ b/web/features/chat/components/ChatWorkspace.tsx
 @@ -11,7 +11,7 @@ import { COMMAND_CONFIRMATION_FAILED } from "@/features/chat/transport/command-d
@@ -3284,7 +3319,7 @@ index 37503ee..b6cccff 100644
 +    let alive = true;
 +    const timer = setTimeout(() => { void consumePendingMaterial(activeWorkspaceId()).then(material => {
 +      if (!alive || !material) return;
-+      setAttachments(previous => [...previous, material]);
++      setAttachments(previous => previous.some(item => (item.attachmentId || item.id) === material.attachmentId) ? previous : [...previous, material]);
 +      viewerPanelRef.current?.openFileTab({ id: material.attachmentId, filename: material.filename, type: material.type, mime_type: material.mimeType, url: material.url });
 +    }); }, 0);
 +    return () => { alive = false; clearTimeout(timer); };
