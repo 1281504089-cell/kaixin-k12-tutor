@@ -78,7 +78,11 @@ Function CheckMigration
 !ifdef TEST_MODE
   ReadEnvStr $R9 "KX_MIGRATION_CHECK_REPORT"
   ${If} $R9 != ""
-    StrCpy $CheckReport "$R9"
+    ${If} $CheckRoot == $StageDir
+      StrCpy $CheckReport "$R9.staged.json"
+    ${Else}
+      StrCpy $CheckReport "$R9.payload.json"
+    ${EndIf}
   ${EndIf}
 !endif
   ReadEnvStr $SavedElectronMode "ELECTRON_RUN_AS_NODE"

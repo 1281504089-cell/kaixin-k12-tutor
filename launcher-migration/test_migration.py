@@ -122,6 +122,19 @@ class MigrationTests(unittest.TestCase):
         self.assertFalse((profile / "runtimes/1.7.1-77f2ba387-x64").exists())
         self.assertIn('"passed":true', package.run(args))
 
+    def test_payload_root_alias_has_the_same_canonical_inventory(self):
+        _, stage, _, _, _, _ = self.stage()
+        root = stage / 'Contents'
+        alias = self.root / 'payload-root-alias'
+        alias.symlink_to(root, target_is_directory=True)
+        result = node("""
+          import assert from 'node:assert/strict';
+          const {tree}=await import(process.env.HELPER);
+          assert.deepEqual(await tree(process.env.ALIAS),await tree(process.env.REAL));
+          console.log('canonical alias inventory verified');
+        """, HELPER=(HERE / 'launcher-migration-check.mjs').as_uri(), ALIAS=str(alias), REAL=str(root))
+        self.assertIn('canonical alias inventory verified', result)
+
     def test_missing_native_base_rejected(self):
         _, _, profile, _, signed, args = self.stage()
         shutil.rmtree(profile / "runtimes" / signed["base"]["runtimeId"])

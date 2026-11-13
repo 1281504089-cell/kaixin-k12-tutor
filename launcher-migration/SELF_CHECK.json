@@ -1,22 +1,22 @@
 {
   "formatVersion": 1,
-  "createdAtUTC": "2026-11-13T18:04:47.645530+00:00",
+  "createdAtUTC": "2026-11-13T18:59:00.947762+00:00",
   "frozenShellCommit": "d3214451efd0a392aca1000805362626632cc858",
   "frozenShellFiles": 26,
   "passed": true,
   "checks": [
     {
       "name": "migration_offline",
-      "expectedTests": 13,
+      "expectedTests": 14,
       "exitCode": 0,
-      "seconds": 5.221,
+      "seconds": 15.767,
       "passed": true
     },
     {
       "name": "windows_template_static",
-      "expectedTests": 5,
+      "expectedTests": 6,
       "exitCode": 0,
-      "seconds": 0.101,
+      "seconds": 0.001,
       "passed": true
     },
     {
@@ -37,5 +37,9 @@
   "realLearnerDataUsed": false,
   "paidAPIUsed": false,
   "shellSelfUpgradeSupported": false,
-  "criticalSeedNotice": "Historical payload-42341195532 public raw manifests failed signature check; use the original signed baselines included here, never rewrite signatures."
+  "criticalSeedNotice": "Historical payload-42341195532 public raw manifests failed signature check; use the original signed baselines included here, never rewrite signatures.",
+  "windowsMigrationFixes": [
+    "explicit UTF8 script decoding and compiled Chinese ProductName assertion",
+    "canonical payload root before external-link guard"
+  ]
 }

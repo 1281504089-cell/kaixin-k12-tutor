@@ -55,8 +55,8 @@ def migration_install(root, target, install, resources, home, evidence):
                                 env={**os.environ, 'OPEN_DEEPTUTOR_TEST_HOME': str(home),
                                      'KX_MIGRATION_CHECK_REPORT': str(evidence / 'migration-installer-check.json')}, timeout=600)
         if result.returncode != 0:
-            diagnostic = evidence / 'migration-installer-check.json'
-            print(diagnostic.read_text() if diagnostic.exists() else 'Installer failed before the native checker', flush=True)
+            diagnostics = sorted(evidence.glob('migration-installer-check*.json'))
+            print('\n'.join(file.read_text() for file in diagnostics) if diagnostics else 'Installer failed before the native checker', flush=True)
         assert result.returncode == 0, 'Migration installer failed, exit code ' + str(result.returncode)
         rollback = fixed.with_name(fixed.name + '.launcher-' + package_report['frozenShellCommit'][:12] + '.rollback')
         assert rollback.is_dir()

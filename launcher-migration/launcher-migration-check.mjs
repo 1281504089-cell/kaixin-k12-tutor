@@ -26,6 +26,7 @@ async function noLinks(directory) {
 }
 
 export async function tree(root) {
+  root = await realpath(root);
   const result = {};
   const mac = path.basename(root) === 'Contents';
   async function walk(dir) {
