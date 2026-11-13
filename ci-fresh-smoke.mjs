@@ -109,7 +109,7 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     assert.match(result.text, /分之/);
     speech.push({ milliseconds: Date.now() - started, spoken_audio_decoded: true });
   }
-  const attachmentProof = execFileSync(python, [path.join(process.cwd(), 'ci-attachment-native.py'), frontend, path.join(evidence, 'attachments.json')], {
+  const attachmentProof = execFileSync(python, [path.join(process.cwd(), 'ci-attachment-native.py'), frontend, path.join(evidence, 'attachments.json'), backend], {
     encoding: 'utf8', timeout: 480000, env: { ...process.env, PYTHONPATH: path.join(runtime, 'core'),
       DEEPTUTOR_HOME: path.join(home, 'workspace'), DEEPTUTOR_LOCAL_AI: path.join(native, 'support/local-ai'),
       DEEPTUTOR_FONT_DIR: path.join(native, 'support/fonts'), PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1',

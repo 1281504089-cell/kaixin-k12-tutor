@@ -2,7 +2,7 @@
 import asyncio,concurrent.futures,hashlib,json,os,sys,tempfile,time
 from pathlib import Path
 import httpx,pymupdf
-BASE=sys.argv[1];OUT=Path(sys.argv[2]);client=httpx.Client(base_url=BASE,timeout=45)
+BASE=sys.argv[1];OUT=Path(sys.argv[2]);HEALTH=sys.argv[3];client=httpx.Client(base_url=BASE,timeout=45)
 def upload(file,retention):
  start=time.monotonic();r=client.post('/api/student/attachments/uploads',json={'filename':file.name,'size':file.stat().st_size,'retention':retention});r.raise_for_status();meta=r.json()
  with file.open('rb') as stream:
@@ -39,7 +39,7 @@ with tempfile.TemporaryDirectory(prefix='附件验收-') as temp:
  assert interactive_seconds<20,interactive_seconds
  samples=[];start=time.monotonic()
  while time.monotonic()-start<300:
-  at=time.monotonic();response=client.get('/health/ready');response.raise_for_status();samples.append(time.monotonic()-at)
+  at=time.monotonic();response=client.get(HEALTH+'/health/ready');response.raise_for_status();samples.append(time.monotonic()-at)
   listing=client.get('/api/student/attachments/uploads/library');listing.raise_for_status();rows=listing.json()['uploads']
   assert not any(r['upload_id']==temporary['upload_id'] for r in rows)
   retained=[next(r for r in rows if r['upload_id']==u[0]['upload_id']) for u in uploaded]
