@@ -1,0 +1,632 @@
+diff --git a/deeptutor/agents/loop/pipeline.py b/deeptutor/agents/loop/pipeline.py
+index bcabd53..158ffb2 100644
+--- a/deeptutor/agents/loop/pipeline.py
++++ b/deeptutor/agents/loop/pipeline.py
+@@ -1497,6 +1497,8 @@ class AgenticLoopPipeline:
+             kwargs.setdefault("sort_by", "relevance")
+         elif tool_name == "web_search":
+             kwargs.setdefault("query", context.user_message)
++            kwargs["_search_budget"] = context.runtime.web_search_budget
++            kwargs["_language"] = context.language
+             if task_dir is not None:
+                 kwargs.setdefault("output_dir", str(task_dir / "web_search"))
+         elif tool_name == "save_favorite":
+diff --git a/deeptutor/core/context.py b/deeptutor/core/context.py
+index cc0e77e..43d4997 100644
+--- a/deeptutor/core/context.py
++++ b/deeptutor/core/context.py
+@@ -52,6 +52,7 @@ class TurnRuntimeContext:
+     """Non-serializable execution state owned by the runtime adapter."""
+ 
+     loop_extensions: dict[str, Any] = field(default_factory=dict, repr=False)
++    web_search_budget: dict[str, Any] = field(default_factory=dict, repr=False)
+     turn_id: str = ""
+     wait_for_user_reply: Callable[[], Awaitable[dict[str, Any] | None]] | None = None
+     # Takes the messages the learner sent while this turn was running
+diff --git a/deeptutor/services/search/__init__.py b/deeptutor/services/search/__init__.py
+index 440b57f..2444c88 100644
+--- a/deeptutor/services/search/__init__.py
++++ b/deeptutor/services/search/__init__.py
+@@ -6,6 +6,7 @@ from datetime import datetime
+ import json
+ import logging
+ from pathlib import Path
++from time import monotonic
+ from typing import Any
+ 
+ from deeptutor.services.config import (
+@@ -144,6 +145,7 @@ def web_search(
+     upgrade from template formatting to LLM synthesis.
+     """
+     config = _get_web_search_config()
++    deadline = provider_kwargs.pop("_deadline", None)
+     if not config.get("enabled", True):
+         _logger.warning("Web search is disabled in config")
+         return _disabled_result(
+@@ -200,6 +202,13 @@ def web_search(
+     supports_answer = False
+     for candidate in attempts:
+         candidate_kwargs = dict(provider_kwargs)
++        if deadline is not None:
++            remaining = deadline - monotonic()
++            if remaining <= 0:
++                break
++            candidate_kwargs["timeout"] = min(
++                float(candidate_kwargs.get("timeout", remaining)), remaining
++            )
+         if candidate != provider_name:
+             candidate_key, candidate_base_url = _credentials_for(candidate, resolved)
+             candidate_kwargs.pop("api_key", None)
+diff --git a/deeptutor/services/search/providers/duckduckgo.py b/deeptutor/services/search/providers/duckduckgo.py
+index 9cf6b6a..8d807e4 100644
+--- a/deeptutor/services/search/providers/duckduckgo.py
++++ b/deeptutor/services/search/providers/duckduckgo.py
+@@ -3,6 +3,7 @@
+ from __future__ import annotations
+ 
+ from datetime import datetime
++from time import monotonic
+ from typing import Any
+ 
+ from ..base import BaseSearchProvider
+@@ -21,14 +22,46 @@ class DuckDuckGoProvider(BaseSearchProvider):
+         self,
+         query: str,
+         max_results: int = 5,
+-        timeout: int = 20,
++        timeout: float = 8,
+         **kwargs: Any,
+     ) -> WebSearchResponse:
+         from ddgs import DDGS
++        from ddgs.engines import ENGINES
++        from ddgs.exceptions import DDGSException
+ 
+         count = max(1, min(int(max_results), 10))
+-        ddgs = DDGS(proxy=self.proxy, timeout=timeout)
+-        rows = list(ddgs.text(query, max_results=count) or [])
++        deadline = monotonic() + max(0.1, min(float(timeout), 8))
++        rows = []
++        attempted = []
++        network_failed = False
++        backend = ""
++        # DDGS auto can serially exhaust unrelated engines before returning a useful SERP.
++        for backend in ("yahoo", "duckduckgo"):
++            if backend not in ENGINES["text"]:
++                continue
++            remaining = deadline - monotonic()
++            if remaining <= 0:
++                break
++            attempted.append(backend)
++            try:
++                rows = list(
++                    DDGS(proxy=self.proxy, timeout=min(4, remaining)).text(
++                        query,
++                        max_results=count,
++                        backend=backend,
++                        safesearch="on",
++                        region="cn-zh"
++                        if any("\u4e00" <= ch <= "\u9fff" for ch in query)
++                        else "us-en",
++                    )
++                    or []
++                )
++            except DDGSException as exc:
++                network_failed |= str(exc) != "No results found."
++                continue
++            if rows:
++                break
++        source = "Yahoo" if backend == "yahoo" else "DuckDuckGo"
+         citations: list[Citation] = []
+         search_results: list[SearchResult] = []
+         for idx, row in enumerate(rows, 1):
+@@ -40,7 +73,7 @@ class DuckDuckGoProvider(BaseSearchProvider):
+                     title=title,
+                     url=url,
+                     snippet=snippet,
+-                    source="DuckDuckGo",
++                    source=source,
+                 )
+             )
+             citations.append(
+@@ -50,7 +83,7 @@ class DuckDuckGoProvider(BaseSearchProvider):
+                     url=url,
+                     title=title,
+                     snippet=snippet,
+-                    source="DuckDuckGo",
++                    source=source,
+                 )
+             )
+         return WebSearchResponse(
+@@ -61,5 +94,18 @@ class DuckDuckGoProvider(BaseSearchProvider):
+             model="duckduckgo",
+             citations=citations,
+             search_results=search_results,
+-            metadata={"finish_reason": "stop"},
++            metadata={
++                "finish_reason": "stop",
++                "search_backend": backend if rows else "",
++                "search_backends_attempted": attempted,
++                **(
++                    {
++                        "error_code": "search_unavailable"
++                        if network_failed or not attempted
++                        else "search_no_results"
++                    }
++                    if not rows
++                    else {}
++                ),
++            },
+         )
+diff --git a/deeptutor/tools/builtin/__init__.py b/deeptutor/tools/builtin/__init__.py
+index ebbc453..b9f9a6a 100644
+--- a/deeptutor/tools/builtin/__init__.py
++++ b/deeptutor/tools/builtin/__init__.py
+@@ -6,6 +6,7 @@ import asyncio
+ import json
+ import logging
+ import math
++from time import monotonic
+ from typing import Any
+ 
+ from deeptutor.core.tool_protocol import (
+@@ -655,6 +656,9 @@ class KnowledgeFrontierTool(_PromptHintsMixin, BaseTool):
+ 
+ 
+ class WebSearchTool(_PromptHintsMixin, BaseTool):
++    QUERY_TIMEOUT_S = 12.0
++    TURN_WAIT_S = 20.0
++
+     def get_definition(self) -> ToolDefinition:
+         return ToolDefinition(
+             name="web_search",
+@@ -668,14 +672,53 @@ class WebSearchTool(_PromptHintsMixin, BaseTool):
+         from deeptutor.tools.web_search import web_search
+ 
+         query = kwargs.get("query", "")
++        if not isinstance(query, str) or not query.strip():
++            raise ValueError("Search query must be a non-empty string")
+         output_dir = kwargs.get("output_dir")
+         verbose = kwargs.get("verbose", False)
+-        result = await asyncio.to_thread(
+-            web_search,
+-            query=query,
+-            output_dir=output_dir,
+-            verbose=verbose,
+-        )
++        budget = kwargs.get("_search_budget")
++        if not isinstance(budget, dict):
++            budget = {}
++        zh = str(kwargs.get("_language") or "en").startswith("zh")
++        remaining = self.TURN_WAIT_S - budget.get("spent", 0.0)
++        if (
++            budget.get("blocked")
++            or remaining <= 0
++            or budget.get("failures", 0) >= 2
++            or budget.get("active", 0) >= 2
++        ):
++            return ToolResult(
++                content=(
++                    "本轮搜索已到等待或失败上限。停止换关键词重试，使用已有结果；没有可靠来源就直说本次未找到，不能编造真题。"
++                    if zh
++                    else "Search wait/failure limit reached for this turn. Stop retrying; use existing evidence or state that no verified source was obtained. Do not invent an original exam question."
++                ),
++                metadata={"error_code": "search_budget_exhausted", "do_not_retry": True},
++                success=False,
++            )
++        started = monotonic()
++        timeout = min(self.QUERY_TIMEOUT_S, remaining)
++        budget["active"] = budget.get("active", 0) + 1
++        try:
++            async with asyncio.timeout(timeout):
++                result = await asyncio.to_thread(
++                    web_search,
++                    query=query.strip(),
++                    output_dir=output_dir,
++                    verbose=verbose,
++                    timeout=min(8, timeout),
++                    _deadline=started + timeout,
++                )
++        except Exception as exc:
++            logger.warning("Web search did not complete (%s)", type(exc).__name__)
++            result = {
++                "error_code": "search_timeout"
++                if isinstance(exc, TimeoutError)
++                else "search_unavailable"
++            }
++        finally:
++            budget["active"] -= 1
++            budget["spent"] = budget.get("spent", 0.0) + monotonic() - started
+ 
+         if isinstance(result, dict):
+             answer = result.get("answer", "")
+@@ -684,13 +727,64 @@ class WebSearchTool(_PromptHintsMixin, BaseTool):
+             answer = str(result)
+             citations = []
+ 
++        if isinstance(result, dict) and (
++            result.get("error_code") or not (citations or result.get("search_results"))
++        ):
++            budget["failures"] = budget.get("failures", 0) + 1
++            code = result.get("error_code") or "search_no_results"
++            no_results = code == "search_no_results"
++            budget["blocked"] = bool(
++                budget.get("blocked") or not no_results or budget["failures"] >= 2
++            )
++            message = (
++                (
++                    "本次未找到可核对的网页结果。可以说明这个缺口；不得把自编题冒充真题。"
++                    if no_results
++                    else "联网搜索未能完成，本次没有获得可核对的来源；这不代表网上没有。请简短说明，勿继续换关键词等待，也不要调用无关工具。"
++                )
++                if zh
++                else (
++                    "No verifiable web results were found in this search. State the gap; do not present a generated exercise as an original exam question."
++                    if no_results
++                    else "Web search could not complete; no verifiable sources were obtained. This does not prove absence on the web. State the limitation briefly without retrying other queries or calling unrelated tools."
++                )
++            )
++            if code in {"web_search_disabled", "search_provider_not_configured"}:
++                message = (
++                    (
++                        "联网搜索已关闭，请在设置中开启。"
++                        if code == "web_search_disabled"
++                        else "尚未配置搜索服务，请在设置中选择搜索提供方；免费搜索不需要 Key。"
++                    )
++                    if zh
++                    else result.get("answer", message)
++                )
++            return ToolResult(
++                content=message,
++                metadata={
++                    **result,
++                    "error_code": code,
++                    "do_not_retry": budget["blocked"],
++                    "search_elapsed_s": round(monotonic() - started, 3),
++                },
++                success=False,
++            )
++
++        evidence_note = (
++            "来源核对：只依据上面实际返回的内容。未读到全文就不能声称已核对全文；摘要缺少的题干、选项或图形不得凭记忆补成真题。不能把同一转载当作独立来源，不能推断未读网页的收费、登录或反爬原因。若证据不足，简短说明即可。"
++            if zh
++            else "Source check: use only the returned evidence. Do not claim to have verified an unread page. Never reconstruct missing exam text, options or diagrams from memory. Reposts are not independent verification. Do not infer paywall, login or anti-bot causes for unread pages. State insufficient evidence briefly."
++        )
+         return ToolResult(
+-            content=answer,
++            content=f"{answer}\n\n[{evidence_note}]",
+             sources=[
+                 {"type": "web", "url": citation.get("url", ""), "title": citation.get("title", "")}
+                 for citation in citations
+             ],
+-            metadata=result if isinstance(result, dict) else {"raw": answer},
++            metadata={
++                **(result if isinstance(result, dict) else {"raw": answer}),
++                "search_elapsed_s": round(monotonic() - started, 3),
++            },
+         )
+ 
+ 
+diff --git a/deeptutor/tools/prompting/hints/en/web_fetch.yaml b/deeptutor/tools/prompting/hints/en/web_fetch.yaml
+index e0c202b..f38df38 100644
+--- a/deeptutor/tools/prompting/hints/en/web_fetch.yaml
++++ b/deeptutor/tools/prompting/hints/en/web_fetch.yaml
+@@ -1,6 +1,6 @@
+ short_description: "Fetch a specific URL and extract readable content as markdown."
+ when_to_use: "When the user's message contains a specific URL and reading that page is needed: shared blog / textbook / paper links with a question about them, or an explicit 'read this page' request. Use ``web_search`` for general topic searches."
+ input_format: "{\"url\": \"full http(s):// URL\", \"max_chars\": 50000}. ``max_chars`` is optional (default 50000) and content beyond it is truncated."
+-guideline: "Login-walled, anti-bot, or JS-only pages may return little useful content — say so honestly, don't fabricate around an empty result. The returned text already has scripts and sidebars stripped (first line is `# Title` when available)."
++guideline: "Network, login, anti-bot or JS-only pages may prevent reading. State only the tool's explicit cause; never infer which applies or invent unread body text, exam questions, options or diagrams. State the limitation briefly. The returned text already has scripts and sidebars stripped (first line is `# Title` when available)."
+ note: "Refuses file:// / localhost / private IP addresses. Fetches one URL per call; issue separate calls for multiple URLs."
+ phase: "exploration"
+diff --git a/deeptutor/tools/prompting/hints/en/web_search.yaml b/deeptutor/tools/prompting/hints/en/web_search.yaml
+index 46a70c3..ff7afbf 100644
+--- a/deeptutor/tools/prompting/hints/en/web_search.yaml
++++ b/deeptutor/tools/prompting/hints/en/web_search.yaml
+@@ -1,6 +1,6 @@
+ short_description: "Search the web for current or external information with citations."
+ when_to_use: "Use when the knowledge base is insufficient or the task needs recent events, real-world examples, or external references."
+ input_format: "Natural-language search query."
+-guideline: "Prefer web search only when freshness or external coverage matters."
+-note: "Web results can vary in quality; cross-check claims before relying on them."
++guideline: "Search only for fresh or external evidence. Preserve requested years, places and subjects; answer once evidence is sufficient. Stop for network failure, timeout or do_not_retry; changing keywords cannot fix a network failure. With no results, make at most one substantively different follow-up query."
++note: "Distinguish an unsuccessful search from network failure, not universal absence. A search snippet is not verified full exam text. Check the year, place, complete question and source. For inaccessible/partial material report only the tool's stated cause; do not infer a paywall, login requirement or unseen body. Omit unrelated configuration reminders. Never label a generated exercise or another year's paper as the requested original."
+ phase: "expansion"
+diff --git a/deeptutor/tools/prompting/hints/zh/web_fetch.yaml b/deeptutor/tools/prompting/hints/zh/web_fetch.yaml
+index d737b9c..0a030ca 100644
+--- a/deeptutor/tools/prompting/hints/zh/web_fetch.yaml
++++ b/deeptutor/tools/prompting/hints/zh/web_fetch.yaml
+@@ -1,6 +1,6 @@
+ short_description: "抓取一个具体 URL 的网页内容并提取为 markdown 文本。"
+ when_to_use: "用户消息里出现具体 URL 且需要读那个页面时使用：分享了博客 / 教材 / 论文链接并问相关问题，或者用户明确说\"帮我读这个页面\"。普通主题搜索请用 web_search。"
+ input_format: "{\"url\": \"完整 http(s):// URL\", \"max_chars\": 50000}。max_chars 可选，默认 50000，超出会截断。"
+-guideline: "对于需要登录、有反爬虫、或纯前端 JS 渲染的页面会失败——失败时如实告知用户，不要凭空补内容。返回结果是已经去掉脚本/侧边栏的纯文本（首行 `# 标题`）。"
++guideline: "页面可能因网络、登录、反爬虫或 JS 渲染等原因读取失败。只说明工具明确返回的原因，不自行推断是哪一种，更不能编造未读取的正文、题干、选项或图形；简短说明即可。返回结果是已经去掉脚本/侧边栏的纯文本（首行 `# 标题`）。"
+ note: "拒绝 file:// / localhost / 内网 IP 等地址。一次只抓一个 URL；要抓多个分多次调用。"
+ phase: "exploration"
+diff --git a/deeptutor/tools/prompting/hints/zh/web_search.yaml b/deeptutor/tools/prompting/hints/zh/web_search.yaml
+index 508a44b..bd14e85 100644
+--- a/deeptutor/tools/prompting/hints/zh/web_search.yaml
++++ b/deeptutor/tools/prompting/hints/zh/web_search.yaml
+@@ -1,6 +1,6 @@
+ short_description: "搜索网页上的最新信息或外部资料，并返回引用。"
+ when_to_use: "当知识库覆盖不足，或任务需要最新动态、现实案例、外部参考时使用。"
+ input_format: "自然语言搜索查询。"
+-guideline: "只有在确实需要时效性或外部覆盖时再使用网页搜索。"
+-note: "网页结果质量不稳定，重要结论应交叉核验。"
++guideline: "仅在需要时效性或外部资料时搜索。首次保留用户指定的年份、地区、科目等条件；找到足够来源就作答。网络超时、服务不可达或结果标记 do_not_retry 时停止本轮搜索，不要靠换关键词继续等；无结果时最多再做一次实质不同的查询。"
++note: "区分本次未找到与联网失败，不得断言全网没有。搜索摘要不是已核验的试卷全文；真题须核对年份、地区、完整题干和出处。打不开或看不全就直说；只报告工具明确给出的失败原因，不自行推断收费、需登录或正文内容。不要重复粘贴与当前问题无关的配置提醒，不把自编题、模拟题或其他年份冒充指定真题。"
+ phase: "expansion"
+diff --git a/tests/agents/chat/test_agent_loop.py b/tests/agents/chat/test_agent_loop.py
+index 99310ed..0bff093 100644
+--- a/tests/agents/chat/test_agent_loop.py
++++ b/tests/agents/chat/test_agent_loop.py
+@@ -4022,6 +4022,18 @@ def test_augment_tool_kwargs_injects_mastery_path_id() -> None:
+     assert augmented["_mastery_path_id"] == "book-1"
+ 
+ 
++def test_search_budget_is_owned_by_current_turn_and_cannot_be_overridden():
++    pipeline = AgenticChatPipeline.__new__(AgenticChatPipeline)
++    first = UnifiedContext(user_message="查真题", language="zh")
++    next_turn = UnifiedContext(user_message="再查另一题", language="zh")
++    kwargs = pipeline._augment_tool_kwargs("web_search", {"_search_budget": {"spent": -100}}, first)
++    same_turn = pipeline._augment_tool_kwargs("web_search", {}, first)
++    separate = pipeline._augment_tool_kwargs("web_search", {}, next_turn)
++    assert kwargs["_search_budget"] is same_turn["_search_budget"]
++    assert kwargs["_search_budget"] is not separate["_search_budget"]
++    assert kwargs["_search_budget"] == {} and kwargs["_language"] == "zh"
++
++
+ def test_augment_tool_kwargs_injects_geogebra_image() -> None:
+     pipeline = AgenticChatPipeline.__new__(AgenticChatPipeline)
+     pipeline.language = "zh"
+diff --git a/tests/core/test_builtin_tools.py b/tests/core/test_builtin_tools.py
+index ee33105..7186a42 100644
+--- a/tests/core/test_builtin_tools.py
++++ b/tests/core/test_builtin_tools.py
+@@ -2,8 +2,10 @@
+ 
+ from __future__ import annotations
+ 
++import asyncio
+ from pathlib import Path
+ import sys
++import time
+ import types
+ from types import SimpleNamespace
+ from typing import Any
+@@ -449,12 +451,108 @@ async def test_web_search_tool_wraps_sync_function(monkeypatch: pytest.MonkeyPat
+ 
+     result = await WebSearchTool().execute(query="latest benchmark", output_dir="/tmp/out")
+ 
+-    assert result.content == "web summary"
++    assert result.content.startswith("web summary")
++    assert "Never reconstruct missing exam text" in result.content
+     assert captured["query"] == "latest benchmark"
+     assert captured["output_dir"] == "/tmp/out"
+     assert result.sources[0]["url"] == "https://example.com"
+ 
+ 
++@pytest.mark.asyncio
++async def test_search_timeout_returns_without_blocking_ui_and_stops_changed_queries(monkeypatch):
++    calls, ticks, budget = [], [], {}
++
++    def slow_search(**kwargs):
++        calls.append(kwargs["query"])
++        time.sleep(0.12)
++        return {"answer": "late", "citations": [{"url": "https://example.org"}]}
++
++    _install_module(monkeypatch, "deeptutor.tools.web_search", web_search=slow_search)
++    monkeypatch.setattr(WebSearchTool, "QUERY_TIMEOUT_S", 0.03)
++    tool = WebSearchTool()
++    pending = asyncio.create_task(
++        tool.execute(query="original", _search_budget=budget, _language="zh")
++    )
++    await asyncio.sleep(0.01)
++    ticks.append("UI still responsive")
++    result = await pending
++    assert ticks and not result.success and result.sources == []
++    assert result.metadata["error_code"] == "search_timeout"
++    assert result.metadata["search_elapsed_s"] < 0.1
++    blocked = await tool.execute(query="changed keywords", _search_budget=budget)
++    assert blocked.metadata["do_not_retry"] and calls == ["original"]
++    assert "不代表网上没有" in result.content
++
++
++@pytest.mark.asyncio
++async def test_no_results_allows_only_one_retry_and_does_not_leak_across_turns(monkeypatch):
++    calls = []
++
++    def empty_search(**kwargs):
++        calls.append(kwargs["query"])
++        return {"answer": "", "citations": [], "search_results": []}
++
++    _install_module(monkeypatch, "deeptutor.tools.web_search", web_search=empty_search)
++    tool, budget = WebSearchTool(), {}
++    first = await tool.execute(query="first", _search_budget=budget)
++    second = await tool.execute(query="different query", _search_budget=budget)
++    third = await tool.execute(query="third", _search_budget=budget)
++    fresh = await tool.execute(query="next turn", _search_budget={})
++    assert not first.metadata["do_not_retry"] and second.metadata["do_not_retry"]
++    assert third.metadata["error_code"] == "search_budget_exhausted"
++    assert not fresh.metadata["do_not_retry"]
++    assert calls == ["first", "different query", "next turn"]
++
++
++@pytest.mark.asyncio
++async def test_search_limits_parallel_failures_and_keeps_cancellation(monkeypatch):
++    calls = []
++
++    def unavailable(**kwargs):
++        calls.append(kwargs["query"])
++        time.sleep(0.04)
++        return {"error_code": "search_unavailable"}
++
++    _install_module(monkeypatch, "deeptutor.tools.web_search", web_search=unavailable)
++    budget, tool = {}, WebSearchTool()
++    results = await asyncio.gather(
++        *(tool.execute(query=f"q{i}", _search_budget=budget) for i in range(3))
++    )
++    assert len(calls) == 2 and all(not r.success for r in results)
++    assert (await tool.execute(query="fourth", _search_budget=budget)).metadata["do_not_retry"]
++    assert budget["active"] == 0
++    task = asyncio.create_task(tool.execute(query="cancel", _search_budget={}))
++    await asyncio.sleep(0.005)
++    task.cancel()
++    with pytest.raises(asyncio.CancelledError):
++        await task
++
++
++@pytest.mark.asyncio
++async def test_search_rejects_empty_query_before_outbound_call(monkeypatch):
++    def unexpected(**_kwargs):
++        pytest.fail("empty query must not reach network")
++
++    _install_module(monkeypatch, "deeptutor.tools.web_search", web_search=unexpected)
++    with pytest.raises(ValueError, match="Search query must be a non-empty string"):
++        await WebSearchTool().execute(query=" ")
++
++
++@pytest.mark.asyncio
++async def test_search_keeps_configuration_errors_distinct_from_network_errors(monkeypatch):
++    _install_module(
++        monkeypatch,
++        "deeptutor.tools.web_search",
++        web_search=lambda **_: {
++            "error_code": "search_provider_not_configured",
++            "answer": "Choose a provider in Settings",
++        },
++    )
++    result = await WebSearchTool().execute(query="geometry", _language="zh")
++    assert not result.success and "尚未配置搜索服务" in result.content
++    assert "联网搜索未能完成" not in result.content
++
++
+ @pytest.mark.asyncio
+ async def test_exec_tool_runs_python_via_sandbox(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+     from pathlib import Path
+diff --git a/tests/services/search/test_search_providers.py b/tests/services/search/test_search_providers.py
+index 0049408..0abe6a6 100644
+--- a/tests/services/search/test_search_providers.py
++++ b/tests/services/search/test_search_providers.py
+@@ -116,6 +116,88 @@ def test_provider_metadata_comes_from_the_spec_table() -> None:
+         assert cls.supports_answer == spec.supports_answer
+ 
+ 
++@pytest.mark.parametrize("first_error", [None, "No results found.", "request timed out"])
++def test_free_search_uses_explicit_engines_and_preserves_sources(monkeypatch, first_error):
++    import ddgs
++    from ddgs.exceptions import DDGSException
++
++    from deeptutor.services.search.providers.duckduckgo import DuckDuckGoProvider
++
++    calls = []
++    clock = [100.0]
++
++    class FakeDDGS:
++        def __init__(self, **kwargs):
++            self.options = kwargs
++
++        def text(self, query, **kwargs):
++            calls.append({**self.options, **kwargs, "query": query})
++            if first_error and kwargs["backend"] == "yahoo":
++                clock[0] += 4
++                raise DDGSException(first_error)
++            return [
++                {"title": "试卷原题", "href": "https://example.org/paper", "body": "完整来源待核对"}
++            ]
++
++    monkeypatch.setattr(ddgs, "DDGS", FakeDDGS)
++    monkeypatch.setattr(
++        "deeptutor.services.search.providers.duckduckgo.monotonic", lambda: clock[0]
++    )
++    response = DuckDuckGoProvider(proxy=PROXY).search("东莞中考数学2025", timeout=6, max_results=5)
++    assert [call["backend"] for call in calls] == (
++        ["yahoo", "duckduckgo"] if first_error else ["yahoo"]
++    )
++    assert calls[-1]["timeout"] == (2 if first_error else 4)
++    assert all(
++        call["region"] == "cn-zh"
++        and call["safesearch"] == "on"
++        and call["proxy"] == PROXY
++        and call["max_results"] == 5
++        for call in calls
++    )
++    assert response.citations[0].url == "https://example.org/paper"
++    assert response.citations[0].source == ("DuckDuckGo" if first_error else "Yahoo")
++    assert "error_code" not in response.metadata
++
++
++@pytest.mark.parametrize(
++    "error,code",
++    [("No results found.", "search_no_results"), ("request timed out", "search_unavailable")],
++)
++def test_free_search_distinguishes_absence_from_network_failure(monkeypatch, error, code):
++    import ddgs
++    from ddgs.exceptions import DDGSException
++
++    from deeptutor.services.search.providers.duckduckgo import DuckDuckGoProvider
++
++    class FakeDDGS:
++        def __init__(self, **_kwargs):
++            pass
++
++        def text(self, *_args, **_kwargs):
++            raise DDGSException(error)
++
++    monkeypatch.setattr(ddgs, "DDGS", FakeDDGS)
++    response = DuckDuckGoProvider().search("algebra textbook")
++    assert response.metadata["error_code"] == code
++    assert response.citations == []
++
++
++def test_free_search_never_falls_back_to_auto_when_backend_is_unavailable(monkeypatch):
++    import ddgs
++    import ddgs.engines
++
++    from deeptutor.services.search.providers.duckduckgo import DuckDuckGoProvider
++
++    def unexpected(**_kwargs):
++        pytest.fail("Unavailable backends must not invoke DDGS auto")
++
++    monkeypatch.setattr(ddgs, "DDGS", unexpected)
++    monkeypatch.setitem(ddgs.engines.ENGINES, "text", {})
++    response = DuckDuckGoProvider().search("algebra")
++    assert response.metadata["error_code"] == "search_unavailable"
++
++
+ # --------------------------------------------------------------------------
+ # Providers added on top of the original seven. Each names its result cap
+ # something different, so the shared-knob contract is where they break first.
+diff --git a/tests/services/search/test_web_search_runtime.py b/tests/services/search/test_web_search_runtime.py
+index 2012d25..4aca6ad 100644
+--- a/tests/services/search/test_web_search_runtime.py
++++ b/tests/services/search/test_web_search_runtime.py
+@@ -115,6 +115,28 @@ def test_web_search_rejects_deprecated_provider(monkeypatch) -> None:
+         web_search("hello")
+ 
+ 
++@pytest.mark.parametrize("elapsed,expected", [(4, [6, 2]), (7, [6])])
++def test_provider_fallback_shares_one_deadline(monkeypatch, elapsed, expected):
++    _patch_runtime(
++        monkeypatch,
++        ResolvedSearchConfig(provider="duckduckgo", requested_provider="duckduckgo"),
++        candidates=["brave"],
++    )
++    clock, timeouts = [100.0], []
++
++    def run(_provider, _query, kwargs):
++        timeouts.append(kwargs["timeout"])
++        assert "_deadline" not in kwargs
++        clock[0] += elapsed
++        raise TimeoutError("unreachable")
++
++    monkeypatch.setattr("deeptutor.services.search.monotonic", lambda: clock[0])
++    monkeypatch.setattr("deeptutor.services.search._run_provider", run)
++    with pytest.raises(Exception, match="web search failed"):
++        web_search("hello", timeout=8, _deadline=106)
++    assert timeouts == expected
++
++
+ def test_web_search_none_provider_returns_actionable_configuration_error(monkeypatch) -> None:
+     _patch_runtime(
+         monkeypatch,

@@ -8,6 +8,8 @@
 
 [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-windows-x64) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-arm64) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-04276f68a-macos-x64)
 
+**20261113 联网搜索源码修复。** 免费搜索改为明确的主备引擎；单次搜索最多等待 12 秒，网络失败停止换词重试，空结果最多补查一次。来源没读全就说明缺口，不把摘要补成真题。已通过 248 项相关回归及 DeepSeek Flash High 小样本实测。**本项已更新源码，现有完整安装包及签名客户端更新尚不包含此补丁。** [搜索说明、实测与限制](SEARCH-20261113.md)
+
 **20261113 整合更新。** 对话里的教材页码现在能直接打开对应原页，有核实原句时会短暂标亮；右侧收起或切到活动后也能点击打开；阅读区可输入页码、按回车跳转。无关教材页不再额外跑一轮模型研读。合并了移入项目、查历史聊天、在聊天里创建和修改任务，以及此前的附件长期保存、语音输入、选择卡片和数学配图更新。[整合说明与验证范围](INTEGRATED-20261113.md)
 
 **20261112 三系统完整安装版。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [完整安装说明](INSTALL-20261112.md) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)

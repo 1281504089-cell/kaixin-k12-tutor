@@ -113,6 +113,11 @@
       "file": "student-integrated-reading-20261113.patch",
       "sha256": "1c8d9dd753d59f1e85e0ef83ee6b0374dcb1139e239210bd6cf9f66594f59765",
       "description": "Integrate bounded personal study actions, project filing and history/library tools; avoid duplicate reading investigation, preserve original-page evidence, and restore chat citations with one-click page opening and native source highlighting; typed page-number navigation in both readers"
+    },
+    {
+      "file": "student-search-20261113.patch",
+      "sha256": "b9ba5ec4c2a3290759236341b71949da34af715453015e552af983a50b0713b7",
+      "description": "Use explicit bounded free search backends; share per-turn retry/wait limits; preserve citations and source filtering; distinguish connectivity, empty results and configuration errors; do not reconstruct unverifiable exam text"
     }
   ]
 }

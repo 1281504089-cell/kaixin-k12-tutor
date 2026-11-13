@@ -1,0 +1,136 @@
+{
+  "source_commit": "db150f8444001ee16ed5c09d2afc50f50031434e",
+  "base_source_commit": "70d682c4f455632bc323343e681a7a7b44d2124d",
+  "patch_sha256": "b9ba5ec4c2a3290759236341b71949da34af715453015e552af983a50b0713b7",
+  "test_result": {
+    "passed": 248,
+    "failed": 0,
+    "ruff": "passed",
+    "git_diff_check": "passed"
+  },
+  "patch_validation": {
+    "base": "70d682c4f455632bc323343e681a7a7b44d2124d",
+    "patch_applies": true,
+    "all_files_byte_equal": true,
+    "files": [
+      {
+        "file": "deeptutor/agents/loop/pipeline.py",
+        "sha256": "913a1b3bd59052647529ca4d042028a4ec710e21ecaac1215612de77367c055d"
+      },
+      {
+        "file": "deeptutor/core/context.py",
+        "sha256": "09546b5c978cfd50fb6f37d4354f472ff513276138312778e180000fa722f1fb"
+      },
+      {
+        "file": "deeptutor/services/search/__init__.py",
+        "sha256": "38ba551ee2bb01b0c55b3e18694ced4d14d9a646026586953578586440dedcbe"
+      },
+      {
+        "file": "deeptutor/services/search/providers/duckduckgo.py",
+        "sha256": "1f538a486c544c5a04ee35cbc992ceb6d15bd3ab5e84728a36ec766383a7ddc9"
+      },
+      {
+        "file": "deeptutor/tools/builtin/__init__.py",
+        "sha256": "138f05a45920a1fd34e47a79993d05d4a878199cd66c98998c80c2c8c65113df"
+      },
+      {
+        "file": "deeptutor/tools/prompting/hints/en/web_fetch.yaml",
+        "sha256": "44635b34b95c05016ba126385db1e1afb94db46b16052035fe402c4447c00285"
+      },
+      {
+        "file": "deeptutor/tools/prompting/hints/en/web_search.yaml",
+        "sha256": "edc0d77d6dfcf5d3755578ee7bd6d725f47992d2eb550763a233105f4a8b6769"
+      },
+      {
+        "file": "deeptutor/tools/prompting/hints/zh/web_fetch.yaml",
+        "sha256": "af902dcf4077209ad7cf219f3cf081b9a3bd213c7945a62f3e60c425f88c6e54"
+      },
+      {
+        "file": "deeptutor/tools/prompting/hints/zh/web_search.yaml",
+        "sha256": "08ae2294466e1d9385312e6b5111457d70018ef673c8492641b5cb24f3030883"
+      },
+      {
+        "file": "tests/agents/chat/test_agent_loop.py",
+        "sha256": "417bbf75538e503e909ac59925352b8dae9a90d136e13bf5113b780fcdacbd6e"
+      },
+      {
+        "file": "tests/core/test_builtin_tools.py",
+        "sha256": "5f2710a0194dd5c3621651e4d74de8794293fe4483521713d24efdb603a944b7"
+      },
+      {
+        "file": "tests/services/search/test_search_providers.py",
+        "sha256": "1292bb214afb9badd0ed59082bae3e63cd0d44f99d03cefbbde5f4465fe13275"
+      },
+      {
+        "file": "tests/services/search/test_web_search_runtime.py",
+        "sha256": "c9df1852281ece8b73b6da4e685e62700a8245baac4dd41752ad4fef305ce86a"
+      }
+    ]
+  },
+  "bounds_seconds": {
+    "single_search": 12,
+    "free_provider_chain": 8,
+    "free_engine": 4,
+    "turn_accumulated_search_wait": 20
+  },
+  "retry_policy": {
+    "network_failure": "stop this turn",
+    "no_results": "one follow-up query maximum",
+    "parallel_searches_max": 2,
+    "new_turn_independent": true
+  },
+  "search_sample": {
+    "query": "东莞市中考 数学 真题 试卷 原题 2025",
+    "before_s": 10.364,
+    "after_s": 1.229,
+    "citation_count": 5,
+    "same_urls_in_same_order": true,
+    "backend": "yahoo",
+    "not_full_exam_verification": true
+  },
+  "other_empty_sample": {
+    "query": "东莞中考数学试题及答案 2024年 广东",
+    "seconds": 1.373,
+    "error_code": "search_no_results"
+  },
+  "real_high_model_samples": [
+    {
+      "case": "online",
+      "model": "deepseek-flash",
+      "reasoning_effort": "high",
+      "timing": {
+        "first_visible_content_s": 3.334,
+        "first_content_after_tool_s": 5.929,
+        "completion_s": 15.571
+      },
+      "model_calls": 4,
+      "tool_search_wait_s": 2.951,
+      "error": null,
+      "failure_injected": false
+    },
+    {
+      "case": "offline",
+      "model": "deepseek-flash",
+      "reasoning_effort": "high",
+      "timing": {
+        "first_visible_content_s": 1.296,
+        "first_content_after_tool_s": 3.735,
+        "completion_s": 10.546
+      },
+      "model_calls": 3,
+      "tool_search_wait_s": 0.225,
+      "error": null,
+      "failure_injected": true
+    }
+  ],
+  "verification_limits": [
+    "Small network sample; empty responses were also observed.",
+    "The final High-answer sample did not retrieve a complete exam question.",
+    "No full Windows or Apple Silicon installation test in this source-only update.",
+    "Source/teacher/model rules and High reasoning retained; no new paid service."
+  ],
+  "real_learning_records_modified": false,
+  "installed_client_modified": false,
+  "installers_rebuilt": false,
+  "api_keys_uploaded": false
+}
