@@ -36,12 +36,12 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Path native-evidence -Force | Out-Null
-          $fixtureTemp = Join-Path $env:RUNNER_TEMP '诊断 fixture'
+          $fixtureTemp = Join-Path $env:RUNNER_TEMP 'fixture workspace'
           New-Item -ItemType Directory -Path $fixtureTemp -Force | Out-Null
           $env:TEMP = $fixtureTemp
           & .\test-collector.ps1 | Tee-Object -FilePath native-evidence/native-test.log
           $global:LASTEXITCODE = 0
-          Get-FileHash -Algorithm SHA256 -LiteralPath .\Collect-WindowsUpdateDiagnostic.ps1,.\build-collector.py,.\test-collector.ps1,'.\双击检查Windows更新.cmd','.\Windows只读更新诊断.zip' | Format-List | Out-File -LiteralPath native-evidence/hashes.txt -Encoding utf8
+          Get-ChildItem -LiteralPath . -File | Where-Object { $_.Extension -in '.ps1','.py','.cmd','.zip' } | Get-FileHash -Algorithm SHA256 | Format-List | Out-File -LiteralPath native-evidence/hashes.txt -Encoding utf8
       - name: Retain diagnostic test evidence
         if: always()
         uses: actions/upload-artifact@v4
