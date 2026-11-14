@@ -1,12 +1,12 @@
 {
-  "tag": "student-20261114-library",
-  "source_commit": "8e31f68080a9c746f409c1191caf167b421a939e",
-  "baseline_source_commit": "c0eaa65d5324908ef8afc29adee9adc364b4dff1",
-  "patch_sha256": "db1b5863dabfce064bbb93f403456c2dc852e0557e725d1ab92ff5ab7dff5028",
-  "archive": "kaixin-core-20261114-library.tar.gz",
+  "tag": "student-20261114-materials",
+  "source_commit": "842d6654666e20e606f31245cc20730807562ad8",
+  "baseline_source_commit": "8e31f68080a9c746f409c1191caf167b421a939e",
+  "patch_sha256": "a737ad1efdeb43cb46a3e10b7614c357fd9cb8c12d61978bdcca81cfe4645f33",
+  "archive": "kaixin-core-20261114-materials.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261114-review.tar.gz",
-    "sha256": "f591de8e85ef041b3bc99d2f567dd1ba051ce85cd59872c4a54a81b05cb8ac25"
+    "archive": "kaixin-core-20261114-library.tar.gz",
+    "sha256": "becd75e830f9e632bcf898a7d62dfdd76dccc6281eac82fffde15f225c93334f"
   },
   "new_backend_files": [],
   "web_tests": [
@@ -24,7 +24,16 @@
     "tests/chat-failed-submission-recovery.spec.tsx",
     "tests/pdf-page-render.spec.tsx",
     "tests/pdf-reading-resize.spec.tsx",
-    "tests/student-reports.spec.tsx"
+    "tests/student-reports.spec.tsx",
+    "tests/html-attachment.spec.ts",
+    "tests/reading-read-aloud-speech.spec.ts",
+    "tests/chat-library-materials.spec.ts",
+    "tests/library-material-picker.spec.tsx",
+    "tests/notes-model.spec.ts",
+    "tests/notes-previews.spec.tsx",
+    "tests/notes-clip-editing.spec.ts",
+    "tests/notes-math-import.spec.ts",
+    "tests/mistake-math-rendering.spec.tsx"
   ],
-  "source_files_sha256": "658242eb776ffe88b533e631338dc2749d20a44ec4348b5fca3fd4ea7a64cbca"
+  "source_files_sha256": "ccf67077fc401725ca72379c3addc7e6add0c44afe91bf7bdc00fcdc92fb256a"
 }

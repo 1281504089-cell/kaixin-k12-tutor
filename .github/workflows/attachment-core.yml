@@ -1,8 +1,8 @@
-name: Build frozen library bulk upload core
+name: Build frozen background materials and references core
 on:
   push:
-    branches: ['codex/library-core-20261114-*']
-    paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-library-upload-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
+    branches: ['codex/materials-core-20261114-*']
+    paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-materials-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
 permissions:
   contents: write
 jobs:
@@ -27,8 +27,13 @@ jobs:
           if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
             python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
           else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '资料库批量上传候选 · 2026-11-14' --notes '正在验证资料库批量上传、原件完整性、原记录保留及三端实际检查更新。验证完成后再设为正式版。'
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '后台上传与资料引用候选 · 2026-11-14' --notes '正在验证跨页后台上传、资料引用、听力预览、公式显示及三端实际检查更新。验证完成后再设为正式版。'
           fi
+      - name: Record candidate run
+        run: |
+          python -c 'import json,os;open("core-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
+          tag=$(python -c 'import json;print(json.load(open("attachment-release.json"))["tag"])')
+          gh release upload "$tag" core-run.json --clobber
       - name: Build and verify core
         run: python ci-attachment-core.py
       - name: Keep core receipt

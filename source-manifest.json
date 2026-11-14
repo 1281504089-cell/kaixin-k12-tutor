@@ -163,6 +163,11 @@
       "file": "student-library-upload-20261114.patch",
       "sha256": "db1b5863dabfce064bbb93f403456c2dc852e0557e725d1ab92ff5ab7dff5028",
       "description": "Upload multiple long-term originals directly from the materials library, preserve per-project scope, and keep successful files when another upload fails or is stopped"
+    },
+    {
+      "file": "student-materials-20261114.patch",
+      "sha256": "a737ad1efdeb43cb46a3e10b7614c357fd9cb8c12d61978bdcca81cfe4645f33",
+      "description": "Keep bulk originals uploading across application pages, reference authorized library originals in chat, read historical documents on demand, isolate HTML listening with device speech, and render saved note and mistake formulas"
     }
   ]
 }
