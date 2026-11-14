@@ -19,7 +19,7 @@ index 52048c6..51078a7 100644
    releaseAvailable: "发现开心动力超级学霸新版",
    releaseDetail: "构建 {build}。将从 GitHub 下载对应的更新包。切换前会备份学习数据，请先完成正在进行的学习任务。",
 diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
-index cec17c8..bd0d5fe 100644
+index cec17c8..168478f 100644
 --- a/apps/desktop/src/main.mjs
 +++ b/apps/desktop/src/main.mjs
 @@ -1,5 +1,6 @@
@@ -39,7 +39,7 @@ index cec17c8..bd0d5fe 100644
  import { createUpdateFetch } from './update-network.mjs';
  
  app.setName('开心动力超级学霸');
-@@ -50,14 +51,45 @@ let releaseRequest;
+@@ -50,14 +51,48 @@ let releaseRequest;
  let releaseCheck;
  let releaseCheckScheduled = false;
  let availableRelease;
@@ -82,11 +82,14 @@ index cec17c8..bd0d5fe 100644
 +    if (releaseProgress.canCancel) releaseRequest?.abort(new Error('Update cancelled'));
 +    progressWindow.hide();
 +  });
-+  void progressWindow.loadFile(path.join(sourceDirectory, 'update-progress.html')).then(() => publishRelease(availableRelease));
++  const opened = progressWindow;
++  void opened.loadFile(path.join(sourceDirectory, 'update-progress.html')).then(() => {
++    if (!opened.isDestroyed()) opened.webContents.send('desktop:release-status', releaseSnapshot());
++  }).catch(error => { if (!opened.isDestroyed()) console.warn('Update progress page failed', error.message); });
  }
  
  const t = (key, values) => translate(ui.language, key, values);
-@@ -176,7 +208,14 @@ async function openContent(url) {
+@@ -176,7 +211,14 @@ async function openContent(url) {
    content.on('render-process-gone', () => status({ phase: 'error', step: null, message: t('pageGone') }));
    window.contentView.addChildView(view);
    layout();
@@ -102,7 +105,7 @@ index cec17c8..bd0d5fe 100644
  }
  
  function trustedShell(event) {
-@@ -356,7 +395,7 @@ async function installUpdate() {
+@@ -356,7 +398,7 @@ async function installUpdate() {
  
  function checkRelease(interactive = true) {
    if (releaseCheck) {
@@ -111,7 +114,7 @@ index cec17c8..bd0d5fe 100644
      return releaseCheck.promise;
    }
    const check = { interactive };
-@@ -375,10 +414,14 @@ async function performReleaseCheck(check) {
+@@ -375,10 +417,14 @@ async function performReleaseCheck(check) {
    releaseRequest = request;
    let temporary;
    let downloading = false;
@@ -126,7 +129,7 @@ index cec17c8..bd0d5fe 100644
        if (check.interactive) await updateNotice('releaseCurrent');
        return;
      }
-@@ -394,6 +437,7 @@ async function performReleaseCheck(check) {
+@@ -394,6 +440,7 @@ async function performReleaseCheck(check) {
        const present = await access(base).then(() => true, () => false);
        if (!present) {
          publishRelease(null);
@@ -134,7 +137,7 @@ index cec17c8..bd0d5fe 100644
          if (check.interactive) await updateNotice('releaseBaseMissing');
          return;
        }
-@@ -401,23 +445,40 @@ async function performReleaseCheck(check) {
+@@ -401,23 +448,40 @@ async function performReleaseCheck(check) {
      if (quitting) return;
      publishRelease(next);
      if (!check.interactive) return;
@@ -181,7 +184,7 @@ index cec17c8..bd0d5fe 100644
      } else if (check.interactive) {
        console.warn('GitHub update check failed', error);
        await updateNotice('releaseCheckFailed', t('releaseCheckRetry'), 'warning');
-@@ -426,6 +487,8 @@ async function performReleaseCheck(check) {
+@@ -426,6 +490,8 @@ async function performReleaseCheck(check) {
      if (window && !window.isDestroyed()) window.setProgressBar(-1);
      if (temporary) await rm(temporary, { recursive: true, force: true }).catch(() => {});
      releaseRequest = undefined;
@@ -190,7 +193,7 @@ index cec17c8..bd0d5fe 100644
      busy = false;
    }
  }
-@@ -635,6 +698,11 @@ else {
+@@ -635,6 +701,11 @@ else {
        throw new Error('Untrusted desktop update caller');
      }
    };

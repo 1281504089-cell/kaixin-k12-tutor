@@ -1,4 +1,4 @@
-name: Build frozen chat audio and science formulas core
+name: Build signed desktop updater core
 on:
   push:
     branches: ['codex/updater-core-20261115-*']
@@ -27,7 +27,7 @@ jobs:
           if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
             python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
           else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '聊天音频与理化公式候选 · 2026-11-14' --notes '正在验证聊天原生音频、选中文字朗读、理化公式及三端实际检查更新。验证完成后再设为正式版。'
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '桌面检查更新修复候选 · 2026-11-15' --notes '正在验证三端启动器在线升级、下载进度、取消、正常重开与数据保留。尚未发布正式版。'
           fi
       - name: Record candidate run
         run: |
