@@ -1,0 +1,59 @@
+{
+  "source_commit": "8e31f68080a9c746f409c1191caf167b421a939e",
+  "source_files_sha256": "658242eb776ffe88b533e631338dc2749d20a44ec4348b5fca3fd4ea7a64cbca",
+  "changed_files": [
+    "web/components/student/StudentLearning.module.css",
+    "web/components/student/StudentMaterials.tsx",
+    "web/tests/student-materials.spec.tsx"
+  ],
+  "targeted_tests": {
+    "passed": 15,
+    "files": [
+      "tests/student-materials.spec.tsx",
+      "tests/student-upload.spec.ts",
+      "tests/pending-chat-attachments.spec.tsx"
+    ]
+  },
+  "typecheck": "passed",
+  "targeted_eslint_errors": 0,
+  "preview": {
+    "passed": true,
+    "actualFileChooserClick": {
+      "x": 44,
+      "y": 250.28125,
+      "width": 120,
+      "height": 38
+    },
+    "multipleFiles": true,
+    "libraryRetention": true,
+    "originalsByteIdentical": true,
+    "previewOpened": true,
+    "conversationCreated": false,
+    "views": [
+      {
+        "width": 390,
+        "height": 844,
+        "horizontalOverflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1366,
+        "height": 900,
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "horizontalOverflow": false
+      }
+    ],
+    "realLearningRecordsUsed": false,
+    "paidModelCalls": 0
+  },
+  "real_keys_used": false,
+  "usb_written": false
+}

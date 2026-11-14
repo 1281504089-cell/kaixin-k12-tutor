@@ -48,6 +48,8 @@ for target in targets:
  assert attachment['short_pdf_pages']==2 and attachment['interactive_page_ready_while_indexing_seconds']<20
  report['attachment_uploads']=attachment
  update=report['update_entry'];assert update['actual_download_install_backup_restart']=='passed' and update['check_again_current']
+ bulk=update['library_bulk_upload'];assert bulk['saved_files']==2 and all(bulk[k] for k in ['multiple','library_retention','originals_byte_identical','original_preview_opened'])
+ assert json.loads((native_evidence/'library-bulk.json').read_text())==bulk
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
  for row in report['full_files']:
   actual=assets[row['file']];assert actual['digest']=='sha256:'+row['sha256'] and actual['size']==row['bytes']
@@ -91,7 +93,7 @@ except Exception:
 
 gh('release','upload',batch['tag'],root/'INSTALLATION.txt','--clobber')
 gh('api','-X','PATCH','repos/'+repo+'/git/refs/tags/'+batch['tag'],'-f','sha='+os.environ['GITHUB_SHA'],'-F','force=true')
-gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 全科复盘真实性修复 2026-11-14','--notes-file',root/'RELEASE-NOTES.md')
+gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 资料库批量上传 2026-11-14','--notes-file',root/'RELEASE-NOTES.md')
 latest=api('releases/latest');assert latest['tag_name']==batch['tag'] and not latest['prerelease']
 receipt={**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'physical_user_devices_tested':False,'private_key_uploaded':False}
 receipt_file=root/'PUBLICATION-RECEIPT.json';receipt_file.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n');gh('release','upload',batch['tag'],receipt_file,'--clobber')

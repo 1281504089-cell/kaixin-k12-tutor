@@ -39,7 +39,7 @@ print(json.dumps(asyncio.run(run())))
  if target.startswith('macos'):
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
- subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/'update-entry.json'),'KX_CANDIDATE_TAG':'student-20261114-review'},check=True,timeout=1000)
+ subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/'update-entry.json'),'KX_CANDIDATE_TAG':'student-20261114-library'},check=True,timeout=1000)
  after=json.loads((home/'active.json').read_text());assert after['commit']==active['commit']
  preserved=python_probe('''
 import asyncio,json,os

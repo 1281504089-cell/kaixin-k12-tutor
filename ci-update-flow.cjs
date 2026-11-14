@@ -78,6 +78,56 @@ async function content() {
     for (const label of ['收藏夹', '学习日志', '题库', '书籍', '阅读']) assert.ok(!menu.split('\n').includes(label), label);
     await view.executeJavaScript(`document.querySelector('button[aria-label="资源"]')?.click()`);
     await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-ui-updated.png'), (await view.capturePage()).toPNG());
+    await view.loadURL(new URL('/space?dt_workspace=', view.getURL()).href);
+    const libraryDeadline = Date.now() + 180000;
+    while (!await view.executeJavaScript('Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))')) {
+      assert.ok(Date.now() < libraryDeadline, 'Updated library did not expose bulk upload');
+      await pause(250);
+    }
+    const originals = [
+      { name: 'native-bulk-one.txt', text: 'SYNTHETIC NATIVE LIBRARY ONE 原件完整保存。' },
+      { name: 'native-bulk-two.md', text: '# SYNTHETIC NATIVE LIBRARY TWO\n资料库直接批量长期上传。' },
+    ];
+    const multiple = await view.executeJavaScript(`(() => {
+      const input = document.querySelector('input[aria-label="选择要长期保存的资料"]');
+      const data = new DataTransfer();
+      for (const file of ${JSON.stringify(originals)}) data.items.add(new File([file.text], file.name, { type: 'text/plain' }));
+      input.files = data.files;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      return input.multiple;
+    })()`);
+    assert.equal(multiple, true);
+    while (!await view.executeJavaScript('document.body.innerText.includes("已保存 2/2 份")')) {
+      assert.ok(Date.now() < libraryDeadline, 'Library batch never saved both originals');
+      await pause(250);
+    }
+    const library = await view.executeJavaScript(`(async () => {
+      const response = await fetch('/api/student/attachments/uploads/library?dt_workspace=');
+      if (!response.ok) throw new Error('Library listing failed: ' + response.status);
+      const uploads = (await response.json()).uploads;
+      for (const file of ${JSON.stringify(originals)}) {
+        const upload = uploads.find(item => item.retention === 'library' && item.records.some(record => record.filename === file.name));
+        if (!upload) throw new Error('Missing retained original: ' + file.name);
+        const record = upload.records.find(record => record.filename === file.name);
+        const original = await fetch(record.url);
+        if (!original.ok) throw new Error('Original download failed: ' + file.name);
+        const actual = new Uint8Array(await original.arrayBuffer()), expected = new TextEncoder().encode(file.text);
+        if (actual.length !== expected.length || actual.some((byte, index) => byte !== expected[index])) throw new Error('Original bytes changed: ' + file.name);
+      }
+      const card = [...document.querySelectorAll('article')].find(item => item.innerText.includes('native-bulk-one.txt'));
+      if (!card) throw new Error('Missing uploaded original card');
+      const open = [...card.querySelectorAll('button')].find(button => button.textContent.includes('打开原件'));
+      if (!open) throw new Error('No saved original reading action');
+      open.click();
+      return { multiple: true, saved_files: 2, library_retention: true, originals_byte_identical: true };
+    })()`);
+    while (!await view.executeJavaScript('Boolean(document.querySelector(\'[role="dialog"]\')?.innerText.includes("SYNTHETIC NATIVE LIBRARY ONE"))')) {
+      assert.ok(Date.now() < libraryDeadline, 'Saved library original did not open');
+      await pause(250);
+    }
+    library.original_preview_opened = true;
+    await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-library-bulk.png'), (await view.capturePage()).toPNG());
+    writeFileSync(path.join(path.dirname(output), 'library-bulk.json'), JSON.stringify(library, null, 2));
     await view.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
     assert.equal(current, true);
     writeFileSync(output, JSON.stringify({
@@ -86,6 +136,7 @@ async function content() {
       production_main_unchanged: true, candidate_feed_routed_only_in_test: true, from_runtime: before.runtimeId, to_runtime: after.runtimeId,
       actual_download_install_backup_restart: 'passed', transaction: transaction.phase,
       check_again_current: true, old_renderer_closed_after_update: Boolean(invokeError),
+      library_bulk_upload: library,
     }, null, 2));
     clearTimeout(timer);
     app.quit();
