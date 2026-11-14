@@ -5,7 +5,7 @@ import zipfile
 root = Path(__file__).resolve().parent
 source = root / 'Collect-WindowsUpdateDiagnostic.ps1'
 script = source.read_text(encoding='utf-8-sig')
-source.write_text(script, encoding='utf-8-sig')
+source.write_bytes(b'\xef\xbb\xbf' + script.encode('utf-8'))
 lines = script.splitlines()
 assert all('"' not in line and '%' not in line for line in lines)
 command = '; '.join(lines)
