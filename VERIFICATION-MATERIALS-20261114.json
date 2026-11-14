@@ -1,0 +1,412 @@
+{
+  "source_commit": "842d6654666e20e606f31245cc20730807562ad8",
+  "baseline": "8e31f68080a9c746f409c1191caf167b421a939e",
+  "backend_tests_passed": 96,
+  "targeted_frontend_tests_before_math": 37,
+  "file_previewer_node_tests_passed": 3,
+  "integrated_math_tests_passed": 11,
+  "integrated_typecheck": "passed",
+  "eslint_errors_in_background_reference_html_scope": 0,
+  "inherited_mistake_lint": "existing setSelected-in-effect unchanged; new note math files and tests pass target lint",
+  "independent_math_tests_passed": 64,
+  "local_merged_electron": {
+    "multiple": true,
+    "saved_files": 21,
+    "library_retention": true,
+    "originals_byte_identical": true,
+    "original_preview_opened": true,
+    "held_real_chunk": true,
+    "chat_and_settings_navigation": true,
+    "appended_while_active": true,
+    "completed_in_chat": true,
+    "document_not_reloaded": true,
+    "draft_preserved": true,
+    "picker_reference_byte_identical": true,
+    "no_duplicate_upload_or_new_chat": true,
+    "html_safe_preview": true,
+    "source_toggle": true,
+    "device_speech": {
+      "available": true,
+      "localVoices": 0,
+      "noDesktopIPC": true,
+      "noNode": true,
+      "parentBlocked": true,
+      "observedStatus": "朗读完成"
+    },
+    "real_model_calls": 0
+  },
+  "math_preview": {
+    "passed": true,
+    "actualFullApplication": true,
+    "notesNewAndSavedTables": true,
+    "mistakeQuestionWorkAnalysisCorrection": true,
+    "views": [
+      {
+        "surface": "notes",
+        "width": 390,
+        "height": 844,
+        "horizontalOverflow": false,
+        "formulas": 9,
+        "rawTableMath": false
+      },
+      {
+        "surface": "notes",
+        "width": 844,
+        "height": 390,
+        "horizontalOverflow": false,
+        "formulas": 9,
+        "rawTableMath": false
+      },
+      {
+        "surface": "notes",
+        "width": 1366,
+        "height": 900,
+        "horizontalOverflow": false,
+        "formulas": 9,
+        "rawTableMath": false
+      },
+      {
+        "surface": "notes",
+        "width": 1920,
+        "height": 1080,
+        "horizontalOverflow": false,
+        "formulas": 9,
+        "rawTableMath": false
+      },
+      {
+        "surface": "mistakes",
+        "width": 390,
+        "height": 844,
+        "horizontalOverflow": false,
+        "formulas": 11,
+        "rawCommands": false
+      },
+      {
+        "surface": "mistakes",
+        "width": 844,
+        "height": 390,
+        "horizontalOverflow": false,
+        "formulas": 11,
+        "rawCommands": false
+      },
+      {
+        "surface": "mistakes",
+        "width": 1366,
+        "height": 900,
+        "horizontalOverflow": false,
+        "formulas": 11,
+        "rawCommands": false
+      },
+      {
+        "surface": "mistakes",
+        "width": 1920,
+        "height": 1080,
+        "horizontalOverflow": false,
+        "formulas": 11,
+        "rawCommands": false
+      }
+    ],
+    "consoleErrors": [],
+    "realLearnerData": false,
+    "modelCalls": 0
+  },
+  "source_freeze": "FROZEN-SOURCE.json",
+  "production_core_build": {
+    "run_id": 43579564634,
+    "workflow_commit": "5295f64f71c1b81786d502bbbee13fc2ef88b83b",
+    "passed": true,
+    "web_tests_passed": 228,
+    "web_suites": 24,
+    "core_receipt": {
+      "omitted_documentation_figures": [
+        {
+          "file": "core/assets/figs/system/chat-agent-loop.png",
+          "bytes": 914360
+        },
+        {
+          "file": "core/assets/figs/system/chat-agent-loop.svg",
+          "bytes": 4882
+        },
+        {
+          "file": "core/assets/figs/system/generate_diagrams.py",
+          "bytes": 6952
+        },
+        {
+          "file": "core/assets/figs/system/partners-architecture.png",
+          "bytes": 1127505
+        },
+        {
+          "file": "core/assets/figs/system/system architecture.png",
+          "bytes": 1107882
+        },
+        {
+          "file": "core/assets/figs/system/system-architecture.svg",
+          "bytes": 5704
+        },
+        {
+          "file": "core/assets/figs/web-dev/README.md",
+          "bytes": 1355
+        },
+        {
+          "file": "core/assets/figs/web-dev/agents.png",
+          "bytes": 167284
+        },
+        {
+          "file": "core/assets/figs/web-dev/appearance.png",
+          "bytes": 336385
+        },
+        {
+          "file": "core/assets/figs/web-dev/book-detail.png",
+          "bytes": 364726
+        },
+        {
+          "file": "core/assets/figs/web-dev/book-quiz.png",
+          "bytes": 364713
+        },
+        {
+          "file": "core/assets/figs/web-dev/book-widget.png",
+          "bytes": 376481
+        },
+        {
+          "file": "core/assets/figs/web-dev/books.png",
+          "bytes": 168129
+        },
+        {
+          "file": "core/assets/figs/web-dev/calendar.png",
+          "bytes": 223015
+        },
+        {
+          "file": "core/assets/figs/web-dev/chat.png",
+          "bytes": 312046
+        },
+        {
+          "file": "core/assets/figs/web-dev/cli-apps.png",
+          "bytes": 122180
+        },
+        {
+          "file": "core/assets/figs/web-dev/co-writer.png",
+          "bytes": 127893
+        },
+        {
+          "file": "core/assets/figs/web-dev/favorites.png",
+          "bytes": 140194
+        },
+        {
+          "file": "core/assets/figs/web-dev/journal.png",
+          "bytes": 218892
+        },
+        {
+          "file": "core/assets/figs/web-dev/knowledge-create.png",
+          "bytes": 403146
+        },
+        {
+          "file": "core/assets/figs/web-dev/knowledge.png",
+          "bytes": 128741
+        },
+        {
+          "file": "core/assets/figs/web-dev/learning-new.png",
+          "bytes": 188820
+        },
+        {
+          "file": "core/assets/figs/web-dev/learning.png",
+          "bytes": 187405
+        },
+        {
+          "file": "core/assets/figs/web-dev/manifest.json",
+          "bytes": 23636
+        },
+        {
+          "file": "core/assets/figs/web-dev/mastery-detail.png",
+          "bytes": 348584
+        },
+        {
+          "file": "core/assets/figs/web-dev/mastery.png",
+          "bytes": 135590
+        },
+        {
+          "file": "core/assets/figs/web-dev/mcp.png",
+          "bytes": 162529
+        },
+        {
+          "file": "core/assets/figs/web-dev/memory-graph.png",
+          "bytes": 2466100
+        },
+        {
+          "file": "core/assets/figs/web-dev/memory.png",
+          "bytes": 244005
+        },
+        {
+          "file": "core/assets/figs/web-dev/modules.png",
+          "bytes": 420644
+        },
+        {
+          "file": "core/assets/figs/web-dev/notebook-detail.png",
+          "bytes": 198148
+        },
+        {
+          "file": "core/assets/figs/web-dev/notebook-dito.png",
+          "bytes": 283795
+        },
+        {
+          "file": "core/assets/figs/web-dev/overview.png",
+          "bytes": 158198
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-dingtalk.png",
+          "bytes": 208232
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-discord.png",
+          "bytes": 249820
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-email.png",
+          "bytes": 239991
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-feishu.png",
+          "bytes": 253120
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-matrix.png",
+          "bytes": 244290
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-mattermost.png",
+          "bytes": 222086
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-mochat.png",
+          "bytes": 263099
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-msteams.png",
+          "bytes": 238550
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-napcat.png",
+          "bytes": 254915
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-qq.png",
+          "bytes": 210526
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-slack.png",
+          "bytes": 241955
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-telegram.png",
+          "bytes": 261337
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-wecom.png",
+          "bytes": 239294
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-weixin.png",
+          "bytes": 256923
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-whatsapp.png",
+          "bytes": 215690
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channel-zulip.png",
+          "bytes": 219962
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-channels.png",
+          "bytes": 208232
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-configure.png",
+          "bytes": 267015
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners-new.png",
+          "bytes": 219162
+        },
+        {
+          "file": "core/assets/figs/web-dev/partners.png",
+          "bytes": 133401
+        },
+        {
+          "file": "core/assets/figs/web-dev/personalization.png",
+          "bytes": 178243
+        },
+        {
+          "file": "core/assets/figs/web-dev/personas.png",
+          "bytes": 138824
+        },
+        {
+          "file": "core/assets/figs/web-dev/practice.png",
+          "bytes": 170870
+        },
+        {
+          "file": "core/assets/figs/web-dev/providers.png",
+          "bytes": 193874
+        },
+        {
+          "file": "core/assets/figs/web-dev/reading-detail.png",
+          "bytes": 215112
+        },
+        {
+          "file": "core/assets/figs/web-dev/reading.png",
+          "bytes": 137682
+        },
+        {
+          "file": "core/assets/figs/web-dev/resources.png",
+          "bytes": 179822
+        },
+        {
+          "file": "core/assets/figs/web-dev/settings-about.png",
+          "bytes": 266543
+        },
+        {
+          "file": "core/assets/figs/web-dev/settings-agents.png",
+          "bytes": 279069
+        },
+        {
+          "file": "core/assets/figs/web-dev/settings-parsing.png",
+          "bytes": 377782
+        },
+        {
+          "file": "core/assets/figs/web-dev/settings-video.png",
+          "bytes": 254153
+        },
+        {
+          "file": "core/assets/figs/web-dev/settings.png",
+          "bytes": 297682
+        },
+        {
+          "file": "core/assets/figs/web-dev/skills.png",
+          "bytes": 282687
+        },
+        {
+          "file": "core/assets/figs/web-dev/task-board.png",
+          "bytes": 151381
+        },
+        {
+          "file": "core/assets/figs/web-dev/workspace-switcher.png",
+          "bytes": 185674
+        }
+      ],
+      "source_commit": "842d6654666e20e606f31245cc20730807562ad8",
+      "backend_source_commit": "842d6654666e20e606f31245cc20730807562ad8",
+      "frontend_build": "hGEsbZ_PARcFRtdLpswdB",
+      "archive": "kaixin-core-20261114-materials.tar.gz",
+      "sha256": "d0498a88ec722d36be81d87d84fec08f1986fec6747780b6bb2185619b4c615d",
+      "bytes": 26739567,
+      "files": 3288,
+      "real_keys_used": false,
+      "personal_records_included": false
+    },
+    "actual_archive_public_readback_verified": true
+  },
+  "three_native_jobs": "pending",
+  "published": false,
+  "real_keys_used": false,
+  "real_learner_data_modified": false,
+  "usb_modified": false
+}

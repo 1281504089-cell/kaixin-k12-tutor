@@ -23,7 +23,9 @@ async def run():
  s=get_session_store();r=await s.create_session(title='attachment upgrade preservation');await s.add_message(r['id'],'user','synthetic retained learning record')
  t=get_task_board_store().create(CreateCard(title='synthetic retained task'),'').cards[-1]
  c=get_model_catalog_service();d=c.load();d['services']['llm']={'active_profile_id':'fixture','active_model_id':'fixture','profiles':[{'id':'fixture','name':'fixture','binding':'openai','base_url':'http://127.0.0.1:9/v1','api_key':'fixture-only-not-a-real-key','models':[{'id':'fixture','model':'gpt-4o-mini','name':'fixture'}]}]};c.save(d)
- return {'session_id':r['id'],'task_id':t.id}
+ from pathlib import Path
+ namespace={};exec(compile(Path('native-materials-fixture.py').read_text(encoding='utf-8'),'native-materials-fixture.py','exec'),namespace)
+ return {'session_id':r['id'],'task_id':t.id,**namespace['seed']()}
 print(json.dumps(asyncio.run(run())))
 ''',old)
  (home/'attachment-fixture.json').write_text(json.dumps(seeded))
@@ -35,11 +37,12 @@ print(json.dumps(asyncio.run(run())))
  (copied/'seed').mkdir();shutil.copyfile(resources/'seed/runtime.json',copied/'seed/runtime.json')
  package=copied/'app/package.json';pkg=json.loads(package.read_text());pkg['main']='src/update-flow.cjs';package.write_text(json.dumps(pkg,ensure_ascii=False))
  shutil.copyfile(root/'ci-update-flow.cjs',copied/'app/src/update-flow.cjs')
+ shutil.copyfile(root/'ci-materials-ui.cjs',copied/'app/src/materials-ui.cjs')
  for name in ['main.mjs','release-updates.mjs','update-network.mjs']:assert (copied/'app/src'/name).read_bytes()==(resources/'app/src'/name).read_bytes()
  if target.startswith('macos'):
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
- subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/'update-entry.json'),'KX_CANDIDATE_TAG':'student-20261114-library'},check=True,timeout=1000)
+ subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/'update-entry.json'),'KX_CANDIDATE_TAG':'student-20261114-materials'},check=True,timeout=1000)
  after=json.loads((home/'active.json').read_text());assert after['commit']==active['commit']
  preserved=python_probe('''
 import asyncio,json,os

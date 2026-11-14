@@ -1,0 +1,36 @@
+{
+  "electron": "45.1.0",
+  "productionComponent": true,
+  "originalAttachmentReadOnly": true,
+  "nativeSpeechStartAndEndObserved": true,
+  "actualAudioLoopbackCaptured": false,
+  "localVoiceCount": 191,
+  "clickToNativeStartMs": 251,
+  "boundaries": {
+    "parentBlocked": true,
+    "networkBlocked": true,
+    "arbitraryScriptBlocked": true,
+    "noNode": true,
+    "noDesktopIPC": true,
+    "noExternalLinks": true,
+    "permissionPolicy": true
+  },
+  "stopAndSourceTogglePassed": true,
+  "snapshots": [
+    {
+      "width": 1000,
+      "height": 900
+    },
+    {
+      "width": 600,
+      "height": 800
+    },
+    {
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "pageErrors": [],
+  "windowsTested": false,
+  "noPaidOrCloudTTS": true
+}

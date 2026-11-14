@@ -1,8 +1,8 @@
-name: Validate three native library bulk upload installers and upgrades
+name: Validate three native background materials and references installers and upgrades
 on:
   push:
-    branches: ['codex/library-native-20261114-*']
-    paths: ['attachment-batch.json', 'ci-attachment-native.py', 'native-report-smoke.py', 'ci_attachment_bridge.py', 'ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'ci_repackage.py', 'ci_update_probe.py', 'ci-update-flow.cjs', '.github/workflows/attachment-native.yml']
+    branches: ['codex/materials-native-20261114-*']
+    paths: ['attachment-batch.json', 'ci-attachment-native.py', 'native-report-smoke.py', 'ci_attachment_bridge.py', 'ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'ci_repackage.py', 'ci_update_probe.py', 'ci-update-flow.cjs', 'ci-materials-ui.cjs', 'native-materials-fixture.py', '.github/workflows/attachment-native.yml']
 permissions:
   contents: write
 jobs:
@@ -33,6 +33,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Record native candidate run
+        shell: bash
+        env:
+          KX_TARGET: ${{ matrix.target }}
+        run: |
+          python -c 'import json,os;open("native-run-"+os.environ["KX_TARGET"]+".json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
+          tag=$(python -c 'import json;print(json.load(open("attachment-batch.json"))["tag"])')
+          gh release upload "$tag" "native-run-${KX_TARGET}.json" --clobber
       - name: Prepare Windows packaging tool
         if: runner.os == 'Windows'
         run: choco install nsis --yes --no-progress

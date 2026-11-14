@@ -1,7 +1,7 @@
-name: Publish native verified library bulk upload batch
+name: Publish native verified background materials and references batch
 on:
   push:
-    branches: ['codex/library-publish-20261114-*']
+    branches: ['codex/materials-publish-20261114-*']
     paths: ['attachment-publication.json', 'ci-promote-attachments.py', '.github/workflows/attachment-publish.yml']
 permissions:
   contents: write
