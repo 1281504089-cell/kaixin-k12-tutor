@@ -1,0 +1,51 @@
+name: Validate read-only Windows migration diagnostic
+on:
+  push:
+    branches: ['codex/windows-migration-diagnostics-20261114-*']
+    paths: ['support/windows-real-machine-diagnostics/**', '.github/workflows/windows-diagnostic.yml']
+permissions:
+  contents: read
+jobs:
+  native-diagnostic:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          path: native diagnostic 中文
+      - name: Build final one-click collector
+        shell: powershell
+        working-directory: native diagnostic 中文/support/windows-real-machine-diagnostics
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5) { throw 'Windows PowerShell 5.1 is required' }
+          python build-collector.py
+          if ($LASTEXITCODE -ne 0) { throw 'Collector packaging failed' }
+          $freeze = Get-Content -LiteralPath COLLECTOR-FREEZE.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          foreach ($file in $freeze.files.PSObject.Properties) {
+            if ($file.Name.EndsWith('.zip')) { continue }
+            if ((Get-FileHash -LiteralPath $file.Name -Algorithm SHA256).Hash.ToLowerInvariant() -ne $file.Value.sha256) { throw ('Frozen bytes differ: '+$file.Name) }
+          }
+      - name: Run literal CMD with synthetic metadata and private sentinels
+        shell: powershell
+        working-directory: native diagnostic 中文/support/windows-real-machine-diagnostics
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path native-evidence -Force | Out-Null
+          $fixtureTemp = Join-Path $env:RUNNER_TEMP '诊断 fixture'
+          New-Item -ItemType Directory -Path $fixtureTemp -Force | Out-Null
+          $env:TEMP = $fixtureTemp
+          & .\test-collector.ps1 | Tee-Object -FilePath native-evidence/native-test.log
+          $global:LASTEXITCODE = 0
+          Get-FileHash -Algorithm SHA256 -LiteralPath .\Collect-WindowsUpdateDiagnostic.ps1,.\build-collector.py,.\test-collector.ps1,'.\双击检查Windows更新.cmd','.\Windows只读更新诊断.zip' | Format-List | Out-File -LiteralPath native-evidence/hashes.txt -Encoding utf8
+      - name: Retain diagnostic test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-read-only-diagnostic-proof
+          path: native diagnostic 中文/support/windows-real-machine-diagnostics/native-evidence/
+          if-no-files-found: warn

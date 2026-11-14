@@ -1,0 +1,27 @@
+{
+  "scope": "read-only collection; no deployment or installer writes",
+  "files": {
+    "Collect-WindowsUpdateDiagnostic.ps1": {
+      "sha256": "40d174fc2775b995540942a320bcfbb5da5a1a434dbb998a1e5dae86e26bf8e8",
+      "bytes": 6176
+    },
+    "build-collector.py": {
+      "sha256": "c2fcd8b4cc881b2603f4ed15483722cf7033f58bfe7fffc7ee99ef4c8cd84a2d",
+      "bytes": 1472
+    },
+    "双击检查Windows更新.cmd": {
+      "sha256": "47a791c334953bb9cba28b911ef7413aaad6d51fa93eb0459a24ab021a0a301e",
+      "bytes": 7148
+    },
+    "test-collector.ps1": {
+      "sha256": "10b07af88e5b781b6e85d1637344b61603a69bb4a0885274959fd70af1b6ea7a",
+      "bytes": 5804
+    },
+    "Windows只读更新诊断.zip": {
+      "sha256": "187da98d6570408c14c75cfd4b81c35bb9c5b8c341daf2f6da97dc79618c6eb1",
+      "bytes": 2868
+    }
+  },
+  "native_windows_test": "pending",
+  "profile_content_access": "public signed manifests only; no chats, settings, databases or private keys"
+}
