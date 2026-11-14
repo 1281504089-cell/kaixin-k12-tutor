@@ -1,13 +1,187 @@
 {
-  "signature_verified_manifests": 27,
-  "native_platform": "darwin",
-  "native_arch": "x64",
-  "transport": "production Chromium update session",
-  "previous_materials_full_runtime_gets_small_update": true,
-  "downloaded_core_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "downloaded_sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1",
-  "selected_native_base": "1.7.1-kaixin-20261114-materials-macos-x64-universal",
-  "current_full_install_does_not_downgrade": true,
-  "earliest_base_gets_automatic_native_bridge": true,
-  "real_user_profile_modified": false
+  "tag": "student-20261115-updater2",
+  "release_id": 445554770,
+  "release_repository_commit": "c39327be8273bd2f8a08e9ad88135e18bcd79b2f",
+  "all_30_signed_manifests_read_back": [
+    {
+      "file": "runtime-windows-x64-20261115-updater2-20261112.json",
+      "sha256": "7a545f3f5f838b8efd22591029f563921f4c87f959e773492fd5520a739fb7a4",
+      "bytes": 642
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-bb8f5191555d.json",
+      "sha256": "0bdb563c0c0d6fffabec049cab7eaf6e177830dd902469a048970c0bbc67f1e0",
+      "bytes": 681
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-573f105ed118.json",
+      "sha256": "45e6ebf56a59b8698731fc92bedd40fc558eca10a0edadfe267962b02764395a",
+      "bytes": 679
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-9b7c2b84f908.json",
+      "sha256": "8d0d6c1d3889f5665c03bbcf9506706050f2975f5d1d30ff75f26608af01b5c8",
+      "bytes": 684
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-3e01c184c6a4.json",
+      "sha256": "9025bbba282bdcdae7b80e2add3c1a9babb1d7900729facb271517ae3bd2730d",
+      "bytes": 687
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-7a52e2cacc9f.json",
+      "sha256": "087cf54487144c51f97ef92ef22723b7940c910753a11bc0cbc136b29e8b2ea9",
+      "bytes": 682
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-e4abdb1cb594.json",
+      "sha256": "cf12c8de44e7b8ddcc84e8be279ad5036603bc30777579d19099e347b44d5d45",
+      "bytes": 683
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-base-afb4dfe97ae4.json",
+      "sha256": "5406960ac00392a32bf63a167e5ce936b05cf1cab314f9fc0487296e1f77de1d",
+      "bytes": 685
+    },
+    {
+      "file": "runtime-windows-x64-20261115-updater2-prior-current.json",
+      "sha256": "6e93ec285d0ee632911da699407e7e7b79d8c3500de88e576728648b922960df",
+      "bytes": 677
+    },
+    {
+      "file": "runtime-windows-x64.json",
+      "sha256": "71c5b3f6637cb3428cc8f6c1051f17cb9b158a44ab3827940093424b34472a5d",
+      "bytes": 2115
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-20261112.json",
+      "sha256": "1842c2cfb2818ac0584f4b1e697ccefc50983cbc93238e3424194ecc9d9c0893",
+      "bytes": 641
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-e2a196e1e65a.json",
+      "sha256": "b4e752eedf846fb6d17c47da243498908949926a56130d83be1c55697e11e3c4",
+      "bytes": 678
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-681a198cf308.json",
+      "sha256": "7521764e2a69427071043226fcfe3b83988a03ccd023982dacbbaa424c7c0e35",
+      "bytes": 676
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-170a15b2f1a2.json",
+      "sha256": "a45bc28fd47521686c59e00106a6770b27257ef1a52ed01563eca8ace489af99",
+      "bytes": 681
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-22eb20a39a60.json",
+      "sha256": "d914ac2757867a478cea1c9e581b28b842433983df5542fc51106ef05d48f096",
+      "bytes": 684
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-80115ecd6d3d.json",
+      "sha256": "ab19e8b1e7ad13ced0c0791db85e4bb99537921b6572d8057c512382b10c9d82",
+      "bytes": 679
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-c452d12cb482.json",
+      "sha256": "e53125ff0d046b72e853d2b069c8c7957b409144fe8110d03159b59f440402f4",
+      "bytes": 680
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-base-c41831772671.json",
+      "sha256": "6dc7cedd8532cfde19c5d575c4ae2f3624d56b285a39e737678393fa47be6b6c",
+      "bytes": 682
+    },
+    {
+      "file": "runtime-macos-x64-20261115-updater2-prior-current.json",
+      "sha256": "336637b6e54d8e53d7be09acc084c8ead67026f01a542cd2b26c0284caba2fcb",
+      "bytes": 674
+    },
+    {
+      "file": "runtime-macos-x64.json",
+      "sha256": "d1d8a8c08753b7f84dc8403472bfbd4142baf4f1e29b49beb696ed6dddab4a08",
+      "bytes": 2078
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-20261112.json",
+      "sha256": "30dfa118a4d23805ff3d6282139ad72bd0d6b3d45172a84d25dea0b739a276b9",
+      "bytes": 647
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-7744dbeb8d09.json",
+      "sha256": "8a0913ad0c4a04e35eaf2411b01966317b47eb73cd6cb5037ff2d363388e3a1c",
+      "bytes": 684
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-7056f6bb9861.json",
+      "sha256": "a5af1bcbb4009caf717ea3239143d7fb5a0cdee2bf129b81639f32394d418552",
+      "bytes": 682
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-b445b7c83c4d.json",
+      "sha256": "28fd1309c4607ba8208547173a5ad724ce98d67b5733904e255cdfd3fa8307d2",
+      "bytes": 687
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-c09b1d53f8d0.json",
+      "sha256": "3f1e3c5748e4bc84b885b905d0bf343972df6687bde026637053789641d0f824",
+      "bytes": 690
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-194178f05eea.json",
+      "sha256": "cbee9cc4f48ecc4bb409095aa1b91eb567fb182e628b1a73f428f6b4d0ee7dbb",
+      "bytes": 685
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-6f6222533fad.json",
+      "sha256": "06f3aceb48c4ce3ed7e6a02828ef66e494eb4d53c7c9274e14547fc822b9e409",
+      "bytes": 686
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-base-b83c8329037e.json",
+      "sha256": "6e892b784020fb4dbc2c3dd015ad8b42971676ec0e8495c276891bcd7e097c8c",
+      "bytes": 688
+    },
+    {
+      "file": "runtime-macos-arm64-20261115-updater2-prior-current.json",
+      "sha256": "5663ab0495b40b7a12ec30bf717672d3835cd27b35a0e4f56705320f19a0bf93",
+      "bytes": 680
+    },
+    {
+      "file": "runtime-macos-arm64.json",
+      "sha256": "9d9f918f6e4c2ed4fbc31273bdab6c198140853fef0ee2438e2d4f4157295f52",
+      "bytes": 2120
+    }
+  ],
+  "all_4_archives_metadata_match_prepublication_full_hash_verification": true,
+  "latest_is_formal": true,
+  "native_systems_passed": 3,
+  "physical_student_devices_all_tested": false,
+  "usb_written": false,
+  "local_actual_online_update": {
+    "final_source": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+    "actual_online_update_completed": true,
+    "entry": "Settings > About > Check for updates",
+    "formal_tag": "student-20261115-updater2",
+    "product_version": "1.7.1",
+    "runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-base-c41831772671",
+    "core_bytes": 26822596,
+    "core_sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265",
+    "signature_verified": true,
+    "download_confirmed_in_real_ui": true,
+    "install_completion_seen_in_real_ui": true,
+    "check_again_current": true,
+    "normal_launcher_quit_and_reopen_preview_passed": true,
+    "launcher_build": "20261115-updater-1",
+    "launcher_files_verified": 24,
+    "chat_databases_logically_compared": 10,
+    "all_existing_rows_preserved": true,
+    "settings_files_unchanged": 19,
+    "real_learning_content_uploaded": false,
+    "private_key_uploaded": false,
+    "observed_at": "2026-11-14T20:59:45.728Z",
+    "manual_cancel_not_completed_in_this_machine": true,
+    "manual_maintenance_json_picker_not_claimed_as_passed": true
+  }
 }

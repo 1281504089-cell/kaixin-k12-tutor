@@ -1,31 +1,69 @@
 {
   "formatVersion": 1,
   "repository": "1281504089-cell/kaixin-k12-tutor",
-  "tag": "student-20261114-audio",
-  "release_id": 445374839,
-  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio",
-  "release_repository_commit": "3eeec89f254a1f40291fcdcca85c311435d4bac7",
-  "combined_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "learning_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "backend_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "baseline_source_commit": "842d6654666e20e606f31245cc20730807562ad8",
-  "frontend_build_id": "Szyy3eF5IipMu4w1wdHdd",
-  "launcher_build": "20261114-unified",
-  "builtAt": 1794668769140,
-  "core_archive": "kaixin-core-20261114-audio.tar.gz",
-  "core_sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1",
-  "core_bytes": 26768307,
+  "tag": "student-20261115-updater2",
+  "release_id": 445554770,
+  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2",
+  "release_repository_commit": "c39327be8273bd2f8a08e9ad88135e18bcd79b2f",
+  "combined_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "learning_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "backend_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "baseline_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
+  "frontend_build_id": "rtJU0P7rSX14y6phR8Rtz",
+  "launcher_build": "20261115-updater-1",
+  "builtAt": 1794686728087,
+  "core_archive": "kaixin-core-20261115-updater2.tar.gz",
+  "core_sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265",
+  "core_bytes": 26822596,
   "platforms": {
     "windows-x64": {
       "native_run": {
-        "run_id": 43609376062,
-        "workflow_commit": "4ce2f52cd682a6dea6f8fe5271c814ff84d830bf"
+        "run_id": 43635618684,
+        "workflow_commit": "0c980411e42a129d756435edf8eaa5938e3ca3b8"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43609376062/job/132490843209",
-      "new_install_runtime": "1.7.1-kaixin-20261114-audio-windows-x64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43635618684/job/132571639868",
+      "new_install_runtime": "1.7.1-kaixin-20261115-updater2-windows-x64-20261112",
       "stable_manifest": "runtime-windows-x64.json",
-      "stable_manifest_sha256": "74cc26b4856cc9c8fc90033ddba59dce92b75233a4eba7352efa797ec11af590",
-      "stable_runtime": "1.7.1-kaixin-20261114-audio-windows-x64-universal",
+      "stable_manifest_sha256": "71c5b3f6637cb3428cc8f6c1051f17cb9b158a44ab3827940093424b34472a5d",
+      "stable_runtime": "1.7.1-kaixin-20261115-updater2-windows-x64-universal",
+      "compatible_base_manifests": [
+        {
+          "baseRuntimeId": "1.7.1-04276f68a-x64",
+          "file": "runtime-windows-x64-20261115-updater2-20261112.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-bb8f5191555d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-stt-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-573f105ed118.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-projects-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-9b7c2b84f908.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-3e01c184c6a4.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-review-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-7a52e2cacc9f.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-library-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-e4abdb1cb594.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-materials-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-base-afb4dfe97ae4.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-audio-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-updater2-prior-current.json"
+        }
+      ],
       "complete_installation_files": [
         {
           "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
@@ -49,2235 +87,484 @@
         },
         {
           "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
-          "bytes": 186582220,
-          "sha256": "39d6f17ad4c08122cd04661b107aa1e9b0e3c3f7770da97ecfe07ccc6f53041b"
+          "bytes": 186650476,
+          "sha256": "8e57ee276e3b10538afdc7eeb4b785ea2ef5b569e5eb5a14cb817cca8a5fa844"
         }
       ],
-      "migration_file": {
-        "file": "Kaixin-Launcher-Migration-d3214451efd0-windows-x64-Setup.exe",
-        "bytes": 159892786,
-        "sha256": "4650036eae7ea9f7a713fbee8eb008547d94e6677dd71c53a01786f3f6f13ea6",
-        "release_tag": "student-20261114-unified"
-      },
-      "launcher_migration_retested_in_this_release": false,
+      "launcher_migration_retested_in_this_release": true,
       "native_installation": "passed",
       "native_core_update": "passed",
       "existing_synthetic_records_preserved": true,
-      "study_reports": {
-        "passed": true,
-        "native_platform": "win32",
-        "python": "3.12.13",
-        "cases": [
-          {
-            "subject": "chinese",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "math",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "english",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "physics",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "chemistry",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "biology",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "history",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "geography",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "politics",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          }
-        ],
-        "real_model_calls": 0,
-        "real_learner_data_used": false,
-        "model_semantic_quality_tested": false
+      "native_proof_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/verification-windows-x64.json",
+      "native_proof_sha256": "e4d8b266f48a59e0cb3507b96abcec2d10c4a81b3e789a9a3380edc5ac54e71d",
+      "oldest_launcher_entry": {
+        "actual_download_install_backup_restart": "passed",
+        "check_again_current": true,
+        "signed_launcher_restarted": true,
+        "from_launcher": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
+        "to_launcher": "20261115-updater-1",
+        "old_pid": 9176,
+        "restarted_pid": 8500,
+        "chat_preserved": true,
+        "task_preserved": true,
+        "saved_key_preserved": true
       },
-      "attachment_uploads": {
-        "raw_originals_verified": true,
-        "temporary_excluded_from_library": true,
-        "short_pdf_pages": 2,
-        "concurrent_library_uploads_saved": true,
-        "scanned_pdf_retrievable": true,
-        "sources": 3,
-        "interactive_page_ready_while_indexing_seconds": 8.828,
-        "temporary_raw_seconds": 3.0,
-        "library_raw_seconds": [
-          0.141,
-          3.344
-        ],
-        "background_and_retrieval_seconds": 26.719,
-        "health_max_seconds": 0.734,
-        "real_api_key_used": false,
-        "cloud_models_used": false
+      "new_launcher_small_update_entry": {
+        "actual_download_install_backup_restart": "passed",
+        "check_again_current": true,
+        "download_progress_visible": true,
+        "downloaded_bytes_visible": true,
+        "from_launcher": "20261115-updater-1",
+        "to_launcher": "20261115-updater-1",
+        "chat_preserved": true,
+        "task_preserved": true,
+        "saved_key_preserved": true
       },
-      "library_bulk_upload": {
-        "multiple": true,
-        "saved_files": 21,
-        "library_retention": true,
-        "originals_byte_identical": true,
-        "original_preview_opened": true,
-        "held_real_chunk": true,
-        "chat_and_settings_navigation": true,
-        "appended_while_active": true,
-        "completed_in_chat": true,
-        "document_not_reloaded": true,
+      "regressions": {
+        "textbooks": 136,
+        "study_reports_passed": true,
+        "study_report_subject_cases": 9,
+        "attachment_uploads": true,
+        "library_saved_files": 21,
         "draft_preserved": true,
-        "picker_reference_byte_identical": true,
-        "no_duplicate_upload_or_new_chat": true,
-        "html_safe_preview": true,
-        "source_toggle": true,
-        "device_speech": {
-          "attachmentScriptBlocked": true,
-          "available": true,
-          "localVoices": 0,
-          "networkBlocked": true,
-          "noDesktopIPC": true,
-          "noNode": true,
-          "parentBlocked": true,
-          "diagnostic": {
-            "available": true,
-            "events": [
-              {
-                "charIndex": 0,
-                "elapsedTime": 664.2000122070312,
-                "error": "synthesis-failed",
-                "type": "error"
-              }
-            ],
-            "language": "en-US",
-            "localVoices": [
-              {
-                "lang": "en-US",
-                "name": "Microsoft David - English (United States)"
-              },
-              {
-                "lang": "en-US",
-                "name": "Microsoft Mark - English (United States)"
-              },
-              {
-                "lang": "en-US",
-                "name": "Microsoft Zira - English (United States)"
-              }
-            ],
-            "nativeEnded": false,
-            "observedStatus": "设备朗读未能播放，请检查系统声音后重试。",
-            "physicalSpeakerOrLoopbackCaptured": false,
-            "timedOut": false,
-            "voice": {
-              "lang": "en-US",
-              "local": true,
-              "name": "Microsoft David - English (United States)"
-            }
-          },
-          "observedStatus": "设备朗读未能播放，请检查系统声音后重试。",
-          "playbackVerified": false,
-          "diagnosticOnly": true
-        },
-        "native_math_display": true,
-        "real_model_calls": 0
-      },
-      "chat_audio": {
-        "passed": true,
-        "persisted_file_play_and_history_replay": true,
-        "selected_text_tts_and_stop": true,
-        "chat_model_calls": 0,
-        "failure_notice_verified": true,
-        "physical_speaker_verified": false
-      },
-      "science_formulas": {
-        "passed": true,
-        "viewport_surface_states": 16,
-        "original_edit_checks": 18,
-        "cases": [
-          "physics-vector",
-          "physics-units",
-          "physics-derivative",
-          "physics-electricity",
-          "chemistry-charge",
-          "chemistry-reversible",
-          "chemistry-conditions",
-          "chemistry-isotope",
-          "chemistry-chinese-conditions",
-          "biology-photosynthesis",
-          "geography-ratio",
-          "science-physical-units"
-        ],
-        "model_answer_quality_tested": false
+        "chat_and_settings_navigation": true,
+        "originals_byte_identical": true,
+        "chat_audio_passed": true,
+        "science_formulas_passed": true,
+        "science_views": 16
       }
     },
     "macos-x64": {
       "native_run": {
-        "run_id": 43609376062,
-        "workflow_commit": "4ce2f52cd682a6dea6f8fe5271c814ff84d830bf"
+        "run_id": 43635618684,
+        "workflow_commit": "0c980411e42a129d756435edf8eaa5938e3ca3b8"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43609376062/job/132490843135",
-      "new_install_runtime": "1.7.1-kaixin-20261114-audio-macos-x64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43635618684/job/132571639657",
+      "new_install_runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-20261112",
       "stable_manifest": "runtime-macos-x64.json",
-      "stable_manifest_sha256": "76b2916855edff6d4a1509ecdc764fe70c118627a91e1076dd0c423e54fd143b",
-      "stable_runtime": "1.7.1-kaixin-20261114-audio-macos-x64-universal",
-      "complete_installation_files": [
+      "stable_manifest_sha256": "d1d8a8c08753b7f84dc8403472bfbd4142baf4f1e29b49beb696ed6dddab4a08",
+      "stable_runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-universal",
+      "compatible_base_manifests": [
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.002.dmgpart",
-          "bytes": 1992295135,
-          "sha256": "04d30d504d3a29d1765c6d8267a2b999ff365ede8d260ed9d73294343af1d4bb"
+          "baseRuntimeId": "1.7.1-04276f68a-x64",
+          "file": "runtime-macos-x64-20261115-updater2-20261112.json"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.003.dmgpart",
-          "bytes": 1992295135,
-          "sha256": "6ad1f18fad352fd841da2a148aa292a37681d7ca208ff29b085b84a751ab3dc9"
+          "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-e2a196e1e65a.json"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.004.dmgpart",
-          "bytes": 1183249420,
-          "sha256": "4cb56cde51ada30313b4d7e67b5ad2eb3c0da116638928cfac3df9c7f7ee86f6"
+          "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-681a198cf308.json"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.dmg",
-          "bytes": 1992732392,
-          "sha256": "9f0790861a589f83abaa4c92c7417bb8e10e45dd961bcfc9ae02c459c55b22ea"
+          "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-170a15b2f1a2.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-22eb20a39a60.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-80115ecd6d3d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-c452d12cb482.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-base-c41831772671.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-updater2-prior-current.json"
         }
       ],
-      "migration_file": {
-        "file": "Kaixin-Launcher-Migration-d3214451efd0-macos-x64.zip",
-        "bytes": 128816569,
-        "sha256": "6e0f55d4aecf9d10e58c6bd8ae709469e6dedc21e0053beb28ec0bb0c509c585",
-        "release_tag": "student-20261114-unified"
-      },
-      "launcher_migration_retested_in_this_release": false,
+      "complete_installation_files": [
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "67f4578b06b147fc4ba089da9c6942134e5683d91efd32f577759f08c1081765"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "7a5f5ab6db38b1fdf600ba6434c430ecb494fd823ed7b93fa7c17be082a16504"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.004.dmgpart",
+          "bytes": 1183258778,
+          "sha256": "889f590c8f53aec6641afaca4e357341ed85b212206729e43b797bd5656c32cb"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.dmg",
+          "bytes": 1992731434,
+          "sha256": "b37a78518970c72a1f7331d9a7e403b4fa5c05002b3dac4daae372f46497ee76"
+        }
+      ],
+      "launcher_migration_retested_in_this_release": true,
       "native_installation": "passed",
       "native_core_update": "passed",
       "existing_synthetic_records_preserved": true,
-      "study_reports": {
-        "passed": true,
-        "native_platform": "darwin",
-        "python": "3.12.13",
-        "cases": [
-          {
-            "subject": "chinese",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "math",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "english",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "physics",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "chemistry",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "biology",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "history",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "geography",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "politics",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          }
-        ],
-        "real_model_calls": 0,
-        "real_learner_data_used": false,
-        "model_semantic_quality_tested": false
+      "native_proof_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/verification-macos-x64.json",
+      "native_proof_sha256": "d5986c80e53ee1838b5b04511869a6532a8776785a3dcdeb4b7b59a9be543e03",
+      "oldest_launcher_entry": {
+        "actual_download_install_backup_restart": "passed",
+        "check_again_current": true,
+        "signed_launcher_restarted": true,
+        "from_launcher": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
+        "to_launcher": "20261115-updater-1",
+        "old_pid": 30952,
+        "restarted_pid": 35074,
+        "chat_preserved": true,
+        "task_preserved": true,
+        "saved_key_preserved": true
       },
-      "attachment_uploads": {
-        "raw_originals_verified": true,
-        "temporary_excluded_from_library": true,
-        "short_pdf_pages": 2,
-        "concurrent_library_uploads_saved": true,
-        "scanned_pdf_retrievable": true,
-        "sources": 3,
-        "interactive_page_ready_while_indexing_seconds": 12.873,
-        "temporary_raw_seconds": 2.82,
-        "library_raw_seconds": [
-          0.332,
-          3.548
-        ],
-        "background_and_retrieval_seconds": 40.856,
-        "health_max_seconds": 0.424,
-        "real_api_key_used": false,
-        "cloud_models_used": false
+      "new_launcher_small_update_entry": {
+        "actual_download_install_backup_restart": "passed",
+        "check_again_current": true,
+        "download_progress_visible": true,
+        "downloaded_bytes_visible": true,
+        "from_launcher": "20261115-updater-1",
+        "to_launcher": "20261115-updater-1",
+        "chat_preserved": true,
+        "task_preserved": true,
+        "saved_key_preserved": true
       },
-      "library_bulk_upload": {
-        "multiple": true,
-        "saved_files": 21,
-        "library_retention": true,
-        "originals_byte_identical": true,
-        "original_preview_opened": true,
-        "held_real_chunk": true,
-        "chat_and_settings_navigation": true,
-        "appended_while_active": true,
-        "completed_in_chat": true,
-        "document_not_reloaded": true,
+      "regressions": {
+        "textbooks": 136,
+        "study_reports_passed": true,
+        "study_report_subject_cases": 9,
+        "attachment_uploads": true,
+        "library_saved_files": 21,
         "draft_preserved": true,
-        "picker_reference_byte_identical": true,
-        "no_duplicate_upload_or_new_chat": true,
-        "html_safe_preview": true,
-        "source_toggle": true,
-        "device_speech": {
-          "attachmentScriptBlocked": true,
-          "available": true,
-          "localVoices": 0,
-          "networkBlocked": true,
-          "noDesktopIPC": true,
-          "noNode": true,
-          "parentBlocked": true,
-          "diagnostic": {
-            "available": true,
-            "events": [
-              {
-                "charIndex": 0,
-                "elapsedTime": 82.5,
-                "type": "start"
-              },
-              {
-                "charIndex": 0,
-                "elapsedTime": 7780.5,
-                "type": "end"
-              }
-            ],
-            "language": "en-US",
-            "localVoices": [
-              {
-                "lang": "en-US",
-                "name": "Samantha"
-              },
-              {
-                "lang": "en-US",
-                "name": "Aaron"
-              },
-              {
-                "lang": "en-US",
-                "name": "Albert"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Alice"
-              },
-              {
-                "lang": "sv-SE",
-                "name": "Alva"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Amélie"
-              },
-              {
-                "lang": "ms-MY",
-                "name": "Amira"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Anna"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Arthur"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bad News"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bahh"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bells"
-              },
-              {
-                "lang": "en-US",
-                "name": "Boing"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bubbles"
-              },
-              {
-                "lang": "he-IL",
-                "name": "Carmit"
-              },
-              {
-                "lang": "en-AU",
-                "name": "Catherine"
-              },
-              {
-                "lang": "en-US",
-                "name": "Cellos"
-              },
-              {
-                "lang": "id-ID",
-                "name": "Damayanti"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Daniel (English (United Kingdom))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Daniel (French (France))"
-              },
-              {
-                "lang": "bg-BG",
-                "name": "Daria"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Eddy (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Eddy (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Eddy (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Eddy (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Eddy (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Eddy (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Eddy (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Eddy (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Eddy (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Eddy (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Eddy (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Eddy (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Eddy (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Eddy (Chinese (Taiwan))"
-              },
-              {
-                "lang": "nl-BE",
-                "name": "Ellen"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Flo (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Flo (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Flo (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Flo (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Flo (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Flo (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Flo (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Flo (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Flo (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Flo (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Flo (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Flo (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Flo (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Flo (Chinese (Taiwan))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Fred"
-              },
-              {
-                "lang": "en-US",
-                "name": "Good News"
-              },
-              {
-                "lang": "en-AU",
-                "name": "Gordon"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Grandma (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Grandma (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Grandma (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Grandma (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Grandma (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Grandma (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Grandma (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Grandma (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Grandma (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Grandma (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Grandma (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Grandma (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Grandma (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Grandma (Chinese (Taiwan))"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Grandpa (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Grandpa (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Grandpa (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Grandpa (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Grandpa (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Grandpa (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Grandpa (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Grandpa (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Grandpa (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Grandpa (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Grandpa (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Grandpa (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Grandpa (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Grandpa (Chinese (Taiwan))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Hattori"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Helena"
-              },
-              {
-                "lang": "ro-RO",
-                "name": "Ioana"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Jacques"
-              },
-              {
-                "lang": "en-US",
-                "name": "Jester"
-              },
-              {
-                "lang": "pt-PT",
-                "name": "Joana"
-              },
-              {
-                "lang": "en-US",
-                "name": "Junior"
-              },
-              {
-                "lang": "th-TH",
-                "name": "Kanya"
-              },
-              {
-                "lang": "en-AU",
-                "name": "Karen"
-              },
-              {
-                "lang": "en-US",
-                "name": "Kathy"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Kyoko"
-              },
-              {
-                "lang": "hr-HR",
-                "name": "Lana"
-              },
-              {
-                "lang": "sk-SK",
-                "name": "Laura"
-              },
-              {
-                "lang": "hi-IN",
-                "name": "Lekha"
-              },
-              {
-                "lang": "uk-UA",
-                "name": "Lesya"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Li-Mu"
-              },
-              {
-                "lang": "vi-VN",
-                "name": "Linh"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Luciana"
-              },
-              {
-                "lang": "ar-001",
-                "name": "Majed"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Marie"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Martha"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Martin"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Meijia"
-              },
-              {
-                "lang": "el-GR",
-                "name": "Melina"
-              },
-              {
-                "lang": "ru-RU",
-                "name": "Milena"
-              },
-              {
-                "lang": "en-IE",
-                "name": "Moira"
-              },
-              {
-                "lang": "ca-ES",
-                "name": "Montse"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Mónica"
-              },
-              {
-                "lang": "en-US",
-                "name": "Nicky"
-              },
-              {
-                "lang": "nb-NO",
-                "name": "Nora"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "O-Ren"
-              },
-              {
-                "lang": "en-US",
-                "name": "Organ"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Paulina"
-              },
-              {
-                "lang": "en-US",
-                "name": "Ralph"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Reed (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Reed (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Reed (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Reed (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Reed (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Reed (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Reed (French (Canada))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Reed (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Reed (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Reed (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Reed (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Reed (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Reed (Chinese (Taiwan))"
-              },
-              {
-                "lang": "en-IN",
-                "name": "Rishi"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Rocko (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Rocko (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Rocko (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Rocko (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Rocko (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Rocko (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Rocko (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Rocko (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Rocko (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Rocko (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Rocko (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Rocko (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Rocko (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Rocko (Chinese (Taiwan))"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Sandy (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Sandy (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Sandy (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Sandy (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Sandy (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Sandy (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Sandy (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Sandy (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Sandy (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Sandy (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Sandy (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Sandy (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Sandy (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Sandy (Chinese (Taiwan))"
-              },
-              {
-                "lang": "da-DK",
-                "name": "Sara"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Satu"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Shelley (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Shelley (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Shelley (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Shelley (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Shelley (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Shelley (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Shelley (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Shelley (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Shelley (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Shelley (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Shelley (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Shelley (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Shelley (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Shelley (Chinese (Taiwan))"
-              },
-              {
-                "lang": "zh-HK",
-                "name": "Sinji"
-              },
-              {
-                "lang": "en-US",
-                "name": "Superstar"
-              },
-              {
-                "lang": "en-ZA",
-                "name": "Tessa"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Thomas"
-              },
-              {
-                "lang": "sl-SI",
-                "name": "Tina"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Tingting"
-              },
-              {
-                "lang": "en-US",
-                "name": "Trinoids"
-              },
-              {
-                "lang": "hu-HU",
-                "name": "Tünde"
-              },
-              {
-                "lang": "ta-IN",
-                "name": "Vani"
-              },
-              {
-                "lang": "en-US",
-                "name": "Whisper"
-              },
-              {
-                "lang": "en-US",
-                "name": "Wobble"
-              },
-              {
-                "lang": "nl-NL",
-                "name": "Xander"
-              },
-              {
-                "lang": "tr-TR",
-                "name": "Yelda"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Yu-shu"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Yuna"
-              },
-              {
-                "lang": "en-US",
-                "name": "Zarvox"
-              },
-              {
-                "lang": "pl-PL",
-                "name": "Zosia"
-              },
-              {
-                "lang": "cs-CZ",
-                "name": "Zuzana"
-              }
-            ],
-            "nativeEnded": true,
-            "observedStatus": "朗读完成",
-            "physicalSpeakerOrLoopbackCaptured": false,
-            "timedOut": false,
-            "voice": {
-              "lang": "en-US",
-              "local": true,
-              "name": "Samantha"
-            }
-          },
-          "observedStatus": "朗读完成",
-          "playbackVerified": true,
-          "diagnosticOnly": true
-        },
-        "native_math_display": true,
-        "real_model_calls": 0
-      },
-      "chat_audio": {
-        "passed": true,
-        "persisted_file_play_and_history_replay": true,
-        "selected_text_tts_and_stop": true,
-        "chat_model_calls": 0,
-        "failure_notice_verified": true,
-        "physical_speaker_verified": false
-      },
-      "science_formulas": {
-        "passed": true,
-        "viewport_surface_states": 16,
-        "original_edit_checks": 18,
-        "cases": [
-          "physics-vector",
-          "physics-units",
-          "physics-derivative",
-          "physics-electricity",
-          "chemistry-charge",
-          "chemistry-reversible",
-          "chemistry-conditions",
-          "chemistry-isotope",
-          "chemistry-chinese-conditions",
-          "biology-photosynthesis",
-          "geography-ratio",
-          "science-physical-units"
-        ],
-        "model_answer_quality_tested": false
+        "chat_and_settings_navigation": true,
+        "originals_byte_identical": true,
+        "chat_audio_passed": true,
+        "science_formulas_passed": true,
+        "science_views": 16
       }
     },
     "macos-arm64": {
       "native_run": {
-        "run_id": 43609376062,
-        "workflow_commit": "4ce2f52cd682a6dea6f8fe5271c814ff84d830bf"
+        "run_id": 43635618684,
+        "workflow_commit": "0c980411e42a129d756435edf8eaa5938e3ca3b8"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43609376062/job/132490842982",
-      "new_install_runtime": "1.7.1-kaixin-20261114-audio-macos-arm64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43635618684/job/132571639948",
+      "new_install_runtime": "1.7.1-kaixin-20261115-updater2-macos-arm64-20261112",
       "stable_manifest": "runtime-macos-arm64.json",
-      "stable_manifest_sha256": "21584d779d9dbac0724eaa7882d807a6cc05eb41b09b4f75e117bf1405f9d5dc",
-      "stable_runtime": "1.7.1-kaixin-20261114-audio-macos-arm64-universal",
-      "complete_installation_files": [
+      "stable_manifest_sha256": "9d9f918f6e4c2ed4fbc31273bdab6c198140853fef0ee2438e2d4f4157295f52",
+      "stable_runtime": "1.7.1-kaixin-20261115-updater2-macos-arm64-universal",
+      "compatible_base_manifests": [
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.002.dmgpart",
-          "bytes": 1992295135,
-          "sha256": "1119b56772e3ded89f57a2cc1fc1e13fd1a6e6807cdafcc480074cd2db930c61"
+          "baseRuntimeId": "1.7.1-04276f68a-arm64",
+          "file": "runtime-macos-arm64-20261115-updater2-20261112.json"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.003.dmgpart",
-          "bytes": 1992295135,
-          "sha256": "caeae34cfd141320069c8b29767e0bfe0d7ce7b352373211dc7a639cf277e474"
+          "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-7744dbeb8d09.json"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.004.dmgpart",
-          "bytes": 1114120986,
-          "sha256": "8dc070f0d02be2a0056b70388b031789be3a1fed74c299b99f9276c26274bc60"
+          "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-7056f6bb9861.json"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.dmg",
-          "bytes": 1992728343,
-          "sha256": "86d4ca7eda80946c7ce7aae02c317874bed5ab1dd6a9dda219de971447fa043a"
+          "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-b445b7c83c4d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-c09b1d53f8d0.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-194178f05eea.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-6f6222533fad.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-base-b83c8329037e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-updater2-prior-current.json"
         }
       ],
-      "migration_file": {
-        "file": "Kaixin-Launcher-Migration-d3214451efd0-macos-arm64.zip",
-        "bytes": 122802302,
-        "sha256": "43f32b93155c5e3a5fbd25b81b3248d51fc095d276733881eea6899697b07fbe",
-        "release_tag": "student-20261114-unified"
-      },
-      "launcher_migration_retested_in_this_release": false,
+      "complete_installation_files": [
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "da7b3fe6dd331216724034d5d4936d6bdc8830f504c1164e4b75fcfc4702e0c2"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "c49f9eeed3c664063050d04c14a710ae9f94d8b1ddf0800ca5faa66395836812"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.004.dmgpart",
+          "bytes": 1114131735,
+          "sha256": "a933d2bb254d274c45288e55d481420b6efbf827a8e61e860e1790dc684c1fef"
+        },
+        {
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.dmg",
+          "bytes": 1992728821,
+          "sha256": "359c4e4f2c5a46b860339d77404aa35db667434fb12b4048b2c7c5e60a18ace9"
+        }
+      ],
+      "launcher_migration_retested_in_this_release": true,
       "native_installation": "passed",
       "native_core_update": "passed",
       "existing_synthetic_records_preserved": true,
-      "study_reports": {
-        "passed": true,
-        "native_platform": "darwin",
-        "python": "3.12.13",
-        "cases": [
-          {
-            "subject": "chinese",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "math",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "english",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "physics",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "chemistry",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "biology",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "history",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "geography",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          },
-          {
-            "subject": "politics",
-            "generation_failure_rejected": true,
-            "audit_failure_rejected": true,
-            "legacy_fallback_hidden_and_export_blocked": true,
-            "reviewed_fixture_available_and_word_exported": true,
-            "chat_and_reading_records_preserved": true
-          }
-        ],
-        "real_model_calls": 0,
-        "real_learner_data_used": false,
-        "model_semantic_quality_tested": false
+      "native_proof_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/verification-macos-arm64.json",
+      "native_proof_sha256": "5eceae0186f8fff23330b6e5a48f5c60219ab79954024cf16f4921500a4b31ac",
+      "oldest_launcher_entry": {
+        "actual_download_install_backup_restart": "passed",
+        "check_again_current": true,
+        "signed_launcher_restarted": true,
+        "from_launcher": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
+        "to_launcher": "20261115-updater-1",
+        "old_pid": 51329,
+        "restarted_pid": 55892,
+        "chat_preserved": true,
+        "task_preserved": true,
+        "saved_key_preserved": true
       },
-      "attachment_uploads": {
-        "raw_originals_verified": true,
-        "temporary_excluded_from_library": true,
-        "short_pdf_pages": 2,
-        "concurrent_library_uploads_saved": true,
-        "scanned_pdf_retrievable": true,
-        "sources": 3,
-        "interactive_page_ready_while_indexing_seconds": 5.412,
-        "temporary_raw_seconds": 1.389,
-        "library_raw_seconds": [
-          0.216,
-          1.406
-        ],
-        "background_and_retrieval_seconds": 15.67,
-        "health_max_seconds": 0.185,
-        "real_api_key_used": false,
-        "cloud_models_used": false
+      "new_launcher_small_update_entry": {
+        "actual_download_install_backup_restart": "passed",
+        "check_again_current": true,
+        "download_progress_visible": true,
+        "downloaded_bytes_visible": true,
+        "from_launcher": "20261115-updater-1",
+        "to_launcher": "20261115-updater-1",
+        "chat_preserved": true,
+        "task_preserved": true,
+        "saved_key_preserved": true
       },
-      "library_bulk_upload": {
-        "multiple": true,
-        "saved_files": 21,
-        "library_retention": true,
-        "originals_byte_identical": true,
-        "original_preview_opened": true,
-        "held_real_chunk": true,
-        "chat_and_settings_navigation": true,
-        "appended_while_active": true,
-        "completed_in_chat": true,
-        "document_not_reloaded": true,
+      "regressions": {
+        "textbooks": 136,
+        "study_reports_passed": true,
+        "study_report_subject_cases": 9,
+        "attachment_uploads": true,
+        "library_saved_files": 21,
         "draft_preserved": true,
-        "picker_reference_byte_identical": true,
-        "no_duplicate_upload_or_new_chat": true,
-        "html_safe_preview": true,
-        "source_toggle": true,
-        "device_speech": {
-          "attachmentScriptBlocked": true,
-          "available": true,
-          "localVoices": 0,
-          "networkBlocked": true,
-          "noDesktopIPC": true,
-          "noNode": true,
-          "parentBlocked": true,
-          "diagnostic": {
-            "available": true,
-            "events": [
-              {
-                "charIndex": 0,
-                "elapsedTime": 74.5,
-                "type": "start"
-              },
-              {
-                "charIndex": 0,
-                "elapsedTime": 3348.5,
-                "type": "end"
-              }
-            ],
-            "language": "en-US",
-            "localVoices": [
-              {
-                "lang": "en-US",
-                "name": "Samantha"
-              },
-              {
-                "lang": "en-US",
-                "name": "Aaron"
-              },
-              {
-                "lang": "en-US",
-                "name": "Albert"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Alice"
-              },
-              {
-                "lang": "sv-SE",
-                "name": "Alva"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Amélie"
-              },
-              {
-                "lang": "ms-MY",
-                "name": "Amira"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Anna"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Arthur"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bad News"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bahh"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bells"
-              },
-              {
-                "lang": "en-US",
-                "name": "Boing"
-              },
-              {
-                "lang": "en-US",
-                "name": "Bubbles"
-              },
-              {
-                "lang": "he-IL",
-                "name": "Carmit"
-              },
-              {
-                "lang": "en-AU",
-                "name": "Catherine"
-              },
-              {
-                "lang": "en-US",
-                "name": "Cellos"
-              },
-              {
-                "lang": "id-ID",
-                "name": "Damayanti"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Daniel (English (United Kingdom))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Daniel (French (France))"
-              },
-              {
-                "lang": "bg-BG",
-                "name": "Daria"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Eddy (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Eddy (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Eddy (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Eddy (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Eddy (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Eddy (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Eddy (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Eddy (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Eddy (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Eddy (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Eddy (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Eddy (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Eddy (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Eddy (Chinese (Taiwan))"
-              },
-              {
-                "lang": "nl-BE",
-                "name": "Ellen"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Flo (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Flo (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Flo (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Flo (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Flo (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Flo (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Flo (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Flo (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Flo (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Flo (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Flo (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Flo (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Flo (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Flo (Chinese (Taiwan))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Fred"
-              },
-              {
-                "lang": "en-US",
-                "name": "Good News"
-              },
-              {
-                "lang": "en-AU",
-                "name": "Gordon"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Grandma (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Grandma (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Grandma (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Grandma (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Grandma (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Grandma (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Grandma (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Grandma (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Grandma (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Grandma (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Grandma (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Grandma (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Grandma (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Grandma (Chinese (Taiwan))"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Grandpa (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Grandpa (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Grandpa (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Grandpa (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Grandpa (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Grandpa (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Grandpa (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Grandpa (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Grandpa (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Grandpa (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Grandpa (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Grandpa (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Grandpa (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Grandpa (Chinese (Taiwan))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Hattori"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Helena"
-              },
-              {
-                "lang": "ro-RO",
-                "name": "Ioana"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Jacques"
-              },
-              {
-                "lang": "en-US",
-                "name": "Jester"
-              },
-              {
-                "lang": "pt-PT",
-                "name": "Joana"
-              },
-              {
-                "lang": "en-US",
-                "name": "Junior"
-              },
-              {
-                "lang": "th-TH",
-                "name": "Kanya"
-              },
-              {
-                "lang": "en-AU",
-                "name": "Karen"
-              },
-              {
-                "lang": "en-US",
-                "name": "Kathy"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Kyoko"
-              },
-              {
-                "lang": "hr-HR",
-                "name": "Lana"
-              },
-              {
-                "lang": "sk-SK",
-                "name": "Laura"
-              },
-              {
-                "lang": "hi-IN",
-                "name": "Lekha"
-              },
-              {
-                "lang": "uk-UA",
-                "name": "Lesya"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Li-Mu"
-              },
-              {
-                "lang": "vi-VN",
-                "name": "Linh"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Luciana"
-              },
-              {
-                "lang": "ar-001",
-                "name": "Majed"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Marie"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Martha"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Martin"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Meijia"
-              },
-              {
-                "lang": "el-GR",
-                "name": "Melina"
-              },
-              {
-                "lang": "ru-RU",
-                "name": "Milena"
-              },
-              {
-                "lang": "en-IE",
-                "name": "Moira"
-              },
-              {
-                "lang": "ca-ES",
-                "name": "Montse"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Mónica"
-              },
-              {
-                "lang": "en-US",
-                "name": "Nicky"
-              },
-              {
-                "lang": "nb-NO",
-                "name": "Nora"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "O-Ren"
-              },
-              {
-                "lang": "en-US",
-                "name": "Organ"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Paulina"
-              },
-              {
-                "lang": "en-US",
-                "name": "Ralph"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Reed (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Reed (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Reed (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Reed (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Reed (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Reed (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Reed (French (Canada))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Reed (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Reed (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Reed (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Reed (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Reed (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Reed (Chinese (Taiwan))"
-              },
-              {
-                "lang": "en-IN",
-                "name": "Rishi"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Rocko (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Rocko (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Rocko (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Rocko (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Rocko (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Rocko (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Rocko (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Rocko (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Rocko (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Rocko (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Rocko (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Rocko (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Rocko (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Rocko (Chinese (Taiwan))"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Sandy (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Sandy (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Sandy (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Sandy (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Sandy (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Sandy (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Sandy (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Sandy (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Sandy (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Sandy (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Sandy (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Sandy (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Sandy (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Sandy (Chinese (Taiwan))"
-              },
-              {
-                "lang": "da-DK",
-                "name": "Sara"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Satu"
-              },
-              {
-                "lang": "de-DE",
-                "name": "Shelley (German (Germany))"
-              },
-              {
-                "lang": "en-GB",
-                "name": "Shelley (English (United Kingdom))"
-              },
-              {
-                "lang": "en-US",
-                "name": "Shelley (English (United States))"
-              },
-              {
-                "lang": "es-ES",
-                "name": "Shelley (Spanish (Spain))"
-              },
-              {
-                "lang": "es-MX",
-                "name": "Shelley (Spanish (Mexico))"
-              },
-              {
-                "lang": "fi-FI",
-                "name": "Shelley (Finnish (Finland))"
-              },
-              {
-                "lang": "fr-CA",
-                "name": "Shelley (French (Canada))"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Shelley (French (France))"
-              },
-              {
-                "lang": "it-IT",
-                "name": "Shelley (Italian (Italy))"
-              },
-              {
-                "lang": "ja-JP",
-                "name": "Shelley (Japanese (Japan))"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Shelley (Korean (South Korea))"
-              },
-              {
-                "lang": "pt-BR",
-                "name": "Shelley (Portuguese (Brazil))"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Shelley (Chinese (China mainland))"
-              },
-              {
-                "lang": "zh-TW",
-                "name": "Shelley (Chinese (Taiwan))"
-              },
-              {
-                "lang": "zh-HK",
-                "name": "Sinji"
-              },
-              {
-                "lang": "en-US",
-                "name": "Superstar"
-              },
-              {
-                "lang": "en-ZA",
-                "name": "Tessa"
-              },
-              {
-                "lang": "fr-FR",
-                "name": "Thomas"
-              },
-              {
-                "lang": "sl-SI",
-                "name": "Tina"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Tingting"
-              },
-              {
-                "lang": "en-US",
-                "name": "Trinoids"
-              },
-              {
-                "lang": "hu-HU",
-                "name": "Tünde"
-              },
-              {
-                "lang": "ta-IN",
-                "name": "Vani"
-              },
-              {
-                "lang": "en-US",
-                "name": "Whisper"
-              },
-              {
-                "lang": "en-US",
-                "name": "Wobble"
-              },
-              {
-                "lang": "nl-NL",
-                "name": "Xander"
-              },
-              {
-                "lang": "tr-TR",
-                "name": "Yelda"
-              },
-              {
-                "lang": "zh-CN",
-                "name": "Yu-shu"
-              },
-              {
-                "lang": "ko-KR",
-                "name": "Yuna"
-              },
-              {
-                "lang": "en-US",
-                "name": "Zarvox"
-              },
-              {
-                "lang": "pl-PL",
-                "name": "Zosia"
-              },
-              {
-                "lang": "cs-CZ",
-                "name": "Zuzana"
-              }
-            ],
-            "nativeEnded": true,
-            "observedStatus": "朗读完成",
-            "physicalSpeakerOrLoopbackCaptured": false,
-            "timedOut": false,
-            "voice": {
-              "lang": "en-US",
-              "local": true,
-              "name": "Samantha"
-            }
-          },
-          "observedStatus": "朗读完成",
-          "playbackVerified": true,
-          "diagnosticOnly": true
-        },
-        "native_math_display": true,
-        "real_model_calls": 0
-      },
-      "chat_audio": {
-        "passed": true,
-        "persisted_file_play_and_history_replay": true,
-        "selected_text_tts_and_stop": true,
-        "chat_model_calls": 0,
-        "failure_notice_verified": true,
-        "physical_speaker_verified": false
-      },
-      "science_formulas": {
-        "passed": true,
-        "viewport_surface_states": 16,
-        "original_edit_checks": 18,
-        "cases": [
-          "physics-vector",
-          "physics-units",
-          "physics-derivative",
-          "physics-electricity",
-          "chemistry-charge",
-          "chemistry-reversible",
-          "chemistry-conditions",
-          "chemistry-isotope",
-          "chemistry-chinese-conditions",
-          "biology-photosynthesis",
-          "geography-ratio",
-          "science-physical-units"
-        ],
-        "model_answer_quality_tested": false
+        "chat_and_settings_navigation": true,
+        "originals_byte_identical": true,
+        "chat_audio_passed": true,
+        "science_formulas_passed": true,
+        "science_views": 16
       }
     }
   },
-  "source_test_receipt": "VERIFICATION-AUDIO-20261114.json",
+  "source_test_receipt": "VERIFICATION-UPDATER-20261115.json",
   "post_publication_verification": {
-    "signature_verified_manifests": 27,
-    "native_platform": "darwin",
-    "native_arch": "x64",
-    "transport": "production Chromium update session",
-    "previous_materials_full_runtime_gets_small_update": true,
-    "downloaded_core_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-    "downloaded_sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1",
-    "selected_native_base": "1.7.1-kaixin-20261114-materials-macos-x64-universal",
-    "current_full_install_does_not_downgrade": true,
-    "earliest_base_gets_automatic_native_bridge": true,
-    "real_user_profile_modified": false
+    "tag": "student-20261115-updater2",
+    "release_id": 445554770,
+    "release_repository_commit": "c39327be8273bd2f8a08e9ad88135e18bcd79b2f",
+    "all_30_signed_manifests_read_back": [
+      {
+        "file": "runtime-windows-x64-20261115-updater2-20261112.json",
+        "sha256": "7a545f3f5f838b8efd22591029f563921f4c87f959e773492fd5520a739fb7a4",
+        "bytes": 642
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-bb8f5191555d.json",
+        "sha256": "0bdb563c0c0d6fffabec049cab7eaf6e177830dd902469a048970c0bbc67f1e0",
+        "bytes": 681
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-573f105ed118.json",
+        "sha256": "45e6ebf56a59b8698731fc92bedd40fc558eca10a0edadfe267962b02764395a",
+        "bytes": 679
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-9b7c2b84f908.json",
+        "sha256": "8d0d6c1d3889f5665c03bbcf9506706050f2975f5d1d30ff75f26608af01b5c8",
+        "bytes": 684
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-3e01c184c6a4.json",
+        "sha256": "9025bbba282bdcdae7b80e2add3c1a9babb1d7900729facb271517ae3bd2730d",
+        "bytes": 687
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-7a52e2cacc9f.json",
+        "sha256": "087cf54487144c51f97ef92ef22723b7940c910753a11bc0cbc136b29e8b2ea9",
+        "bytes": 682
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-e4abdb1cb594.json",
+        "sha256": "cf12c8de44e7b8ddcc84e8be279ad5036603bc30777579d19099e347b44d5d45",
+        "bytes": 683
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-base-afb4dfe97ae4.json",
+        "sha256": "5406960ac00392a32bf63a167e5ce936b05cf1cab314f9fc0487296e1f77de1d",
+        "bytes": 685
+      },
+      {
+        "file": "runtime-windows-x64-20261115-updater2-prior-current.json",
+        "sha256": "6e93ec285d0ee632911da699407e7e7b79d8c3500de88e576728648b922960df",
+        "bytes": 677
+      },
+      {
+        "file": "runtime-windows-x64.json",
+        "sha256": "71c5b3f6637cb3428cc8f6c1051f17cb9b158a44ab3827940093424b34472a5d",
+        "bytes": 2115
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-20261112.json",
+        "sha256": "1842c2cfb2818ac0584f4b1e697ccefc50983cbc93238e3424194ecc9d9c0893",
+        "bytes": 641
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-e2a196e1e65a.json",
+        "sha256": "b4e752eedf846fb6d17c47da243498908949926a56130d83be1c55697e11e3c4",
+        "bytes": 678
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-681a198cf308.json",
+        "sha256": "7521764e2a69427071043226fcfe3b83988a03ccd023982dacbbaa424c7c0e35",
+        "bytes": 676
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-170a15b2f1a2.json",
+        "sha256": "a45bc28fd47521686c59e00106a6770b27257ef1a52ed01563eca8ace489af99",
+        "bytes": 681
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-22eb20a39a60.json",
+        "sha256": "d914ac2757867a478cea1c9e581b28b842433983df5542fc51106ef05d48f096",
+        "bytes": 684
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-80115ecd6d3d.json",
+        "sha256": "ab19e8b1e7ad13ced0c0791db85e4bb99537921b6572d8057c512382b10c9d82",
+        "bytes": 679
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-c452d12cb482.json",
+        "sha256": "e53125ff0d046b72e853d2b069c8c7957b409144fe8110d03159b59f440402f4",
+        "bytes": 680
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-base-c41831772671.json",
+        "sha256": "6dc7cedd8532cfde19c5d575c4ae2f3624d56b285a39e737678393fa47be6b6c",
+        "bytes": 682
+      },
+      {
+        "file": "runtime-macos-x64-20261115-updater2-prior-current.json",
+        "sha256": "336637b6e54d8e53d7be09acc084c8ead67026f01a542cd2b26c0284caba2fcb",
+        "bytes": 674
+      },
+      {
+        "file": "runtime-macos-x64.json",
+        "sha256": "d1d8a8c08753b7f84dc8403472bfbd4142baf4f1e29b49beb696ed6dddab4a08",
+        "bytes": 2078
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-20261112.json",
+        "sha256": "30dfa118a4d23805ff3d6282139ad72bd0d6b3d45172a84d25dea0b739a276b9",
+        "bytes": 647
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-7744dbeb8d09.json",
+        "sha256": "8a0913ad0c4a04e35eaf2411b01966317b47eb73cd6cb5037ff2d363388e3a1c",
+        "bytes": 684
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-7056f6bb9861.json",
+        "sha256": "a5af1bcbb4009caf717ea3239143d7fb5a0cdee2bf129b81639f32394d418552",
+        "bytes": 682
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-b445b7c83c4d.json",
+        "sha256": "28fd1309c4607ba8208547173a5ad724ce98d67b5733904e255cdfd3fa8307d2",
+        "bytes": 687
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-c09b1d53f8d0.json",
+        "sha256": "3f1e3c5748e4bc84b885b905d0bf343972df6687bde026637053789641d0f824",
+        "bytes": 690
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-194178f05eea.json",
+        "sha256": "cbee9cc4f48ecc4bb409095aa1b91eb567fb182e628b1a73f428f6b4d0ee7dbb",
+        "bytes": 685
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-6f6222533fad.json",
+        "sha256": "06f3aceb48c4ce3ed7e6a02828ef66e494eb4d53c7c9274e14547fc822b9e409",
+        "bytes": 686
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-base-b83c8329037e.json",
+        "sha256": "6e892b784020fb4dbc2c3dd015ad8b42971676ec0e8495c276891bcd7e097c8c",
+        "bytes": 688
+      },
+      {
+        "file": "runtime-macos-arm64-20261115-updater2-prior-current.json",
+        "sha256": "5663ab0495b40b7a12ec30bf717672d3835cd27b35a0e4f56705320f19a0bf93",
+        "bytes": 680
+      },
+      {
+        "file": "runtime-macos-arm64.json",
+        "sha256": "9d9f918f6e4c2ed4fbc31273bdab6c198140853fef0ee2438e2d4f4157295f52",
+        "bytes": 2120
+      }
+    ],
+    "all_4_archives_metadata_match_prepublication_full_hash_verification": true,
+    "latest_is_formal": true,
+    "native_systems_passed": 3,
+    "physical_student_devices_all_tested": false,
+    "usb_written": false,
+    "local_actual_online_update": {
+      "final_source": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+      "actual_online_update_completed": true,
+      "entry": "Settings > About > Check for updates",
+      "formal_tag": "student-20261115-updater2",
+      "product_version": "1.7.1",
+      "runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-base-c41831772671",
+      "core_bytes": 26822596,
+      "core_sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265",
+      "signature_verified": true,
+      "download_confirmed_in_real_ui": true,
+      "install_completion_seen_in_real_ui": true,
+      "check_again_current": true,
+      "normal_launcher_quit_and_reopen_preview_passed": true,
+      "launcher_build": "20261115-updater-1",
+      "launcher_files_verified": 24,
+      "chat_databases_logically_compared": 10,
+      "all_existing_rows_preserved": true,
+      "settings_files_unchanged": 19,
+      "real_learning_content_uploaded": false,
+      "private_key_uploaded": false,
+      "observed_at": "2026-11-14T20:59:45.728Z",
+      "manual_cancel_not_completed_in_this_machine": true,
+      "manual_maintenance_json_picker_not_claimed_as_passed": true
+    }
   },
-  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/PUBLICATION-RECEIPT.json",
-  "publication_run": 43614495590,
+  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/PUBLICATION-RECEIPT.json",
+  "publication_run": 43639482566,
   "usb_delivery": {
-    "completed": true,
-    "tag": "student-20261114-audio",
-    "updated_for_this_release": true,
-    "verified_payload_files": 9,
-    "superseded_installation_directories_removed": true,
-    "other_materials_preserved": true,
-    "receipt": "USB-DELIVERY-RECEIPT.json",
-    "receipt_sha256": "fea89bb860512fac6310ec6f92207afa27b8aa0ff379810ef8a161568f9b5de5"
+    "completed": false,
+    "tag": "student-20261115-updater2",
+    "updated_for_this_release": false,
+    "reason": "external USB volume not connected; no USB files modified",
+    "pending_receipt": "USB-DELIVERY-PENDING-20261115.json"
   },
   "release_skill": "skills/scholar-desktop-release/SKILL.md",
   "physical_student_devices_all_tested": false,
   "paid_model_semantic_quality_tested": false,
   "third_party_model_recovery_claimed": false,
   "omitted_development_figure_files": 68,
-  "source_files_sha256": "5c5f5c7825349fcebbe5a235926b78e5fabb5e4f15e97b6f1b8a5141952f780b",
-  "source_patch_sha256": "8befd8590285bf0d6632cccbb12cb4b30ad8c5076d519f2a17fc2cd0b35a1625",
+  "source_files_sha256": "b4e57a1d3d070fae7fc967c220008077b220f249675b88aeedd4a679c56e510f",
+  "source_patch_sha256": "89071250306f322b7810e19dc5371086beb2bb5fb073deb9b4a5ce4369117c6c",
   "voice_playback": {
     "default_provider": "edge",
     "default_requires_api_key": false,
@@ -2287,8 +574,6 @@
     "physical_speakers_or_loopback_verified": false
   },
   "background_upload_scope": "internal page navigation only; no process-exit or refresh resume",
-  "core_ci_suites_passed": 29,
-  "core_ci_tests_passed": 285,
   "audio_responsive_validation": {
     "passed": true,
     "platform": "local Intel Electron 45.1",
@@ -2312,5 +597,8 @@
     ],
     "actual_three_platform_responsive_audio_test": false,
     "receipt_sha256": "27d620b2e2a660b76e75d7a14e3bf685a8930b6b8914284cc058d19dfbed1713"
-  }
+  },
+  "update_entry": "Settings > About > Check for updates, or Core > Check for updates",
+  "launcher_migration": "Signed carrier through the normal update, followed by the restart button; no daily manual patch",
+  "earliest_native_bridge_may_be_large": true
 }
