@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import tarfile
 from urllib.request import Request, urlopen
 
 
@@ -12,8 +13,10 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
     batch = json.loads((root / 'attachment-batch.json').read_text())
     manifest = batch['manifests'][target]
     assert manifest['baseRuntimeId'] == json.loads((resources / 'seed/runtime.json').read_text())['runtimeId']
-    for name, row in batch['shell_files'].items():
-        assert hashlib.sha256((resources / 'app' / name).read_bytes()).hexdigest() == row['sha256'], 'Reuse only the published launcher'
+    previous_shell = json.loads((root / 'prior-launcher-fingerprint.json').read_text())
+    for name, row in previous_shell.items():
+        assert hashlib.sha256((resources / 'app' / name).read_bytes()).hexdigest() == row['sha256'], 'Unexpected prior launcher'
+    shutil.copytree(resources / 'app/src', root / 'previous-launcher-src')
     shutil.copytree(resources / 'update', root / 'prior-update')
     core = resources / 'update'
     for file in core.iterdir():
@@ -25,6 +28,19 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
         shutil.copyfileobj(response, output, 8 * 1024**2)
     assert hashlib.sha256(archive.read_bytes()).hexdigest() == manifest['sha256']
     (core / 'runtime.json').write_text(json.dumps(manifest, indent=2))
+    descriptor = json.loads((root / 'launcher-manifest.json').read_text())
+    assert descriptor['coreCommit'] == batch['core_commit']
+    shutil.rmtree(resources / 'app/src')
+    (resources / 'app/src').mkdir()
+    with tarfile.open(archive) as bundle:
+        for row in descriptor['files']:
+            assert row['file'].startswith('src/') and '/' not in row['file'][4:]
+            data = bundle.extractfile('launcher/' + row['file']).read()
+            assert len(data) == row['bytes'] and hashlib.sha256(data).hexdigest() == row['sha256']
+            (resources / 'app' / row['file']).write_bytes(data)
+    for name, row in batch['shell_files'].items():
+        assert hashlib.sha256((resources / 'app' / name).read_bytes()).hexdigest() == row['sha256']
+
     pkg = json.loads((resources / 'app/package.json').read_text())
     pkg['kaixinLauncherBuild'] = batch['launcher_build']
     (resources / 'app/package.json').write_text(json.dumps(pkg, ensure_ascii=False, indent=2))
@@ -65,7 +81,7 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
         subprocess.run(['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)], check=True)
         shutil.rmtree(downloads)
         (install / 'Applications').symlink_to('/Applications')
-        stem = 'Kaixin-Super-Scholar-MacOS-' + ('Intel' if target == 'macos-x64' else 'Apple-Silicon') + '-v1.7.1-20261114-audio'
+        stem = 'Kaixin-Super-Scholar-MacOS-' + ('Intel' if target == 'macos-x64' else 'Apple-Silicon') + '-v1.7.1-20261115-updater'
         image = out / (stem + '.dmg')
         subprocess.run(['/usr/bin/hdiutil', 'create', '-volname', '开心动力超级学霸', '-srcfolder', str(install),
                         '-fs', 'APFS', '-format', 'ULFO', str(image)], check=True)

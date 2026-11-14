@@ -118,6 +118,7 @@ run(['node', 'ci-fresh-smoke.mjs', executable, resources, work / '全新学习�
 from ci_attachment_bridge import prepare_bridge
 prepare_bridge(root, target, resources, work / '全新学习目录', evidence, batch)
 from ci_update_probe import verify_update_entry
+oldest_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, legacy=True)
 update_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence)
 after = release_metadata()
 assert after['id'] == lock['release_id'], 'Latest release changed during validation'
@@ -130,8 +131,8 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'download_files': download_rows, 'native_install': 'passed',
           'native_smoke': json.loads((evidence / 'app.json').read_text()),
           'network': json.loads((evidence / 'network.json').read_text()),
-          'update_entry': update_entry,
-          'launcher_migration': {'reused_unchanged_launcher_proof': lock['tag']},
+          'update_entry': update_entry, 'oldest_launcher_entry': oldest_entry,
+          'launcher_migration': {'from_published_launcher': lock['tag'], 'signed_core_carrier': oldest_entry['signed_launcher_restarted']},
           'shell_files': batch['shell_files'],
           'full_files': [{'file': file.name, 'bytes': file.stat().st_size, 'sha256': sha(file)} for file in sorted(candidate_out.iterdir())],
           'real_keys_used': False, 'real_learning_records_modified': False}

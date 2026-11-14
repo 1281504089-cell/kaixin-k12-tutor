@@ -8,6 +8,7 @@ import test from 'node:test';
 import { bundleConfig, canonicalManifest, installBundle } from '../src/bundles.mjs';
 import { systemTar, runtimeLayout, targetId } from '../src/platform.mjs';
 import { downloadReleaseUpdate, findReleaseUpdate } from '../src/release-updates.mjs';
+import { createUpdateFetch } from '../src/update-network.mjs';
 
 const { publicKey, privateKey } = generateKeyPairSync('ed25519');
 const current = { runtimeId: 'student-base', builtAt: 100 };
@@ -135,6 +136,58 @@ test('cancellation removes only its own partial download and never starts anothe
   await writeFile(path.join(root, 'patch.tar.gz'), 'existing user file');
   await assert.rejects(downloadReleaseUpdate(signed(), root, () => {}, async () => new Response('test')), { code: 'EEXIST' });
   assert.equal(await readFile(path.join(root, 'patch.tar.gz'), 'utf8'), 'existing user file');
+});
+
+test('a suspended request or body recovers once with a fresh session and verifies the complete archive', async t => {
+  const bytes = Buffer.from('a complete archive after resume');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  for (const phase of ['request', 'body']) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-suspend-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    const names = [];
+    const fetch = createUpdateFetch({ fromPartition(name) {
+      names.push(name);
+      const generation = names.length;
+      return { webRequest: { onBeforeRequest() {} }, fetch: async () => {
+        if (generation > 1) return new Response(bytes);
+        const error = new TypeError('fetch failed', { cause: new Error('net::ERR_NETWORK_IO_SUSPENDED') });
+        if (phase === 'request') throw error;
+        return new Response(new ReadableStream({ start(controller) {
+          controller.enqueue(bytes.subarray(0, 5));
+          queueMicrotask(() => controller.error(error));
+        } }));
+      } };
+    } });
+    await downloadReleaseUpdate(manifest, root, () => {}, fetch);
+    assert.deepEqual(names, ['kaixin-updates', 'kaixin-updates-resumed-1'], phase);
+    assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+    assert.equal(JSON.parse(await readFile(path.join(root, 'runtime.json'))).signature, manifest.signature);
+  }
+});
+
+test('persistent suspension is bounded and cancellation during recovery starts no new request', async t => {
+  for (const cancel of [false, true]) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-suspend-limit-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    const controller = new AbortController();
+    let archives = 0, recoveries = 0;
+    const fetch = async url => {
+      if (url.pathname.endsWith('/tags/core-updates')) return Response.json({ tag_name: 'core-updates', draft: false,
+        assets: [{ name: 'patch.tar.gz', state: 'uploaded', id: 12 }] });
+      archives++;
+      throw new Error('net::ERR_NETWORK_IO_SUSPENDED');
+    };
+    fetch.recoverAfterSuspend = async signal => {
+      recoveries++;
+      if (cancel) controller.abort(new Error('user cancelled'));
+      signal.throwIfAborted();
+    };
+    await assert.rejects(downloadReleaseUpdate(signed(), root, () => {}, fetch, controller.signal), cancel ? /user cancelled/ : /ERR_NETWORK_IO_SUSPENDED/);
+    assert.equal(recoveries, 1);
+    assert.equal(archives, cancel ? 1 : 3);
+    await assert.rejects(readFile(path.join(root, 'patch.tar.gz')), { code: 'ENOENT' });
+    await assert.rejects(readFile(path.join(root, 'runtime.json')), { code: 'ENOENT' });
+  }
 });
 
 test('signed update reuses original runtime without modifying it; wrong archive is rejected', async t => {

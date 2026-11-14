@@ -28,3 +28,23 @@ test('the system-network session validates every redirect, omits credentials and
     assert.equal(result.cancel, cancel, url);
   }
 });
+
+test('suspension recovery creates a fresh isolated network session with the same redirect guard', async () => {
+  const names = [], guards = [];
+  const fetch = createUpdateFetch({ fromPartition(name) {
+    names.push(name);
+    return { webRequest: { onBeforeRequest(callback) { guards.push(callback); } }, fetch: async () => new Response('ok') };
+  } });
+  await fetch('https://github.com/fixture');
+  await fetch.recoverAfterSuspend();
+  await fetch('https://github.com/fixture');
+  assert.deepEqual(names, ['kaixin-updates', 'kaixin-updates-resumed-1']);
+  let blocked;
+  guards[1]({ url: 'https://example.org/redirect' }, value => { blocked = value.cancel; });
+  assert.equal(blocked, true);
+  const controller = new AbortController();
+  controller.abort(new Error('user cancelled'));
+  await assert.rejects(fetch.recoverAfterSuspend(controller.signal), /abort/i);
+  await fetch('https://github.com/fixture');
+  assert.equal(names.length, 2);
+});

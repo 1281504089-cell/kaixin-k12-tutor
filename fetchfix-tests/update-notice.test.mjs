@@ -12,6 +12,14 @@ function updater(next, { base = true, transaction = null } = {}) {
   const context = {
     busy:false, quitting:false, active:{ manifest:{runtimeId:'installed'} }, state:{phase:'ready'},
     availableRelease:undefined, releaseCheck:undefined, releaseRequest:undefined,
+    releaseProgress:{phase:'idle',received:0,total:0,canCancel:false}, progressWindow:undefined,
+    sourceDirectory:'/isolated-preview/src', pathToFileURL: value=>({href:`file://${value}`}),
+    logPath:'/isolated-preview/runtime.log', mkdir:async()=>{}, appendFile:async()=>{},
+    BrowserWindow:class {
+      constructor() { this.webContents={send(){},setWindowOpenHandler(){},on(){}}; }
+      isDestroyed(){return false;} show(){} focus(){} hide(){} destroy(){} on(){}
+      loadFile(){return Promise.resolve();}
+    },
     findReleaseUpdate:async()=>next, updateFetch:()=>{}, publicKey:'public', targetId:()=> 'macos-x64',
     readJSON:async()=>transaction, access:async()=> { if (!base) throw new Error('missing'); },
     path, userRoot:'/isolated-preview', transactionFile:'upgrade.json', AbortController,
@@ -28,10 +36,9 @@ function updater(next, { base = true, transaction = null } = {}) {
 test('background detection notifies the avatar without opening an install dialog', async () => {
   const h = updater({runtimeId:'verified-next',signature:'not-sent-to-renderer'});
   await h.context.checkRelease(false);
-  assert.equal(h.sent.length,1);
-  assert.equal(h.sent[0].available,true);
-  assert.equal(h.sent[0].runtimeId,'verified-next');
-  assert.deepEqual(Object.keys(h.sent[0]).sort(),['available','runtimeId']);
+  const advertised = h.sent.find(status=>status.available);
+  assert.equal(advertised.runtimeId,'verified-next');
+  assert.deepEqual(Object.keys(advertised).sort(),['available','canCancel','phase','received','runtimeId','total']);
   assert.equal(h.dialogs.length,0);
   assert.equal(h.context.busy,false);
   await h.context.checkRelease(true);
@@ -46,6 +53,34 @@ test('current, missing-base and recovered updates never advertise an unusable up
     await h.context.checkRelease(false);
     assert.equal(h.context.releaseSnapshot().available,false);
     assert.equal(h.dialogs.length,0);
+  }
+});
+
+test('confirmed updates prevent idle suspension only until download and installation finish', async () => {
+  for (const fail of [false, true]) {
+    const h = updater({ runtimeId: 'next' });
+    const events = [];
+    Object.assign(h.context, {
+      powerSaveBlocker: { start(type) { events.push(type); return 0; }, stop(id) { events.push(['stop', id]); } },
+      mkdtemp: async () => '/isolated-preview/download', rm: async () => { events.push('cleanup'); },
+      downloadReleaseUpdate: async () => {
+        events.push('download');
+        if (fail) throw new Error('net::ERR_NETWORK_IO_SUSPENDED');
+        return '/isolated-preview/download/runtime.json';
+      },
+      applyCoreUpdate: async () => { events.push('install'); },
+      isNetworkSuspended: error => error.message.includes('ERR_NETWORK_IO_SUSPENDED'),
+    });
+    h.context.dialog.showMessageBox = async () => ({ response: 1 });
+    h.context.updateNotice = async (...values) => { events.push(values); };
+    await h.context.checkRelease(true);
+    assert.equal(events[0], 'prevent-app-suspension');
+    const released = events.findIndex(value => Array.isArray(value) && value[0] === 'stop');
+    const notified = events.findIndex(value => Array.isArray(value) && value[0] === (fail ? 'updateFailed' : 'releaseInstalled'));
+    assert.ok(released > 0 && released < notified);
+    assert.equal(events[notified][1], fail ? 'releaseSuspended' : 'next');
+    assert.equal(events.at(-1), 'cleanup');
+    assert.equal(h.context.busy, false);
   }
 });
 
@@ -88,3 +123,52 @@ test('both update IPC handlers reject foreign frames and windows', () => {
   frame.url='https://example.org/';
   assert.throws(()=>handlers['desktop:get-release-status'](valid),/Untrusted/);
 });
+
+test('reopening the local learning page after suspension retries once without clearing its partition', async () => {
+  const block = source.slice(source.indexOf('async function openContent('), source.indexOf('function trustedShell('));
+  for (const mode of ['resume', 'persistent', 'other-error', 'quit']) {
+    let calls = 0, waits = 0;
+    const error = new Error(mode === 'other-error' ? 'net::ERR_CONNECTION_REFUSED' : 'net::ERR_NETWORK_IO_SUSPENDED');
+    const context = { URL, path, sourceDirectory: '/preview', quitting: false,
+      hideContent() {}, layout() {}, status() {}, window: { contentView: { addChildView() {} } },
+      isNetworkSuspended: value => value.message.includes('ERR_NETWORK_IO_SUSPENDED'),
+      delay: async () => { waits++; if (mode === 'quit') context.quitting = true; },
+      WebContentsView: class {
+        constructor(options) {
+          assert.equal(options.webPreferences.partition, 'persist:deeptutor');
+          this.webContents = { setWindowOpenHandler() {}, on() {}, loadURL: async () => {
+            calls++;
+            if (mode !== 'resume' || calls === 1) throw error;
+          } };
+        }
+      },
+    };
+    runInNewContext(block, context);
+    if (mode === 'resume') await context.openContent('http://127.0.0.1:18762');
+    else await assert.rejects(context.openContent('http://127.0.0.1:18762'), value => value === error);
+    assert.equal(calls, ['resume', 'persistent'].includes(mode) ? 2 : 1);
+    assert.equal(waits, mode === 'other-error' ? 0 : 1);
+  }
+});
+
+ test('cancelled downloads never install or retry and leave the entry reusable', async()=> {
+  const h=updater({runtimeId:'next'});
+  const events=[];
+  Object.assign(h.context,{
+    powerSaveBlocker:{start:()=>0,stop:()=>events.push('released')},
+    mkdtemp:async()=>'/isolated-preview/download',rm:async()=>events.push('cleanup'),
+    downloadReleaseUpdate:async(_manifest,_directory,onProgress,_fetch,signal)=> {
+      onProgress(.5,{received:50,total:100});
+      h.context.releaseRequest.abort(new Error('Update cancelled'));
+      signal.throwIfAborted();
+    },
+    applyCoreUpdate:async()=>events.push('installed'),
+  });
+  h.context.dialog.showMessageBox=async()=>({response:1});
+  await h.context.checkRelease(true);
+  assert.equal(h.context.releaseSnapshot().phase,'cancelled');
+  assert.ok(h.sent.some(status=>status.received===50 && status.total===100));
+  assert.deepEqual(events,['released','cleanup']);
+  assert.equal(h.context.busy,false);
+  assert.equal(h.context.releaseCheck,undefined);
+ });
