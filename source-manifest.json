@@ -153,6 +153,11 @@
       "file": "student-attachments-20261114.patch",
       "sha256": "e4cf7b85404e965e5c7b540bc8f2d7cb13da934dc4150fdca301f9c370aa2c42",
       "description": "Hide the five unused entry points throughout student menus; upload originals in bounded verified chunks, make attachments readable while retained materials index in the background, and serialize library writes"
+    },
+    {
+      "file": "student-reports-20261114.patch",
+      "sha256": "7e75d478659810ebb9c5f4b83bf7e5004f44cb86a2556b7c4e31eb7bb1daee39",
+      "description": "Keep failed generation or independent review from becoming unrelated practice across all nine subjects; hide unreviewed legacy fallback drafts without deleting learning records"
     }
   ]
 }

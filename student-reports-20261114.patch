@@ -1,0 +1,289 @@
+diff --git a/deeptutor/services/student_learning/reports.py b/deeptutor/services/student_learning/reports.py
+index 2493788..f3dd4df 100644
+--- a/deeptutor/services/student_learning/reports.py
++++ b/deeptutor/services/student_learning/reports.py
+@@ -413,6 +413,9 @@ async def checked_rows():
+ 
+ 
+ def public(row, *, stale=False, detail=False):
++    if row.get("result_level") == "records":
++        row = {**row, "state": "failed", "stage": None,
++               "message": "这份旧版备用稿未完成基于原文的专项生成与核对，已停止作为学习复盘展示。原对话与报告文件保留，请重新生成。"}
+     result = {k: row[k] for k in ["id", "created_at", "range", "subject", "state", "stage", "message", "metrics", "result_level"] if k in row}
+     if row.get("extra_sessions"):
+         result["extra_session_count"] = len(row["extra_sessions"])
+@@ -424,23 +427,11 @@ def public(row, *, stale=False, detail=False):
+     return result
+ 
+ 
+-async def complete_saved_practice(row: dict) -> dict:
+-    review = row.get("subject_review")
+-    if row.get("result_level") != "records" or not review or review["exercises"]:
+-        return row
+-    source = {"subject": row["subject"], "range": row["range"], "messages": report_evidence(row["evidence"])}
+-    source["textbook_scope"] = row.get("textbook_scope", [])
+-    updated = await bridge("records", {"source": source})
+-    return {**row, "subject_review": updated, "message": "已根据保存的学习记录补齐知识点练习和答案，可下载 Word。"}
+-
+-
+ async def overview(period: ReportRange):
+     source = await collect(period)
+     reports = await checked_rows()
+     matching = [(r, s) for r, s in reports if saved_period(r) == period]
+     latest = matching[0][0] if matching and matching[0][1] is not None else None
+-    if latest:
+-        latest = await complete_saved_practice(latest)
+     return {"range": period.payload(), "metrics": source["metrics"], "coverage": source["coverage"], "reflection": source["reflection"], "report": public(latest, stale=latest["fingerprint"] != source["fingerprint"] or latest["policy"] != policy_version(), detail=True) if latest else None, "history": [public(r) for r, _ in reports[:100]], "missing_extra_sessions": source.get("missing_extra_sessions", 0)}
+ 
+ 
+@@ -449,7 +440,6 @@ async def detail(report_id: str):
+         if row["id"] == report_id:
+             if source is None:
+                 raise ReportError("当前无法重新核对原文，请缩小范围后再读取。", 413)
+-            row = await complete_saved_practice(row)
+             return public(row, stale=row["fingerprint"] != source["fingerprint"] or row["policy"] != policy_version(), detail=True)
+     raise ReportError("这份报告不存在，或原文已更改、移除。", 404)
+ 
+@@ -587,6 +577,7 @@ async def bridge(operation, data):
+ 
+ async def generate(manager, notebook, row, source, config, complete=None):
+     from deeptutor.services.llm.factory import complete_with_config
++    from deeptutor.services.llm.exceptions import LLMAPIError, LLMTimeoutError
+     from deeptutor.services.llm.metrics import TurnUsage, current_usage
+     usage = TurnUsage(turn_id="student-report-" + row["id"], source="student_report")
+     usage_token = current_usage.set(usage)
+@@ -655,17 +646,10 @@ async def generate(manager, notebook, row, source, config, complete=None):
+         LOGGER.warning("Student report %s stopped in %s (%s)", row["id"], stage, type(error).__name__)
+         reason = str(error) if isinstance(error, ReportError) else (
+             "模型返回的报告格式不完整。" if isinstance(error, json.JSONDecodeError) else
+-            "报告整理超时。" if isinstance(error, TimeoutError) else "这次整理或独立核对未完成。"
++            "报告模型请求超时。" if isinstance(error, (TimeoutError, LLMTimeoutError)) else
++            "报告模型请求失败。" if isinstance(error, LLMAPIError) else "这次整理或独立核对未完成。"
+         )
+         updates = {"state": "failed", "stage": None, "summary": None, "message": reason + "原记录保留，可手动重试。"}
+-        if period.subject and stage != "checking_sources":
+-            try:
+-                async with asyncio.timeout(25):
+-                    await check_sources()
+-                    record_review = await bridge("records", {"source": source})
+-                updates.update(state="ready", subject_review=record_review, result_level="records", message=reason + "已生成完整的知识点巩固版，含练习、答案和解析。")
+-            except Exception as fallback_error:
+-                LOGGER.warning("Student report %s could not build records (%s)", row["id"], type(fallback_error).__name__)
+     finally:
+         current_usage.reset(usage_token)
+     updates["usage"] = usage.summary()
+diff --git a/tests/api/test_student_reports.py b/tests/api/test_student_reports.py
+index 35a311c..8fa7967 100644
+--- a/tests/api/test_student_reports.py
++++ b/tests/api/test_student_reports.py
+@@ -3,6 +3,7 @@ from datetime import datetime, timezone
+ import json
+ import os
+ from types import SimpleNamespace
++from typing import get_args
+ from unittest.mock import AsyncMock
+ 
+ from fastapi import FastAPI
+@@ -14,6 +15,8 @@ from deeptutor.services.path_service import PathService
+ from deeptutor.services.session.sqlite_store import SQLiteSessionStore
+ from deeptutor.services.student_learning import reports
+ 
++SUBJECTS = get_args(reports.ReportSubject)
++
+ 
+ @pytest.fixture
+ def setup(tmp_path, monkeypatch):
+@@ -25,7 +28,7 @@ def setup(tmp_path, monkeypatch):
+ 
+     owner = ["a"]
+     active = [""]
+-    stores = {name: SQLiteSessionStore(tmp_path / (name + ".sqlite3")) for name in ("", "math", "english")}
++    stores = {name: SQLiteSessionStore(tmp_path / (name + ".sqlite3")) for name in ("", *SUBJECTS)}
+ 
+     def paths():
+         value = PathService(workspace_root=tmp_path / owner[0])
+@@ -47,7 +50,7 @@ def setup(tmp_path, monkeypatch):
+         "workspaces": [
+             {"workspace_id": key, "display_name": name, "path": str(tmp_path / ("student-study-" + key)),
+              "kind": "workspace", "status": "ready", "archived": False}
+-            for key, name in (("math", "数学"), ("english", "英语"))
++            for key, name in ((key, {"math": "数学", "english": "英语"}.get(key, key)) for key in SUBJECTS)
+         ],
+     }))
+     monkeypatch.setattr(session, "get_session_store", lambda: stores[active[0]])
+@@ -311,23 +314,76 @@ async def test_subject_review_has_its_own_skill_sources_reflection_and_exercises
+ 
+ 
+ @pytest.mark.asyncio
+-async def test_subject_empty_model_body_keeps_readable_records_and_allows_retry(setup):
++async def test_subject_empty_model_body_preserves_records_and_allows_retry(setup):
+     await seed(setup, workspace="math")
+     period = reports.ReportRange(**PERIOD.model_dump(exclude={"subject"}), subject="math")
+     row, task = await reports.begin(period)
+     complete = AsyncMock(return_value="")
+     await reports.generate(*task, complete=complete)
+     result = await reports.detail(row["id"])
+-    assert result["result_level"] == "records"
+-    review = result["subject_review"]
+-    assert len(review["sections"]) == 9 and len(review["exercises"]) == 10
+-    assert [exercise["type"] for exercise in review["exercises"]] == ["choice"] * 4 + ["fill"] * 4 + ["solution"] * 2
+-    assert "分数与通分" in review["title"]
++    assert result["state"] == "failed" and result.get("subject_review") is None
+     assert "没有返回报告正文" in result["message"]
+     assert complete.await_count == 1
+     assert (await reports.begin(period))[0]["id"] != row["id"]
+ 
+ 
++@pytest.mark.asyncio
++@pytest.mark.parametrize("subject", SUBJECTS)
++async def test_failed_report_never_substitutes_a_template_for_any_subject(setup, monkeypatch, subject):
++    from deeptutor.services.llm.exceptions import LLMAPIError
++
++    content = "请复盘本次学习的内容。"
++    await seed(setup, workspace=subject, content=content)
++    period = reports.ReportRange(**PERIOD.model_dump(exclude={"subject"}), subject=subject)
++    row, task = await reports.begin(period)
++    bridge = AsyncMock(wraps=reports.bridge)
++    monkeypatch.setattr(reports, "bridge", bridge)
++    complete = AsyncMock(side_effect=LLMAPIError("synthetic transport failure", provider="moonshot"))
++    await reports.generate(*task, complete=complete)
++    result = await reports.detail(row["id"])
++    assert result["state"] == "failed"
++    assert result.get("subject_review") is None
++    assert "报告模型请求失败" in result["message"]
++    complete.assert_awaited_once()
++    assert "records" not in [call.args[0] for call in bridge.await_args_list]
++    assert (await reports.collect(period))["messages"][0]["content"] == content
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("subject", SUBJECTS)
++async def test_old_unrelated_fallback_is_hidden_without_rewriting_saved_records(setup, subject):
++    await seed(setup, workspace=subject, content="继续本次学习。")
++    period = reports.ReportRange(**PERIOD.model_dump(exclude={"subject"}), subject=subject)
++    row, task = await reports.begin(period)
++    manager, notebook, saved = task[:3]
++    reports.save(manager, notebook, {**saved, "state": "ready", "stage": None, "policy": "old-policy",
++                                   "result_level": "records", "subject_review": {"title": "运算顺序与验算", "exercises": [{}]}})
++    before = manager.get_record(notebook, row["id"])
++    shown = await reports.detail(row["id"])
++    assert shown["state"] == "failed" and shown.get("subject_review") is None
++    assert "旧版备用稿" in shown["message"]
++    assert (await reports.overview(period))["report"]["state"] == "failed"
++    assert setup.client.get("/api/student/reports/history").json()[0]["state"] == "failed"
++    with pytest.raises(reports.ReportError, match="还没有可导出的正文"):
++        await reports.export_word(row["id"])
++    assert manager.get_record(notebook, row["id"]) == before
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("subject", SUBJECTS)
++async def test_rejected_subject_review_never_becomes_a_ready_template(setup, subject):
++    await seed(setup, workspace=subject)
++    period = reports.ReportRange(**PERIOD.model_dump(exclude={"subject"}), subject=subject)
++    row, task = await reports.begin(period)
++    draft = await reports.bridge("records", {"source": task[3]})
++    complete = AsyncMock(side_effect=[json.dumps(draft), '{"approved":false,"issues":["内容与原文不符"]}'])
++    await reports.generate(*task, complete=complete)
++    result = await reports.detail(row["id"])
++    assert result["state"] == "failed" and result.get("subject_review") is None
++    assert "未通过独立核对" in result["message"]
++    assert complete.await_count == 2
++
++
+ @pytest.mark.asyncio
+ async def test_deepseek_report_budget_has_room_for_thinking_and_json(setup, monkeypatch):
+     from deeptutor.services.llm import config
+@@ -390,7 +446,8 @@ async def test_manual_scope_adds_normal_and_reading_chats_without_changing_defau
+     row, task = await reports.begin(extra_period)
+     await reports.generate(*task, complete=AsyncMock(return_value=""))
+     result = await reports.detail(row["id"])
+-    assert result["extra_session_count"] == 2 and result["result_level"] == "records"
++    assert result["extra_session_count"] == 2
++    assert result["state"] == "failed" and result.get("subject_review") is None
+     assert (await reports.overview(period))["report"] is None
+     assert (await reports.overview(extra_period))["report"]["id"] == row["id"]
+ 
+@@ -413,16 +470,14 @@ async def test_extra_sessions_outside_period_or_workspace_are_reported_before_mo
+ 
+ 
+ @pytest.mark.asyncio
+-async def test_empty_subject_can_create_complete_practice_report_without_a_model(setup):
++async def test_empty_subject_does_not_invent_a_practice_report(setup):
+     period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="english")
+     row, task = await reports.begin(period)
+     complete = AsyncMock()
+     await reports.generate(*task, complete=complete)
+     result = await reports.detail(row["id"])
+-    assert result["result_level"] == "records"
+-    assert len(result["subject_review"]["sections"]) == 8
+-    assert len(result["subject_review"]["exercises"]) == 7
+-    assert not result["evidence"]
++    assert result["state"] == "failed" and result.get("subject_review") is None
++    assert "暂无可用于分析的学生原文" in result["message"]
+     complete.assert_not_awaited()
+ 
+ 
+@@ -489,7 +544,8 @@ async def test_review_uses_actual_pdf_outline_and_places_word_evidence_after_the
+     prepared = await reports.bridge("prepare", {"source": task[3]})
+     assert prepared["input"]["textbookScope"][0]["matched"]
+     assert "五四运动" not in json.dumps(prepared["input"]["textbookScope"], ensure_ascii=False)
+-    await reports.generate(*task, complete=AsyncMock(return_value=""))
++    draft = await reports.bridge("records", {"source": task[3]})
++    await reports.generate(*task, complete=AsyncMock(side_effect=[json.dumps(draft), '{"approved":true,"issues":[]}']))
+     report = await reports.detail(row["id"])
+     assert "辛亥革命" in report["subject_review"]["exercises"][0]["question"]
+     assert report["textbook_scope"] == scope
+@@ -516,8 +572,8 @@ async def test_review_uses_actual_pdf_outline_and_places_word_evidence_after_the
+         await reports.begin(selected.model_copy(update={"textbook_id": "abcd1234"}))
+ 
+ @pytest.mark.asyncio
+-@pytest.mark.parametrize("extra_text", ["", "这一段是很长的学习记录。" * 10000])
+-async def test_short_and_oversized_records_generate_a_complete_export(setup, extra_text):
++@pytest.mark.parametrize("extra_text", ["", "这一段是很长的学习记录。" * 10000], ids=["short", "long"])
++async def test_short_and_oversized_reviewed_reports_generate_a_complete_export(setup, extra_text):
+     original = "我想复习分数通分。" + extra_text
+     await seed(setup, workspace="math", content=original)
+     period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="math")
+@@ -527,12 +583,13 @@ async def test_short_and_oversized_records_generate_a_complete_export(setup, ext
+     assert len(messages) == 1 and messages[0]["content"].startswith("我想复习分数通分")
+     assert messages[0]["isExcerpt"] is bool(extra_text)
+     assert len(messages[0]["content"]) < 4000
+-    complete = AsyncMock(side_effect=TimeoutError("model fixture timeout"))
++    draft = await reports.bridge("records", {"source": task[3]})
++    complete = AsyncMock(side_effect=[json.dumps(draft), '{"approved":true,"issues":[]}'])
+     await reports.generate(*task, complete=complete)
+-    complete.assert_awaited_once()
++    assert complete.await_count == 2
+     result = await reports.detail(row["id"])
+     review = result["subject_review"]
+-    assert result["state"] == "ready" and result["result_level"] == "records"
++    assert result["state"] == "ready" and result["result_level"] == "full"
+     assert len(review["sections"]) == 9 and len(review["exercises"]) == 10
+     assert all(question["answer"] and question["explanation"] for question in review["exercises"])
+     assert (await reports.export_word(row["id"])).startswith(b"PK")
+@@ -623,7 +680,7 @@ async def test_report_only_displays_and_exports_a_reviewed_figure(setup, monkeyp
+     from deeptutor.services.llm import factory
+     from deeptutor.services.student_learning import report_figures
+ 
+-    await seed(setup, workspace="math", content="三角形的三条边在哪里？")
++    await seed(setup, workspace="math", content="空间向量可以用三角形的三条边表示吗？")
+     period = reports.ReportRange(from_date=PERIOD.from_date, to_date=PERIOD.to_date, subject="math")
+     row, task = await reports.begin(period)
+     source = task[3]
+@@ -646,8 +703,14 @@ async def test_report_only_displays_and_exports_a_reviewed_figure(setup, monkeyp
+     monkeypatch.setattr(factory, "complete_with_config", complete)
+     await reports.generate(*task)
+     result = await reports.detail(row["id"])
++    if not text_approved:
++        assert result["state"] == "failed" and result.get("subject_review") is None
++        assert complete.await_count == 2
++        with pytest.raises(reports.ReportError, match="还没有可导出的正文"):
++            await reports.export_word(row["id"])
++        return
+     assert result["state"] == "ready"
+-    assert result["result_level"] == ("full" if text_approved else "records")
++    assert result["result_level"] == "full"
+     assert complete.await_count == (4 if text_approved else 2)
+ 
+     shown = result["subject_review"].get("figure")

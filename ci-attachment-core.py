@@ -16,7 +16,7 @@ OUT=ROOT/'attachment-core';OUT.mkdir()
 prior=OUT/'prior-core.tar.gz'
 subprocess.run(['gh','release','download','core-updates','--pattern',CONFIG['prior_core']['archive'],'--output',str(prior)],check=True)
 assert hashlib.sha256(prior.read_bytes()).hexdigest()==CONFIG['prior_core']['sha256']
-archive=OUT/CONFIG['archive'];seen=set();required={'BUILD_COMMIT','core/deeptutor/api/routers/student_uploads.py','core/deeptutor/services/student_learning/uploads.py','core/deeptutor_cli/main.py','web/server.js','web/.next/BUILD_ID'}
+archive=OUT/CONFIG['archive'];seen=set();required={'core/deeptutor/services/student_learning/reports.py','BUILD_COMMIT','core/deeptutor/api/routers/student_uploads.py','core/deeptutor/services/student_learning/uploads.py','core/deeptutor_cli/main.py','web/server.js','web/.next/BUILD_ID'}
 def add(out,name,data,mode=0o644):
  parts=PurePosixPath(name).parts
  assert not name.startswith('/') and '..' not in parts and '.git' not in parts
