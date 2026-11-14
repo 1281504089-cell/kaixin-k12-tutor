@@ -21,7 +21,7 @@ def prepare_bridge(root,target,resources,home,evidence,batch):
  assert archive.stat().st_size<2*1024**3
  unsigned={**{k:batch['manifests'][target][k] for k in ['formatVersion','protocolVersion','platform','arch','coreVersion','commit','builtAt','corePayloadSha256']},'runtimeId':'1.7.1-kaixin-20261115-updater-'+target+'-universal','archive':archive.name,'sha256':sha(archive)}
  unsigned_file=out/('runtime-'+target+'.unsigned.json');unsigned_file.write_text(json.dumps(unsigned,indent=2))
- subprocess.run(['python','bootstrap_source.py','--with-updates'],check=True)
+ if not (root/'student-source').is_dir():subprocess.run(['python','bootstrap_source.py','--with-updates'],check=True)
  bridge_home=root/('bridge-profile-'+target)
  subprocess.run(['node','ci-probe-runtime.mjs','seed',str(stage),str(bridge_home),str(resources/'seed/runtime.json'),str(evidence/'bridge-before.json')],check=True,timeout=900)
  subprocess.run(['node','ci-probe-runtime.mjs','bridge',str(stage),str(bridge_home),str(unsigned_file),str(evidence/'bridge-native.json')],check=True,timeout=900)

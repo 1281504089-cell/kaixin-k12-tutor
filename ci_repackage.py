@@ -71,6 +71,11 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
     test_root = root / ('launcher-tests-' + target)
     shutil.copytree(resources / 'app/src', test_root / 'src')
     shutil.copytree(root / 'fetchfix-tests', test_root / 'test')
+    if not (root / 'student-source').is_dir():
+        subprocess.run(['python', 'bootstrap_source.py', '--with-updates'], check=True)
+    for folder in ['scripts', 'platforms']:
+        shutil.copytree(root / 'student-source/apps/desktop' / folder, test_root / folder)
+    shutil.copytree(root / 'student-source/apps/desktop/assets', test_root / 'assets')
     subprocess.run(['node', '--test', *[str(p) for p in (test_root / 'test').glob('*.test.mjs')]], check=True)
 
     out = root / ('candidate-' + target)
