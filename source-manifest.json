@@ -173,6 +173,11 @@
       "file": "student-chat-audio-20261114.patch",
       "sha256": "8befd8590285bf0d6632cccbb12cb4b30ad8c5076d519f2a17fc2cd0b35a1625",
       "description": "Generate real speech files directly in chat, read selected text without a model request, and render physics/chemistry notation."
+    },
+    {
+      "file": "student-update-click-20261115.patch",
+      "sha256": "1788447d4eefe5ea8192b6aa2c26aba2faf91078ffa25f4d10bdf695975bdf75",
+      "description": "Bound update waits, show real download progress/cancel, and safely deliver a signed script launcher at normal restart while preserving study data."
     }
   ]
 }

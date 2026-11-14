@@ -1,16 +1,19 @@
 {
-  "tag": "student-20261114-audio",
-  "source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "baseline_source_commit": "842d6654666e20e606f31245cc20730807562ad8",
-  "patch_sha256": "8befd8590285bf0d6632cccbb12cb4b30ad8c5076d519f2a17fc2cd0b35a1625",
-  "archive": "kaixin-core-20261114-audio.tar.gz",
+  "tag": "student-20261115-updater",
+  "source_commit": "f4554f273b73ebf22daa59f15e0164b8fec3d9a9",
+  "baseline_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
+  "patch_sha256": "1788447d4eefe5ea8192b6aa2c26aba2faf91078ffa25f4d10bdf695975bdf75",
+  "archive": "kaixin-core-20261115-updater.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261114-materials.tar.gz",
-    "sha256": "d0498a88ec722d36be81d87d84fec08f1986fec6747780b6bb2185619b4c615d"
+    "archive": "kaixin-core-20261114-audio.tar.gz",
+    "sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1"
   },
   "new_backend_files": [
     "deeptutor/tools/prompting/hints/zh/speechgen.yaml",
-    "deeptutor/tools/prompting/hints/en/speechgen.yaml"
+    "deeptutor/tools/prompting/hints/en/speechgen.yaml",
+    "deeptutor/api/routers/desktop_update.py",
+    "deeptutor/runtime/desktop_restart.py",
+    "deeptutor/services/student_learning/desktop_update.py"
   ],
   "web_tests": [
     "tests/pending-material.spec.ts",
@@ -41,7 +44,9 @@
     "tests/generated-file-cards.spec.tsx",
     "tests/chat-read-aloud-playback.spec.tsx",
     "tests/chat-selection-actions.spec.tsx",
-    "tests/voice-settings.spec.tsx"
+    "tests/voice-settings.spec.tsx",
+    "tests/desktop-update-notice.spec.tsx",
+    "tests/desktop-launcher-update.spec.tsx"
   ],
-  "source_files_sha256": "5c5f5c7825349fcebbe5a235926b78e5fabb5e4f15e97b6f1b8a5141952f780b"
+  "source_files_sha256": "29464660de7fd1f3fd38b8510b067c921289fa7b965436597125ecfa9179562e"
 }

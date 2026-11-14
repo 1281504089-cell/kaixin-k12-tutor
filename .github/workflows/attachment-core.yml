@@ -1,7 +1,7 @@
 name: Build frozen chat audio and science formulas core
 on:
   push:
-    branches: ['codex/audio-core-20261114-*']
+    branches: ['codex/updater-core-20261115-*']
     paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-chat-audio-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
 permissions:
   contents: write

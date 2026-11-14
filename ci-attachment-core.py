@@ -42,6 +42,13 @@ with archive.open('wb') as raw,gzip.GzipFile(filename='',mode='wb',fileobj=raw,m
  for name in CONFIG['new_backend_files']:
   file=SOURCE/name;arc='core/'+name
   if arc not in seen:add(out,arc,file.read_bytes(),file.stat().st_mode&0o777)
+ descriptor=json.loads((ROOT/'launcher-manifest.json').read_text())
+ assert descriptor['coreCommit']==CONFIG['source_commit']
+ add(out,'launcher/manifest.json',(ROOT/'launcher-manifest.json').read_bytes())
+ for row in descriptor['files']:
+  data=(SOURCE/'apps/desktop'/row['file']).read_bytes()
+  assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+  add(out,'launcher/'+row['file'],data)
  add(out,'BUILD_COMMIT',(CONFIG['source_commit']+'\n').encode())
  standalone=WEB/'.next/standalone'
  for file in sorted(standalone.rglob('*')):
