@@ -1,7 +1,7 @@
-name: Publish native verified chat audio and science formulas batch
+name: Publish signed updater repair after three native upgrade validations
 on:
   push:
-    branches: ['codex/audio-publish-20261114-*']
+    branches: ['codex/updater-publish-20261115-*']
     paths: ['attachment-publication.json', 'ci-promote-attachments.py', '.github/workflows/attachment-publish.yml']
 permissions:
   contents: write

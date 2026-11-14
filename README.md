@@ -6,7 +6,9 @@
 - **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
 - **九科有各自的 AI 老师。** 每科都有自己的学习项目。做题卡住时可以选对应科目的老师，先要个提示，自己做下去。
 
-[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio)
+[下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2) · [下载 Apple 芯片 Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2) · [下载 Intel Mac 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2)
+
+**20261115 检查更新修复。** 检查、下载、校验和安装显示明确进度；下载可取消，网络无响应会停止并提示重试。按已安装运行环境选择小包，本次核心约 27 MB。需要更新启动器脚本时，点击“重新打开完成更新”，保留学习数据与设置。[更新步骤与验证范围](UPDATE-20261115.md)。
 
 **20261114 聊天音频与理化公式。** 选中聊天或阅读对话里的文字，可在「引用」旁直接点「朗读」；也可要求生成听力，聊天中直接显示可播放音频，重开历史继续听。默认在线语音无需另外申请有道或模型 Key；直接朗读不调用聊天模型。补齐物理单位、矢量和化学反应式、电荷、箭头等公式显示。[使用与验证范围](AUDIO-SCIENCE-20261114.md)。
 
@@ -20,13 +22,13 @@
 
 **新电脑只装当前整合完整版，无需先装旧版或旧补丁。** 三种系统均包含新版更新器、项目与历史列表修复、语音预加载、运行环境和 136 册教材。[完整安装步骤](INSTALL-LATEST.md)。
 
-**旧电脑本次迁移一次，之后从软件内检查更新。** 装过旧兼容包和没打过补丁的旧版，都直接用本次对应系统的迁移包，不串装旧补丁。修复 `fetch failed`，遵循系统代理，下载连接或传输失败时切换公开 GitHub 路线，保留学习记录和 Key。[迁移步骤与例外](MIGRATE-LEGACY.md) · [本批验证回执](DESKTOP-20261114.md)。
+**已有电脑优先直接检查更新。** 本批签名核心同时携带启动器脚本；需要替换时通过界面正常重开完成。最早运行环境可能自动补齐兼容资源一次，后续匹配小包。无需删除学习目录或反复运行历史补丁。[已有版本更新与排查](MIGRATE-LEGACY.md)。
 
 **20261114 项目与历史列表。** 修复切换科目时通用历史消失，补齐项目内对话的重命名、置顶、归档、移动和删除，操作限定在来源项目；列表失败保留内容并支持重试。[改动与页面验收](PROJECT-HISTORY-20261114.md)。
 
 **20261114 语音输入修复与预加载。** 修复 Windows 中文安装路径下的离线识别失败。打开软件后在后台准备本机语音模型，并保留到退出，避免学习一会儿再录音又重新加载；不调用付费语音 API。已提供编号含 `20261114-stt` 的签名核心更新，学习记录和设置保留。[改动、操作与真实解码测试](STT-20261114.md)
 
-已迁移电脑可使用「核心 → 检查更新」。旧更新器需要上述一次迁移，核心包不会替换外壳；本批尚未逐台验证用户实体设备。
+已有电脑使用「核心 → 检查更新」或「设置 → 关于 → 检查更新」。本批新增签名启动器脚本载体，Electron 主程序与原生运行环境仍分别校验；原生构建机验收不代表每台实体设备都已测试。
 
 **20261113 头像更新提示。** 有新版时，左上角头像旁显示提示卡；关闭后保留「有新版」标记，后台检查不打断学习。新完整包包含配套启动器；已有旧启动器完成上述一次迁移后，从「核心 → 检查更新」继续升级。[单项操作与验证范围](AVATAR-UPDATES-20261113.md)
 
@@ -36,7 +38,7 @@
 
 **20261113 整合更新。** 对话里的教材页码现在能直接打开对应原页，有核实原句时会短暂标亮；右侧收起或切到活动后也能点击打开；阅读区可输入页码、按回车跳转。无关教材页不再额外跑一轮模型研读。合并了移入项目、查历史聊天、在聊天里创建和修改任务，以及此前的附件长期保存、语音输入、选择卡片和数学配图更新。[整合说明与验证范围](INTEGRATED-20261113.md)
 
-**本次三系统完整包保留全部已有功能。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [本次完整安装说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/INSTALLATION.txt) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
+**本次三系统完整包保留全部已有功能。** 首次安装即包含 MOSS、豆包实时语音、高拍仪、手机摄像头与共享屏幕、场景切换、阅读记录恢复、原 PDF 文字／公式截图引用和 Kimi API 入口。启动页、桌面菜单、主界面和 Windows 安装向导默认简体中文，不需要先装旧版再补功能更新。已补齐 MOSS-Live 在系统 SOCKS 代理下需要的语音连接组件，三个系统均重新打包、原生试装。已有用户升级时保留本机学习工作区。 [本次完整安装说明](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/INSTALLATION.txt) · [旧版更新与回退](https://github.com/1281504089-cell/kaixin-k12-tutor/releases)
 
 添加文字聊天 API 时，可搜索 **Kimi / Moonshot（月之暗面）** 并填写对应 Key；原有接口、密钥和默认模型保持不变。
 
@@ -54,13 +56,13 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 ## 下载安装
 
-本轮完整包主版本为 **1.7.1**，运行核心编号包含 **20261114-audio**，自带本机运行环境、136 册教材及本轮已整合修复。首次安装使用下表对应系统的一套文件；装好已包含本轮优化，在设置填写自己的聊天 API。界面默认简体中文。
+本轮完整包主版本为 **1.7.1**，运行核心编号包含 **20261115-updater**，自带本机运行环境、136 册教材及本轮已整合修复。首次安装使用下表对应系统的一套文件；装好已包含本轮优化，在设置填写自己的聊天 API。界面默认简体中文。
 
 | 电脑 | 安装文件 | 自动试装 |
 | --- | --- | --- |
-| Apple 芯片 Mac | [下载 Apple 芯片版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
-| Intel Mac | [下载 Intel 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
-| Windows x64 | [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-audio) | 本轮中文路径安装、启动与退出、更新保留记录、卸载保留资料 |
+| Apple 芯片 Mac | [下载 Apple 芯片版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
+| Intel Mac | [下载 Intel 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2) | 本轮原生新装与退出、136 册教材、更新保留聊天／任务／测试 Key |
+| Windows x64 | [下载 Windows x64 版](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2) | 本轮中文路径安装、启动与退出、更新保留记录、卸载保留资料 |
 
 1. 下载同一发布页的全部平台分卷，放进一个新文件夹并保留原名。学生安装请使用表中的平台文件。
 2. Mac 下载 1 个 `.dmg` 和 3 个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。
@@ -123,7 +125,7 @@ open "$HOME/Downloads/Kaixin-Mac-Complete.dmg"
 
 ## 开发者
 
-本批完整源码、三端构建与验收脚本、签名清单保存在[对应发布标签](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/student-20261114-audio)。从 GitHub 克隆发行仓库后，运行 `python3 bootstrap_source.py --with-updates`，即可校验、解包并应用最新源码修复。上方完整安装包已由完整补丁集合重建，不需要另补辅导更新。开发者指南列出本地启动命令、教材与学科配置的位置、打包入口和依赖说明。 [查看开发者指南](DEVELOPMENT.md) · [查看源码清单](source-manifest.json)
+本批完整源码、三端构建与验收脚本、签名清单保存在[对应发布标签](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/student-20261115-updater2)。从 GitHub 克隆发行仓库后，运行 `python3 bootstrap_source.py --with-updates`，即可校验、解包并应用最新源码修复。上方完整安装包已由完整补丁集合重建，不需要另补辅导更新。开发者指南列出本地启动命令、教材与学科配置的位置、打包入口和依赖说明。 [查看开发者指南](DEVELOPMENT.md) · [查看源码清单](source-manifest.json)
 
 ## 验证与许可
 
