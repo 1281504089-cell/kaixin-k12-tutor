@@ -1,0 +1,19 @@
+name: Audio release evidence readback
+on:
+  push:
+    branches: ['codex/audio-receipts-20261114-*']
+permissions:
+  contents: write
+concurrency:
+  group: kaixin-audio-release-evidence
+  cancel-in-progress: false
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify identity and upload matching release evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 ci-audio-receipts.py
