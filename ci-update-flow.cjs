@@ -104,6 +104,11 @@ async function content() {
       }
       writeFileSync(stateFile, JSON.stringify({phase:'new-launcher',before,accepted,invokeError,oldPid:process.pid}));
       await view.executeJavaScript(`Array.from(document.querySelectorAll('button')).find(button=>button.textContent==='重新打开完成更新').click()`);
+      setTimeout(() => {
+        let launcher;try {launcher=JSON.parse(readFileSync(path.join(home,'launcher-update.json')));}catch{}
+        writeFileSync(output+'.error.json',JSON.stringify({phase:'restart-timeout',launcher}));
+        app.exit(1);
+      },90000).unref();
       return; // The signed helper must normally close and relaunch this process.
       }
     }

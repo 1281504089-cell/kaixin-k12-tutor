@@ -113,6 +113,8 @@ from ci_repackage import prepare_candidate
 candidate_out, batch = prepare_candidate(root, target, install, resources, downloads, evidence, lock)
 included = json.loads((resources / 'update/runtime.json').read_text())
 assert included == batch['manifests'][target]
+# Keep the exact unverified installer bytes in the isolated candidate for focused retries.
+run(['gh', 'release', 'upload', batch['tag'], *candidate_out.iterdir(), '--clobber'])
 environment = {**os.environ, 'KX_EXPECTED_PLATFORM': expected['platform'], 'KX_EXPECTED_ARCH': expected['arch']}
 run(['node', 'ci-fresh-smoke.mjs', executable, resources, work / '全新学习目录', evidence], env=environment, timeout=1100)
 from ci_attachment_bridge import prepare_bridge
@@ -139,5 +141,5 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
 (evidence / 'verified.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
 report_file = evidence / ('verification-' + target + '.json')
 report_file.write_text(json.dumps(report, ensure_ascii=False, indent=2))
-run(['gh', 'release', 'upload', batch['tag'], report_file, *candidate_out.iterdir(), '--clobber'])
+run(['gh', 'release', 'upload', batch['tag'], report_file, '--clobber'])
 print('PASS: public download, native fresh install and included latest core: ' + target, flush=True)

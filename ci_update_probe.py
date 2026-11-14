@@ -61,7 +61,7 @@ print(json.dumps(asyncio.run(run())))
  if target.startswith('macos'):
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
- subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':'student-20261115-updater','KX_EXPECT_SHELL_RESTART':'1' if legacy else '0'},check=True,timeout=1400)
+ subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if legacy else '0'},check=True,timeout=1400)
  deadline=time.monotonic()+1400
  while not (evidence/(entry+'.json')).is_file():
   error=evidence/(entry+'.json.error.json')
