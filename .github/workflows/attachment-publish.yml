@@ -1,7 +1,7 @@
-name: Publish native verified background materials and references batch
+name: Publish native verified chat audio and science formulas batch
 on:
   push:
-    branches: ['codex/materials-publish-20261114-*']
+    branches: ['codex/audio-publish-20261114-*']
     paths: ['attachment-publication.json', 'ci-promote-attachments.py', '.github/workflows/attachment-publish.yml']
 permissions:
   contents: write

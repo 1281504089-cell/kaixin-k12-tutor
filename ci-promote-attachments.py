@@ -50,6 +50,12 @@ for target in targets:
  update=report['update_entry'];assert update['actual_download_install_backup_restart']=='passed' and update['check_again_current']
  bulk=update['library_bulk_upload'];assert bulk['saved_files']==21 and all(bulk[k] for k in ['multiple','library_retention','originals_byte_identical','original_preview_opened','held_real_chunk','chat_and_settings_navigation','appended_while_active','completed_in_chat','document_not_reloaded','draft_preserved','picker_reference_byte_identical','no_duplicate_upload_or_new_chat','html_safe_preview','source_toggle','native_math_display'])
  assert json.loads((native_evidence/'library-bulk.json').read_text())==bulk
+ audio=update['chat_audio'];assert audio['passed'] and len(audio['productionCards'])==2
+ assert audio['selection']['chatRequests']==0 and audio['selection']['errorShown']
+ assert all(card['sha256']==audio['productionCards'][0]['sha256'] for card in audio['productionCards'])
+ assert json.loads((native_evidence/'chat-audio.json').read_text())==audio
+ science=update['science_formulas'];assert science['passed'] and len(science['views'])==16 and len(science['originalEdits'])>=18 and science['cleanup']['debuggerDetached'] and science['cleanup']['deviceMetricsCleared']
+ assert bulk['device_speech']['diagnosticOnly'] and 'nativeEnded' in bulk['device_speech']['diagnostic']
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
  for row in report['full_files']:
   actual=assets[row['file']];assert actual['digest']=='sha256:'+row['sha256'] and actual['size']==row['bytes']
@@ -93,7 +99,7 @@ except Exception:
 
 gh('release','upload',batch['tag'],root/'INSTALLATION.txt','--clobber')
 gh('api','-X','PATCH','repos/'+repo+'/git/refs/tags/'+batch['tag'],'-f','sha='+os.environ['GITHUB_SHA'],'-F','force=true')
-gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 资料后台上传与引用 2026-11-14','--notes-file',root/'RELEASE-NOTES.md')
+gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 聊天音频与理化公式 2026-11-14','--notes-file',root/'RELEASE-NOTES.md')
 latest=api('releases/latest');assert latest['tag_name']==batch['tag'] and not latest['prerelease']
 receipt={**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'physical_user_devices_tested':False,'private_key_uploaded':False}
 receipt_file=root/'PUBLICATION-RECEIPT.json';receipt_file.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n');gh('release','upload',batch['tag'],receipt_file,'--clobber')

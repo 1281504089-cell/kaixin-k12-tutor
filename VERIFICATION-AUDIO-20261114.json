@@ -1,0 +1,113 @@
+{
+  "tag": "student-20261114-audio",
+  "learning_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
+  "source_files_sha256": "5c5f5c7825349fcebbe5a235926b78e5fabb5e4f15e97b6f1b8a5141952f780b",
+  "patch_sha256": "8befd8590285bf0d6632cccbb12cb4b30ad8c5076d519f2a17fc2cd0b35a1625",
+  "core": {
+    "omitted_documentation_figures": [],
+    "source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
+    "backend_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
+    "frontend_build": "Szyy3eF5IipMu4w1wdHdd",
+    "archive": "kaixin-core-20261114-audio.tar.gz",
+    "sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1",
+    "bytes": 26768307,
+    "files": 3291,
+    "real_keys_used": false,
+    "personal_records_included": false
+  },
+  "core_run": 43607867767,
+  "core_suites": 29,
+  "core_tests": 285,
+  "native_run": 43609376062,
+  "native_workflow_commit": "4ce2f52cd682a6dea6f8fe5271c814ff84d830bf",
+  "signature_commit": "a919f8a527d14188d871c7eecd1917bc49a77681",
+  "targets": {
+    "windows-x64": {
+      "native_job": 132490843209,
+      "native_verification_sha256": "cc5b054f6e17590e4d1c9d5a40af7d956379b6285cca23a00bdcb77e9c3a88c9",
+      "fresh_install": "passed",
+      "check_update_download_backup_restart_and_check_again": "passed",
+      "synthetic_chat_tasks_key_preserved": true,
+      "textbooks": 136,
+      "offline_spoken_stt_rounds": 2,
+      "report_subjects": 9,
+      "real_generated_audio_and_history_replay": true,
+      "selected_english_speech_no_chat_requests": true,
+      "science_screens": 16,
+      "original_formula_edit_checks": 18,
+      "physical_speaker_or_loopback_captured": false
+    },
+    "macos-x64": {
+      "native_job": 132490843135,
+      "native_verification_sha256": "72b9029a29508adcadafe464bd1b1e354027571133d07e818c5dda2ff3ac2c7f",
+      "fresh_install": "passed",
+      "check_update_download_backup_restart_and_check_again": "passed",
+      "synthetic_chat_tasks_key_preserved": true,
+      "textbooks": 136,
+      "offline_spoken_stt_rounds": 2,
+      "report_subjects": 9,
+      "real_generated_audio_and_history_replay": true,
+      "selected_english_speech_no_chat_requests": true,
+      "science_screens": 16,
+      "original_formula_edit_checks": 18,
+      "physical_speaker_or_loopback_captured": false
+    },
+    "macos-arm64": {
+      "native_job": 132490842982,
+      "native_verification_sha256": "20802735f80bf1cae89c1fe0c4f1b4aa4cc53f36a37fe9803eb68d9fad773766",
+      "fresh_install": "passed",
+      "check_update_download_backup_restart_and_check_again": "passed",
+      "synthetic_chat_tasks_key_preserved": true,
+      "textbooks": 136,
+      "offline_spoken_stt_rounds": 2,
+      "report_subjects": 9,
+      "real_generated_audio_and_history_replay": true,
+      "selected_english_speech_no_chat_requests": true,
+      "science_screens": 16,
+      "original_formula_edit_checks": 18,
+      "physical_speaker_or_loopback_captured": false
+    }
+  },
+  "signed_manifests": 27,
+  "complete_install_files": 13,
+  "default_speech_requires_api_key": false,
+  "default_speech_provider": "edge",
+  "default_speech_requires_network_to_generate": true,
+  "selected_speech_calls_conversation_model": false,
+  "generated_audio_survives_history_reopen": true,
+  "audio_layout_validation": {
+    "passed": true,
+    "platform": "local Intel Electron 45.1",
+    "css_viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1366,
+        900
+      ],
+      [
+        1920,
+        1080
+      ]
+    ],
+    "actual_three_platform_responsive_audio_test": false,
+    "receipt_sha256": "27d620b2e2a660b76e75d7a14e3bf685a8930b6b8914284cc058d19dfbed1713"
+  },
+  "known_untouched_baseline_checks": {
+    "callsite_lint_errors": 14,
+    "new_callsite_lint_issues": 0,
+    "extra_chinese_i18n_keys": 6
+  },
+  "physical_user_devices_tested": false,
+  "scientific_model_answer_quality_tested": false,
+  "real_learner_records_used": false,
+  "paid_model_test_calls": 0,
+  "private_key_uploaded": false,
+  "checked_at_utc": "2026-11-14T16:13:23Z"
+}
