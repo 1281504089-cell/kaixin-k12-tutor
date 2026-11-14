@@ -1,8 +1,8 @@
-name: Build frozen all-subject review core
+name: Build frozen library bulk upload core
 on:
   push:
-    branches: ['codex/review-core-20261114-*']
-    paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-reports-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
+    branches: ['codex/library-core-20261114-*']
+    paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-library-upload-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
 permissions:
   contents: write
 jobs:
@@ -27,7 +27,7 @@ jobs:
           if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
             python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
           else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '全科复盘真实性修复候选 · 2026-11-14' --notes '正在验证全科复盘失败处理、原记录保留及三端实际检查更新。验证完成后再设为正式版。'
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '资料库批量上传候选 · 2026-11-14' --notes '正在验证资料库批量上传、原件完整性、原记录保留及三端实际检查更新。验证完成后再设为正式版。'
           fi
       - name: Build and verify core
         run: python ci-attachment-core.py

@@ -158,6 +158,11 @@
       "file": "student-reports-20261114.patch",
       "sha256": "7e75d478659810ebb9c5f4b83bf7e5004f44cb86a2556b7c4e31eb7bb1daee39",
       "description": "Keep failed generation or independent review from becoming unrelated practice across all nine subjects; hide unreviewed legacy fallback drafts without deleting learning records"
+    },
+    {
+      "file": "student-library-upload-20261114.patch",
+      "sha256": "db1b5863dabfce064bbb93f403456c2dc852e0557e725d1ab92ff5ab7dff5028",
+      "description": "Upload multiple long-term originals directly from the materials library, preserve per-project scope, and keep successful files when another upload fails or is stopped"
     }
   ]
 }

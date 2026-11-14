@@ -1,0 +1,427 @@
+diff --git a/web/components/student/StudentLearning.module.css b/web/components/student/StudentLearning.module.css
+index 7d64942..6a69e72 100644
+--- a/web/components/student/StudentLearning.module.css
++++ b/web/components/student/StudentLearning.module.css
+@@ -3,6 +3,14 @@
+ .eyebrow { color:var(--sage); font-size:11px; font-weight:700; letter-spacing:.15em; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+ .header h1 { font-size:clamp(22px,2.25vw,32px); line-height:1.3; letter-spacing:-.035em; font-weight:650; margin:0; }
+ .header p { font-size:13px; line-height:1.7; color:var(--muted-foreground); margin-top:9px; max-width:650px; }
++.materialsHeader { flex-wrap:wrap; }
++.materialsHeader > div:first-child { flex:1 1 320px; min-width:0; }
++.uploadQueue { border:1px solid var(--border); border-radius:14px; padding:16px; background:var(--background); margin-bottom:18px; font-size:12px; }
++.uploadQueue strong { font-size:13px; font-weight:600; }
++.uploadList { display:grid; gap:10px; max-height:250px; overflow:auto; padding:0; margin:0; list-style:none; }
++.uploadList li { display:grid; grid-template-columns:minmax(0,1fr); gap:4px; }
++.uploadName { overflow-wrap:anywhere; }
++.uploadList progress { width:100%; height:6px; accent-color:var(--sage); }
+ .actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+ .button { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--border); border-radius:11px; padding:9px 13px; background:var(--background); font-size:12px; font-weight:500; white-space:nowrap; transition:background .15s,transform .15s; }
+ .button:hover { background:var(--muted); }
+diff --git a/web/components/student/StudentMaterials.tsx b/web/components/student/StudentMaterials.tsx
+index cd7fbe6..ee00daa 100644
+--- a/web/components/student/StudentMaterials.tsx
++++ b/web/components/student/StudentMaterials.tsx
+@@ -1,7 +1,7 @@
+ 'use client'
+ 
+-import { useEffect, useState } from 'react'
+-import { FileText, Library, Loader2, MessageCircle, RefreshCw, Search } from 'lucide-react'
++import { useEffect, useRef, useState } from 'react'
++import { FileText, Library, Loader2, MessageCircle, RefreshCw, Search, Upload } from 'lucide-react'
+ import { Dialog } from '@/shared/ui/Dialog'
+ import TextbookLibrary from './TextbookLibrary'
+ import KbFilePreview from '@/components/knowledge/KbFilePreview'
+@@ -17,7 +17,8 @@ import { learningLibrary } from '@/lib/learning-library'
+ import { createReadingWorkspace, type ReadingLibraryMaterial } from '@/lib/reading-workspace-api'
+ import { readingCollectionRoute } from '@/lib/learning-routes'
+ import { setPendingMaterial } from '@/lib/pending-material'
+-import type { UploadResult, UploadedAttachment } from '@/lib/student-upload'
++import { MAX_UPLOAD_SOURCE_BYTES, uploadDocumentFile, type UploadResult, type UploadedAttachment } from '@/lib/student-upload'
++import { ATTACHMENT_ACCEPT, classifyFile } from '@/lib/doc-attachments'
+ import type { FilePreviewSource } from '@/components/chat/preview/previewerFor'
+ import styles from './StudentLearning.module.css'
+ 
+@@ -38,6 +39,28 @@ type SavedUpload = UploadResult & {
+   content_workspace_name?: string
+   library_error?: string
+ }
++type UploadItem = {
++  id: number
++  file: File
++  status: 'waiting' | 'uploading' | 'saved' | 'failed' | 'stopped'
++  progress: number
++  error?: string
++}
++
++function uploadRows(upload: SavedUpload): Row[] {
++  return upload.records.map(row => ({
++    key: `upload:${row.id}`,
++    name: row.filename,
++    size: row.size,
++    detail: upload.library_error || (upload.library_status === 'saving' ? '原件可用 · 检索准备中' : '长期保存 · 原件可用'),
++    attachment: row,
++    workspace: upload.content_workspace_id || '',
++    retainedKb: upload.content_workspace_id
++      ? `workspace:${upload.content_workspace_id}:kb:我的上传资料`
++      : 'account:kb:我的上传资料',
++    source: { id: row.id, filename: row.filename, mimeType: row.mime_type, url: row.url },
++  }))
++}
+ 
+ /** One shelf for original files; readiness of a search index never gates reading. */
+ export default function StudentMaterials() {
+@@ -49,8 +72,22 @@ export default function StudentMaterials() {
+   const [loading, setLoading] = useState(true)
+   const [error, setError] = useState('')
+   const [revision, setRevision] = useState(0)
++  const [queue, setQueue] = useState<UploadItem[]>([])
++  const [uploading, setUploading] = useState(false)
++  const fileInput = useRef<HTMLInputElement>(null)
++  const uploadRequest = useRef<AbortController | null>(null)
++  const mounted = useRef(true)
++  const nextUploadId = useRef(0)
++  useEffect(() => {
++    mounted.current = true
++    return () => {
++      mounted.current = false
++      // shortcut: uploads stop on page exit; use an app-level queue if navigation must keep them running.
++      uploadRequest.current?.abort()
++    }
++  }, [])
+   useEffect(() => {
+-    const refresh = () => setRevision(value => value + 1)
++    const refresh = () => { if (!uploadRequest.current) setRevision(value => value + 1) }
+     window.addEventListener('focus', refresh)
+     window.addEventListener('student:materials-updated', refresh)
+     return () => {
+@@ -59,9 +96,11 @@ export default function StudentMaterials() {
+     }
+   }, [])
+   useEffect(() => {
++    if (uploading) return
+     let alive = true
+-    setLoading(true)
+-    setError('')
++    queueMicrotask(() => {
++      if (alive) { setLoading(true); setError('') }
++    })
+     const failures: string[] = []
+     const saved = async (): Promise<Row[]> => {
+       const response = await apiFetch(apiUrl('/api/student/attachments/uploads/library'), {
+@@ -73,22 +112,7 @@ export default function StudentMaterials() {
+         unavailable_workspaces?: string[]
+       }
+       if (result.unavailable_workspaces?.length) failures.push('部分项目的长期资料')
+-      return result.uploads.flatMap(upload =>
+-        upload.records.map(row => ({
+-          key: `upload:${row.id}`,
+-          name: row.filename,
+-          size: row.size,
+-          detail:
+-            upload.library_error ||
+-            (upload.library_status === 'saving' ? '原件可用 · 检索准备中' : '长期保存 · 原件可用'),
+-          attachment: row,
+-          workspace: upload.content_workspace_id || '',
+-          retainedKb: upload.content_workspace_id
+-            ? `workspace:${upload.content_workspace_id}:kb:我的上传资料`
+-            : 'account:kb:我的上传资料',
+-          source: { id: row.id, filename: row.filename, mimeType: row.mime_type, url: row.url },
+-        }))
+-      )
++      return result.uploads.flatMap(uploadRows)
+     }
+     const knowledge = async (): Promise<Row[]> => {
+       const bases = await listKnowledgeBases({ library: true, force: true })
+@@ -169,7 +193,51 @@ export default function StudentMaterials() {
+     return () => {
+       alive = false
+     }
+-  }, [revision])
++  }, [revision, uploading])
++
++  async function uploadFiles(files: File[]) {
++    if (!files.length || uploadRequest.current) return
++    const controller = new AbortController()
++    uploadRequest.current = controller
++    const workspace = activeWorkspaceId()
++    const batch: UploadItem[] = files.map(file => ({ id: nextUploadId.current++, file, status: 'waiting', progress: 0 }))
++    setQueue(batch)
++    setUploading(true)
++    setView('saved')
++    setQuery('')
++    setLoading(false)
++    const update = (id: number, changes: Partial<UploadItem>) => {
++      if (mounted.current) setQueue(previous => previous.map(item => item.id === id ? { ...item, ...changes } : item))
++    }
++    try {
++      for (const item of batch) {
++        if (controller.signal.aborted) break
++        update(item.id, { status: 'uploading' })
++        try {
++          if (!classifyFile(item.file)) throw new Error('不支持这种文件类型，请选择 PDF、Office 文档、图片或文本。')
++          if (!item.file.size || item.file.size > MAX_UPLOAD_SOURCE_BYTES) throw new Error('文件为空或超过单份原件 1 GB 上限。')
++          const result = await uploadDocumentFile(item.file, 'library', workspace,
++            progress => update(item.id, { progress }), controller.signal)
++          if (!mounted.current) break
++          const added = uploadRows({ ...result, content_workspace_id: workspace })
++          setRows(previous => [...added, ...previous.filter(row => !added.some(item => item.key === row.key))])
++          update(item.id, { status: 'saved', progress: 100 })
++        } catch (caught) {
++          if (controller.signal.aborted) break
++          update(item.id, { status: 'failed', error: caught instanceof TypeError
++            ? '网络连接中断，请刷新资料后重新选择这份文件。'
++            : caught instanceof Error ? caught.message : '这份文件上传未完成，请重新选择。' })
++        }
++      }
++    } finally {
++      uploadRequest.current = null
++      if (mounted.current) {
++        setQueue(previous => previous.map(item => item.status === 'waiting' || item.status === 'uploading' ? { ...item, status: 'stopped' } : item))
++        setUploading(false)
++        setRevision(value => value + 1)
++      }
++    }
++  }
+ 
+   async function openMaterial(row: Row) {
+     if (!row.material) {
+@@ -196,7 +264,7 @@ export default function StudentMaterials() {
+       setBusy('')
+     }
+   }
+-  async function useInChat(row: Row) {
++  async function attachToChat(row: Row) {
+     setBusy(row.key)
+     setError('')
+     try {
+@@ -228,7 +296,7 @@ export default function StudentMaterials() {
+   )
+   return (
+     <main className={styles.page} aria-label="资料库">
+-      <header className={styles.header}>
++      <header className={`${styles.header} ${styles.materialsHeader}`}>
+         <div>
+           <div className={styles.eyebrow}>
+             <Library size={14} /> 本机资料库
+@@ -236,15 +304,51 @@ export default function StudentMaterials() {
+           <h1>教材与长期资料</h1>
+           <p>打开原件就能阅读和提问。全文解析、检索索引在后台准备；临时附件只留在对话中。</p>
+         </div>
+-        <button
++        <div className={styles.actions}>
++          <input ref={fileInput} type="file" multiple accept={ATTACHMENT_ACCEPT}
++            aria-label="选择要长期保存的资料" hidden
++            onChange={event => {
++              void uploadFiles(Array.from(event.currentTarget.files || []))
++              event.currentTarget.value = ''
++            }} />
++          <button className={`${styles.button} ${styles.primary}`} disabled={uploading}
++            onClick={() => fileInput.current?.click()}>
++            <Upload size={14} /> 批量上传资料
++          </button>
++          <button
+           className={styles.button}
+           onClick={() => setRevision(value => value + 1)}
+-          disabled={loading}
++          disabled={loading || uploading}
+         >
+           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+           刷新资料
+-        </button>
++          </button>
++        </div>
+       </header>
++      {!!queue.length && (
++        <section className={styles.uploadQueue} aria-label="批量上传进度">
++          <div className={styles.actions}>
++            <strong>长期资料上传</strong>
++            <span role="status">已保存 {queue.filter(item => item.status === 'saved').length}/{queue.length} 份
++              {queue.some(item => item.status === 'failed') && ` · ${queue.filter(item => item.status === 'failed').length} 份未完成`}</span>
++            {uploading && <button className={styles.button} onClick={() => uploadRequest.current?.abort()}>停止剩余上传</button>}
++          </div>
++          <p className={styles.notice}>上传完成前请停留本页；原件保存后即可在这里阅读，全文检索在后台准备。停止上传会保留已保存的资料。</p>
++          <ul className={styles.uploadList}>
++            {queue.map(item => (
++              <li key={item.id}>
++                <span className={styles.uploadName}>{item.file.name}</span>
++                <span className={item.status === 'failed' ? styles.error : styles.meta}>
++                  {item.status === 'waiting' ? '等待上传' : item.status === 'uploading'
++                    ? item.progress >= 95 ? '正在保存原件…' : `正在上传 ${item.progress}%`
++                    : item.status === 'saved' ? '原件已保存' : item.status === 'stopped' ? '已停止' : item.error}
++                </span>
++                {item.status === 'uploading' && <progress max={100} value={item.progress} aria-label={`${item.file.name} 上传进度`} />}
++              </li>
++            ))}
++          </ul>
++        </section>
++      )}
+       <div className={styles.tabs}>
+         <button
+           className={styles.tab}
+@@ -294,7 +398,7 @@ export default function StudentMaterials() {
+                       {row.size ? formatFileSize(row.size) : '原件'}
+                     </span>
+                   </div>
+-                  <h2>{row.name}</h2>
++                  <h2 className={styles.uploadName}>{row.name}</h2>
+                   <p>{row.detail}</p>
+                   <div className={styles.actions}>
+                     <button
+@@ -308,7 +412,7 @@ export default function StudentMaterials() {
+                       <button
+                         className={styles.button}
+                         disabled={!!busy}
+-                        onClick={() => void useInChat(row)}
++                        onClick={() => void attachToChat(row)}
+                       >
+                         <MessageCircle size={13} />
+                         引用到对话
+@@ -321,7 +425,7 @@ export default function StudentMaterials() {
+           )}
+           {!loading && !filtered.length && (
+             <p className={styles.notice}>
+-              还没有长期资料。在对话框点加号，选择“长期保存到资料库”后上传。
++              还没有找到长期资料。点击“批量上传资料”，可一次选择多份文件长期保存。
+             </p>
+           )}
+         </>
+@@ -339,7 +443,7 @@ export default function StudentMaterials() {
+             <button
+               className={styles.button}
+               disabled={!!busy}
+-              onClick={() => void useInChat(selected)}
++              onClick={() => void attachToChat(selected)}
+             >
+               <MessageCircle size={14} />
+               带到对话中提问
+diff --git a/web/tests/student-materials.spec.tsx b/web/tests/student-materials.spec.tsx
+index f9b18d9..20dca00 100644
+--- a/web/tests/student-materials.spec.tsx
++++ b/web/tests/student-materials.spec.tsx
+@@ -1,8 +1,9 @@
+-import { fireEvent, render, screen } from '@testing-library/react'
+-import { expect, it, vi } from 'vitest'
++import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
++import { beforeEach, expect, it, vi } from 'vitest'
+ import StudentMaterials from '@/components/student/StudentMaterials'
+ import { apiFetch } from '@/lib/api'
+ import { listKnowledgeBases, listKnowledgeBaseFiles } from '@/features/knowledge/api/client'
++import { uploadDocumentFile, type UploadResult } from '@/lib/student-upload'
+ 
+ vi.mock('@/components/student/TextbookLibrary', () => ({ default: () => <div>默认教材原件</div> }))
+ vi.mock('@/components/knowledge/KbFilePreview', () => ({
+@@ -17,6 +18,31 @@ vi.mock('@/features/knowledge/api/client', () => ({
+   knowledgeBaseFilePath: (kb: string, file: string) => `/api/knowledge-bases/${kb}/files/${file}`,
+ }))
+ vi.mock('@/lib/learning-library', () => ({ learningLibrary: async () => ({ items: [] }) }))
++vi.mock('@/lib/student-upload', () => ({ MAX_UPLOAD_SOURCE_BYTES: 1024 ** 3, uploadDocumentFile: vi.fn() }))
++
++let saved: UploadResult[] = []
++beforeEach(() => {
++  saved = []
++  window.history.replaceState({}, '', '/space?dt_workspace=')
++  vi.mocked(apiFetch).mockReset().mockImplementation(async () => new Response(JSON.stringify({ uploads: saved })))
++  vi.mocked(listKnowledgeBases).mockReset().mockResolvedValue([])
++  vi.mocked(listKnowledgeBaseFiles).mockReset().mockResolvedValue([])
++  vi.mocked(uploadDocumentFile).mockReset()
++})
++
++function result(file: File, number: number): UploadResult {
++  const id = number.toString(16).padStart(32, '0')
++  return { upload_id: id, filename: file.name, created_at: 1, library_status: 'saving',
++    records: [{ id, filename: file.name, size: file.size, type: 'file', mime_type: file.type,
++      url: `/files/attachments/_pending/${id}/${encodeURIComponent(file.name)}` }] }
++}
++
++function pending<T>() {
++  let resolve!: (value: T) => void
++  let reject!: (error: Error) => void
++  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no })
++  return { promise, resolve, reject }
++}
+ 
+ it('shows default textbooks and lets a retained original open while indexing is pending', async () => {
+   vi.mocked(apiFetch).mockResolvedValue(
+@@ -68,3 +94,82 @@ it('shows uploaded originals without waiting for a slow knowledge catalog', asyn
+   expect(await screen.findByText('新资料.pdf')).toBeInTheDocument()
+   expect(screen.getByRole('button', { name: '打开原件' })).toBeEnabled()
+ })
++
++it('uploads selected files sequentially to the original workspace without a conversation and opens each saved original', async () => {
++  window.history.replaceState({}, '', '/space?dt_workspace=student-study-math')
++  const first = new File(['first'], '第一份.pdf', { type: 'application/pdf' })
++  const second = new File(['second'], '第二份.docx')
++  const one = pending<UploadResult>(), two = pending<UploadResult>()
++  vi.mocked(uploadDocumentFile).mockImplementation((file, retention, workspace, progress) => {
++    expect(retention).toBe('library')
++    expect(workspace).toBe('student-study-math')
++    progress?.(50)
++    return (file === first ? one.promise : two.promise).then(value => { saved.push(value); return value })
++  })
++  render(<StudentMaterials />)
++  const picker = screen.getByLabelText('选择要长期保存的资料') as HTMLInputElement
++  expect(picker.multiple).toBe(true)
++  fireEvent.change(picker, { target: { files: [first, second] } })
++  expect(uploadDocumentFile).toHaveBeenCalledTimes(1)
++  expect(screen.getByRole('button', { name: '批量上传资料' })).toBeDisabled()
++  expect(screen.getByRole('progressbar', { name: '第一份.pdf 上传进度' })).toHaveValue(50)
++  fireEvent.change(picker, { target: { files: [second] } })
++  expect(uploadDocumentFile).toHaveBeenCalledTimes(1)
++  window.history.replaceState({}, '', '/space?dt_workspace=student-study-english')
++  await act(async () => one.resolve(result(first, 1)))
++  await waitFor(() => expect(uploadDocumentFile).toHaveBeenCalledTimes(2))
++  expect(await screen.findByRole('heading', { name: first.name })).toBeInTheDocument()
++  fireEvent.click(screen.getByRole('button', { name: '打开原件' }))
++  expect(await screen.findByText('原件已打开：第一份.pdf')).toBeInTheDocument()
++  fireEvent.click(screen.getByRole('button', { name: '关闭原件预览' }))
++  await act(async () => two.resolve(result(second, 2)))
++  expect(await screen.findByRole('heading', { name: second.name })).toBeInTheDocument()
++  expect(screen.getByText('已保存 2/2 份')).toBeInTheDocument()
++  expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/sessions'), expect.anything())
++})
++
++it('keeps successful files when another file is rejected and continues the batch', async () => {
++  const bad = new File(['bad'], '程序.exe')
++  const failed = new File(['bad'], '讲义.pdf')
++  const good = new File(['good'], '笔记.txt')
++  vi.mocked(uploadDocumentFile).mockRejectedValueOnce(new Error('磁盘空间不足')).mockImplementationOnce(async file => {
++    const value = result(file, 3); saved.push(value); return value
++  })
++  render(<StudentMaterials />)
++  fireEvent.change(screen.getByLabelText('选择要长期保存的资料'), { target: { files: [bad, failed, good] } })
++  expect(await screen.findByText('磁盘空间不足')).toBeInTheDocument()
++  expect(await screen.findByRole('heading', { name: good.name })).toBeInTheDocument()
++  expect(screen.getByText(/不支持这种文件类型/)).toBeInTheDocument()
++  expect(screen.getByText(/2 份未完成/)).toBeInTheDocument()
++  expect(uploadDocumentFile).toHaveBeenCalledTimes(2)
++})
++
++it('stops the current and remaining uploads while retaining originals already saved', async () => {
++  const files = ['已保存.txt', '进行中.txt', '等待中.txt'].map(name => new File(['original'], name))
++  vi.mocked(uploadDocumentFile).mockImplementationOnce(async file => {
++    const value = result(file, 4); saved.push(value); return value
++  }).mockImplementationOnce((_file, _retention, _workspace, _progress, signal) => new Promise((_resolve, reject) => {
++    signal!.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true })
++  }))
++  render(<StudentMaterials />)
++  fireEvent.change(screen.getByLabelText('选择要长期保存的资料'), { target: { files } })
++  await waitFor(() => expect(uploadDocumentFile).toHaveBeenCalledTimes(2))
++  fireEvent.click(screen.getByRole('button', { name: '停止剩余上传' }))
++  expect(await screen.findByRole('heading', { name: files[0].name })).toBeInTheDocument()
++  await waitFor(() => expect(screen.getAllByText('已停止')).toHaveLength(2))
++  expect(uploadDocumentFile).toHaveBeenCalledTimes(2)
++  expect(screen.getByRole('button', { name: '批量上传资料' })).toBeEnabled()
++})
++
++it('aborts unfinished transfers when leaving the library', async () => {
++  let signal: AbortSignal | undefined
++  vi.mocked(uploadDocumentFile).mockImplementation((_file, _retention, _workspace, _progress, value) => {
++    signal = value
++    return new Promise((_resolve, reject) => signal!.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true }))
++  })
++  const page = render(<StudentMaterials />)
++  fireEvent.change(screen.getByLabelText('选择要长期保存的资料'), { target: { files: [new File(['x'], '资料.txt')] } })
++  page.unmount()
++  expect(signal?.aborted).toBe(true)
++  await act(async () => {})
++})
