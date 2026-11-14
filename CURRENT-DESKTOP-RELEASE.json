@@ -2262,10 +2262,14 @@
   "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/PUBLICATION-RECEIPT.json",
   "publication_run": 43614495590,
   "usb_delivery": {
-    "completed": false,
+    "completed": true,
     "tag": "student-20261114-audio",
-    "updated_for_this_release": false,
-    "status": "new payloads being staged and read back; previous installation retained"
+    "updated_for_this_release": true,
+    "verified_payload_files": 9,
+    "superseded_installation_directories_removed": true,
+    "other_materials_preserved": true,
+    "receipt": "USB-DELIVERY-RECEIPT.json",
+    "receipt_sha256": "fea89bb860512fac6310ec6f92207afa27b8aa0ff379810ef8a161568f9b5de5"
   },
   "release_skill": "skills/scholar-desktop-release/SKILL.md",
   "physical_student_devices_all_tested": false,

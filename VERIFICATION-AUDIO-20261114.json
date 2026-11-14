@@ -109,5 +109,25 @@
   "real_learner_records_used": false,
   "paid_model_test_calls": 0,
   "private_key_uploaded": false,
-  "checked_at_utc": "2026-11-14T16:13:23Z"
+  "checked_at_utc": "2026-11-14T16:13:23Z",
+  "windows_system_speech_diagnosis": {
+    "diagnostic_run": 43607456016,
+    "legacy_web_speech_error": "synthesis-failed",
+    "sapi_voices_available": true,
+    "audio_services_already_running": true,
+    "winmm_output_endpoints": 0,
+    "legacy_nonempty_status_no_longer_counts_as_success": true,
+    "real_chat_audio_file_chain": "passed",
+    "physical_output_hardware_repaired": false,
+    "physical_speaker_or_loopback_captured": false
+  },
+  "usb_delivery": {
+    "completed": true,
+    "verified_payload_files": 9,
+    "receipt": "USB-DELIVERY-RECEIPT.json",
+    "receipt_sha256": "fea89bb860512fac6310ec6f92207afa27b8aa0ff379810ef8a161568f9b5de5",
+    "old_installation_removed": true,
+    "protected_math_documents_unchanged": 6,
+    "completed_at_utc": "2026-11-14T17:12:24.853210+00:00"
+  }
 }

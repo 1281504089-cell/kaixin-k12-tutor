@@ -1,16 +1,16 @@
 {
-  "tag": "student-20261114-materials",
-  "release_id": 445169286,
-  "core_commit": "842d6654666e20e606f31245cc20730807562ad8",
-  "core_sha256": "d0498a88ec722d36be81d87d84fec08f1986fec6747780b6bb2185619b4c615d",
+  "tag": "student-20261114-audio",
+  "release_id": 445374839,
+  "core_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
+  "core_sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1",
   "launcher_build": "20261114-unified",
   "installation_directory": "开心动力超级学霸安装包/2026-11-14-三类安装",
   "files": [
     {
       "target": "windows-x64",
-      "file": "01-从零安装/Windows/Kaixin-K12-Tutor-20261114-materials-Windows-Full.zip",
-      "bytes": 7169005602,
-      "sha256": "8c0326cb4105d5cb559ae1ec4f28173e3835b4d24f20fea44e4afa37467f0c1b",
+      "file": "01-从零安装/Windows/Kaixin-K12-Tutor-20261114-audio-Windows-Full.zip",
+      "bytes": 7169033386,
+      "sha256": "b4a254bcb9711dcb7d041086fc89f78e0d26d0a7de59e6fec10c1d948c25ba3f",
       "usb_readback_verified": true
     },
     {
@@ -57,16 +57,16 @@
     },
     {
       "target": "macos-x64",
-      "file": "01-从零安装/Mac-Intel/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-materials.dmg",
-      "bytes": 7160643660,
-      "sha256": "3f1714f0f697381fa1464434e5cb01cd697ddec1f68e19def786a97b4974cc93",
+      "file": "01-从零安装/Mac-Intel/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio.dmg",
+      "bytes": 7160788059,
+      "sha256": "0ade9bcc3ad269baa48d9e3db12da5aea6ced491465776010f02eebfc08e96db",
       "usb_readback_verified": true
     },
     {
       "target": "macos-arm64",
-      "file": "01-从零安装/Mac-Apple芯片/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-materials.dmg",
-      "bytes": 7091595658,
-      "sha256": "1691809eb0c9fd5127dab3eef62642e165a737835f6811e503b664ca37bd0c2b",
+      "file": "01-从零安装/Mac-Apple芯片/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio.dmg",
+      "bytes": 7091704071,
+      "sha256": "e604f62c827e802a6513cc1ca4c38f04674b5f3e20e3b0af6b18f80afa79d8b5",
       "usb_readback_verified": true
     }
   ],
@@ -75,14 +75,15 @@
   "complete_windows_zip": true,
   "three_native_install_and_update_tests": "passed",
   "superseded_installation_removed": true,
-  "old_bytes_removed": 22299025146,
+  "old_bytes_removed": 22244420368,
   "protected_math_documents": 6,
   "other_materials_unchanged": true,
   "legacy_migration_unchanged_reused_from": "student-20261114-unified",
   "legacy_migration_retested_this_batch": false,
-  "free_bytes_after": 40600600576,
-  "completed_at_utc": "2026-11-14T13:32:07.887998+00:00",
+  "free_bytes_after": 40599552000,
+  "completed_at_utc": "2026-11-14T17:12:24.853210+00:00",
   "physical_user_devices_all_tested": false,
-  "freed_bytes_during_old_cleanup": 22307536896,
-  "net_free_bytes_change_from_start": 54132736
+  "free_bytes_before_staging_recorded": false,
+  "net_free_bytes_change_from_start": null,
+  "freed_bytes_during_old_cleanup": 22252486656
 }
