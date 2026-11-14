@@ -37,6 +37,8 @@ for target in targets:
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
+ study=smoke['study_reports'];assert study['passed'] and len(study['cases'])==9 and study['real_model_calls']==0
+ assert all(all(row[k] for k in ['generation_failure_rejected','audit_failure_rejected','legacy_fallback_hidden_and_export_blocked','reviewed_fixture_available_and_word_exported','chat_and_reading_records_preserved']) for row in study['cases'])
  assert len(smoke['local_spoken_stt'])==2 and all(r['spoken_audio_decoded'] for r in smoke['local_spoken_stt'])
  native_evidence=work/('evidence-'+target)
  gh('run','download',batch['native_runs'][target]['run_id'],'--name','attachments-'+target,'--dir',native_evidence)
@@ -89,7 +91,7 @@ except Exception:
 
 gh('release','upload',batch['tag'],root/'INSTALLATION.txt','--clobber')
 gh('api','-X','PATCH','repos/'+repo+'/git/refs/tags/'+batch['tag'],'-f','sha='+os.environ['GITHUB_SHA'],'-F','force=true')
-gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 附件与资料库 2026-11-14','--notes-file',root/'RELEASE-NOTES.md')
+gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 全科复盘真实性修复 2026-11-14','--notes-file',root/'RELEASE-NOTES.md')
 latest=api('releases/latest');assert latest['tag_name']==batch['tag'] and not latest['prerelease']
 receipt={**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'physical_user_devices_tested':False,'private_key_uploaded':False}
 receipt_file=root/'PUBLICATION-RECEIPT.json';receipt_file.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n');gh('release','upload',batch['tag'],receipt_file,'--clobber')

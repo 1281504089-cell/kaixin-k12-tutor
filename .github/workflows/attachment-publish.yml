@@ -1,7 +1,7 @@
-name: Publish native verified attachment batch
+name: Publish native verified all-subject review batch
 on:
   push:
-    branches: ['codex/attachments-publish-20261114-*']
+    branches: ['codex/review-publish-20261114-*']
     paths: ['attachment-publication.json', 'ci-promote-attachments.py', '.github/workflows/attachment-publish.yml']
 permissions:
   contents: write

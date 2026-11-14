@@ -1,0 +1,29 @@
+{
+  "baseline": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+  "commit": "c0eaa65d5324908ef8afc29adee9adc364b4dff1",
+  "scope": "all nine subjects; fail honestly after generation/audit failure; never promote fixed fallback to a learning recap; stop presenting legacy unreviewed drafts as final reports; originals preserved",
+  "files": {
+    "deeptutor/services/student_learning/reports.py": "0fb70efda0b89c60823a3bfe86e95a08da83f2e8a5df98a9d0a5a223f7ec3f18",
+    "tests/api/test_student_reports.py": "e3efc790ed4435d9abd9043a29e6994408874d6a2870f58ee035f9621b29df70"
+  },
+  "tests": {
+    "api_report_tests": 75,
+    "seconds": 65.31,
+    "passed": true,
+    "native_smoke": {
+      "passed": true,
+      "candidate_source_with_bundled_python": "macos-x64",
+      "subjects": 9,
+      "real_model_calls": 0,
+      "receipt": "native-report-smoke-macos-x64.json"
+    },
+    "native_three_targets": "publisher runs on final packaged core"
+  },
+  "patch_sha256": "7e75d478659810ebb9c5f4b83bf7e5004f44cb86a2556b7c4e31eb7bb1daee39",
+  "native_smoke_sha256": "ca8bbee2637f7e94f7c68bb19948e9776a240d6e2a795b6a08ce5900a1aed052",
+  "model_high_and_output_budget_unchanged": true,
+  "paid_model_calls": 0,
+  "web_and_desktop_shell_unchanged": true,
+  "original_records_or_keys_modified": false,
+  "github_or_usb_modified_here": false
+}
