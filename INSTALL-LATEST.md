@@ -6,19 +6,19 @@
 
 ## Apple 芯片 Mac（M 系列）
 
-- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-materials-part.dmg)
-- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-materials-part.002.dmgpart)
-- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-materials-part.003.dmgpart)
-- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-materials-part.004.dmgpart)
+- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.dmg)
+- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.002.dmgpart)
+- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.003.dmgpart)
+- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio-part.004.dmgpart)
 
 需要 macOS 13 或以上。四个文件下齐后，只打开主文件 `.dmg`，把“开心动力超级学霸”拖进“应用程序”，再从“应用程序”打开。其余 `.dmgpart` 保持原位，不需要逐个打开。
 
 ## Intel Mac
 
-- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-materials-part.dmg)
-- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-materials-part.002.dmgpart)
-- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-materials-part.003.dmgpart)
-- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-materials-part.004.dmgpart)
+- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.dmg)
+- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.002.dmgpart)
+- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.003.dmgpart)
+- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-audio/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio-part.004.dmgpart)
 
 需要 macOS 13 或以上。四个文件下齐后，只打开主文件 `.dmg`，把“开心动力超级学霸”拖进“应用程序”，再从“应用程序”打开。其余 `.dmgpart` 保持原位，不需要逐个打开。
 

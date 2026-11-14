@@ -72,7 +72,7 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 <details>
 <summary>Mac 打开分卷提示错误 109、110 或“镜像无法识别”</summary>
 
-先把同一版本的 `.dmg`、全部 `.dmgpart` 放在本机同一个文件夹，保留原名。发布页的 `verification-macos-x64.json` 和 `verification-macos-arm64.json` 分别列出对应系统文件的 SHA256。若 U 盘附带「Mac-Apple芯片-兼容安装」，打开该文件夹内的单文件 `.dmg`，再把应用拖入「应用程序」。
+先把同一版本的 `.dmg`、全部 `.dmgpart` 放在本机同一个文件夹，保留原名。发布页的 `verification-macos-x64.json` 和 `verification-macos-arm64.json` 分别列出对应系统文件的 SHA256。若使用本批 U 盘，打开「01-从零安装/Mac-Apple芯片」或「01-从零安装/Mac-Intel」内对应的单文件 `.dmg`，再把应用拖入「应用程序」。
 
 GitHub 下载的两种 Mac 包均可合并成单文件。先在终端进入下载文件夹，校验通过后执行转换；把 `./发布页中以-part.dmg结尾的文件名` 换成当前文件夹里真正的首卷名称。
 
@@ -95,7 +95,7 @@ open "$HOME/Downloads/Kaixin-Mac-Complete.dmg"
 
 迁移后在原软件点击「核心 → 检查更新」或「设置 → 关于 → 检查更新」。发现新版后点「下载并更新」，等待备份和重新打开，再检查一次应提示已是最新。保留聊天、任务、教材、设置及 Key。
 
-有匹配环境时获取约 27 MB 同批核心（实际大小以发布回执为准）；最早 `77f2ba387` 底座缺少后来原生依赖，首次可由软件自动获取约 1.17–1.25 GB 兼容资源。后续相容核心和界面优化继续检查更新。检查和下载需要能访问 GitHub；源码提交本身不会更新客户端。
+有匹配环境时获取约 27 MB 同批核心（实际大小以发布回执为准）；最早 `77f2ba387` 底座缺少后来原生依赖，首次可由软件自动获取约 1.15–1.24 GB 兼容资源。后续相容核心和界面优化继续检查更新。检查和下载需要能访问 GitHub；源码提交本身不会更新客户端。
 
 旧发布与旧签名清单保留在 Releases，供维护者回退。离线脚本和 JSON 不是日常升级入口。
 

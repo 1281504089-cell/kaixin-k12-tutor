@@ -3,7 +3,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
+from urllib.parse import unquote, urlparse
 
 repo = '1281504089-cell/kaixin-k12-tutor'
 root = Path.cwd()
@@ -26,8 +28,12 @@ assert current['learning_source_commit'] == post['downloaded_core_commit'] == ve
 assert current['core_sha256'] == post['downloaded_sha256'] == '362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1'
 assert post['signature_verified_manifests'] == verification['signed_manifests'] == 27
 assert all(current['platforms'][target]['chat_audio']['passed'] for target in ['windows-x64', 'macos-x64', 'macos-arm64'])
+expected_installers = {row['file'] for platform in current['platforms'].values() for row in platform['complete_installation_files']}
+links = re.findall(r'\]\((https://[^)]+)\)', (root / 'INSTALL-LATEST.md').read_text())
+linked_installers = [unquote(urlparse(url).path.rsplit('/', 1)[-1]) for url in links if '/download/' + current['tag'] + '/' in url]
+assert len(linked_installers) == 13 and set(linked_installers) == expected_installers, 'Installation links differ from the tested installer set'
 names = ['CURRENT-DESKTOP-RELEASE.json', 'POST-PUBLISH-VERIFIED.json', 'VERIFICATION-AUDIO-20261114.json',
-         'INSTALLATION.txt', 'INSTALL-LATEST.md', 'AUDIO-SCIENCE-20261114.md']
+         'INSTALLATION.txt', 'INSTALL-LATEST.md', 'MIGRATE-LEGACY.md', 'AUDIO-SCIENCE-20261114.md']
 if current['usb_delivery']['completed']:
     usb = read('USB-DELIVERY-RECEIPT.json')
     assert usb['tag'] == current['tag'] and usb['core_commit'] == current['learning_source_commit']
