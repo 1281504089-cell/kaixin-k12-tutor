@@ -1,29 +1,31 @@
 {
   "formatVersion": 1,
   "repository": "1281504089-cell/kaixin-k12-tutor",
-  "tag": "student-20261114-attachments",
-  "release_id": 444696005,
-  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-attachments",
-  "release_repository_commit": "3aceacb9df2aed16234b4cdf7148730355eeefce",
-  "combined_source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
-  "learning_source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
-  "backend_source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
-  "frontend_build_id": "7M_Ba80YyhkDAozDT7-hF",
+  "tag": "student-20261114-review",
+  "release_id": 445031618,
+  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261114-review",
+  "release_repository_commit": "676ff1c20a3a0add71e6030863bfb87971295218",
+  "combined_source_commit": "c0eaa65d5324908ef8afc29adee9adc364b4dff1",
+  "learning_source_commit": "c0eaa65d5324908ef8afc29adee9adc364b4dff1",
+  "backend_source_commit": "c0eaa65d5324908ef8afc29adee9adc364b4dff1",
+  "baseline_source_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
+  "frontend_build_id": "YV3dhcVfsH4bhEab6OtHw",
   "launcher_build": "20261114-unified",
-  "builtAt": 1794607833322,
-  "core_archive": "kaixin-core-20261114-attachments.tar.gz",
-  "core_sha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+  "builtAt": 1794633180908,
+  "core_archive": "kaixin-core-20261114-review.tar.gz",
+  "core_sha256": "f591de8e85ef041b3bc99d2f567dd1ba051ce85cd59872c4a54a81b05cb8ac25",
+  "core_bytes": 44863499,
   "platforms": {
     "windows-x64": {
       "native_run": {
-        "run_id": 43521538853,
-        "workflow_commit": "f136bafaedee44d2e53e9a72073e0dcb77508841"
+        "run_id": 43560653663,
+        "workflow_commit": "2c85d1bee71aee8b4a9ffcd430442509fc294b6d"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43521538853/job/132216740667",
-      "new_install_runtime": "1.7.1-kaixin-20261114-attachments-windows-x64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43560653663/job/132343342241",
+      "new_install_runtime": "1.7.1-kaixin-20261114-review-windows-x64-20261112",
       "stable_manifest": "runtime-windows-x64.json",
-      "stable_manifest_sha256": "ddf7376af4fe1cb3f564dad100a3ce92d7adb399278ebe8aad72e569ba219eef",
-      "stable_runtime": "1.7.1-kaixin-20261114-attachments-windows-x64-universal",
+      "stable_manifest_sha256": "a4ba041f240cccfbaf8e8bb571237c46e7d52866db22e5661ff0243653067834",
+      "stable_runtime": "1.7.1-kaixin-20261114-review-windows-x64-universal",
       "complete_installation_files": [
         {
           "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
@@ -47,8 +49,8 @@
         },
         {
           "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
-          "bytes": 204684185,
-          "sha256": "fd032a0d8069b59d294e4a9c200fd132085e47499f2a89e8ff38ceb171f3d7dc"
+          "bytes": 204683441,
+          "sha256": "51deb9639c8661d2e8701bb0b3894b8d81454873925143ad94afd8de24041612"
         }
       ],
       "migration_file": {
@@ -57,9 +59,92 @@
         "sha256": "4650036eae7ea9f7a713fbee8eb008547d94e6677dd71c53a01786f3f6f13ea6",
         "release_tag": "student-20261114-unified"
       },
+      "launcher_migration_retested_in_this_release": false,
       "native_installation": "passed",
-      "native_migration_and_update": "passed",
+      "native_core_update": "passed",
       "existing_synthetic_records_preserved": true,
+      "study_reports": {
+        "passed": true,
+        "native_platform": "win32",
+        "python": "3.12.13",
+        "cases": [
+          {
+            "subject": "chinese",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "math",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "english",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "physics",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "chemistry",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "biology",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "history",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "geography",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "politics",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          }
+        ],
+        "real_model_calls": 0,
+        "real_learner_data_used": false,
+        "model_semantic_quality_tested": false
+      },
       "attachment_uploads": {
         "raw_originals_verified": true,
         "temporary_excluded_from_library": true,
@@ -67,48 +152,48 @@
         "concurrent_library_uploads_saved": true,
         "scanned_pdf_retrievable": true,
         "sources": 3,
-        "interactive_page_ready_while_indexing_seconds": 7.0,
-        "temporary_raw_seconds": 2.422,
+        "interactive_page_ready_while_indexing_seconds": 8.547,
+        "temporary_raw_seconds": 2.75,
         "library_raw_seconds": [
-          0.218,
-          2.718
+          0.204,
+          3.781
         ],
-        "background_and_retrieval_seconds": 27.219,
-        "health_max_seconds": 0.672,
+        "background_and_retrieval_seconds": 24.937,
+        "health_max_seconds": 0.235,
         "real_api_key_used": false,
         "cloud_models_used": false
       }
     },
     "macos-x64": {
       "native_run": {
-        "run_id": 43521538853,
-        "workflow_commit": "f136bafaedee44d2e53e9a72073e0dcb77508841"
+        "run_id": 43560653663,
+        "workflow_commit": "2c85d1bee71aee8b4a9ffcd430442509fc294b6d"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43521538853/job/132216740842",
-      "new_install_runtime": "1.7.1-kaixin-20261114-attachments-macos-x64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43560653663/job/132343342089",
+      "new_install_runtime": "1.7.1-kaixin-20261114-review-macos-x64-20261112",
       "stable_manifest": "runtime-macos-x64.json",
-      "stable_manifest_sha256": "abb7fb833b3c865c977c6a0d975edf083b0bb8559fdf89550df8f8e0cb5df4d4",
-      "stable_runtime": "1.7.1-kaixin-20261114-attachments-macos-x64-universal",
+      "stable_manifest_sha256": "60186980a7eb4bd37d5d4e4bc5a276e51bb9079774694881e6f9294f144bc650",
+      "stable_runtime": "1.7.1-kaixin-20261114-review-macos-x64-universal",
       "complete_installation_files": [
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-attachments-part.002.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-review-part.002.dmgpart",
           "bytes": 1992295135,
-          "sha256": "eb0c6823b98c4f0beb767da7fd408ac54cde149940038104457c9045ab77fd3b"
+          "sha256": "93d50172928c4fdce2fcc53546a4bd64be66de99f31955426b718c31282709b5"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-attachments-part.003.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-review-part.003.dmgpart",
           "bytes": 1992295135,
-          "sha256": "c398ef043c584ea9e3b7039df7336acf3fbeacc7f52190e4790442b21e0624b2"
+          "sha256": "8d006f27693da3f4314f8ee1f3de3f41ad99e6c7ea9a6b4d43e1d095ae3f9cd2"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-attachments-part.004.dmgpart",
-          "bytes": 1201638038,
-          "sha256": "76bd52c29b3c349040c6b33bfdcad4ec012ca01f0fd96574f1cf97eb9d9e3dce"
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-review-part.004.dmgpart",
+          "bytes": 1201775857,
+          "sha256": "0bdfbe2566f62e34069d8f8f0d3a5415ce42d701e288c41b84f951370520adbc"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-attachments-part.dmg",
-          "bytes": 1992734464,
-          "sha256": "294ce226703aaa7bf91338874b62803c7b18947a938902f94f9191bd79cd23a2"
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-review-part.dmg",
+          "bytes": 1992733688,
+          "sha256": "8e1c6da7d1eb13764e2b1946369264b7ac5c812f2264b6c2febfc3b5cfe59884"
         }
       ],
       "migration_file": {
@@ -117,9 +202,92 @@
         "sha256": "6e0f55d4aecf9d10e58c6bd8ae709469e6dedc21e0053beb28ec0bb0c509c585",
         "release_tag": "student-20261114-unified"
       },
+      "launcher_migration_retested_in_this_release": false,
       "native_installation": "passed",
-      "native_migration_and_update": "passed",
+      "native_core_update": "passed",
       "existing_synthetic_records_preserved": true,
+      "study_reports": {
+        "passed": true,
+        "native_platform": "darwin",
+        "python": "3.12.13",
+        "cases": [
+          {
+            "subject": "chinese",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "math",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "english",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "physics",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "chemistry",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "biology",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "history",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "geography",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "politics",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          }
+        ],
+        "real_model_calls": 0,
+        "real_learner_data_used": false,
+        "model_semantic_quality_tested": false
+      },
       "attachment_uploads": {
         "raw_originals_verified": true,
         "temporary_excluded_from_library": true,
@@ -127,48 +295,48 @@
         "concurrent_library_uploads_saved": true,
         "scanned_pdf_retrievable": true,
         "sources": 3,
-        "interactive_page_ready_while_indexing_seconds": 11.881,
-        "temporary_raw_seconds": 2.692,
+        "interactive_page_ready_while_indexing_seconds": 13.819,
+        "temporary_raw_seconds": 3.218,
         "library_raw_seconds": [
-          0.294,
-          3.213
+          0.298,
+          3.052
         ],
-        "background_and_retrieval_seconds": 46.18,
-        "health_max_seconds": 1.358,
+        "background_and_retrieval_seconds": 41.104,
+        "health_max_seconds": 0.378,
         "real_api_key_used": false,
         "cloud_models_used": false
       }
     },
     "macos-arm64": {
       "native_run": {
-        "run_id": 43521538853,
-        "workflow_commit": "f136bafaedee44d2e53e9a72073e0dcb77508841"
+        "run_id": 43560653663,
+        "workflow_commit": "2c85d1bee71aee8b4a9ffcd430442509fc294b6d"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43521538853/job/132216740976",
-      "new_install_runtime": "1.7.1-kaixin-20261114-attachments-macos-arm64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43560653663/job/132343342245",
+      "new_install_runtime": "1.7.1-kaixin-20261114-review-macos-arm64-20261112",
       "stable_manifest": "runtime-macos-arm64.json",
-      "stable_manifest_sha256": "26675b053959223015897ca860ab1fcc9c55297aaf653c98b5039d24ed69064d",
-      "stable_runtime": "1.7.1-kaixin-20261114-attachments-macos-arm64-universal",
+      "stable_manifest_sha256": "02e395cded58e96b806af22370097fba30f1aabf755990260fa137f066eb01df",
+      "stable_runtime": "1.7.1-kaixin-20261114-review-macos-arm64-universal",
       "complete_installation_files": [
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-attachments-part.002.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-review-part.002.dmgpart",
           "bytes": 1992295135,
-          "sha256": "ce52427f12706862340729d17064b9b44a5d8b7a9456696cd31b33ad2cca1c83"
+          "sha256": "0be5534fcfb48960cca6862e2860c93814c61065809e7f3743da3e1b84d3314f"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-attachments-part.003.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-review-part.003.dmgpart",
           "bytes": 1992295135,
-          "sha256": "91dba65a07d3cb75f65c33dc41cf74b3eedac2f19b251a48ec3745b0d44ce489"
+          "sha256": "b3d5c970737ac36db88534b13c3e2952b7f2f64af1d796f6c0cd1ef5a2846923"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-attachments-part.004.dmgpart",
-          "bytes": 1132473320,
-          "sha256": "5512e9305ca2e52959c75fd7ea3be4b54b59e8867d73e61d223478fe6670542c"
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-review-part.004.dmgpart",
+          "bytes": 1132336377,
+          "sha256": "e90cb441f2c8d5242a86534ac8be2bba4c1e2e2c585f8c82e10a7600ac87f5af"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-attachments-part.dmg",
-          "bytes": 1992730246,
-          "sha256": "b7e9eb8435dda2d357a191cc66f500050d99b5c5f6d356c0f64c40792e661858"
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-review-part.dmg",
+          "bytes": 1992728996,
+          "sha256": "b46a1820db152e83f6a0f2651b3759a3a6868f0ee9b4024a2f0842a4fd4534c6"
         }
       ],
       "migration_file": {
@@ -177,9 +345,92 @@
         "sha256": "43f32b93155c5e3a5fbd25b81b3248d51fc095d276733881eea6899697b07fbe",
         "release_tag": "student-20261114-unified"
       },
+      "launcher_migration_retested_in_this_release": false,
       "native_installation": "passed",
-      "native_migration_and_update": "passed",
+      "native_core_update": "passed",
       "existing_synthetic_records_preserved": true,
+      "study_reports": {
+        "passed": true,
+        "native_platform": "darwin",
+        "python": "3.12.13",
+        "cases": [
+          {
+            "subject": "chinese",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "math",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "english",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "physics",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "chemistry",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "biology",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "history",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "geography",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          },
+          {
+            "subject": "politics",
+            "generation_failure_rejected": true,
+            "audit_failure_rejected": true,
+            "legacy_fallback_hidden_and_export_blocked": true,
+            "reviewed_fixture_available_and_word_exported": true,
+            "chat_and_reading_records_preserved": true
+          }
+        ],
+        "real_model_calls": 0,
+        "real_learner_data_used": false,
+        "model_semantic_quality_tested": false
+      },
       "attachment_uploads": {
         "raw_originals_verified": true,
         "temporary_excluded_from_library": true,
@@ -187,33 +438,36 @@
         "concurrent_library_uploads_saved": true,
         "scanned_pdf_retrievable": true,
         "sources": 3,
-        "interactive_page_ready_while_indexing_seconds": 8.991,
-        "temporary_raw_seconds": 2.407,
+        "interactive_page_ready_while_indexing_seconds": 7.46,
+        "temporary_raw_seconds": 1.252,
         "library_raw_seconds": [
-          0.184,
-          2.674
+          0.151,
+          1.335
         ],
-        "background_and_retrieval_seconds": 34.137,
-        "health_max_seconds": 0.32,
+        "background_and_retrieval_seconds": 20.478,
+        "health_max_seconds": 0.071,
         "real_api_key_used": false,
         "cloud_models_used": false
       }
     }
   },
+  "source_test_receipt": "VERIFICATION-REPORTS-20261114.json",
+  "source_api_tests_passed": 75,
   "post_publication_verification": {
-    "signature_verified_manifests": 15,
+    "signature_verified_manifests": 18,
     "native_platform": "darwin",
     "native_arch": "x64",
     "transport": "production Chromium update session",
-    "previous_compatibility_runtime_gets_small_update": true,
-    "downloaded_core_commit": "f59d7acc64eaa074162b9ac4a3ea09261c3da3f1",
-    "downloaded_sha256": "7ed7eb27a2556c5cfae9dcb1f73ff09a4b34acba8cdbe51cb75650aff66f66a7",
+    "previous_attachments_full_runtime_gets_small_update": true,
+    "downloaded_core_commit": "c0eaa65d5324908ef8afc29adee9adc364b4dff1",
+    "downloaded_sha256": "f591de8e85ef041b3bc99d2f567dd1ba051ce85cd59872c4a54a81b05cb8ac25",
+    "selected_native_base": "1.7.1-kaixin-20261114-attachments-macos-x64-universal",
     "current_full_install_does_not_downgrade": true,
     "earliest_base_gets_automatic_native_bridge": true,
-    "real_user_profile_modified": false,
-    "intel_updated_ui_fully_rendered": true
+    "real_user_profile_modified": false
   },
-  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-attachments/PUBLICATION-RECEIPT.json",
+  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261114-review/PUBLICATION-RECEIPT.json",
+  "publication_run": 43565047224,
   "usb_delivery": {
     "completed": true,
     "verified_payload_files": 9,
@@ -224,5 +478,6 @@
   },
   "release_skill": "skills/scholar-desktop-release/SKILL.md",
   "physical_student_devices_all_tested": false,
-  "recorded_at_epoch": 1794613291.4746659
+  "paid_model_semantic_quality_tested": false,
+  "third_party_model_recovery_claimed": false
 }
