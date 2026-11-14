@@ -117,6 +117,16 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
   const attachments = JSON.parse(attachmentProof.trim().split('\n').at(-1));
   assert.equal(attachments.scanned_pdf_retrievable, true);
   assert.equal(attachments.raw_originals_verified, true);
+  const reportProof = execFileSync(python, [path.join(process.cwd(), 'native-report-smoke.py'),
+    '--core-dir', path.join(runtime, 'core'), '--node', node,
+    '--out', path.join(evidence, 'reports.json')], {
+    encoding: 'utf8', timeout: 180000,
+    env: { ...process.env, PATH: operatingPath, PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1' },
+  });
+  const studyReports = JSON.parse(reportProof.trim().split('\n').at(-1));
+  assert.equal(studyReports.passed, true);
+  assert.equal(studyReports.cases.length, 9);
+  assert.equal(studyReports.real_model_calls, 0);
   // Exercise the installed launcher's automatic compatibility selection without altering live feeds.
   const { findReleaseUpdate, downloadReleaseUpdate } = await import(pathToFileURL(path.join(resources, 'app/src/release-updates.mjs')));
   const trace = [];
@@ -138,6 +148,7 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     native_platform: process.platform, native_arch: process.arch, runtime_id: active.runtimeId,
     core_commit: included.commit, fresh_profile: true, developer_tools_on_path: false,
     language: profile.language, textbooks: books.length, pdf, local_spoken_stt: speech,
+    study_reports: studyReports,
     reading_page: 'passed', current_core_included: true,
     automatic_small_update_selection: 'passed', automatic_small_update_download: 'passed',
     compatibility_runtime_downloaded: false, real_keys_used: false,

@@ -14,19 +14,19 @@ def prepare_bridge(root,target,resources,home,evidence,batch):
  with tarfile.open(resources/'update'/batch['core_asset']['name']) as archive:archive.extractall(stage,filter='data')
  held.rename(stage/'web/node_modules')
  out=root/('bridge-'+target);out.mkdir()
- archive=out/('kaixin-bridge-20261114-attachments-'+target+'.tar.gz')
+ archive=out/('kaixin-bridge-20261114-review-'+target+'.tar.gz')
  with tarfile.open(archive,'w:gz',compresslevel=6) as bundle:
   for file in sorted(stage.iterdir()):
    if file.name not in {'student-seed','SOURCE.tar.gz','installed.json'}:bundle.add(file,arcname=file.name)
  assert archive.stat().st_size<2*1024**3
- unsigned={**{k:batch['manifests'][target][k] for k in ['formatVersion','protocolVersion','platform','arch','coreVersion','commit','builtAt','corePayloadSha256']},'runtimeId':'1.7.1-kaixin-20261114-attachments-'+target+'-universal','archive':archive.name,'sha256':sha(archive)}
+ unsigned={**{k:batch['manifests'][target][k] for k in ['formatVersion','protocolVersion','platform','arch','coreVersion','commit','builtAt','corePayloadSha256']},'runtimeId':'1.7.1-kaixin-20261114-review-'+target+'-universal','archive':archive.name,'sha256':sha(archive)}
  unsigned_file=out/('runtime-'+target+'.unsigned.json');unsigned_file.write_text(json.dumps(unsigned,indent=2))
  subprocess.run(['python','bootstrap_source.py','--with-updates'],check=True)
  bridge_home=root/('bridge-profile-'+target)
  subprocess.run(['node','ci-probe-runtime.mjs','seed',str(stage),str(bridge_home),str(resources/'seed/runtime.json'),str(evidence/'bridge-before.json')],check=True,timeout=900)
  subprocess.run(['node','ci-probe-runtime.mjs','bridge',str(stage),str(bridge_home),str(unsigned_file),str(evidence/'bridge-native.json')],check=True,timeout=900)
  proof=json.loads((evidence/'bridge-native.json').read_text());assert all(proof.get(k) for k in ['ready','chat_preserved','task_preserved','saved_key_preserved'])
- ready={'target':target,'core_commit':batch['core_commit'],'bridge':{'file':archive.name,'bytes':archive.stat().st_size,'sha256':unsigned['sha256']},'native_bridge':proof,'production_signature':'pending maintainer signature','real_keys_used':False}
+ ready={'native_run_id':int(os.environ['GITHUB_RUN_ID']),'workflow_commit':os.environ['GITHUB_SHA'],'target':target,'core_commit':batch['core_commit'],'bridge':{'file':archive.name,'bytes':archive.stat().st_size,'sha256':unsigned['sha256']},'native_bridge':proof,'production_signature':'pending maintainer signature','real_keys_used':False}
  receipt=out/('attachment-stage-'+target+'.json');receipt.write_text(json.dumps(ready,indent=2))
  subprocess.run(['gh','release','upload',batch['tag'],str(archive),str(unsigned_file),str(receipt),'--clobber'],check=True)
  shutil.rmtree(stage);shutil.rmtree(bridge_home)

@@ -1,8 +1,8 @@
-name: Validate three native attachment installers and upgrades
+name: Validate three native all-subject review installers and upgrades
 on:
   push:
-    branches: ['codex/attachments-native-20261114-*']
-    paths: ['attachment-batch.json', 'ci-attachment-native.py', 'ci_attachment_bridge.py', 'ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'ci_repackage.py', 'ci_update_probe.py', 'ci-update-flow.cjs', '.github/workflows/attachment-native.yml']
+    branches: ['codex/review-native-20261114-*']
+    paths: ['attachment-batch.json', 'ci-attachment-native.py', 'native-report-smoke.py', 'ci_attachment_bridge.py', 'ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'ci_repackage.py', 'ci_update_probe.py', 'ci-update-flow.cjs', '.github/workflows/attachment-native.yml']
 permissions:
   contents: write
 jobs:
