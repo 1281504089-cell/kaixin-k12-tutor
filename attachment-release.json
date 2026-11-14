@@ -1,9 +1,9 @@
 {
-  "tag": "student-20261115-updater",
-  "source_commit": "03d88f7f1c6f228261e717ed51807f4070973f8d",
+  "tag": "student-20261115-updater2",
+  "source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
   "baseline_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "patch_sha256": "5f73b052b65433c3e051bf2dd2f511395783554fbfcb453cf4a7b6096fec43cb",
-  "archive": "kaixin-core-20261115-updater.tar.gz",
+  "patch_sha256": "89071250306f322b7810e19dc5371086beb2bb5fb073deb9b4a5ce4369117c6c",
+  "archive": "kaixin-core-20261115-updater2.tar.gz",
   "prior_core": {
     "archive": "kaixin-core-20261114-audio.tar.gz",
     "sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1"
@@ -46,7 +46,8 @@
     "tests/chat-selection-actions.spec.tsx",
     "tests/voice-settings.spec.tsx",
     "tests/desktop-update-notice.spec.tsx",
-    "tests/desktop-launcher-update.spec.tsx"
+    "tests/desktop-launcher-update.spec.tsx",
+    "tests/composer-draft-restore-failure.spec.tsx"
   ],
-  "source_files_sha256": "9a3b0399ee7c8d029ba613f98f012f86098417f14bd4c873ab69477525ce9243"
+  "source_files_sha256": "b4e57a1d3d070fae7fc967c220008077b220f249675b88aeedd4a679c56e510f"
 }

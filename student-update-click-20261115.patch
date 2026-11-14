@@ -1491,6 +1491,57 @@ index 235c6e2..0176ed0 100644
            </LibraryUploadProvider>
          </AppShellProvider>
        </body>
+diff --git a/web/components/chat/home/ChatComposer.tsx b/web/components/chat/home/ChatComposer.tsx
+index 5afef72..ab4624d 100644
+--- a/web/components/chat/home/ChatComposer.tsx
++++ b/web/components/chat/home/ChatComposer.tsx
+@@ -196,6 +196,10 @@ const SEND_STATE_CLASS: Record<SendState, string> = {
+   streaming: "bg-[var(--primary)] text-[var(--primary-foreground)]",
+ };
+ 
++function mergeRestoredDraftText(saved: string | undefined, entered: string): string {
++  return saved && entered && saved !== entered ? `${saved}\n${entered}` : entered || saved || "";
++}
++
+ export default memo(function ChatComposer({
+   taskSessionId,
+   voiceScopeKey,
+@@ -607,7 +611,7 @@ export default memo(function ChatComposer({
+         const base = restoreBaseRef.current;
+         await saveWorkspaceDraft(
+           {
+-            text: [base?.text, draft.text].filter(Boolean).join("\n"),
++            text: mergeRestoredDraftText(base?.text, draft.text),
+             attachments: [...(base?.attachments ?? []), ...draft.attachments],
+           },
+           location.workspaceId,
+@@ -647,7 +651,7 @@ export default memo(function ChatComposer({
+             return;
+           }
+           const current = inputHandleRef.current?.getValue() || "";
+-          const restoredText = current ? `${draft.text}\n${current}` : draft.text;
++          const restoredText = mergeRestoredDraftText(draft.text, current);
+           draftTextRef.current = restoredText;
+           // Restoring is not user input; don't queue a save that would write
+           // the draft straight back to storage.
+@@ -698,7 +702,7 @@ export default memo(function ChatComposer({
+       if (!draft.text && !draft.attachments.length) return Promise.resolve();
+       const merge = (stored?: WorkspaceDraft) =>
+         saveWorkspaceDraft({
+-          text: [stored?.text, draft.text].filter(Boolean).join("\n"),
++          text: mergeRestoredDraftText(stored?.text, draft.text),
+           attachments: [...(stored?.attachments ?? []), ...draft.attachments],
+         }, location.workspaceId, location.pathname);
+       // Re-read only once per mount so a retried switch merges the original
+@@ -755,7 +759,7 @@ export default memo(function ChatComposer({
+         if (!draftDirtyRef.current) return;
+         const current = collectDraft();
+         await saveWorkspaceDraft({
+-          text: [draft?.text, current.text].filter(Boolean).join("\n"),
++          text: mergeRestoredDraftText(draft?.text, current.text),
+           attachments: [...(draft?.attachments ?? []), ...current.attachments],
+         }, location.workspaceId, location.pathname);
+       }).catch((error) => {
 diff --git a/web/components/settings/DesktopLauncherUpdate.tsx b/web/components/settings/DesktopLauncherUpdate.tsx
 new file mode 100644
 index 0000000..dad75be
@@ -1562,6 +1613,53 @@ index fa05c55..b636868 100644
  }
  
  export interface DesktopUpdateBridge {
+diff --git a/web/tests/composer-draft-restore-failure.spec.tsx b/web/tests/composer-draft-restore-failure.spec.tsx
+index 3d3bdb4..5c1dce1 100644
+--- a/web/tests/composer-draft-restore-failure.spec.tsx
++++ b/web/tests/composer-draft-restore-failure.spec.tsx
+@@ -21,6 +21,8 @@ vi.mock("@/lib/workspace-drafts", () => ({
+   saveWorkspaceDraft: drafts.save,
+ }));
+ 
++vi.mock("@/hooks/useModules", () => ({ useModules: () => ({ modules: [], error: false, reload: () => {}, available: () => true }) }));
++
+ vi.mock("react-i18next", () => ({
+   useTranslation: () => ({ t: (key: string) => key }),
+ }));
+@@ -509,3 +511,33 @@ it("keeps input typed while a workspace-switch save is pending", async () => {
+     expect(stored).toBe("typed during save");
+   } finally {vi.useRealTimers();}
+ });
++
++it('does not duplicate identical text when a saved draft arrives after typing', async () => {
++  let finish!: (value: unknown) => void;
++  drafts.read.mockReturnValue(new Promise(resolve => { finish = resolve; }));
++  drafts.save.mockResolvedValue(undefined);
++  render(<Harness />);
++  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'same retained draft' } });
++  await act(async () => { finish({ text: 'same retained draft', attachments: [] }); });
++  expect(screen.getByRole('textbox')).toHaveValue('same retained draft');
++});
++it('does not append identical text during a failed-restore retry', async () => {
++  drafts.read.mockRejectedValueOnce(new Error('temporary read failure'))
++    .mockResolvedValueOnce({ text: 'same retained draft', attachments: [] });
++  drafts.save.mockResolvedValue(undefined);
++  render(<Harness />);
++  await act(async () => {});
++  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'same retained draft' } });
++  await expect(Promise.all(switchWorkspace())).resolves.toBeDefined();
++  expect(drafts.save).toHaveBeenLastCalledWith({ text: 'same retained draft', attachments: [] }, 'ws_test', '/chat');
++});
++it('keeps a single identical draft when navigation finishes before restoration', async () => {
++  let finish!: (value: unknown) => void;
++  drafts.read.mockReturnValue(new Promise(resolve => { finish = resolve; }));
++  drafts.save.mockResolvedValue(undefined);
++  const ui = render(<Harness />);
++  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'same retained draft' } });
++  ui.unmount();
++  await act(async () => { finish({ text: 'same retained draft', attachments: [] }); });
++  expect(drafts.save).toHaveBeenLastCalledWith({ text: 'same retained draft', attachments: [] }, 'ws_test', '/chat');
++});
 diff --git a/web/tests/desktop-launcher-update.spec.tsx b/web/tests/desktop-launcher-update.spec.tsx
 new file mode 100644
 index 0000000..66ec81e
