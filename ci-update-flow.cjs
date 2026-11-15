@@ -116,7 +116,14 @@ async function content() {
     const after = JSON.parse(readFileSync(path.join(home, 'active.json')));
     const transaction = JSON.parse(readFileSync(path.join(home, 'upgrade.json')));
     if(!needsRestart) { assert.ok(progressVisible,'No visible update progress'); assert.ok(progressWithBytes,'No visible downloaded-byte feedback'); }
-    const launcher = JSON.parse(readFileSync(path.join(home,'launcher-update.json')));
+    const launcherDeadline = Date.now()+30000;
+    let launcher;
+    do {
+      launcher = JSON.parse(readFileSync(path.join(home,'launcher-update.json')));
+      if(launcher.status==='current') break;
+      assert.ok(Date.now()<launcherDeadline, 'Launcher did not become current: '+JSON.stringify(launcher));
+      await pause(200);
+    } while(true);
     assert.equal(launcher.status,'current');
     assert.equal(launcher.restartRequired,false);
     const descriptor=JSON.parse(readFileSync(path.join(home,'runtimes',after.runtimeId,'launcher/manifest.json')));
@@ -155,7 +162,18 @@ async function content() {
     app.quit();
   } catch (error) {
     console.error(error.message);
-    writeFileSync(output+'.error.json',JSON.stringify({phase,error:error.stack}));
+    let launcher,active,tail,differences=[];
+    try {
+      launcher=JSON.parse(readFileSync(path.join(home,'launcher-update.json')));
+      active=JSON.parse(readFileSync(path.join(home,'active.json')));
+      tail=readFileSync(path.join(home,'logs/runtime.log'),'utf8').slice(-18000);
+      const d=JSON.parse(readFileSync(path.join(home,'runtimes',active.runtimeId,'launcher/manifest.json')));
+      for(const row of d.files) {
+        let actual;try {actual=require('node:crypto').createHash('sha256').update(readFileSync(path.join(__dirname,'..',row.file))).digest('hex');}catch(e){actual=e.message;}
+        if(actual!==row.sha256) differences.push({file:row.file,expected:row.sha256,actual});
+      }
+    } catch(e) { console.error('Evidence collection:',e.message); }
+    writeFileSync(output+'.error.json',JSON.stringify({phase,error:error.stack,launcher,active,tail,differences}));
     clearTimeout(timer);
     app.exit(1);
   }

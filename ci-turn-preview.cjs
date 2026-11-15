@@ -11,8 +11,8 @@ module.exports = async function verifyPreview(view, evidence, seed) {
   const debug = view.debugger;
   assert(!debug.isAttached());
   const views = [];
-  async function wait(fn, label) {
-    const until = Date.now() + 60000;
+  async function wait(fn, label, timeout = 60000) {
+    const until = Date.now() + timeout;
     while (!await js(fn)) { assert(Date.now() < until, label); await pause(100); }
   }
   async function moveTo(selector, click = false) {
@@ -55,17 +55,17 @@ module.exports = async function verifyPreview(view, evidence, seed) {
       assert(card.left>=0 && card.right<=card.width+1 && card.top>=0 && card.bottom<=card.height+1,JSON.stringify(card));
       writeFileSync(join(evidence,`quick-preview-${width}x${height}.png`),(await view.capturePage()).toPNG());
       await moveTo(mark,true);
-      await pause(700);
-      const jumped = await js(() => {
+      const jumpStarted=Date.now();
+      await wait(() => {
         const root=document.querySelector('[data-chat-scroll-root]'),mark=document.querySelector('[data-tick]');
         const target=root.querySelector(`[data-turn-key="${mark.dataset.tick}"]`);
         return Math.abs(target.getBoundingClientRect().top-root.getBoundingClientRect().top)<160;
-      });
-      assert(jumped,'Click did not reach original question');
+      },'Click did not reach original question',3000);
+      const jumpMilliseconds=Date.now()-jumpStarted;
       await moveTo('[data-turn-preview] button',true);
       await pause(250);
       assert.equal(await js(() => document.querySelectorAll('[data-turn-preview]').length),0);
-      views.push({width,height,visible:true,previewCorrect:true,jumpToOriginal:true,cardWithinViewport:true,cardWithinMessagePane:true});
+      views.push({width,height,visible:true,previewCorrect:true,jumpToOriginal:true,jumpMilliseconds,cardWithinViewport:true,cardWithinMessagePane:true});
     }
     await view.loadURL(`${origin}/chat?dt_workspace=`);
     await wait(() => Boolean(document.querySelector('textarea')), 'New conversation did not load');

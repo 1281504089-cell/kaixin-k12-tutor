@@ -1,5 +1,5 @@
 diff --git a/web/components/chat/home/TurnNavigator.tsx b/web/components/chat/home/TurnNavigator.tsx
-index 03b8d5a..1e44abe 100644
+index 03b8d5a..7079714 100644
 --- a/web/components/chat/home/TurnNavigator.tsx
 +++ b/web/components/chat/home/TurnNavigator.tsx
 @@ -1,90 +1,25 @@
@@ -229,7 +229,7 @@ index 03b8d5a..1e44abe 100644
  
    // ─── Which tick is current? ───
    // Rect-based and coalesced to one pass per animation frame. Reading n
-@@ -161,44 +109,42 @@ export function TurnNavigator({
+@@ -161,44 +109,45 @@ export function TurnNavigator({
    // interleaved writes), which is cheaper and far less fragile than
    // caching offsets that every mid-stream reflow would invalidate.
    useEffect(() => {
@@ -284,20 +284,26 @@ index 03b8d5a..1e44abe 100644
 +    }
 +  }, [scrollRootRef, keyList])
  
-   // Keep the current tick in view when the track itself has to scroll.
+-  // Keep the current tick in view when the track itself has to scroll.
++  // scrollIntoView also scrolls ancestors and can abort the transcript's smooth jump.
    useEffect(() => {
 -    if (!activeKey) return;
-+    if (!activeKey) return
-     trackRef.current
-       ?.querySelector<HTMLElement>(`[data-tick="${activeKey}"]`)
+-    trackRef.current
+-      ?.querySelector<HTMLElement>(`[data-tick="${activeKey}"]`)
 -      ?.scrollIntoView({ block: "nearest" });
 -  }, [activeKey]);
-+      ?.scrollIntoView?.({ block: 'nearest' })
++    const track = trackRef.current
++    const tick = activeKey ? track?.querySelector<HTMLElement>(`[data-tick="${activeKey}"]`) : null
++    if (!track || !tick) return
++    const bounds = track.getBoundingClientRect()
++    const mark = tick.getBoundingClientRect()
++    if (mark.top < bounds.top) track.scrollTop += mark.top - bounds.top
++    else if (mark.bottom > bounds.bottom) track.scrollTop += mark.bottom - bounds.bottom
 +  }, [activeKey])
  
    // ─── Keyboard ───
    // Alt/Option + arrows walk the user's own questions; from the last one
-@@ -206,188 +152,207 @@ export function TurnNavigator({
+@@ -206,188 +155,207 @@ export function TurnNavigator({
    // are skipped so the composer keeps its native word-wise navigation.
    useEffect(() => {
      const onKeyDown = (event: KeyboardEvent) => {
@@ -660,10 +666,10 @@ index f40463c..a88bf21 100644
    "Solve": "解题",
 diff --git a/web/tests/turn-navigator.spec.tsx b/web/tests/turn-navigator.spec.tsx
 new file mode 100644
-index 0000000..be598de
+index 0000000..042b6ad
 --- /dev/null
 +++ b/web/tests/turn-navigator.spec.tsx
-@@ -0,0 +1,178 @@
+@@ -0,0 +1,194 @@
 +import React, { useRef } from 'react'
 +import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 +import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -823,6 +829,22 @@ index 0000000..be598de
 +    fireEvent.mouseEnter(mark)
 +    fireEvent.pointerDown(document.body)
 +    expect(screen.queryByText('Answer 2')).toBeNull()
++  })
++
++  it('scrolls only the tick track, without interrupting a transcript jump', async () => {
++    const { container } = render(<Harness />)
++    const tick = screen.getByRole('button', { name: '1. Question 1' })
++    const track = tick.parentElement!
++    const scrollIntoView = vi.fn()
++    Object.defineProperty(tick, 'scrollIntoView', { value: scrollIntoView, configurable: true })
++    Object.defineProperty(track, 'getBoundingClientRect', { value: () => ({ top: 0, bottom: 100, height: 100 }) })
++    Object.defineProperty(tick, 'getBoundingClientRect', { value: () => ({ top: 180, bottom: 200, height: 20 }) })
++    const transcript = container.querySelector('[data-chat-column]')!.parentElement!
++    transcript.scrollTop = 432
++    await waitFor(() => expect(tick).toHaveAttribute('aria-current', 'true'))
++    expect(track.scrollTop).toBe(100)
++    expect(transcript.scrollTop).toBe(432)
++    expect(scrollIntoView).not.toHaveBeenCalled()
 +  })
 +
 +  it('keeps Alt navigation out of editable inputs and removes its listener on unmount', async () => {
