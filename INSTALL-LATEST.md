@@ -1,34 +1,34 @@
 # 新电脑首次安装
 
-当前完整安装版：**2026-11-15 检查更新修复版（1.7.1）**。已包含选中文字直接朗读、聊天可播放音频与历史重播、物理和化学公式修复，以及跨页后台批量上传、对话引用资料库原件、HTML 听力安全预览与系统朗读、资料库直接批量长期上传、全科复盘失败状态与旧备用稿展示修复、附件即传即读、长期资料库、闲置入口隐藏、新版更新器、项目和历史列表修复、语音预加载、运行环境和 136 册教材；装好后不需要再运行 `.command` 或另装小补丁。
+当前完整安装版：**2026-11-15 聊天快速预览版（1.7.1）**。已包含聊天快速预览刻度栏、选中文字直接朗读、聊天可播放音频与历史重播、物理和化学公式修复，以及跨页后台批量上传、对话引用资料库原件、HTML 听力安全预览与系统朗读、资料库直接批量长期上传、全科复盘失败状态与旧备用稿展示修复、附件即传即读、长期资料库、闲置入口隐藏、新版更新器、项目和历史列表修复、语音预加载、运行环境和 136 册教材；装好后不需要再运行 `.command` 或另装小补丁。
 
 根据电脑选择下面一组文件，**同一组必须全部下载，保留原名并放在本机同一个文件夹**。不要下载发布页底部的 Source code。建议预留 40 GB 临时空间。
 
 ## Apple 芯片 Mac（M 系列）
 
-- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.dmg)
-- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.002.dmgpart)
-- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.003.dmgpart)
-- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.004.dmgpart)
+- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.dmg)
+- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.002.dmgpart)
+- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.003.dmgpart)
+- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.004.dmgpart)
 
 需要 macOS 13 或以上。四个文件下齐后，只打开主文件 `.dmg`，把“开心动力超级学霸”拖进“应用程序”，再从“应用程序”打开。其余 `.dmgpart` 保持原位，不需要逐个打开。
 
 ## Intel Mac
 
-- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.dmg)
-- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.002.dmgpart)
-- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.003.dmgpart)
-- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.004.dmgpart)
+- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.dmg)
+- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.002.dmgpart)
+- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.003.dmgpart)
+- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.004.dmgpart)
 
 需要 macOS 13 或以上。四个文件下齐后，只打开主文件 `.dmg`，把“开心动力超级学霸”拖进“应用程序”，再从“应用程序”打开。其余 `.dmgpart` 保持原位，不需要逐个打开。
 
 ## Windows 64 位
 
-- [安装程序 Setup.exe](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe)
-- [Runtime.001](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001)
-- [Runtime.002](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002)
-- [Runtime.003](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003)
-- [Runtime.004](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004)
+- [安装程序 Setup.exe](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe)
+- [Runtime.001](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001)
+- [Runtime.002](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002)
+- [Runtime.003](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003)
+- [Runtime.004](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004)
 
 五个文件下齐后，只运行 `Setup.exe`，按向导安装；安装器会校验其余四个 Runtime 分卷。不要单独解压或改名分卷。
 
