@@ -1,5 +1,5 @@
 diff --git a/web/components/chat/home/TurnNavigator.tsx b/web/components/chat/home/TurnNavigator.tsx
-index 03b8d5a..90fb800 100644
+index 03b8d5a..1e44abe 100644
 --- a/web/components/chat/home/TurnNavigator.tsx
 +++ b/web/components/chat/home/TurnNavigator.tsx
 @@ -1,90 +1,25 @@
@@ -297,7 +297,7 @@ index 03b8d5a..90fb800 100644
  
    // ─── Keyboard ───
    // Alt/Option + arrows walk the user's own questions; from the last one
-@@ -206,188 +152,206 @@ export function TurnNavigator({
+@@ -206,188 +152,207 @@ export function TurnNavigator({
    // are skipped so the composer keeps its native word-wise navigation.
    useEffect(() => {
      const onKeyDown = (event: KeyboardEvent) => {
@@ -544,10 +544,11 @@ index 03b8d5a..90fb800 100644
 +              transition={{ duration: reducedMotion ? 0 : 0.14, ease: 'easeOut' }}
 +              style={{
 +                top: cardY ?? '50%',
++                y: '-50%',
 +                width: layout.width,
 +                maxHeight: Math.min(240, layout.height - 16),
 +              }}
-+              className="absolute left-full z-10 -translate-y-1/2 overflow-y-auto overscroll-contain rounded-2xl border border-[var(--border)] bg-[var(--popover)] p-4 text-[var(--popover-foreground)] shadow-[0_12px_32px_-12px_var(--overlay)]"
++              className="absolute left-full z-10 overflow-y-auto overscroll-contain rounded-2xl border border-[var(--border)] bg-[var(--popover)] p-4 text-[var(--popover-foreground)] shadow-[0_12px_32px_-12px_var(--overlay)]"
              >
 -              <div className="flex items-baseline gap-2 text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
 +              <div className="flex items-baseline gap-2 text-[11px] font-medium tracking-wide text-[var(--muted-foreground)]">

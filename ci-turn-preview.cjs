@@ -46,10 +46,12 @@ module.exports = async function verifyPreview(view, evidence, seed) {
       await wait(() => Boolean(document.querySelector('[data-turn-preview]')), 'Hover did not open preview');
       const card = await js(() => {
         const el = document.querySelector('[data-turn-preview]'),r=el.getBoundingClientRect();
-        return {text:el.innerText,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:innerWidth,height:innerHeight};
+        const root=document.querySelector('[data-chat-scroll-root]').getBoundingClientRect();
+        return {text:el.innerText,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:innerWidth,height:innerHeight,paneTop:root.top,paneBottom:root.bottom};
       });
       assert(card.text.includes(seed.titles[0]));
       assert(card.text.includes(seed.answers[0]));
+      assert(card.top>=card.paneTop-1 && card.bottom<=card.paneBottom+1,'Preview covers composer: '+JSON.stringify(card));
       assert(card.left>=0 && card.right<=card.width+1 && card.top>=0 && card.bottom<=card.height+1,JSON.stringify(card));
       writeFileSync(join(evidence,`quick-preview-${width}x${height}.png`),(await view.capturePage()).toPNG());
       await moveTo(mark,true);
