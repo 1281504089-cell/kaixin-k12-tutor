@@ -1,89 +1,44 @@
 {
-  "tag": "student-20261114-audio",
-  "release_id": 445374839,
-  "core_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "core_sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1",
-  "launcher_build": "20261114-unified",
-  "installation_directory": "开心动力超级学霸安装包/2026-11-14-三类安装",
+  "tag": "student-20261115-updater2",
+  "release_id": 445554770,
+  "core_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "core_sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265",
+  "launcher_build": "20261115-updater-1",
+  "installation_directory": "开心动力超级学霸安装包/2026-11-15-最新版",
   "files": [
     {
       "target": "windows-x64",
-      "file": "01-从零安装/Windows/Kaixin-K12-Tutor-20261114-audio-Windows-Full.zip",
-      "bytes": 7169033386,
-      "sha256": "b4a254bcb9711dcb7d041086fc89f78e0d26d0a7de59e6fec10c1d948c25ba3f",
-      "usb_readback_verified": true
-    },
-    {
-      "target": "legacy-launcher-migration",
-      "file": "02-装过前一个补丁/Windows/Kaixin-Launcher-Migration-d3214451efd0-windows-x64-Setup.exe",
-      "bytes": 159892786,
-      "sha256": "4650036eae7ea9f7a713fbee8eb008547d94e6677dd71c53a01786f3f6f13ea6",
-      "usb_readback_verified": true
-    },
-    {
-      "target": "legacy-launcher-migration",
-      "file": "03-旧版未装过任何补丁/Windows/Kaixin-Launcher-Migration-d3214451efd0-windows-x64-Setup.exe",
-      "bytes": 159892786,
-      "sha256": "4650036eae7ea9f7a713fbee8eb008547d94e6677dd71c53a01786f3f6f13ea6",
-      "usb_readback_verified": true
-    },
-    {
-      "target": "legacy-launcher-migration",
-      "file": "02-装过前一个补丁/Mac-Apple芯片/Kaixin-Launcher-Migration-d3214451efd0-macos-arm64.zip",
-      "bytes": 122802302,
-      "sha256": "43f32b93155c5e3a5fbd25b81b3248d51fc095d276733881eea6899697b07fbe",
-      "usb_readback_verified": true
-    },
-    {
-      "target": "legacy-launcher-migration",
-      "file": "03-旧版未装过任何补丁/Mac-Apple芯片/Kaixin-Launcher-Migration-d3214451efd0-macos-arm64.zip",
-      "bytes": 122802302,
-      "sha256": "43f32b93155c5e3a5fbd25b81b3248d51fc095d276733881eea6899697b07fbe",
-      "usb_readback_verified": true
-    },
-    {
-      "target": "legacy-launcher-migration",
-      "file": "02-装过前一个补丁/Mac-Intel/Kaixin-Launcher-Migration-d3214451efd0-macos-x64.zip",
-      "bytes": 128816569,
-      "sha256": "6e0f55d4aecf9d10e58c6bd8ae709469e6dedc21e0053beb28ec0bb0c509c585",
-      "usb_readback_verified": true
-    },
-    {
-      "target": "legacy-launcher-migration",
-      "file": "03-旧版未装过任何补丁/Mac-Intel/Kaixin-Launcher-Migration-d3214451efd0-macos-x64.zip",
-      "bytes": 128816569,
-      "sha256": "6e0f55d4aecf9d10e58c6bd8ae709469e6dedc21e0053beb28ec0bb0c509c585",
-      "usb_readback_verified": true
+      "bytes": 7169101645,
+      "sha256": "4d001147e1e93372ef244e39fc73df426d094df70ddda0d39939a29d231f1fe7",
+      "usb_readback_verified": true,
+      "file": "开心动力超级学霸安装包/2026-11-15-最新版/Kaixin-K12-Tutor-20261115-updater2-Windows-Full.zip"
     },
     {
       "target": "macos-x64",
-      "file": "01-从零安装/Mac-Intel/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261114-audio.dmg",
-      "bytes": 7160788059,
-      "sha256": "0ade9bcc3ad269baa48d9e3db12da5aea6ced491465776010f02eebfc08e96db",
-      "usb_readback_verified": true
+      "bytes": 7160770507,
+      "sha256": "4196a8c04890a015c48f76a16e6a3236160f2f2ff675eefc0f356c9ba8ee1c69",
+      "usb_readback_verified": true,
+      "file": "开心动力超级学霸安装包/2026-11-15-最新版/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2.dmg"
     },
     {
       "target": "macos-arm64",
-      "file": "01-从零安装/Mac-Apple芯片/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261114-audio.dmg",
-      "bytes": 7091704071,
-      "sha256": "e604f62c827e802a6513cc1ca4c38f04674b5f3e20e3b0af6b18f80afa79d8b5",
-      "usb_readback_verified": true
+      "bytes": 7091698176,
+      "sha256": "7873777a5479697f80b4315cdf48bcafc546641d82640f3b02608df080f5e0df",
+      "usb_readback_verified": true,
+      "file": "开心动力超级学霸安装包/2026-11-15-最新版/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2.dmg"
     }
   ],
-  "verified_payload_files": 9,
+  "verified_payload_files": 3,
   "ordinary_single_mac_images": 2,
   "complete_windows_zip": true,
   "three_native_install_and_update_tests": "passed",
   "superseded_installation_removed": true,
-  "old_bytes_removed": 22244420368,
+  "old_bytes_removed": 22245269804,
   "protected_math_documents": 6,
   "other_materials_unchanged": true,
-  "legacy_migration_unchanged_reused_from": "student-20261114-unified",
-  "legacy_migration_retested_this_batch": false,
-  "free_bytes_after": 40599552000,
-  "completed_at_utc": "2026-11-14T17:12:24.853210+00:00",
-  "physical_user_devices_all_tested": false,
-  "free_bytes_before_staging_recorded": false,
-  "net_free_bytes_change_from_start": null,
-  "freed_bytes_during_old_cleanup": 22252486656
+  "free_bytes_before": 40600338432,
+  "free_bytes_after": 41426878464,
+  "net_free_bytes_change": 826540032,
+  "completed_at_utc": "2026-11-15T02:28:32.000899+00:00",
+  "physical_user_devices_all_tested": false
 }

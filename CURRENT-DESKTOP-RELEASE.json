@@ -552,11 +552,18 @@
   "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/PUBLICATION-RECEIPT.json",
   "publication_run": 43639482566,
   "usb_delivery": {
-    "completed": false,
+    "completed": true,
     "tag": "student-20261115-updater2",
-    "updated_for_this_release": false,
-    "reason": "external USB volume not connected; no USB files modified",
-    "pending_receipt": "USB-DELIVERY-PENDING-20261115.json"
+    "updated_for_this_release": true,
+    "verified_payload_files": 3,
+    "ordinary_single_mac_images": 2,
+    "complete_windows_zip": true,
+    "superseded_installation_directories_removed": true,
+    "other_materials_preserved": true,
+    "protected_math_documents": 6,
+    "receipt": "USB-DELIVERY-RECEIPT.json",
+    "receipt_sha256": "013a2738906f033a5dd353c7d448b19259cf321e09255f09047561a15d94f7c7",
+    "completed_at_utc": "2026-11-15T02:28:32.000899+00:00"
   },
   "release_skill": "skills/scholar-desktop-release/SKILL.md",
   "physical_student_devices_all_tested": false,
