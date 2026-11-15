@@ -5,7 +5,6 @@ on:
     paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-chat-audio-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
 permissions:
   contents: write
-  actions: write
 jobs:
   core:
     runs-on: ubuntu-latest
@@ -21,13 +20,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Stop superseded candidate native validation
-        run: |
-          gh api repos/${{ github.repository }}/actions/runs/43696469096 > superseded-run.json
-          python -c 'import json;d=json.load(open("superseded-run.json"));assert d["head_sha"]=="cce061c1f3cbd384fc76c0d8065cefd8f2f9ca9b" and d["head_branch"]=="codex/updater-native-20261115-preview-a"'
-          if [ "$(python -c 'import json;print(json.load(open("superseded-run.json"))["status"])')" != "completed" ]; then
-            gh api -X POST repos/${{ github.repository }}/actions/runs/43696469096/cancel
-          fi
       - name: Create isolated prerelease
         run: |
           set -euo pipefail

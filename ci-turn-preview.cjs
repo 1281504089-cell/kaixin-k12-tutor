@@ -65,7 +65,7 @@ module.exports = async function verifyPreview(view, evidence, seed) {
       await moveTo('[data-turn-preview] button',true);
       await pause(250);
       assert.equal(await js(() => document.querySelectorAll('[data-turn-preview]').length),0);
-      views.push({width,height,visible:true,previewCorrect:true,jumpToOriginal:true,cardWithinViewport:true});
+      views.push({width,height,visible:true,previewCorrect:true,jumpToOriginal:true,cardWithinViewport:true,cardWithinMessagePane:true});
     }
     await view.loadURL(`${origin}/chat?dt_workspace=`);
     await wait(() => Boolean(document.querySelector('textarea')), 'New conversation did not load');
