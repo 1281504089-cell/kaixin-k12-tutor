@@ -1,10 +1,10 @@
 {
-  "tag": "student-20261115-preview2",
+  "tag": "student-20261115-preview3",
   "launcher_build": "20261115-updater-1",
-  "core_commit": "14d1d4bb17b602777e3c1864cb1375901f306d9a",
-  "combined_source_commit": "14d1d4bb17b602777e3c1864cb1375901f306d9a",
+  "core_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+  "combined_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
   "prior_tag": "student-20261115-updater2",
-  "builtAt": 1794733783791,
+  "builtAt": 1794736390559,
   "manifests": {
     "windows-x64": {
       "formatVersion": 1,
@@ -12,14 +12,14 @@
       "platform": "win32",
       "arch": "x64",
       "coreVersion": "1.7.1",
-      "runtimeId": "1.7.1-kaixin-20261115-preview2-windows-x64-20261112",
+      "runtimeId": "1.7.1-kaixin-20261115-preview3-windows-x64-20261112",
       "baseRuntimeId": "1.7.1-04276f68a-x64",
-      "commit": "14d1d4bb17b602777e3c1864cb1375901f306d9a",
-      "builtAt": 1794733783791,
-      "archive": "kaixin-core-20261115-preview2.tar.gz",
-      "sha256": "d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
-      "corePayloadSha256": "d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
-      "signature": "YKyGiJfvPiesyssow2D+Pq9iicEDTXTzsFg1sLK6q+HlEisUmKmxo2J54NNbwG8jRCqqitJS+25R+8oRbRXWAA=="
+      "commit": "896e79b517a008ac6d584526151862ff6191cf77",
+      "builtAt": 1794736390559,
+      "archive": "kaixin-core-20261115-preview3.tar.gz",
+      "sha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+      "corePayloadSha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+      "signature": "+11tbWx61lBskI9kdWCg/yUkf/+XqsF9cNr++YY5XJlyniea63OO3ma86vtfCEX3LZL7dBSrjyLzpJs+gYP1AA=="
     },
     "macos-x64": {
       "formatVersion": 1,
@@ -27,14 +27,14 @@
       "platform": "darwin",
       "arch": "x64",
       "coreVersion": "1.7.1",
-      "runtimeId": "1.7.1-kaixin-20261115-preview2-macos-x64-20261112",
+      "runtimeId": "1.7.1-kaixin-20261115-preview3-macos-x64-20261112",
       "baseRuntimeId": "1.7.1-04276f68a-x64",
-      "commit": "14d1d4bb17b602777e3c1864cb1375901f306d9a",
-      "builtAt": 1794733783791,
-      "archive": "kaixin-core-20261115-preview2.tar.gz",
-      "sha256": "d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
-      "corePayloadSha256": "d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
-      "signature": "q4SxJcg6FuYLNdhzKMZsa2dYHWDGEWLB7rJy2Q/lExQC8b0UPQXC2FvUTc5JmywqoqW8XPFaofm1XUsguT2kCA=="
+      "commit": "896e79b517a008ac6d584526151862ff6191cf77",
+      "builtAt": 1794736390559,
+      "archive": "kaixin-core-20261115-preview3.tar.gz",
+      "sha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+      "corePayloadSha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+      "signature": "JkoQFKto+bfBLw8GQQIsi8KUPQVTT9GiWQzAalW9frxDT1l2nbWM12dSIARuQHYiu3lqfKZNxhnb5XqCreeYDA=="
     },
     "macos-arm64": {
       "formatVersion": 1,
@@ -42,21 +42,21 @@
       "platform": "darwin",
       "arch": "arm64",
       "coreVersion": "1.7.1",
-      "runtimeId": "1.7.1-kaixin-20261115-preview2-macos-arm64-20261112",
+      "runtimeId": "1.7.1-kaixin-20261115-preview3-macos-arm64-20261112",
       "baseRuntimeId": "1.7.1-04276f68a-arm64",
-      "commit": "14d1d4bb17b602777e3c1864cb1375901f306d9a",
-      "builtAt": 1794733783791,
-      "archive": "kaixin-core-20261115-preview2.tar.gz",
-      "sha256": "d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
-      "corePayloadSha256": "d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
-      "signature": "xFWdM3+7PuKFHForejElYbqHXbY6ywtKeb1ca8xYEwSZa8+4ZEM8e/i2V6D48Q7ZqgLJvapdFWZ8zPlugYgMBw=="
+      "commit": "896e79b517a008ac6d584526151862ff6191cf77",
+      "builtAt": 1794736390559,
+      "archive": "kaixin-core-20261115-preview3.tar.gz",
+      "sha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+      "corePayloadSha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+      "signature": "zcpK9xBmbwm3Wl2L488yOJuJ4LY8k6ykHXhbxrrsYaw+EBoG0LvhNk06yzr8P4OXapxe41esRyxZPUGcE8xOCg=="
     }
   },
   "core_asset": {
-    "url": "https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/750435785",
-    "id": 750435785,
-    "node_id": "RA_kwDOVlRP084sur3J",
-    "name": "kaixin-core-20261115-preview2.tar.gz",
+    "url": "https://api.github.com/repos/1281504089-cell/kaixin-k12-tutor/releases/assets/750541184",
+    "id": 750541184,
+    "node_id": "RA_kwDOVlRP084svFmA",
+    "name": "kaixin-core-20261115-preview3.tar.gz",
     "label": "",
     "uploader": {
       "login": "github-actions[bot]",
@@ -81,12 +81,12 @@
     },
     "content_type": "application/x-gtar",
     "state": "uploaded",
-    "size": 26829565,
-    "digest": "sha256:d029008b9426a8d0f69e5a8ec20391a77ca5c520bd10922607f81c130083e84b",
+    "size": 26829700,
+    "digest": "sha256:f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
     "download_count": 0,
-    "created_at": "2026-11-15T09:07:22Z",
-    "updated_at": "2026-11-15T09:07:23Z",
-    "browser_download_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview2/kaixin-core-20261115-preview2.tar.gz"
+    "created_at": "2026-11-15T09:51:54Z",
+    "updated_at": "2026-11-15T09:51:55Z",
+    "browser_download_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/kaixin-core-20261115-preview3.tar.gz"
   },
   "shell_files": {
     "src/bundles.mjs": {
