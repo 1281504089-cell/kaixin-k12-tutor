@@ -27,7 +27,7 @@ jobs:
           if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
             python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
           else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '桌面检查更新修复候选 · 2026-11-15' --notes '正在验证三端启动器在线升级、下载进度、取消、正常重开与数据保留。尚未发布正式版。'
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '聊天快速预览候选 · 2026-11-15' --notes '正在验证消息快速预览、三端完整安装、检查更新和记录保留。尚未发布正式版。'
           fi
       - name: Record candidate run
         run: |

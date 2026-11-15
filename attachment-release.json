@@ -1,12 +1,12 @@
 {
-  "tag": "student-20261115-updater2",
-  "source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
-  "baseline_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "patch_sha256": "89071250306f322b7810e19dc5371086beb2bb5fb073deb9b4a5ce4369117c6c",
-  "archive": "kaixin-core-20261115-updater2.tar.gz",
+  "tag": "student-20261115-preview",
+  "source_commit": "fdeb350b948301ba7ed9ce1484dda51ae2facfe1",
+  "baseline_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "patch_sha256": "94b57f808d12892abf699d2c43ce920fe73679b344ddfaa118f18654fb1e62de",
+  "archive": "kaixin-core-20261115-preview.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261114-audio.tar.gz",
-    "sha256": "362fc67900c8b77be93eb7c967ffe6c96334af6a0f3362065cddbc20d73a64d1"
+    "archive": "kaixin-core-20261115-updater2.tar.gz",
+    "sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265"
   },
   "new_backend_files": [
     "deeptutor/tools/prompting/hints/zh/speechgen.yaml",
@@ -47,7 +47,10 @@
     "tests/voice-settings.spec.tsx",
     "tests/desktop-update-notice.spec.tsx",
     "tests/desktop-launcher-update.spec.tsx",
-    "tests/composer-draft-restore-failure.spec.tsx"
+    "tests/composer-draft-restore-failure.spec.tsx",
+    "tests/turn-navigator.spec.tsx",
+    "tests/chat-autoscroll-layout.spec.tsx",
+    "tests/chat-branch-navigator.spec.tsx"
   ],
-  "source_files_sha256": "b4e57a1d3d070fae7fc967c220008077b220f249675b88aeedd4a679c56e510f"
+  "source_files_sha256": "3ac1d7600842fe8aaaebb1e47b7971ce1554cc5a72db22ee38b89bf414059c38"
 }
