@@ -1,67 +1,109 @@
 {
   "formatVersion": 1,
   "repository": "1281504089-cell/kaixin-k12-tutor",
-  "tag": "student-20261115-updater2",
-  "release_id": 445554770,
-  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-updater2",
-  "release_repository_commit": "c39327be8273bd2f8a08e9ad88135e18bcd79b2f",
-  "combined_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
-  "learning_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
-  "backend_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
-  "baseline_source_commit": "651fbd6a41f8649c53c23f3fea79de98776cde05",
-  "frontend_build_id": "rtJU0P7rSX14y6phR8Rtz",
+  "tag": "student-20261115-preview3",
+  "release_id": 445953276,
+  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261115-preview3",
+  "release_repository_commit": "8a1d3342d3f8bdb03d6661514359d2858a12be7d",
+  "combined_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+  "learning_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+  "backend_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+  "backend_unchanged_from": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "baseline_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
+  "frontend_build_id": "xUu-cSIXf1E3Fi90U4ume",
   "launcher_build": "20261115-updater-1",
-  "builtAt": 1794686728087,
-  "core_archive": "kaixin-core-20261115-updater2.tar.gz",
-  "core_sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265",
-  "core_bytes": 26822596,
+  "launcher_script_bytes_unchanged_from": "student-20261115-updater2",
+  "builtAt": 1794736390559,
+  "core_archive": "kaixin-core-20261115-preview3.tar.gz",
+  "core_sha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+  "core_bytes": 26829700,
+  "source_files_sha256": "3ade2e10f2f8d0b82a221938eca98b0a57a7084a9bbdf16374188dc50073de4d",
+  "source_patch_sha256": "64a4b7e49d11b17d1aa659169a51ceb1726fa96276c7474fe95185159a541e7c",
+  "source_test_receipt": "VERIFICATION-QUICK-PREVIEW-20261115.json",
+  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/PUBLICATION-RECEIPT.json",
+  "publication_receipt_sha256": "8705073ab7298d891f0d1a94091727a48f8be14bb29466c6bac58e776a49c555",
+  "core_run": 43701090024,
+  "publication_run": 43704945887,
+  "update_entry": "Settings > About > Check for updates, or Core > Check for updates",
+  "earliest_native_bridge_may_be_large": true,
+  "physical_student_devices_all_tested": false,
+  "paid_model_calls_added": 0,
+  "learning_records_or_model_rules_changed": false,
+  "usb_delivery": {
+    "updated_for_this_release": false,
+    "previous_delivered_tag": "student-20261115-updater2",
+    "reason": "USB not mounted; no USB files changed"
+  },
+  "local_actual_online_update": {
+    "final_source": "896e79b517a008ac6d584526151862ff6191cf77",
+    "formal_tag": "student-20261115-preview3",
+    "actual_online_update_completed": true,
+    "entry": "Settings > About > Check for updates",
+    "runtime": "1.7.1-kaixin-20261115-preview3-macos-x64-base-c41831772671",
+    "signature_verified": true,
+    "download_confirmed_in_real_ui": true,
+    "install_completion_seen_in_real_ui": true,
+    "check_again_current": true,
+    "launcher_build": "20261115-updater-1",
+    "launcher_files_verified": 24,
+    "chat_databases_logically_compared": 10,
+    "all_existing_rows_preserved": true,
+    "settings_files_unchanged": 19,
+    "real_learning_content_uploaded": false,
+    "private_key_uploaded": false,
+    "observed_at": "2026-11-15T10:47:06.911Z"
+  },
   "platforms": {
     "windows-x64": {
       "native_run": {
-        "run_id": 43635618684,
-        "workflow_commit": "0c980411e42a129d756435edf8eaa5938e3ca3b8"
+        "run_id": 43701392911,
+        "workflow_commit": "b3958ba1dec9bc81b04bd224a5de9681bb840e17"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43635618684/job/132571639868",
-      "new_install_runtime": "1.7.1-kaixin-20261115-updater2-windows-x64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43701392911/job/132773089231",
+      "new_install_runtime": "1.7.1-kaixin-20261115-preview3-windows-x64-20261112",
       "stable_manifest": "runtime-windows-x64.json",
-      "stable_manifest_sha256": "71c5b3f6637cb3428cc8f6c1051f17cb9b158a44ab3827940093424b34472a5d",
-      "stable_runtime": "1.7.1-kaixin-20261115-updater2-windows-x64-universal",
+      "stable_manifest_sha256": "4f3144b688099d5d1bc683b8568a85e013901a5fe834887c4d03a336d096472f",
+      "stable_runtime": "1.7.1-kaixin-20261115-preview3-windows-x64-universal",
       "compatible_base_manifests": [
         {
           "baseRuntimeId": "1.7.1-04276f68a-x64",
-          "file": "runtime-windows-x64-20261115-updater2-20261112.json"
+          "file": "runtime-windows-x64-20261115-preview3-20261112.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-bb8f5191555d.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-bb8f5191555d.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-stt-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-573f105ed118.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-573f105ed118.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-projects-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-9b7c2b84f908.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-9b7c2b84f908.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-3e01c184c6a4.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-3e01c184c6a4.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-review-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-7a52e2cacc9f.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-7a52e2cacc9f.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-library-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-e4abdb1cb594.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-e4abdb1cb594.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-materials-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-base-afb4dfe97ae4.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-afb4dfe97ae4.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-audio-windows-x64-universal",
-          "file": "runtime-windows-x64-20261115-updater2-prior-current.json"
+          "file": "runtime-windows-x64-20261115-preview3-base-77b621411568.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-windows-x64-universal",
+          "file": "runtime-windows-x64-20261115-preview3-prior-current.json"
         }
       ],
       "complete_installation_files": [
@@ -87,525 +129,322 @@
         },
         {
           "file": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
-          "bytes": 186650476,
-          "sha256": "8e57ee276e3b10538afdc7eeb4b785ea2ef5b569e5eb5a14cb817cca8a5fa844"
+          "bytes": 186651078,
+          "sha256": "d56089beea22585df8c1b8afc2625ade5fd6beb0ad6edfc6a47b7026b8440b30"
         }
       ],
-      "launcher_migration_retested_in_this_release": true,
       "native_installation": "passed",
       "native_core_update": "passed",
+      "oldest_launcher_entry": "passed",
       "existing_synthetic_records_preserved": true,
-      "native_proof_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/verification-windows-x64.json",
-      "native_proof_sha256": "e4d8b266f48a59e0cb3507b96abcec2d10c4a81b3e789a9a3380edc5ac54e71d",
-      "oldest_launcher_entry": {
-        "actual_download_install_backup_restart": "passed",
-        "check_again_current": true,
-        "signed_launcher_restarted": true,
-        "from_launcher": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
-        "to_launcher": "20261115-updater-1",
-        "old_pid": 9176,
-        "restarted_pid": 8500,
-        "chat_preserved": true,
-        "task_preserved": true,
-        "saved_key_preserved": true
+      "quick_preview": {
+        "passed": true,
+        "actualNativeRenderer": true,
+        "views": [
+          {
+            "width": 390,
+            "height": 844,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 7,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 844,
+            "height": 390,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 6,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 1366,
+            "height": 900,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 5,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 1920,
+            "height": 1080,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 102,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          }
+        ],
+        "conversationSwitchCleared": true,
+        "paidModelCalls": 0,
+        "realStudentData": false
       },
-      "new_launcher_small_update_entry": {
-        "actual_download_install_backup_restart": "passed",
-        "check_again_current": true,
-        "download_progress_visible": true,
-        "downloaded_bytes_visible": true,
-        "from_launcher": "20261115-updater-1",
-        "to_launcher": "20261115-updater-1",
-        "chat_preserved": true,
-        "task_preserved": true,
-        "saved_key_preserved": true
-      },
-      "regressions": {
-        "textbooks": 136,
-        "study_reports_passed": true,
-        "study_report_subject_cases": 9,
-        "attachment_uploads": true,
-        "library_saved_files": 21,
-        "draft_preserved": true,
-        "chat_and_settings_navigation": true,
-        "originals_byte_identical": true,
-        "chat_audio_passed": true,
-        "science_formulas_passed": true,
-        "science_views": 16
-      }
+      "full_evidence_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/PUBLICATION-RECEIPT.json"
     },
     "macos-x64": {
       "native_run": {
-        "run_id": 43635618684,
-        "workflow_commit": "0c980411e42a129d756435edf8eaa5938e3ca3b8"
+        "run_id": 43701392911,
+        "workflow_commit": "b3958ba1dec9bc81b04bd224a5de9681bb840e17"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43635618684/job/132571639657",
-      "new_install_runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43701392911/job/132773089324",
+      "new_install_runtime": "1.7.1-kaixin-20261115-preview3-macos-x64-20261112",
       "stable_manifest": "runtime-macos-x64.json",
-      "stable_manifest_sha256": "d1d8a8c08753b7f84dc8403472bfbd4142baf4f1e29b49beb696ed6dddab4a08",
-      "stable_runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-universal",
+      "stable_manifest_sha256": "950a454aa745b92953387a4a5e8ebe88bff2fdf3c713b89cf249d7f4a77927cf",
+      "stable_runtime": "1.7.1-kaixin-20261115-preview3-macos-x64-universal",
       "compatible_base_manifests": [
         {
           "baseRuntimeId": "1.7.1-04276f68a-x64",
-          "file": "runtime-macos-x64-20261115-updater2-20261112.json"
+          "file": "runtime-macos-x64-20261115-preview3-20261112.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-e2a196e1e65a.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-e2a196e1e65a.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-681a198cf308.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-681a198cf308.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-170a15b2f1a2.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-170a15b2f1a2.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-22eb20a39a60.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-22eb20a39a60.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-80115ecd6d3d.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-80115ecd6d3d.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-c452d12cb482.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-c452d12cb482.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-base-c41831772671.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-c41831772671.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-x64-universal",
-          "file": "runtime-macos-x64-20261115-updater2-prior-current.json"
+          "file": "runtime-macos-x64-20261115-preview3-base-3e8b6a21262c.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-x64-universal",
+          "file": "runtime-macos-x64-20261115-preview3-prior-current.json"
         }
       ],
       "complete_installation_files": [
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.002.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.002.dmgpart",
           "bytes": 1992295135,
-          "sha256": "67f4578b06b147fc4ba089da9c6942134e5683d91efd32f577759f08c1081765"
+          "sha256": "61be3250845fc7025c9e76027f36c1f0c2675aa0f346a0f69d3a221ff06255d2"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.003.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.003.dmgpart",
           "bytes": 1992295135,
-          "sha256": "7a5f5ab6db38b1fdf600ba6434c430ecb494fd823ed7b93fa7c17be082a16504"
+          "sha256": "bb20505ab3ce8935b3c158b46ae1eb1cabd5bc874e845dff3ae3b4659730f8aa"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.004.dmgpart",
-          "bytes": 1183258778,
-          "sha256": "889f590c8f53aec6641afaca4e357341ed85b212206729e43b797bd5656c32cb"
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.004.dmgpart",
+          "bytes": 1183384566,
+          "sha256": "87dec0d981dbe3cc777eb90b946566c62b6e8154d185ad0752d56d6bd3b043d0"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-updater2-part.dmg",
-          "bytes": 1992731434,
-          "sha256": "b37a78518970c72a1f7331d9a7e403b4fa5c05002b3dac4daae372f46497ee76"
+          "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261115-preview3-part.dmg",
+          "bytes": 1992732324,
+          "sha256": "d1b6e95d210ea24b6bd23c68201784966f990ea990feb7b5baea1c4670e181d6"
         }
       ],
-      "launcher_migration_retested_in_this_release": true,
       "native_installation": "passed",
       "native_core_update": "passed",
+      "oldest_launcher_entry": "passed",
       "existing_synthetic_records_preserved": true,
-      "native_proof_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/verification-macos-x64.json",
-      "native_proof_sha256": "d5986c80e53ee1838b5b04511869a6532a8776785a3dcdeb4b7b59a9be543e03",
-      "oldest_launcher_entry": {
-        "actual_download_install_backup_restart": "passed",
-        "check_again_current": true,
-        "signed_launcher_restarted": true,
-        "from_launcher": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
-        "to_launcher": "20261115-updater-1",
-        "old_pid": 30952,
-        "restarted_pid": 35074,
-        "chat_preserved": true,
-        "task_preserved": true,
-        "saved_key_preserved": true
+      "quick_preview": {
+        "passed": true,
+        "actualNativeRenderer": true,
+        "views": [
+          {
+            "width": 390,
+            "height": 844,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 1228,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 844,
+            "height": 390,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 1035,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 1366,
+            "height": 900,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 820,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 1920,
+            "height": 1080,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 719,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          }
+        ],
+        "conversationSwitchCleared": true,
+        "paidModelCalls": 0,
+        "realStudentData": false
       },
-      "new_launcher_small_update_entry": {
-        "actual_download_install_backup_restart": "passed",
-        "check_again_current": true,
-        "download_progress_visible": true,
-        "downloaded_bytes_visible": true,
-        "from_launcher": "20261115-updater-1",
-        "to_launcher": "20261115-updater-1",
-        "chat_preserved": true,
-        "task_preserved": true,
-        "saved_key_preserved": true
-      },
-      "regressions": {
-        "textbooks": 136,
-        "study_reports_passed": true,
-        "study_report_subject_cases": 9,
-        "attachment_uploads": true,
-        "library_saved_files": 21,
-        "draft_preserved": true,
-        "chat_and_settings_navigation": true,
-        "originals_byte_identical": true,
-        "chat_audio_passed": true,
-        "science_formulas_passed": true,
-        "science_views": 16
-      }
+      "full_evidence_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/PUBLICATION-RECEIPT.json"
     },
     "macos-arm64": {
       "native_run": {
-        "run_id": 43635618684,
-        "workflow_commit": "0c980411e42a129d756435edf8eaa5938e3ca3b8"
+        "run_id": 43701392911,
+        "workflow_commit": "b3958ba1dec9bc81b04bd224a5de9681bb840e17"
       },
-      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43635618684/job/132571639948",
-      "new_install_runtime": "1.7.1-kaixin-20261115-updater2-macos-arm64-20261112",
+      "native_job_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/43701392911/job/132773089044",
+      "new_install_runtime": "1.7.1-kaixin-20261115-preview3-macos-arm64-20261112",
       "stable_manifest": "runtime-macos-arm64.json",
-      "stable_manifest_sha256": "9d9f918f6e4c2ed4fbc31273bdab6c198140853fef0ee2438e2d4f4157295f52",
-      "stable_runtime": "1.7.1-kaixin-20261115-updater2-macos-arm64-universal",
+      "stable_manifest_sha256": "9934284a1e2ddf4e2afe603ceefce748f0b1909b0e8cc5af10dbb26ffc450e44",
+      "stable_runtime": "1.7.1-kaixin-20261115-preview3-macos-arm64-universal",
       "compatible_base_manifests": [
         {
           "baseRuntimeId": "1.7.1-04276f68a-arm64",
-          "file": "runtime-macos-arm64-20261115-updater2-20261112.json"
+          "file": "runtime-macos-arm64-20261115-preview3-20261112.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-7744dbeb8d09.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-7744dbeb8d09.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-7056f6bb9861.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-7056f6bb9861.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-b445b7c83c4d.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-b445b7c83c4d.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-c09b1d53f8d0.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-c09b1d53f8d0.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-194178f05eea.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-194178f05eea.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-6f6222533fad.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-6f6222533fad.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-base-b83c8329037e.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-b83c8329037e.json"
         },
         {
           "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-arm64-universal",
-          "file": "runtime-macos-arm64-20261115-updater2-prior-current.json"
+          "file": "runtime-macos-arm64-20261115-preview3-base-6c9c7f936933.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261115-preview3-prior-current.json"
         }
       ],
       "complete_installation_files": [
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.002.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.002.dmgpart",
           "bytes": 1992295135,
-          "sha256": "da7b3fe6dd331216724034d5d4936d6bdc8830f504c1164e4b75fcfc4702e0c2"
+          "sha256": "92e8d16813b3ab8cac7006ccbc2babb009964ff959f23488b4ba8780c9820e6f"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.003.dmgpart",
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.003.dmgpart",
           "bytes": 1992295135,
-          "sha256": "c49f9eeed3c664063050d04c14a710ae9f94d8b1ddf0800ca5faa66395836812"
+          "sha256": "571ce32c81888994f0df92d80aef89e1cd39f688a7b5c32fbfce8a50ef9c7ddc"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.004.dmgpart",
-          "bytes": 1114131735,
-          "sha256": "a933d2bb254d274c45288e55d481420b6efbf827a8e61e860e1790dc684c1fef"
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.004.dmgpart",
+          "bytes": 1114146083,
+          "sha256": "d8a7fe8ce8f7397e688f123ae7f670f81e6eac46c0b7f13df664dbff3efacaa2"
         },
         {
-          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-updater2-part.dmg",
-          "bytes": 1992728821,
-          "sha256": "359c4e4f2c5a46b860339d77404aa35db667434fb12b4048b2c7c5e60a18ace9"
+          "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261115-preview3-part.dmg",
+          "bytes": 1992728698,
+          "sha256": "7236d3f3e9baba1240582e99c67a98ccc0bcbdc0e46251627fcfbd4389d0ebdd"
         }
       ],
-      "launcher_migration_retested_in_this_release": true,
       "native_installation": "passed",
       "native_core_update": "passed",
+      "oldest_launcher_entry": "passed",
       "existing_synthetic_records_preserved": true,
-      "native_proof_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/verification-macos-arm64.json",
-      "native_proof_sha256": "5eceae0186f8fff23330b6e5a48f5c60219ab79954024cf16f4921500a4b31ac",
-      "oldest_launcher_entry": {
-        "actual_download_install_backup_restart": "passed",
-        "check_again_current": true,
-        "signed_launcher_restarted": true,
-        "from_launcher": "a47b05f9136ca6fb72d2f1f8a04eeb425298f358",
-        "to_launcher": "20261115-updater-1",
-        "old_pid": 51329,
-        "restarted_pid": 55892,
-        "chat_preserved": true,
-        "task_preserved": true,
-        "saved_key_preserved": true
+      "quick_preview": {
+        "passed": true,
+        "actualNativeRenderer": true,
+        "views": [
+          {
+            "width": 390,
+            "height": 844,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 1257,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 844,
+            "height": 390,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 1037,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 1366,
+            "height": 900,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 832,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          },
+          {
+            "width": 1920,
+            "height": 1080,
+            "visible": true,
+            "previewCorrect": true,
+            "jumpToOriginal": true,
+            "jumpMilliseconds": 723,
+            "cardWithinViewport": true,
+            "cardWithinMessagePane": true
+          }
+        ],
+        "conversationSwitchCleared": true,
+        "paidModelCalls": 0,
+        "realStudentData": false
       },
-      "new_launcher_small_update_entry": {
-        "actual_download_install_backup_restart": "passed",
-        "check_again_current": true,
-        "download_progress_visible": true,
-        "downloaded_bytes_visible": true,
-        "from_launcher": "20261115-updater-1",
-        "to_launcher": "20261115-updater-1",
-        "chat_preserved": true,
-        "task_preserved": true,
-        "saved_key_preserved": true
-      },
-      "regressions": {
-        "textbooks": 136,
-        "study_reports_passed": true,
-        "study_report_subject_cases": 9,
-        "attachment_uploads": true,
-        "library_saved_files": 21,
-        "draft_preserved": true,
-        "chat_and_settings_navigation": true,
-        "originals_byte_identical": true,
-        "chat_audio_passed": true,
-        "science_formulas_passed": true,
-        "science_views": 16
-      }
+      "full_evidence_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/PUBLICATION-RECEIPT.json"
     }
-  },
-  "source_test_receipt": "VERIFICATION-UPDATER-20261115.json",
-  "post_publication_verification": {
-    "tag": "student-20261115-updater2",
-    "release_id": 445554770,
-    "release_repository_commit": "c39327be8273bd2f8a08e9ad88135e18bcd79b2f",
-    "all_30_signed_manifests_read_back": [
-      {
-        "file": "runtime-windows-x64-20261115-updater2-20261112.json",
-        "sha256": "7a545f3f5f838b8efd22591029f563921f4c87f959e773492fd5520a739fb7a4",
-        "bytes": 642
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-bb8f5191555d.json",
-        "sha256": "0bdb563c0c0d6fffabec049cab7eaf6e177830dd902469a048970c0bbc67f1e0",
-        "bytes": 681
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-573f105ed118.json",
-        "sha256": "45e6ebf56a59b8698731fc92bedd40fc558eca10a0edadfe267962b02764395a",
-        "bytes": 679
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-9b7c2b84f908.json",
-        "sha256": "8d0d6c1d3889f5665c03bbcf9506706050f2975f5d1d30ff75f26608af01b5c8",
-        "bytes": 684
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-3e01c184c6a4.json",
-        "sha256": "9025bbba282bdcdae7b80e2add3c1a9babb1d7900729facb271517ae3bd2730d",
-        "bytes": 687
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-7a52e2cacc9f.json",
-        "sha256": "087cf54487144c51f97ef92ef22723b7940c910753a11bc0cbc136b29e8b2ea9",
-        "bytes": 682
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-e4abdb1cb594.json",
-        "sha256": "cf12c8de44e7b8ddcc84e8be279ad5036603bc30777579d19099e347b44d5d45",
-        "bytes": 683
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-base-afb4dfe97ae4.json",
-        "sha256": "5406960ac00392a32bf63a167e5ce936b05cf1cab314f9fc0487296e1f77de1d",
-        "bytes": 685
-      },
-      {
-        "file": "runtime-windows-x64-20261115-updater2-prior-current.json",
-        "sha256": "6e93ec285d0ee632911da699407e7e7b79d8c3500de88e576728648b922960df",
-        "bytes": 677
-      },
-      {
-        "file": "runtime-windows-x64.json",
-        "sha256": "71c5b3f6637cb3428cc8f6c1051f17cb9b158a44ab3827940093424b34472a5d",
-        "bytes": 2115
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-20261112.json",
-        "sha256": "1842c2cfb2818ac0584f4b1e697ccefc50983cbc93238e3424194ecc9d9c0893",
-        "bytes": 641
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-e2a196e1e65a.json",
-        "sha256": "b4e752eedf846fb6d17c47da243498908949926a56130d83be1c55697e11e3c4",
-        "bytes": 678
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-681a198cf308.json",
-        "sha256": "7521764e2a69427071043226fcfe3b83988a03ccd023982dacbbaa424c7c0e35",
-        "bytes": 676
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-170a15b2f1a2.json",
-        "sha256": "a45bc28fd47521686c59e00106a6770b27257ef1a52ed01563eca8ace489af99",
-        "bytes": 681
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-22eb20a39a60.json",
-        "sha256": "d914ac2757867a478cea1c9e581b28b842433983df5542fc51106ef05d48f096",
-        "bytes": 684
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-80115ecd6d3d.json",
-        "sha256": "ab19e8b1e7ad13ced0c0791db85e4bb99537921b6572d8057c512382b10c9d82",
-        "bytes": 679
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-c452d12cb482.json",
-        "sha256": "e53125ff0d046b72e853d2b069c8c7957b409144fe8110d03159b59f440402f4",
-        "bytes": 680
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-base-c41831772671.json",
-        "sha256": "6dc7cedd8532cfde19c5d575c4ae2f3624d56b285a39e737678393fa47be6b6c",
-        "bytes": 682
-      },
-      {
-        "file": "runtime-macos-x64-20261115-updater2-prior-current.json",
-        "sha256": "336637b6e54d8e53d7be09acc084c8ead67026f01a542cd2b26c0284caba2fcb",
-        "bytes": 674
-      },
-      {
-        "file": "runtime-macos-x64.json",
-        "sha256": "d1d8a8c08753b7f84dc8403472bfbd4142baf4f1e29b49beb696ed6dddab4a08",
-        "bytes": 2078
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-20261112.json",
-        "sha256": "30dfa118a4d23805ff3d6282139ad72bd0d6b3d45172a84d25dea0b739a276b9",
-        "bytes": 647
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-7744dbeb8d09.json",
-        "sha256": "8a0913ad0c4a04e35eaf2411b01966317b47eb73cd6cb5037ff2d363388e3a1c",
-        "bytes": 684
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-7056f6bb9861.json",
-        "sha256": "a5af1bcbb4009caf717ea3239143d7fb5a0cdee2bf129b81639f32394d418552",
-        "bytes": 682
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-b445b7c83c4d.json",
-        "sha256": "28fd1309c4607ba8208547173a5ad724ce98d67b5733904e255cdfd3fa8307d2",
-        "bytes": 687
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-c09b1d53f8d0.json",
-        "sha256": "3f1e3c5748e4bc84b885b905d0bf343972df6687bde026637053789641d0f824",
-        "bytes": 690
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-194178f05eea.json",
-        "sha256": "cbee9cc4f48ecc4bb409095aa1b91eb567fb182e628b1a73f428f6b4d0ee7dbb",
-        "bytes": 685
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-6f6222533fad.json",
-        "sha256": "06f3aceb48c4ce3ed7e6a02828ef66e494eb4d53c7c9274e14547fc822b9e409",
-        "bytes": 686
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-base-b83c8329037e.json",
-        "sha256": "6e892b784020fb4dbc2c3dd015ad8b42971676ec0e8495c276891bcd7e097c8c",
-        "bytes": 688
-      },
-      {
-        "file": "runtime-macos-arm64-20261115-updater2-prior-current.json",
-        "sha256": "5663ab0495b40b7a12ec30bf717672d3835cd27b35a0e4f56705320f19a0bf93",
-        "bytes": 680
-      },
-      {
-        "file": "runtime-macos-arm64.json",
-        "sha256": "9d9f918f6e4c2ed4fbc31273bdab6c198140853fef0ee2438e2d4f4157295f52",
-        "bytes": 2120
-      }
-    ],
-    "all_4_archives_metadata_match_prepublication_full_hash_verification": true,
-    "latest_is_formal": true,
-    "native_systems_passed": 3,
-    "physical_student_devices_all_tested": false,
-    "usb_written": false,
-    "local_actual_online_update": {
-      "final_source": "114485d3f1c4df24d9fa58cae35299ab9f918419",
-      "actual_online_update_completed": true,
-      "entry": "Settings > About > Check for updates",
-      "formal_tag": "student-20261115-updater2",
-      "product_version": "1.7.1",
-      "runtime": "1.7.1-kaixin-20261115-updater2-macos-x64-base-c41831772671",
-      "core_bytes": 26822596,
-      "core_sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265",
-      "signature_verified": true,
-      "download_confirmed_in_real_ui": true,
-      "install_completion_seen_in_real_ui": true,
-      "check_again_current": true,
-      "normal_launcher_quit_and_reopen_preview_passed": true,
-      "launcher_build": "20261115-updater-1",
-      "launcher_files_verified": 24,
-      "chat_databases_logically_compared": 10,
-      "all_existing_rows_preserved": true,
-      "settings_files_unchanged": 19,
-      "real_learning_content_uploaded": false,
-      "private_key_uploaded": false,
-      "observed_at": "2026-11-14T20:59:45.728Z",
-      "manual_cancel_not_completed_in_this_machine": true,
-      "manual_maintenance_json_picker_not_claimed_as_passed": true
-    }
-  },
-  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-updater2/PUBLICATION-RECEIPT.json",
-  "publication_run": 43639482566,
-  "usb_delivery": {
-    "completed": true,
-    "tag": "student-20261115-updater2",
-    "updated_for_this_release": true,
-    "verified_payload_files": 3,
-    "ordinary_single_mac_images": 2,
-    "complete_windows_zip": true,
-    "superseded_installation_directories_removed": true,
-    "other_materials_preserved": true,
-    "protected_math_documents": 6,
-    "receipt": "USB-DELIVERY-RECEIPT.json",
-    "receipt_sha256": "013a2738906f033a5dd353c7d448b19259cf321e09255f09047561a15d94f7c7",
-    "completed_at_utc": "2026-11-15T02:28:32.000899+00:00"
-  },
-  "release_skill": "skills/scholar-desktop-release/SKILL.md",
-  "physical_student_devices_all_tested": false,
-  "paid_model_semantic_quality_tested": false,
-  "third_party_model_recovery_claimed": false,
-  "omitted_development_figure_files": 68,
-  "source_files_sha256": "b4e57a1d3d070fae7fc967c220008077b220f249675b88aeedd4a679c56e510f",
-  "source_patch_sha256": "89071250306f322b7810e19dc5371086beb2bb5fb073deb9b4a5ce4369117c6c",
-  "voice_playback": {
-    "default_provider": "edge",
-    "default_requires_api_key": false,
-    "requires_network_to_generate": true,
-    "selected_text_calls_chat_model": false,
-    "real_audio_file_generation_and_history_reopen": true,
-    "physical_speakers_or_loopback_verified": false
-  },
-  "background_upload_scope": "internal page navigation only; no process-exit or refresh resume",
-  "audio_responsive_validation": {
-    "passed": true,
-    "platform": "local Intel Electron 45.1",
-    "css_viewports": [
-      [
-        390,
-        844
-      ],
-      [
-        844,
-        390
-      ],
-      [
-        1366,
-        900
-      ],
-      [
-        1920,
-        1080
-      ]
-    ],
-    "actual_three_platform_responsive_audio_test": false,
-    "receipt_sha256": "27d620b2e2a660b76e75d7a14e3bf685a8930b6b8914284cc058d19dfbed1713"
-  },
-  "update_entry": "Settings > About > Check for updates, or Core > Check for updates",
-  "launcher_migration": "Signed carrier through the normal update, followed by the restart button; no daily manual patch",
-  "earliest_native_bridge_may_be_large": true
+  }
 }

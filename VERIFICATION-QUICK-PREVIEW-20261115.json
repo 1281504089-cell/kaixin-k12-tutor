@@ -1,5 +1,5 @@
 {
-  "stage": "three_native_platforms_passed_ready_for_publication",
+  "stage": "formal_published_three_native_platforms_and_local_online_update_passed",
   "feature": "Shared conversation quick-preview rail",
   "source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
   "frontend_build": "xUu-cSIXf1E3Fi90U4ume",
@@ -70,5 +70,26 @@
       "native_install": "passed",
       "normal_update_entry": "passed"
     }
+  },
+  "publication_run": 43704945887,
+  "release_tag": "student-20261115-preview3",
+  "local_actual_online_update": {
+    "final_source": "896e79b517a008ac6d584526151862ff6191cf77",
+    "formal_tag": "student-20261115-preview3",
+    "actual_online_update_completed": true,
+    "entry": "Settings > About > Check for updates",
+    "runtime": "1.7.1-kaixin-20261115-preview3-macos-x64-base-c41831772671",
+    "signature_verified": true,
+    "download_confirmed_in_real_ui": true,
+    "install_completion_seen_in_real_ui": true,
+    "check_again_current": true,
+    "launcher_build": "20261115-updater-1",
+    "launcher_files_verified": 24,
+    "chat_databases_logically_compared": 10,
+    "all_existing_rows_preserved": true,
+    "settings_files_unchanged": 19,
+    "real_learning_content_uploaded": false,
+    "private_key_uploaded": false,
+    "observed_at": "2026-11-15T10:47:06.911Z"
   }
 }
