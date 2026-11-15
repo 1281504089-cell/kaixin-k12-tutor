@@ -137,6 +137,8 @@ async function content() {
     const library = await require('./materials-ui.cjs')(view, path.dirname(output), fixture);
     const audio = await require('./ci-chat-audio-ui.cjs')(view, path.dirname(output), fixture.audio);
     const science = await require('./science-ui.cjs').verifyScienceNative(view, path.dirname(output), fixture.science);
+    const preview = await require('./ci-turn-preview.cjs')(view, path.dirname(output), fixture.science.preview);
+    assert.equal(preview.passed, true);
     assert.equal(audio.passed, true);
     assert.equal(science.passed, true);
     await view.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
@@ -147,7 +149,7 @@ async function content() {
       production_main_unchanged: true, candidate_feed_routed_only_in_test: true, from_runtime: before.runtimeId, to_runtime: after.runtimeId,
       actual_download_install_backup_restart: 'passed', transaction: transaction.phase,
       check_again_current: true, signed_launcher_restarted: needsRestart, from_launcher: needsRestart?'a47b05f9136ca6fb72d2f1f8a04eeb425298f358':descriptor.buildId, to_launcher: descriptor.buildId, old_pid: saved?.oldPid ?? fromPid, restarted_pid: process.pid, download_progress_visible: progressVisible, downloaded_bytes_visible: progressWithBytes, old_renderer_closed_after_update: Boolean(invokeError),
-      library_bulk_upload: library, chat_audio: audio, science_formulas: science,
+      library_bulk_upload: library, chat_audio: audio, science_formulas: science, quick_preview: preview,
     }, null, 2));
     clearTimeout(timer);
     app.quit();

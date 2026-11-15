@@ -22,6 +22,15 @@ async def seed_science():
     session = await store.create_session(title)
     await store.add_message(session["id"], "user", "以下为合成公式，仅验证显示，不生成学习结论。")
     await store.add_message(session["id"], "assistant", text, capability="chat")
+    preview_session = await store.create_session("消息快速预览合成验证")
+    preview = {"session": preview_session["id"], "titles": [], "answers": []}
+    for number in range(1, 9):
+        question = f"预览问题{number}：如何理解分数与单位一？"
+        answer = f"预览回答{number}：先确定整体，再比较每份的大小。" + "请结合题目说明你选择这个单位的原因。" * 35
+        await store.add_message(preview_session["id"], "user", question)
+        await store.add_message(preview_session["id"], "assistant", answer, capability="chat")
+        preview["titles"].append(question)
+        preview["answers"].append(answer[:22])
     notes = get_co_writer_storage()
     note = notes.create_document(title=title, content=text)
     saved_cases = [cases[0], cases[4], cases[5], cases[-1]]
@@ -52,7 +61,7 @@ async def seed_science():
         })
         mistakes._save(*mistakes.storage(), record)
         ids[subject] = record["id"]
-    return {"session": session["id"], "note": note.id, "saved_note": saved.id,
+    return {"preview": preview, "session": session["id"], "note": note.id, "saved_note": saved.id,
             "mistakes": ids, "cases": cases, "saved_cases": saved_cases}
 
 

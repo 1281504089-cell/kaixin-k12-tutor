@@ -53,7 +53,7 @@ print(json.dumps(asyncio.run(run())))
  (copied/'app/qa').mkdir()
  shutil.copyfile(root/'ci-update-flow.cjs',copied/'app/qa/update-flow.cjs')
  shutil.copyfile(root/'ci-materials-ui.cjs',copied/'app/qa/materials-ui.cjs')
- for name in ['ci-chat-audio-ui.cjs','audio-card-probe.cjs','native-html-speech-diagnostic.cjs','science-ui.cjs']:
+ for name in ['ci-chat-audio-ui.cjs','audio-card-probe.cjs','native-html-speech-diagnostic.cjs','science-ui.cjs','ci-turn-preview.cjs']:
   shutil.copyfile(root/name,copied/'app/qa'/name)
  expected_src=root/launcher if legacy else resources/'app/src'
  for file in expected_src.iterdir():
