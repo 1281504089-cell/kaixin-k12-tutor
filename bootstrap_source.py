@@ -44,3 +44,11 @@ if options.with_updates:
         for arguments in (["apply", "--index", str(patch)], ["commit", "-m", update["description"]]):
             subprocess.run(["git", "-C", str(destination), *arguments], check=True)
         print("Applied student source update", update["sha256"])
+
+
+if options.with_updates and manifest.get("sourceOverlay"):
+    from release_source import apply_overlay
+    overlay = apply_overlay(root, destination, manifest["sourceOverlay"])
+    for arguments in (["add", "--all"], ["commit", "-m", "Frozen release source " + overlay["source_commit"]]):
+        subprocess.run(["git", "-C", str(destination), *arguments], check=True)
+    print("Verified final owner-frozen source", overlay["source_commit"])

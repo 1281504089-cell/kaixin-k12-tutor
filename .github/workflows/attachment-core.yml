@@ -1,14 +1,14 @@
-name: Build signed desktop updater core
+name: Build frozen K12 bank and library candidate core
 on:
   push:
-    branches: ['codex/updater-core-20261115-*']
-    paths: ['attachment-release.json', 'ci-attachment-core.py', 'student-chat-audio-20261114.patch', 'source-manifest.json', '.github/workflows/attachment-core.yml']
+    branches: ['codex/k12-core-20261116-*']
+    paths: ['attachment-release.json', 'ci-attachment-core.py', 'release_source.py', 'bootstrap_source.py', '*manifest*.json', 'source-inventory-20261116.json', 'source-overlay.*', 'bank-payload.*', '.github/workflows/attachment-core.yml']
 permissions:
   contents: write
 jobs:
   core:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -16,10 +16,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.4'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Require the final owner-prepared input freeze
+        run: |
+          python -c 'import json; c=json.load(open("attachment-release.json")); assert c.get("prepared") is True; assert c["tag"].startswith("student-20261116-")'
       - name: Create isolated prerelease
         run: |
           set -euo pipefail
@@ -27,7 +30,7 @@ jobs:
           if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
             python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
           else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '聊天快速预览候选 · 2026-11-15' --notes '正在验证消息快速预览、三端完整安装、检查更新和记录保留。尚未发布正式版。'
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '题库与资料来源候选 · 2026-11-16' --notes '正在验证同批题库、教材资料来源、三端完整安装、检查更新与记录保留。尚未发布正式版。'
           fi
       - name: Record candidate run
         run: |
@@ -41,5 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: attachment-core
-          path: attachment-core/attachment-core.json
+          path: |
+            attachment-core/attachment-core.json
+            attachment-core/core-file-manifest.json
           if-no-files-found: warn

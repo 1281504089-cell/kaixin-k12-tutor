@@ -16,6 +16,9 @@ def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=Fal
  (qa_home/'.science-fixture-allowed').touch()
  science_file=evidence/'science-seed.json'
  subprocess.run([str(python),str(root/'science_seed.py'),'--source',str(home/'runtimes'/active['runtimeId']/'core'),'--home',str(qa_home),'--output',str(science_file)],env=qa_env,check=True,timeout=120)
+ (qa_home/'.k12-release-qa-allowed').touch()
+ k12_file=evidence/'k12-seed.json'
+ subprocess.run([str(python),str(root/'native-k12-fixture.py'),'--core',str(home/'runtimes'/active['runtimeId']/'core'),'--home',str(qa_home),'--out',str(k12_file)],env=qa_env,check=True,timeout=120)
  # Install the real prior signed code without changing the verified native base.
  code="import{readFile,writeFile}from'node:fs/promises';import{pathToFileURL}from'node:url';const{installBundle}=await import(pathToFileURL(process.argv[1]));const key=await readFile(process.argv[2]);const installed=await installBundle(process.argv[3],process.argv[4],key);await writeFile(process.argv[4]+'/active.json',JSON.stringify(installed.manifest));"
  subprocess.run(['node','--input-type=module','-e',code,str(resources/'app/src/bundles.mjs'),str(resources/'app/assets/runtime-public.pem'),str(prior),str(home)],check=True)
@@ -39,7 +42,7 @@ async def run():
  return {'session_id':r['id'],'task_id':t.id,**namespace['seed']()}
 print(json.dumps(asyncio.run(run())))
 ''',old)
- seeded.update(audio=json.loads(audio_file.read_text(encoding='utf-8')),science=json.loads(science_file.read_text(encoding='utf-8')))
+ seeded.update(audio=json.loads(audio_file.read_text(encoding='utf-8')),science=json.loads(science_file.read_text(encoding='utf-8')),k12=json.loads(k12_file.read_text(encoding='utf-8')))
  (home/'attachment-fixture.json').write_text(json.dumps(seeded))
  source=resources.parent.parent if target.startswith('macos') else install
  probe=root/('update-entry.app' if target.startswith('macos') else 'update-entry')
@@ -53,7 +56,7 @@ print(json.dumps(asyncio.run(run())))
  (copied/'app/qa').mkdir()
  shutil.copyfile(root/'ci-update-flow.cjs',copied/'app/qa/update-flow.cjs')
  shutil.copyfile(root/'ci-materials-ui.cjs',copied/'app/qa/materials-ui.cjs')
- for name in ['ci-chat-audio-ui.cjs','audio-card-probe.cjs','native-html-speech-diagnostic.cjs','science-ui.cjs','ci-turn-preview.cjs']:
+ for name in ['ci-chat-audio-ui.cjs','audio-card-probe.cjs','native-html-speech-diagnostic.cjs','science-ui.cjs','ci-turn-preview.cjs','ci-k12-library-ui.cjs']:
   shutil.copyfile(root/name,copied/'app/qa'/name)
  expected_src=root/launcher if legacy else resources/'app/src'
  for file in expected_src.iterdir():

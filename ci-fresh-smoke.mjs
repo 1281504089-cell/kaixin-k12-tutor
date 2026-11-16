@@ -70,6 +70,12 @@ try {
   const native = path.join(home, 'runtimes', base.runtimeId);
   const python = path.join(native, process.platform === 'win32' ? 'python/python.exe' : 'python/bin/python3');
   const node = path.join(native, process.platform === 'win32' ? 'node/node.exe' : 'node/bin/node');
+  const nativeNode = JSON.parse(execFileSync(node, ['-p', 'JSON.stringify({version:process.version,platform:process.platform,arch:process.arch})'], { encoding: 'utf8', timeout: 30000 }));
+  assert.equal(nativeNode.platform, process.platform);
+  assert.equal(nativeNode.arch, process.arch);
+  const k12Proof = execFileSync(python, [path.join(process.cwd(), 'native-k12-api-smoke.py'), '--frontend', frontend, '--core', path.join(runtime, 'core'), '--out', path.join(evidence, 'k12-api.json')], { encoding: 'utf8', timeout: 180000, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1' } });
+  const k12Api = JSON.parse(k12Proof.trim().split('\n').at(-1));
+  assert.equal(k12Api.passed, true);
   const catalog = path.join(home, 'workspace/data/user/workspace/student-textbooks/catalog.json');
   await access(catalog);
   const code = `
@@ -148,7 +154,7 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     native_platform: process.platform, native_arch: process.arch, runtime_id: active.runtimeId,
     core_commit: included.commit, fresh_profile: true, developer_tools_on_path: false,
     language: profile.language, textbooks: books.length, pdf, local_spoken_stt: speech,
-    study_reports: studyReports,
+    study_reports: studyReports, native_node: nativeNode, k12_api: k12Api,
     reading_page: 'passed', current_core_included: true,
     automatic_small_update_selection: 'passed', automatic_small_update_download: 'passed',
     compatibility_runtime_downloaded: false, real_keys_used: false,

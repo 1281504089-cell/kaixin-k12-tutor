@@ -5,6 +5,7 @@ from urllib.request import Request,urlopen
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
+assert batch.get('prepared') is True and batch['tag'].startswith('student-20261116-'), 'Owner must prepare the final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -37,6 +38,10 @@ for target in targets:
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
+ assert smoke['k12_api']['passed'] and smoke['k12_api']['model_calls']==0 and smoke['k12_api']['teacher_fields_absent']
+ for field in ['update_entry','oldest_launcher_entry']:
+  k12=report[field]['k12_library'];assert k12['passed'] and k12['actualNativeRenderer'] and k12['model_calls']==0 and len(k12['views'])==4
+  assert k12['bank_revision']==smoke['k12_api']['bank_revision']
  study=smoke['study_reports'];assert study['passed'] and len(study['cases'])==9 and study['real_model_calls']==0
  assert all(all(row[k] for k in ['generation_failure_rejected','audit_failure_rejected','legacy_fallback_hidden_and_export_blocked','reviewed_fixture_available_and_word_exported','chat_and_reading_records_preserved']) for row in study['cases'])
  preview=report['update_entry']['quick_preview'];assert preview['passed'] and len(preview['views'])==4 and preview['conversationSwitchCleared'] and all(v['cardWithinMessagePane'] for v in preview['views'])

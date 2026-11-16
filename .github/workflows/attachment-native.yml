@@ -1,8 +1,8 @@
-name: Validate signed updater delivery on three native platforms
+name: Validate frozen K12 candidate on three native platforms
 on:
   push:
-    branches: ['codex/updater-native-20261115-*']
-    paths: ['attachment-batch.json', 'ci-attachment-native.py', 'native-report-smoke.py', 'ci_attachment_bridge.py', 'ci-fresh-install.py', 'ci-fresh-smoke.mjs', 'ci_repackage.py', 'ci_update_probe.py', 'ci-update-flow.cjs', 'ci-materials-ui.cjs', 'native-materials-fixture.py', '.github/workflows/attachment-native.yml']
+    branches: ['codex/k12-native-20261116-*']
+    paths: ['attachment-batch.json', 'fresh-install-lock.json', 'ci-*.py', 'ci-*.cjs', 'ci-*.mjs', 'release_source.py', 'native-*.py', '.github/workflows/attachment-native.yml']
 permissions:
   contents: write
 jobs:
@@ -29,10 +29,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.4'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Require owner-signed same-source candidate inputs
+        shell: bash
+        run: |
+          python -c 'import json; c=json.load(open("attachment-release.json")); b=json.load(open("attachment-batch.json")); assert c.get("prepared") is True; assert b["tag"]==c["tag"] and b["core_commit"]==c["source_commit"]; assert b["tag"].startswith("student-20261116-"); assert all(m["commit"]==c["source_commit"] and m["archive"]==c["archive"] for m in b["manifests"].values())'
       - name: Record native candidate run
         shell: bash
         env:

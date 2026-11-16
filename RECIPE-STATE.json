@@ -1,0 +1,20 @@
+{
+  "status": "candidate_recipe_in_progress_not_built_not_published",
+  "baseline_tag": "student-20261115-preview3",
+  "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+  "prior_recipe_unchanged": true,
+  "published_export_required": true,
+  "models_with_pending_distribution_rights": "isolated_by_owner_ledger",
+  "bank_archive_prefix": "core/deeptutor/services/student_learning/question_bank_data",
+  "source_and_bank_transport_part_bytes": 2097152,
+  "normal_git_credential_helper": "osxkeychain_configured_root_reports_no_usable_github_credential",
+  "candidate_delivery": "connector blobs/tree/commit on isolated push-triggered branch; runner github.token creates candidate assets",
+  "pending": [
+    "final owner source export and isolation ledger",
+    "final student-only bank payload/receipt",
+    "final frontend smoke contract",
+    "owner-signed descriptor and runtime batch",
+    "three native candidate install/update passes",
+    "owner promotion"
+  ]
+}
