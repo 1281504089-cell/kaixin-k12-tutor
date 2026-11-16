@@ -1,0 +1,54 @@
+{
+  "final_source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+  "frontend": {
+    "freeze": "/Users/Admin1/Documents/Kaixin-20261115-K12题库工程/qa/k12-library-frontend-20261116/v3/FREEZE.json",
+    "freeze_sha256": "b45914ab75e927af53757257a0bd3093a2c133230f3118f83fe15cafe8db7e42",
+    "tested_files": [
+      "tests/student-materials.spec.tsx",
+      "tests/student-source-library.spec.tsx",
+      "tests/question-source-preview.spec.tsx",
+      "tests/source-citation-links.spec.tsx",
+      "tests/attachment-citation-viewport.spec.tsx",
+      "tests/file-citation-navigation.spec.tsx",
+      "tests/textbook-reference-links.spec.tsx",
+      "tests/related-material-links.spec.tsx",
+      "tests/chat-reading-navigation.spec.tsx",
+      "tests/session-viewer-panel.spec.tsx",
+      "tests/pdf-preview-quote.spec.tsx"
+    ],
+    "command": "/Users/Admin1/.local/bin/node node_modules/vitest/vitest.mjs run tests/student-materials.spec.tsx tests/student-source-library.spec.tsx tests/question-source-preview.spec.tsx tests/source-citation-links.spec.tsx tests/attachment-citation-viewport.spec.tsx tests/file-citation-navigation.spec.tsx tests/textbook-reference-links.spec.tsx tests/related-material-links.spec.tsx tests/chat-reading-navigation.spec.tsx tests/session-viewer-panel.spec.tsx tests/pdf-preview-quote.spec.tsx",
+    "cwd": "integration-20261116/source/web",
+    "passed": 89,
+    "full_typescript_errors": 0
+  },
+  "source_citation": {
+    "freeze": "/Users/Admin1/Documents/Kaixin-20261115-K12题库工程/qa/source-citation-handoff-20261116/FREEZE.json",
+    "freeze_sha256": "14d1d69389d8ce92d79a8f3cfbaa7ea4f847bd3cdfd1a9443bb94774676b1e74",
+    "passed": 107,
+    "seconds": 5.28,
+    "tested_files": [
+      "tests/services/session/test_source_citations.py",
+      "tests/services/session/test_source_inventory.py",
+      "tests/reading/test_references.py",
+      "tests/tools/test_read_source.py",
+      "tests/agents/chat/test_document_source_policy.py",
+      "tests/capabilities/test_explore_context_capability.py",
+      "tests/capabilities/test_source_citation_handoff.py"
+    ],
+    "scope": "At its own source-citation freeze; excludes later root teaching-image/metadata fixes."
+  },
+  "metadata_v3_question_sources": {
+    "tested_file": "tests/services/test_question_sources.py",
+    "passed": 25,
+    "real_inprocess_fastapi_conservative_flags": true
+  },
+  "new_release_native_acceptance": false,
+  "runtime_image_isolation": {
+    "tested_file": "tests/services/test_question_sources.py",
+    "passed": 28,
+    "runtime_exclusions": 16,
+    "predicate": "Exact qualified_id plus current body asset SHA; not an inference of missing conditions",
+    "cold_prepare_ms": 323.86,
+    "cached_prepare_sql_calls": 0
+  }
+}

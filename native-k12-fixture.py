@@ -15,8 +15,17 @@ async def seed(core):
     pack = core / "deeptutor/services/student_learning/question_bank_data"
     manifest = question_sources.prepare(pack)
     with sqlite3.connect((pack / "index.sqlite3").resolve().as_uri() + "?mode=ro&immutable=1", uri=True) as conn:
-        row = conn.execute("SELECT q.qualified_id FROM questions q JOIN documents d ON d.payload_sha=q.payload_sha ORDER BY (json_array_length(d.body_json,'$.assets')>0) DESC,q.qualified_id LIMIT 1").fetchone()
-    question = question_sources.detail(row[0], root=pack, revision=manifest["bank_revision"])
+        candidates = conn.execute("SELECT q.qualified_id FROM questions q JOIN documents d ON d.payload_sha=q.payload_sha WHERE q.usable=1 ORDER BY (json_array_length(d.body_json,'$.assets')>0) DESC,q.qualified_id").fetchall()
+    question = None
+    for row in candidates:
+        try:
+            current = question_sources.detail(row[0], root=pack, revision=manifest["bank_revision"])
+        except (FileNotFoundError, PermissionError):
+            continue  # Use the same live permission/runtime-isolation boundary as API detail.
+        if current.get("can_select_original") is True:
+            question = current
+            break
+    assert question is not None, "No permitted current original exercise fixture"
     store = get_sqlite_session_store()
     session = await store.create_session("题库来源跳转合成验证")
     await store.add_message(session["id"], "user", "只验证已有公开题源的显示与跳转，不发起模型。")

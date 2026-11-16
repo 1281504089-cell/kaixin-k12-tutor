@@ -5,7 +5,7 @@ from urllib.request import Request,urlopen
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag'].startswith('student-20261116-'), 'Owner must prepare the final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag'].startswith(('student-20261116-','student-20261117-')), 'Owner must prepare the final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -39,6 +39,8 @@ for target in targets:
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
  assert smoke['k12_api']['passed'] and smoke['k12_api']['model_calls']==0 and smoke['k12_api']['teacher_fields_absent']
+ assert all(smoke['k12_api'][key] for key in ['fts_search_passed','fts_empty_query_passed','item_quality_metadata_matched'])
+ assert smoke['k12_api']['runtime_isolated_count']==16 and smoke['k12_api']['physical_readable_count']-smoke['k12_api']['effective_readable_count']==16
  for field in ['update_entry','oldest_launcher_entry']:
   k12=report[field]['k12_library'];assert k12['passed'] and k12['actualNativeRenderer'] and k12['model_calls']==0 and len(k12['views'])==4
   assert k12['bank_revision']==smoke['k12_api']['bank_revision']
@@ -111,7 +113,7 @@ except Exception:
 
 gh('release','upload',batch['tag'],root/'INSTALLATION.txt','--clobber')
 gh('api','-X','PATCH','repos/'+repo+'/git/refs/tags/'+batch['tag'],'-f','sha='+os.environ['GITHUB_SHA'],'-F','force=true')
-gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title','开心动力超级学霸 · 聊天快速预览 2026-11-15','--notes-file',root/'RELEASE-NOTES.md')
+gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title',batch.get('title','开心动力超级学霸 · 题库与资料来源 2026-11-16'),'--notes-file',root/'RELEASE-NOTES.md')
 latest=api('releases/latest');assert latest['tag_name']==batch['tag'] and not latest['prerelease']
 receipt={**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'physical_user_devices_tested':False,'private_key_uploaded':False}
 receipt_file=root/'PUBLICATION-RECEIPT.json';receipt_file.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n');gh('release','upload',batch['tag'],receipt_file,'--clobber')

@@ -184,5 +184,195 @@
       "sha256": "64a4b7e49d11b17d1aa659169a51ceb1726fa96276c7474fe95185159a541e7c",
       "description": "Make the shared question rail visible at normal/narrow widths with readable anchored question-answer previews, click navigation, keyboard and touch access; preserve selected branch and existing records."
     }
-  ]
+  ],
+  "sourceOverlay": {
+    "manifest": "source-inventory-20261116.json",
+    "manifest_sha256": "5873d104898dfe94230e0f52f2bf83166218d44ed74bdadc5b70ac481aac3c07",
+    "source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+    "source_files_sha256": "c75d2b04b5144fa9da10855803a82807417a085198db05497b6e5b255c86ae5f",
+    "archive_sha256": "e336afe8a1d63bd62532dbbe74068cb2d71df428cd28f9c9d9599a8107865756",
+    "parts": [
+      {
+        "file": "source-overlay.001",
+        "bytes": 524288,
+        "sha256": "8d4fc35914302205a432fa3539bea44bf81b55fe909db9e17c24ab4a26df5a31"
+      },
+      {
+        "file": "source-overlay.002",
+        "bytes": 524288,
+        "sha256": "d1238f3d1717913750053d4f80c88583fdfc3369323dd3c962fed325dbe2056f"
+      },
+      {
+        "file": "source-overlay.003",
+        "bytes": 524288,
+        "sha256": "81b30aaa179dac9dbbffbde5eb3a86f3f0d5f30035046782df2bdbbde508479a"
+      },
+      {
+        "file": "source-overlay.004",
+        "bytes": 524288,
+        "sha256": "646e26e57bcd88ede2e1cd925a42305d997fccf9045d52902fdec5ceb8aeef32"
+      },
+      {
+        "file": "source-overlay.005",
+        "bytes": 524288,
+        "sha256": "1b642b285f7eafc410703fe455aadbfd865483093ce34916d8984e4b09b680f8"
+      },
+      {
+        "file": "source-overlay.006",
+        "bytes": 524288,
+        "sha256": "9952ba1fc5e8d3adbfed58df2af4da49c24c2acadf53eec576720aa48faab575"
+      },
+      {
+        "file": "source-overlay.007",
+        "bytes": 524288,
+        "sha256": "5b9fb48e406058fcaa3d624ab32c0d4f85028b1a65fa3126f6a25629a2ef43ae"
+      },
+      {
+        "file": "source-overlay.008",
+        "bytes": 524288,
+        "sha256": "29f0e7f8294dca0a2c6c66f283e4b9e5e92dee31445e5bd415bde1ed4706bbb5"
+      },
+      {
+        "file": "source-overlay.009",
+        "bytes": 524288,
+        "sha256": "a2698ebd260eb8abfb060e480c12a821bf080a4603b26dc7ed4db9eb0dfba69c"
+      },
+      {
+        "file": "source-overlay.010",
+        "bytes": 524288,
+        "sha256": "9402fa67defc9457d664f83014764571d4abd4aa4f6469a3b4d913b1011804eb"
+      },
+      {
+        "file": "source-overlay.011",
+        "bytes": 524288,
+        "sha256": "4401a322f506b7cfad7a16986a15a8a3a968ed6d68664bef62cc42cec706498a"
+      },
+      {
+        "file": "source-overlay.012",
+        "bytes": 524288,
+        "sha256": "c97829c0cb22e101478cc1881c72c02998a6b79e32c70e2182217a41c7a02c2a"
+      },
+      {
+        "file": "source-overlay.013",
+        "bytes": 524288,
+        "sha256": "efebec75f9e88c44a2ebfcf7770954eee16799c7e6a209eb5aa2f8397fd268df"
+      },
+      {
+        "file": "source-overlay.014",
+        "bytes": 524288,
+        "sha256": "5ecd7805447f6207582ca678e9c0d3e2eee77064ff036e417bbab7cf285d01d2"
+      },
+      {
+        "file": "source-overlay.015",
+        "bytes": 524288,
+        "sha256": "22a11999a012e0c6df19023414a0ad963934819db6e31f03731f80cdf0317370"
+      },
+      {
+        "file": "source-overlay.016",
+        "bytes": 524288,
+        "sha256": "31a28b7ae7fe4206c9c8a5bb772ca96ede68ed494f13835d2f16535ea7e27d16"
+      },
+      {
+        "file": "source-overlay.017",
+        "bytes": 524288,
+        "sha256": "7562e410d5256d2f00be49f9a0845ab3686e193f02a9996724e1a4002278e428"
+      },
+      {
+        "file": "source-overlay.018",
+        "bytes": 524288,
+        "sha256": "ae5cc9218c671225b74e7e6ad676eae6c83e0f8c5788312c3574480e2423a9a4"
+      },
+      {
+        "file": "source-overlay.019",
+        "bytes": 524288,
+        "sha256": "6b9202a3f9d40faa8a0d46ce51ee0bfce4a35d941a9dc8b1d3db8eba016a5c91"
+      },
+      {
+        "file": "source-overlay.020",
+        "bytes": 524288,
+        "sha256": "62a227fc3aa4c509559acccd05a62cdc1b1e443ffe5377a96304674f062f28f3"
+      },
+      {
+        "file": "source-overlay.021",
+        "bytes": 524288,
+        "sha256": "fe4c4ae508082610dfcbcae06893f854d882925e9bd1afbcfdcf1b147d070c13"
+      },
+      {
+        "file": "source-overlay.022",
+        "bytes": 524288,
+        "sha256": "0794e2efff65860dc4a8cfebed1a77a635f160742b2d99daf91f058a20e7e2db"
+      },
+      {
+        "file": "source-overlay.023",
+        "bytes": 524288,
+        "sha256": "48629d6ecb915288d43188329eefefdf43ac931a6dd8a7260af5d8b7d74321f4"
+      },
+      {
+        "file": "source-overlay.024",
+        "bytes": 524288,
+        "sha256": "524ef948c32a18f2d428d01671c680bc2502be5cb09730f14bd6e8fb0b22e179"
+      },
+      {
+        "file": "source-overlay.025",
+        "bytes": 524288,
+        "sha256": "d4921e1627b1cf9978fc0a2e7ad6330245b45bd0d5d4d984f1d64df85a398c14"
+      },
+      {
+        "file": "source-overlay.026",
+        "bytes": 524288,
+        "sha256": "c2040aa1e5e808f396a11690832709fcc8001af05057c1f50f7ed667ca15c415"
+      },
+      {
+        "file": "source-overlay.027",
+        "bytes": 524288,
+        "sha256": "d7219a274805efb193126a779879bf8e6626f6ed70b807f8ac9d17a584009b92"
+      },
+      {
+        "file": "source-overlay.028",
+        "bytes": 524288,
+        "sha256": "a24f6b81a469853e6c33e8f54501f4b6f055784ba36b19935132ace57434e141"
+      },
+      {
+        "file": "source-overlay.029",
+        "bytes": 524288,
+        "sha256": "54dfe2f297d0340c976c005fe821690ae6a28d346769085f843ac1d8a8261102"
+      },
+      {
+        "file": "source-overlay.030",
+        "bytes": 524288,
+        "sha256": "ca386ba2db2ac31fdc46cd44af7dfea3954adc11724d8af6c74659ce9a4cfc06"
+      },
+      {
+        "file": "source-overlay.031",
+        "bytes": 524288,
+        "sha256": "249b6efd82b0e19a3cf7e6ed74101eb62a87b3a7688b62af1a1e5dcfeece32cb"
+      },
+      {
+        "file": "source-overlay.032",
+        "bytes": 524288,
+        "sha256": "ea60dd22e9e211b6575416b1b80d31d1c19f71acc1067a34825efb8bd9002c8d"
+      },
+      {
+        "file": "source-overlay.033",
+        "bytes": 524288,
+        "sha256": "614645311e0b2fd7d0bba9ec06a00edebed86b0c006f1e01665f1e4b9d6d8397"
+      },
+      {
+        "file": "source-overlay.034",
+        "bytes": 524288,
+        "sha256": "e369425ba57105e592615275bf7960f887db09f30a791c7d1b01abfdd5066ab7"
+      },
+      {
+        "file": "source-overlay.035",
+        "bytes": 344321,
+        "sha256": "9101e02d53222554b9084662cd7aa1d9ef6c3a08150dcd095396e9f66ec3beb7"
+      }
+    ],
+    "remote_archive": {
+      "file": "source-overlay-20261117-k12-1.tar.gz",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/source-overlay-20261117-k12-1.tar.gz",
+      "bytes": 18170113,
+      "sha256": "e336afe8a1d63bd62532dbbe74068cb2d71df428cd28f9c9d9599a8107865756"
+    }
+  }
 }

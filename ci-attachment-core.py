@@ -10,7 +10,7 @@ import sys
 import tarfile
 import tempfile
 
-from release_source import DOC_FIGURES, add_file, aggregate, inventory, safe_name, sha, verify_files
+from release_source import DOC_FIGURES, add_file, aggregate, inventory, join_source_overlay, safe_name, sha, verify_files
 
 ROOT = Path.cwd()
 CONFIG = json.loads((ROOT / "attachment-release.json").read_text())
@@ -110,7 +110,7 @@ with archive.open("xb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=ra
         assert file.is_file() and not file.is_symlink(), str(relative)
         add(out, "web/" + relative.as_posix(), file.read_bytes(), file.stat().st_mode & 0o777)
 assert archive.stat().st_size < 2_000_000_000, "Current signed core protocol archive limit"
-required = {"core/deeptutor/services/student_learning/reference.cjs", "core/deeptutor/services/student_learning/miniapp/textbook-library.cjs", "core/deeptutor/services/student_learning/miniapp/retrieval.cjs", "core/deeptutor/services/student_learning/question_bank_data/manifest.json", "core/deeptutor/services/student_learning/question_bank_data/index.sqlite3", "web/server.js", "web/.next/BUILD_ID", "BUILD_COMMIT"}
+required = {"core/deeptutor/services/student_learning/word-runtime.cjs", "core/deeptutor/services/student_learning/reference.cjs", "core/deeptutor/services/student_learning/miniapp/textbook-library.cjs", "core/deeptutor/services/student_learning/miniapp/retrieval.cjs", "core/deeptutor/services/student_learning/question_bank_data/manifest.json", "core/deeptutor/services/student_learning/question_bank_data/index.sqlite3", "web/server.js", "web/.next/BUILD_ID", "BUILD_COMMIT"}
 assert required.issubset(files), required - set(files)
 
 # Re-open the actual archive, check every member and run the existing static audit.
@@ -130,7 +130,10 @@ with tempfile.TemporaryDirectory(prefix="core-readback-", dir=OUT) as directory:
 bank_archive.unlink()
 file_manifest = {"source_commit": CONFIG["source_commit"], "files": sorted(files.values(), key=lambda row: row["file"])}
 (OUT / "core-file-manifest.json").write_text(json.dumps(file_manifest, indent=2) + "\n")
-report = {"source_commit": CONFIG["source_commit"], "backend_source_commit": CONFIG["source_commit"], "source_scope": "published_export", "source_files_sha256": CONFIG["source_files_sha256"], "isolation_ledger_sha256": CONFIG["isolation_ledger_sha256"], "isolated_assets": isolation["excluded_files"], "frontend_build": (WEB / ".next/BUILD_ID").read_text().strip(), "archive": archive.name, "sha256": sha(archive), "bytes": archive.stat().st_size, "files": len(files), "runtime_source_files": len(runtime["files"]), "generated_word_sha256": sha(generated_word), "bank_payload_manifest_sha256": sha(payload_file), "file_manifest_sha256": sha(OUT / "core-file-manifest.json"), "archive_full_readback": True, "static_bundle_audit": audit, "real_keys_used": False, "personal_records_included": False}
+report = {"source_commit": CONFIG["source_commit"], "backend_source_commit": CONFIG["source_commit"], "source_scope": "published_export", "source_files_sha256": CONFIG["source_files_sha256"], "isolation_ledger_sha256": CONFIG["isolation_ledger_sha256"], "isolated_assets": isolation["excluded_files"], "frontend_build": (WEB / ".next/BUILD_ID").read_text().strip(), "archive": archive.name, "sha256": sha(archive), "bytes": archive.stat().st_size, "files": len(files), "runtime_source_files": len(runtime["files"]), "generated_word_sha256": sha(generated_word), "generated_word_bytes": generated_word.stat().st_size, "generated_word_archive_readback": files["core/deeptutor/services/student_learning/word-runtime.cjs"]["sha256"] == sha(generated_word), "bank_payload_manifest_sha256": sha(payload_file), "file_manifest_sha256": sha(OUT / "core-file-manifest.json"), "archive_full_readback": True, "static_bundle_audit": audit, "real_keys_used": False, "personal_records_included": False}
 (OUT / "attachment-core.json").write_text(json.dumps(report, indent=2) + "\n")
 print(json.dumps(report))
-subprocess.run(["gh", "release", "upload", CONFIG["tag"], str(archive), str(OUT / "attachment-core.json"), str(OUT / "core-file-manifest.json"), "--clobber"], check=True)
+overlay_descriptor = json.loads((ROOT / "source-manifest.json").read_text())["sourceOverlay"]
+source_asset = OUT / safe_name(overlay_descriptor["remote_archive"]["file"])
+join_source_overlay(ROOT, source_asset, overlay_descriptor)
+subprocess.run(["gh", "release", "upload", CONFIG["tag"], str(archive), str(source_asset), str(OUT / "attachment-core.json"), str(OUT / "core-file-manifest.json"), "--clobber"], check=True)

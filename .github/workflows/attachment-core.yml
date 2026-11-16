@@ -1,8 +1,7 @@
 name: Build frozen K12 bank and library candidate core
 on:
   push:
-    branches: ['codex/k12-core-20261116-*']
-    paths: ['attachment-release.json', 'ci-attachment-core.py', 'release_source.py', 'bootstrap_source.py', '*manifest*.json', 'source-inventory-20261116.json', 'source-overlay.*', 'bank-payload.*', '.github/workflows/attachment-core.yml']
+    branches: ['codex/k12-core-20261116-*', 'codex/k12-core-20261117-*']
 permissions:
   contents: write
 jobs:
@@ -22,7 +21,7 @@ jobs:
           python-version: '3.12'
       - name: Require the final owner-prepared input freeze
         run: |
-          python -c 'import json; c=json.load(open("attachment-release.json")); assert c.get("prepared") is True; assert c["tag"].startswith("student-20261116-")'
+          python -c 'import json; c=json.load(open("attachment-release.json")); assert c.get("prepared") is True; assert c["tag"].startswith(("student-20261116-", "student-20261117-"))'
       - name: Create isolated prerelease
         run: |
           set -euo pipefail
@@ -30,7 +29,7 @@ jobs:
           if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
             python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
           else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title '题库与资料来源候选 · 2026-11-16' --notes '正在验证同批题库、教材资料来源、三端完整安装、检查更新与记录保留。尚未发布正式版。'
+            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title "题库与资料来源候选 · ${tag#student-}" --notes '正在验证同批题库、教材资料来源、三端完整安装、检查更新与记录保留。尚未发布正式版。'
           fi
       - name: Record candidate run
         run: |

@@ -1,20 +1,12 @@
 {
-  "tag": "student-20261115-preview3",
-  "source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
-  "baseline_source_commit": "114485d3f1c4df24d9fa58cae35299ab9f918419",
-  "patch_sha256": "64a4b7e49d11b17d1aa659169a51ceb1726fa96276c7474fe95185159a541e7c",
-  "archive": "kaixin-core-20261115-preview3.tar.gz",
+  "tag": "student-20261117-k12-1",
+  "source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+  "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+  "archive": "kaixin-core-20261117-k12-1.tar.gz",
   "prior_core": {
     "archive": "kaixin-core-20261115-updater2.tar.gz",
     "sha256": "303622c2111fcc5f4583b9ca5c531aaaa3a9e0be608f56a54ae8e2a941889265"
   },
-  "new_backend_files": [
-    "deeptutor/tools/prompting/hints/zh/speechgen.yaml",
-    "deeptutor/tools/prompting/hints/en/speechgen.yaml",
-    "deeptutor/api/routers/desktop_update.py",
-    "deeptutor/runtime/desktop_restart.py",
-    "deeptutor/services/student_learning/desktop_update.py"
-  ],
   "web_tests": [
     "tests/pending-material.spec.ts",
     "tests/student-materials.spec.tsx",
@@ -50,9 +42,22 @@
     "tests/composer-draft-restore-failure.spec.tsx",
     "tests/turn-navigator.spec.tsx",
     "tests/chat-autoscroll-layout.spec.tsx",
-    "tests/chat-branch-navigator.spec.tsx"
+    "tests/chat-branch-navigator.spec.tsx",
+    "tests/student-source-library.spec.tsx",
+    "tests/question-source-preview.spec.tsx",
+    "tests/source-citation-links.spec.tsx",
+    "tests/attachment-citation-viewport.spec.tsx",
+    "tests/file-citation-navigation.spec.tsx",
+    "tests/textbook-reference-links.spec.tsx",
+    "tests/related-material-links.spec.tsx",
+    "tests/session-viewer-panel.spec.tsx",
+    "tests/chat-reading-selection.spec.tsx"
   ],
-  "source_files_sha256": "3ade2e10f2f8d0b82a221938eca98b0a57a7084a9bbdf16374188dc50073de4d",
-  "prepared": false,
-  "pending_reason": "Owner final source, student-only bank payload and signed launcher descriptor are not frozen yet."
+  "source_files_sha256": "c75d2b04b5144fa9da10855803a82807417a085198db05497b6e5b255c86ae5f",
+  "prepared": true,
+  "source_scope": "published_export",
+  "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
+  "runtime_manifest_sha256": "d4748bf5660f8e5fd2f8fed18012b0403164042ddb491afce0f76d49934bf34d",
+  "bank_manifest_sha256": "6743986468d69c720dfb5b59bb2ab07c69d515243406db86ebacfaef35643606",
+  "bank_payload_manifest_sha256": "fe3acc9a3e671075d67f6cf3ba33a80440af7bf5581810bb2dff311d8759b179"
 }

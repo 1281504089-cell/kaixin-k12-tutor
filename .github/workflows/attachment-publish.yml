@@ -1,8 +1,7 @@
-name: Publish signed updater repair after three native upgrade validations
+name: Owner-only promotion after the complete K12 native matrix
 on:
   push:
-    branches: ['codex/updater-publish-20261115-*']
-    paths: ['attachment-publication.json', 'ci-promote-attachments.py', '.github/workflows/attachment-publish.yml']
+    branches: ['codex/k12-publish-20261116-*', 'codex/k12-publish-20261117-*']
 permissions:
   contents: write
   actions: read

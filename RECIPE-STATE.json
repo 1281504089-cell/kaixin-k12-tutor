@@ -1,20 +1,32 @@
 {
-  "status": "candidate_recipe_in_progress_not_built_not_published",
+  "status": "final_source_prepared_all_bank_objects_ready_unsigned_core_not_built",
   "baseline_tag": "student-20261115-preview3",
   "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
   "prior_recipe_unchanged": true,
   "published_export_required": true,
   "models_with_pending_distribution_rights": "isolated_by_owner_ledger",
   "bank_archive_prefix": "core/deeptutor/services/student_learning/question_bank_data",
-  "source_and_bank_transport_part_bytes": 2097152,
+  "source_and_bank_transport_part_bytes": 524288,
   "normal_git_credential_helper": "osxkeychain_configured_root_reports_no_usable_github_credential",
   "candidate_delivery": "connector blobs/tree/commit on isolated push-triggered branch; runner github.token creates candidate assets",
   "pending": [
-    "final owner source export and isolation ledger",
-    "final student-only bank payload/receipt",
-    "final frontend smoke contract",
-    "owner-signed descriptor and runtime batch",
+    "source/recipe immutable blobs and isolated candidate core workflow",
+    "core readback and owner signed native batch",
     "three native candidate install/update passes",
-    "owner promotion"
-  ]
+    "owner-only promotion and local install/update"
+  ],
+  "nested_base64_full_part_characters": 699052,
+  "nested_tool_measured_output_cap_characters": 1048607,
+  "final_source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+  "planned_tag": "student-20261117-k12-1",
+  "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+  "bank_blobs_checkpointed": 985,
+  "source_overlay_parts": 35,
+  "source_prepared": true,
+  "physical_readable_count": 20862,
+  "effective_readable_count": 20846,
+  "physical_exercise_candidate_count": 18907,
+  "effective_exercise_candidate_count": 18891,
+  "runtime_isolated_count": 16,
+  "owner_launcher_signed": true
 }

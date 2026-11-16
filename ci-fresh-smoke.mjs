@@ -67,6 +67,10 @@ try {
   assert.match(reading.url, /^\/learning\/reading\//);
   await get(frontend + reading.url);
   const runtime = path.join(home, 'runtimes', active.runtimeId);
+  const packagedTextbooks = JSON.parse(await readFile(path.join(runtime, 'core/deeptutor/services/student_learning/textbook-defaults/catalog.json'), 'utf8'));
+  const installedTextbooks = await (await get(frontend + '/api/student/textbooks')).json();
+  assert.equal(installedTextbooks.passage_count, packagedTextbooks.passage_count, 'Fresh native seed did not select the frozen core textbook summaries');
+  assert.equal(installedTextbooks.books.length, packagedTextbooks.books.length);
   const native = path.join(home, 'runtimes', base.runtimeId);
   const python = path.join(native, process.platform === 'win32' ? 'python/python.exe' : 'python/bin/python3');
   const node = path.join(native, process.platform === 'win32' ? 'node/node.exe' : 'node/bin/node');
@@ -154,7 +158,7 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     native_platform: process.platform, native_arch: process.arch, runtime_id: active.runtimeId,
     core_commit: included.commit, fresh_profile: true, developer_tools_on_path: false,
     language: profile.language, textbooks: books.length, pdf, local_spoken_stt: speech,
-    study_reports: studyReports, native_node: nativeNode, k12_api: k12Api,
+    study_reports: studyReports, native_node: nativeNode, k12_api: k12Api, textbook_summary_count: installedTextbooks.passage_count,
     reading_page: 'passed', current_core_included: true,
     automatic_small_update_selection: 'passed', automatic_small_update_download: 'passed',
     compatibility_runtime_downloaded: false, real_keys_used: false,

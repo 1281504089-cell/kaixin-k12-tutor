@@ -7,6 +7,8 @@ import json
 from pathlib import Path, PurePosixPath
 import subprocess
 import tarfile
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 DOC_FIGURES = ("assets/figs/web-dev/", "assets/figs/system/")
 RUNTIME_ROOTS = ("deeptutor/", "deeptutor_cli/", "requirements/", "scripts/", "assets/")
@@ -70,6 +72,44 @@ def add_file(package, name, stream, size, mode=0o644):
     package.addfile(info, stream)
 
 
+def join_source_overlay(root, archive, descriptor):
+    """CI uses transport parts; small main metadata rebuilds from one release asset."""
+    present = [(Path(root) / safe_name(row["file"])).is_file() for row in descriptor["parts"]]
+    digest = hashlib.sha256()
+    with Path(archive).open("xb") as output:
+        if all(present):
+            for row in descriptor["parts"]:
+                file = Path(root) / row["file"]
+                if file.stat().st_size != row["bytes"] or sha(file) != row["sha256"]:
+                    raise ValueError("Source overlay part checksum mismatch")
+                with file.open("rb") as stream:
+                    while block := stream.read(1024 * 1024):
+                        digest.update(block); output.write(block)
+        elif not any(present) and descriptor.get("remote_archive"):
+            remote = descriptor["remote_archive"]
+            url = urlparse(remote["url"])
+            if (url.scheme != "https" or url.netloc != "github.com" or not url.path.startswith("/1281504089-cell/kaixin-k12-tutor/releases/download/")
+                or url.query or url.fragment or not 0 < remote["bytes"] <= 256 * 1024 * 1024
+                or remote["sha256"] != descriptor["archive_sha256"]):
+                raise ValueError("Untrusted source overlay release asset")
+            with urlopen(Request(remote["url"], headers={"User-Agent": "Kaixin-Frozen-Source"}), timeout=60) as stream:
+                redirected = urlparse(stream.geturl())
+                if redirected.scheme != "https" or redirected.hostname not in {"github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"}:
+                    raise ValueError("Untrusted source overlay redirect")
+                total = 0
+                while block := stream.read(1024 * 1024):
+                    total += len(block)
+                    if total > remote["bytes"]:
+                        raise ValueError("Oversized source overlay release asset")
+                    digest.update(block); output.write(block)
+                if total != remote["bytes"]:
+                    raise ValueError("Truncated source overlay release asset")
+        else:
+            raise ValueError("Source overlay transport parts are incomplete")
+    if digest.hexdigest() != descriptor["archive_sha256"]:
+        raise ValueError("Source overlay archive checksum mismatch")
+
+
 def apply_overlay(root, destination, descriptor):
     """Apply only hash-bound regular files; never trust tar member destinations."""
     root, destination = Path(root), Path(destination)
@@ -85,18 +125,7 @@ def apply_overlay(root, destination, descriptor):
             raise ValueError("Linked removed source")
         file.unlink()
     archive = root / "source-overlay.tar.gz"
-    digest = hashlib.sha256()
-    with archive.open("xb") as output:
-        for part in descriptor["parts"]:
-            file = root / safe_name(part["file"])
-            if file.stat().st_size != part["bytes"] or sha(file) != part["sha256"]:
-                raise ValueError("Source overlay part checksum mismatch")
-            with file.open("rb") as stream:
-                while block := stream.read(1024 * 1024):
-                    digest.update(block)
-                    output.write(block)
-    if digest.hexdigest() != descriptor["archive_sha256"]:
-        raise ValueError("Source overlay archive checksum mismatch")
+    join_source_overlay(root, archive, descriptor)
     expected = {row["file"]: row for row in manifest["changed"]}
     seen = set()
     with tarfile.open(archive) as package:

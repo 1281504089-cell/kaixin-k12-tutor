@@ -42,8 +42,8 @@ module.exports = async function verifyK12Library(view, evidence, seed) {
       await js(() => [...document.querySelectorAll('button')].find(el => el.textContent.trim() === '题库').click());
       await wait(() => !!document.querySelector('[aria-label="按学科筛选题库"] button[aria-pressed="true"]') && !!document.querySelector('button[aria-label^="查看题源："]'), [], 'Real question-pack catalog did not render');
       await click('button[aria-label^="查看题源："]');
-      await wait(() => !!document.querySelector('a[aria-label^="查看完整原题："]'), [], 'Source did not list complete-question links');
-      await click('a[aria-label^="查看完整原题："]');
+      await wait(() => !!document.querySelector('section[aria-label="题库"] a[href^="#dt-question-"]'), [], 'Source did not list complete original-material links');
+      await click('section[aria-label="题库"] a[href^="#dt-question-"]');
       await wait(() => document.querySelector('[data-testid="question-source-preview"]')?.getAttribute('data-source-ready') === 'true', [], 'Library question did not finish original images');
       await click('button[aria-label="关闭题源"]');
       await wait(() => !document.querySelector('[role="dialog"]'), [], 'Source did not close');

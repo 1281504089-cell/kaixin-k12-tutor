@@ -8,6 +8,7 @@ import subprocess
 import tarfile
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from release_source import add_file, aggregate, apply_overlay, inventory, runtime_rows, safe_name, sha
 
@@ -86,6 +87,26 @@ class ReleaseSourceTests(unittest.TestCase):
         names = ["deeptutor/new.py", "deeptutor/services/student_learning/reference.cjs", "deeptutor/services/student_learning/textbook-models/model.onnx", "deeptutor/services/student_learning/textbook-defaults/reference.sqlite3", "scripts/new.py", "assets/brand/logo.png", "assets/figs/system/diagram.png", "tests/test_new.py", "web/app/page.tsx"]
         selected = {row["file"] for row in runtime_rows([{"file": name} for name in names])}
         self.assertEqual(selected, set(names[:6]))
+
+    def test_main_rebuild_can_use_hash_bound_release_asset_without_git_parts(self):
+        descriptor = self.overlay()
+        file = self.root / "source-overlay.001"
+        data = file.read_bytes();file.unlink()
+        descriptor["remote_archive"] = {"url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/source-overlay.tar.gz", "bytes": len(data), "sha256": descriptor["archive_sha256"]}
+        class Response(io.BytesIO):
+            def geturl(self):
+                return "https://release-assets.githubusercontent.com/frozen-source"
+        with patch("release_source.urlopen", return_value=Response(data)):
+            apply_overlay(self.root, self.source, descriptor)
+        self.assertEqual((self.source / "keep.py").read_bytes(), b"new frozen bytes\n")
+
+    def test_release_asset_fallback_rejects_another_host_before_request(self):
+        descriptor = self.overlay()
+        file = self.root / "source-overlay.001"
+        size = file.stat().st_size;file.unlink()
+        descriptor["remote_archive"] = {"url": "https://example.com/source-overlay.tar.gz", "bytes": size, "sha256": descriptor["archive_sha256"]}
+        with patch("release_source.urlopen", side_effect=AssertionError("No untrusted network")), self.assertRaisesRegex(ValueError, "Untrusted source overlay"):
+            apply_overlay(self.root, self.source, descriptor)
 
 
 if __name__ == "__main__":
