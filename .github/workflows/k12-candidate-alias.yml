@@ -1,0 +1,25 @@
+name: Alias only frozen candidate bridge assets
+on:
+  push:
+    branches: ['codex/k12-stage-alias-20261117-*']
+permissions:
+  contents: write
+jobs:
+  alias:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python candidate-bridge-alias.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frozen-candidate-bridge-aliases
+          path: BRIDGE-ASSET-ALIASES.json
+          if-no-files-found: warn

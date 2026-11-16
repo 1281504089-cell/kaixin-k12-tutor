@@ -1,0 +1,60 @@
+{
+  "status": "confirmed_name_collision_no_mutations",
+  "observed_at": "2026-11-16T18:29:16.920Z",
+  "candidate_release_id": 447366728,
+  "stable_release_id": 437538031,
+  "source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+  "collisions": [
+    {
+      "target": "windows-x64",
+      "name": "kaixin-bridge-20261115-preview3-windows-x64.tar.gz",
+      "candidate": {
+        "id": 755889805,
+        "bytes": 1679960246,
+        "sha256": "25a54863486da15b65b0cb56ed1f7103daadd868076904f15c0fdd296230e9ba",
+        "created_at": "2026-11-16T18:07:34Z"
+      },
+      "stable": {
+        "id": 750655169,
+        "bytes": 1147824310,
+        "sha256": "29f4bbfd4ca81b05b4cbe05e142d2d218e7f194444bfd18fca6e60ee66e7c132"
+      },
+      "proposed_asset_name": "kaixin-bridge-20261117-k12-1-windows-x64.tar.gz",
+      "proposed_runtime_id": "1.7.1-kaixin-20261117-k12-1-windows-x64-universal"
+    },
+    {
+      "target": "macos-x64",
+      "name": "kaixin-bridge-20261115-preview3-macos-x64.tar.gz",
+      "candidate": {
+        "id": 755936762,
+        "bytes": 1768192101,
+        "sha256": "f93f06225dae968aa84165b884b3dca9246512dcf502c6e009a2d8802857924e",
+        "created_at": "2026-11-16T18:21:51Z"
+      },
+      "stable": {
+        "id": 750656348,
+        "bytes": 1235982667,
+        "sha256": "c5c71abdf80af4749fb33b05e13d0168324195eb1de8077c4887076081ac121b"
+      },
+      "proposed_asset_name": "kaixin-bridge-20261117-k12-1-macos-x64.tar.gz",
+      "proposed_runtime_id": "1.7.1-kaixin-20261117-k12-1-macos-x64-universal"
+    },
+    {
+      "target": "macos-arm64",
+      "name": "kaixin-bridge-20261115-preview3-macos-arm64.tar.gz",
+      "candidate": {
+        "id": 755909398,
+        "bytes": 1704806853,
+        "sha256": "4c3cfa972928da1a994a5a4d64f6cadd4cd9655df9ab7e4ffee8cb3f6b3efc30",
+        "created_at": "2026-11-16T18:14:10Z"
+      },
+      "stable": {
+        "id": 750658129,
+        "bytes": 1172632913,
+        "sha256": "c822f07dffd96a095b98d6bad46fada612258773100e9ab70a1cf2f9a0cbd161"
+      },
+      "proposed_asset_name": "kaixin-bridge-20261117-k12-1-macos-arm64.tar.gz",
+      "proposed_runtime_id": "1.7.1-kaixin-20261117-k12-1-macos-arm64-universal"
+    }
+  ]
+}
