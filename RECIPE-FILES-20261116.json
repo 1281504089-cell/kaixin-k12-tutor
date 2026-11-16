@@ -1,0 +1,207 @@
+[
+  {
+    "file": ".github/workflows/attachment-core.yml",
+    "bytes": 2232,
+    "sha256": "024f8a24f8b95116794e8da602b24f1dfdd97089d9f3a1482c5e047051faf32c"
+  },
+  {
+    "file": ".github/workflows/attachment-native.yml",
+    "bytes": 2466,
+    "sha256": "68f470858580a2dd731c02b629206961f734a0608395e23a668e03675ccea841"
+  },
+  {
+    "file": ".github/workflows/attachment-publish.yml",
+    "bytes": 1379,
+    "sha256": "b95c33799439e8f55e0e6cd81512d4449342fbf072eb9f59f8ef26fe063355ac"
+  },
+  {
+    "file": ".github/workflows/k12-intel-reverify.yml",
+    "bytes": 1100,
+    "sha256": "23dec0ee40a2b5836bf57c921a3bfbbaccc815a8dd83d33ea2a406cb5768f94d"
+  },
+  {
+    "file": "BANK-RECOVERY.md",
+    "bytes": 1784,
+    "sha256": "3d903ce663a837862b73e8dcd2de9cf720c4d7626b5f5ba6de377345bf2b117c"
+  },
+  {
+    "file": "BASELINE-20261116.json",
+    "bytes": 18458,
+    "sha256": "72584fd6e996a732de691745416d7d83abc24b7b052a8fc3da5d114537f56114"
+  },
+  {
+    "file": "RECIPE-HANDOFF-20261116.md",
+    "bytes": 7104,
+    "sha256": "6595518f711a6789f5e174e3afd53ce2c69f6f8660b77bb4c16385794f78c50e"
+  },
+  {
+    "file": "RECIPE-STATE.json",
+    "bytes": 1599,
+    "sha256": "93596db9d30ea170807398bb9208652c1ea4f945657d5c3c44eff2d186db4d77"
+  },
+  {
+    "file": "RELEASE-NOTES.md",
+    "bytes": 1977,
+    "sha256": "f99baada7c4f9b08de0b8b7cb0c6e3f3c2aafae35a21388bc68022115676c4bc"
+  },
+  {
+    "file": "SOURCE-TEST-HANDOFF.json",
+    "bytes": 2763,
+    "sha256": "6b04b8df7028fe6f110858d4a3f4954b027c73293ec08a24e0c5cb5d6cad17b7"
+  },
+  {
+    "file": "attachment-publication.json",
+    "bytes": 39168,
+    "sha256": "5e6d47f8a9ad0afa1b45992226c0ff948998126f9d135864a7d70652906dbb51"
+  },
+  {
+    "file": "attachment-release.json",
+    "bytes": 2836,
+    "sha256": "f123cd0e50eeb64bc7f3aa16dcf81694b9cd0f8baa278f89c59eca27043c479d"
+  },
+  {
+    "file": "bootstrap_source.py",
+    "bytes": 2759,
+    "sha256": "87e0dfa910d6699f5e25dc1d301abed67fe416914f12781b0f5b77050d75a24f"
+  },
+  {
+    "file": "ci-attachment-core.py",
+    "bytes": 9129,
+    "sha256": "d674be5a382302075d738cd7967550c71bd6e855a89fa391515b0cc253f76cef"
+  },
+  {
+    "file": "ci-fresh-smoke.mjs",
+    "bytes": 12126,
+    "sha256": "b79b3d45f6d5a05c813d7d34cc42d3384d4fa2f4996feead67ad2701f740b835"
+  },
+  {
+    "file": "ci-intel-reuse.py",
+    "bytes": 12607,
+    "sha256": "63e465f33e4a533b0e74717f393829d0c8806a80bc2e918d58bc45b96c7afb48"
+  },
+  {
+    "file": "ci-k12-driver-selfcheck.cjs",
+    "bytes": 5097,
+    "sha256": "da517f8c51aa748bb2ab10163ec485a23d3ccd022a06119b7077d0d4b3996e42"
+  },
+  {
+    "file": "ci-k12-library-ui.cjs",
+    "bytes": 18739,
+    "sha256": "af726b67ae71abdc664cf1871732cab30d42675cc539cf3ba7514403d946b74d"
+  },
+  {
+    "file": "ci-promote-attachments.py",
+    "bytes": 12391,
+    "sha256": "e3960dc71933e711537a8bafd3802fe2ceda3de1f80c667845a8c825d6da4e7f"
+  },
+  {
+    "file": "ci-update-flow.cjs",
+    "bytes": 11656,
+    "sha256": "88ce8f425c87f8bf4bedaef1ab016145c76afe0d7d262a814ec942c41164befb"
+  },
+  {
+    "file": "ci_attachment_bridge.py",
+    "bytes": 4104,
+    "sha256": "c828c2a659c1b4b64f21640c84d9e1767c12ab940f9288531576cd8714c1ab37"
+  },
+  {
+    "file": "ci_repackage.py",
+    "bytes": 7829,
+    "sha256": "fad3ae56658c7e117aba05d6cdf10f40f4f1c2c10768eb89d08741a725004e3c"
+  },
+  {
+    "file": "ci_update_probe.py",
+    "bytes": 8021,
+    "sha256": "04744a3ac8b2c031bff70270fcc7df9fe529d6a5a1984c198cd42f7ec8e37d42"
+  },
+  {
+    "file": "connector-part.py",
+    "bytes": 2537,
+    "sha256": "322e74b12eb0a1bd5484b21d039a6f996e5cdae7186b1434665f09da82069a75"
+  },
+  {
+    "file": "connector-upload-candidate.js",
+    "bytes": 6093,
+    "sha256": "ec166f1f3879888a8c1dc9e2a4145d6e32bd751ce0caa6c345a89896fac33f2f"
+  },
+  {
+    "file": "fresh-install-lock.json",
+    "bytes": 3837,
+    "sha256": "43c6d648187e135d7b018fbb097aecdd86c25326618cb8847a7884034eb6d3e7"
+  },
+  {
+    "file": "intel-reuse-lock.json",
+    "bytes": 17844,
+    "sha256": "e7cdebe0cfafcb26370044e6cf5d3e1ca2bd02b134e9fe05dff5aedf1c852faa"
+  },
+  {
+    "file": "native-k12-api-smoke.py",
+    "bytes": 7923,
+    "sha256": "744f1b2d814de3fbece7c9594b7caf09966b53c0f4f828269bcdf452a9f06825"
+  },
+  {
+    "file": "native-k12-fixture.py",
+    "bytes": 2981,
+    "sha256": "574a9c5219c5b5637dcace5300e16090361ef11d26d01d370fe910a6e0c71f9c"
+  },
+  {
+    "file": "prepare-bank-payload.py",
+    "bytes": 1072,
+    "sha256": "c38661ea7eb9484dfa1e4349430a7039c17513a719aa2fb3ef1eb030e34f63d7"
+  },
+  {
+    "file": "prepare-candidate.py",
+    "bytes": 7118,
+    "sha256": "5a06cd494a6200a419c15e5053505785ee005e24236e889daaba363e63119e6c"
+  },
+  {
+    "file": "prepare-connector-upload.py",
+    "bytes": 2872,
+    "sha256": "2a0c45e7949ceb8972927861cb26465f23bc890ff1966fa019c9c07732d3bbb2"
+  },
+  {
+    "file": "publication_transaction.py",
+    "bytes": 7803,
+    "sha256": "9e47a5b03f4cc40b14ed39b0bd39dc6bfb960ca381b67695f95948d7757c3a3f"
+  },
+  {
+    "file": "release_bank.py",
+    "bytes": 4421,
+    "sha256": "692f6deb112ded2fc3ec73f14275ed46d742cde6c5d1d8b8beea3e8bb273364f"
+  },
+  {
+    "file": "release_source.py",
+    "bytes": 7680,
+    "sha256": "90ef54ebd8ade0e8d9478cfc69be8f068191d2600b6e4aaf6e3d84242f3b2210"
+  },
+  {
+    "file": "test-connector-upload.cjs",
+    "bytes": 4994,
+    "sha256": "4e9c50fc1f4c1d5274de1c5c06b33686ea04a1b5feec13cdbeb839220dbaad9f"
+  },
+  {
+    "file": "test_intel_reuse.py",
+    "bytes": 5543,
+    "sha256": "f56b6700945340d48daa794b43b1a5be053d72cff703dc1041a42733f246f5ca"
+  },
+  {
+    "file": "test_native_k12_api.py",
+    "bytes": 6726,
+    "sha256": "4bef1f4a440e2979fd618198e5768575124802158015135f9c8f6b17a42a4054"
+  },
+  {
+    "file": "test_publication_transaction.py",
+    "bytes": 11450,
+    "sha256": "519f8cba434b943ba2e741128741ab580cc8c05fc491ea2591fd06cb41077cf3"
+  },
+  {
+    "file": "test_release_bank.py",
+    "bytes": 3416,
+    "sha256": "df1a09d35d41546653bbe43af81499e197950f130bc0e64c4a96df75be3e0063"
+  },
+  {
+    "file": "test_release_source.py",
+    "bytes": 6211,
+    "sha256": "0fe33973d9f40087281d7352414ef8e029d7e519e2d8c319f9413528f58c1224"
+  }
+]

@@ -1,7 +1,7 @@
 name: Owner-only promotion after the complete K12 native matrix
 on:
   push:
-    branches: ['codex/k12-publish-20261116-*', 'codex/k12-publish-20261117-*']
+    branches: ['codex/k12-publish-20261117-*']
 permissions:
   contents: write
   actions: read
@@ -22,9 +22,7 @@ jobs:
           python-version: '3.12'
       - name: Record publication run
         run: |
-          python -c 'import json,os;open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
-          tag=$(python -c 'import json;print(json.load(open("attachment-publication.json"))["tag"])')
-          gh release upload "$tag" publication-run.json --clobber
+          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-1";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
       - name: Verify three native proofs and switch signed batch
         run: python ci-promote-attachments.py
       - name: Keep publication receipts and previous defaults
@@ -34,5 +32,7 @@ jobs:
           name: attachment-publication-receipt
           path: |
             PUBLICATION-RECEIPT.json
+            PUBLICATION-TRANSACTION.json
+            publication-run.json
             publication-work/previous/
           if-no-files-found: warn

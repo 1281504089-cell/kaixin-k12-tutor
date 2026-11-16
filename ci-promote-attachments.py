@@ -2,10 +2,11 @@
 import hashlib,json,os,subprocess,time
 from pathlib import Path
 from urllib.request import Request,urlopen
+from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag'].startswith(('student-20261116-','student-20261117-')), 'Owner must prepare the final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-1', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -18,6 +19,23 @@ def public(asset):
    assert hashlib.sha256(raw).hexdigest()==asset['digest'].split(':')[1]
    return raw
   except Exception as error:last=error
+ raise last
+
+def download_public_archive(asset,destination):
+ partial=destination.with_name(destination.name+'.partial')
+ for url in [asset['browser_download_url'],asset['url']+'?readback='+str(time.time_ns())]:
+  try:
+   with urlopen(Request(url,headers={'User-Agent':'Kaixin-Anonymous-Archive-Readback','Accept':'application/octet-stream'}),timeout=90) as response,partial.open('xb') as output:
+    final=urlparse(response.geturl());assert final.scheme=='https' and final.hostname in {'github.com','api.github.com','release-assets.githubusercontent.com','objects.githubusercontent.com'}
+    received=0
+    while chunk:=response.read(8*1024**2):
+     received+=len(chunk);assert received<=asset['size'],'Oversized public archive'
+     output.write(chunk)
+   assert partial.stat().st_size==asset['size'] and sha(partial)==asset['digest'].split(':')[1]
+   partial.rename(destination)
+   return {'anonymous_download':True,'file':destination.name,'bytes':received,'sha256':sha(destination)}
+  except Exception as error:
+   partial.unlink(missing_ok=True);last=error
  raise last
 
 assert set(batch['native_runs'])==set(targets)
@@ -83,10 +101,12 @@ for name,expected in batch['expected_previous'].items():
  retained=work/('before-attachments-'+name);retained.write_bytes(raw);gh('release','upload',batch['tag'],retained,'--clobber')
 
 # Download and hash all three exact native archives before switching any default.
+anonymous_archives=[]
 for name,row in batch['archives'].items():
  actual=assets[name];assert actual['digest']=='sha256:'+row['sha256'] and actual['size']==row['bytes']
- gh('release','download',batch['tag'],'--pattern',name,'--dir',work)
+ anonymous_archives.append(download_public_archive(actual,work/name))
  assert (work/name).stat().st_size==row['bytes'] and sha(work/name)==row['sha256']
+assert len(anonymous_archives)==len(batch['archives'])==4
 for name,manifest in batch['manifests'].items():(work/name).write_text(json.dumps(manifest,indent=2)+'\n')
 subprocess.run(['python','bootstrap_source.py','--with-updates'],check=True)
 subprocess.run(['node','student-source/apps/desktop/scripts/check-update-batch.mjs',str(work)],check=True)
@@ -98,23 +118,39 @@ for name in batch['manifests']:
  if name not in batch['expected_previous']:
   if name in stable_assets:assert public(stable_assets[name])==(work/name).read_bytes()
   else:gh('release','upload','core-updates',work/name)
-switched=[]
-try:
+from publication_transaction import publish_transaction
+class GitHubPublication:
+ def release(self,tag):return api('releases/tags/'+tag)
+ def latest(self):return api('releases/latest')
+ def tag_sha(self,tag):return api('git/ref/tags/'+tag)['object']['sha']
+ def asset_bytes(self,tag,name):
+  asset=next((a for a in self.release(tag)['assets'] if a['name']==name),None)
+  return public(asset) if asset else None
+ def upload_bytes(self,tag,name,raw):
+  directory=work/'transaction-upload';directory.mkdir(exist_ok=True)
+  file=directory/name;file.write_bytes(raw)
+  gh('release','upload',tag,file,'--clobber')
+ def delete_asset(self,tag,name):
+  asset=next((a for a in self.release(tag)['assets'] if a['name']==name),None)
+  if asset:gh('api','-X','DELETE','repos/'+repo+'/releases/assets/'+str(asset['id']))
+ def set_tag(self,tag,commit):gh('api','-X','PATCH','repos/'+repo+'/git/refs/tags/'+tag,'-f','sha='+commit,'-F','force=true')
+ def edit_release(self,release_id,fields,latest):
+  payload={**fields,'make_latest':'true' if latest else 'false'}
+  file=work/'release-edit.json';file.write_text(json.dumps(payload))
+  gh('api','-X','PATCH','repos/'+repo+'/releases/'+str(release_id),'--input',file)
+def make_receipt(latest):
+ return {**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'anonymous_archives':anonymous_archives,'physical_user_devices_tested':False,'private_key_uploaded':False}
+def check_immutable():
  current={a['name']:a for a in api('releases/tags/core-updates')['assets']}
- for name,expected in batch['expected_previous'].items():
-  assert current[name]['digest']=='sha256:'+expected
-  gh('release','upload','core-updates',work/name,'--clobber');switched.append(name)
- readback={a['name']:a for a in api('releases/tags/core-updates')['assets']}
- for name in batch['manifests']:assert public(readback[name])==(work/name).read_bytes()
- for name,row in batch['archives'].items():assert readback[name]['digest']=='sha256:'+row['sha256'] and readback[name]['size']==row['bytes']
-except Exception:
- for name in switched:gh('release','upload','core-updates',previous/name,'--clobber')
- raise
-
-gh('release','upload',batch['tag'],root/'INSTALLATION.txt','--clobber')
-gh('api','-X','PATCH','repos/'+repo+'/git/refs/tags/'+batch['tag'],'-f','sha='+os.environ['GITHUB_SHA'],'-F','force=true')
-gh('release','edit',batch['tag'],'--prerelease=false','--latest=true','--title',batch.get('title','开心动力超级学霸 · 题库与资料来源 2026-11-16'),'--notes-file',root/'RELEASE-NOTES.md')
-latest=api('releases/latest');assert latest['tag_name']==batch['tag'] and not latest['prerelease']
-receipt={**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'physical_user_devices_tested':False,'private_key_uploaded':False}
-receipt_file=root/'PUBLICATION-RECEIPT.json';receipt_file.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n');gh('release','upload',batch['tag'],receipt_file,'--clobber')
-print(json.dumps({'published':True,'tag':batch['tag'],'release_id':latest['id'],'platforms':targets}))
+ for name in batch['manifests']:
+  if name not in batch['expected_previous']:assert public(current[name])==(work/name).read_bytes()
+ for name,row in batch['archives'].items():assert current[name]['digest']=='sha256:'+row['sha256'] and current[name]['size']==row['bytes']
+ return True
+receipt=publish_transaction(GitHubPublication(),tag=batch['tag'],commit=os.environ['GITHUB_SHA'],
+ pointers={name:(work/name).read_bytes() for name in batch['expected_previous']},
+ previous={name:(previous/name).read_bytes() for name in batch['expected_previous']},
+ installation=(root/'INSTALLATION.txt').read_bytes(),receipt_file=root/'PUBLICATION-RECEIPT.json',
+ receipt_factory=make_receipt,journal_file=root/'PUBLICATION-TRANSACTION.json',
+ title=batch.get('title','开心动力超级学霸 · 题库与资料来源 2026-11-17'),notes=(root/'RELEASE-NOTES.md').read_text(),
+ expected_latest_id=batch['expected_latest_release_id'],check_immutable=check_immutable)
+print(json.dumps({'published':True,'tag':batch['tag'],'release_id':receipt['release_id'],'platforms':targets}))
