@@ -145,7 +145,7 @@ async function content() {
     const audio = await require('./ci-chat-audio-ui.cjs')(view, path.dirname(output), fixture.audio);
     const science = await require('./science-ui.cjs').verifyScienceNative(view, path.dirname(output), fixture.science);
     const preview = await require('./ci-turn-preview.cjs')(view, path.dirname(output), fixture.science.preview);
-    const k12 = await require('./ci-k12-library-ui.cjs')(view, path.dirname(output), fixture.k12);
+    const k12 = await require('./ci-k12-library-ui.cjs')(view, path.dirname(output), fixture.k12, { entry: path.basename(output, '.json') });
     assert.equal(k12.passed, true);
     assert.equal(preview.passed, true);
     assert.equal(audio.passed, true);

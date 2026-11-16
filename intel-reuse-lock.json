@@ -1,0 +1,397 @@
+{
+  "schema_version": 1,
+  "target": "macos-x64",
+  "candidate_tag": "student-20261117-k12-1",
+  "candidate_release_id": 447366728,
+  "source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+  "baseline_latest_id": 445953276,
+  "baseline_latest_tag": "student-20261115-preview3",
+  "original_native_run": 43922470199,
+  "original_native_workflow_commit": "9d614efb87d7bdbfb7e8a70dcc9ec4b0ca03c3f5",
+  "original_failed_job": 133493071804,
+  "candidate_files": [
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.002.dmgpart",
+      "id": 755877077,
+      "bytes": 1992295135,
+      "sha256": "1b81bdc301272c57d7c9a76fc335b6636bb57f11692f96fdac12dfe61e9d6b35",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.002.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.003.dmgpart",
+      "id": 755877142,
+      "bytes": 1992295135,
+      "sha256": "68a8ab251b925981621d7b110dc1112e6b1b2900258cd59640de9a0165390c9e",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.003.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.004.dmgpart",
+      "id": 755877093,
+      "bytes": 1720339118,
+      "sha256": "c1a2a32472e8b2e3bc2af3fa603b2e07a3650a65367d1f8301e8501275080d00",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.004.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.dmg",
+      "id": 755877101,
+      "bytes": 1992764044,
+      "sha256": "f33edf59e89ec88fcce90741158b12752bd62ba9007a1bafd55c77c65ab14872",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-1-part.dmg"
+    }
+  ],
+  "included_manifest": {
+    "formatVersion": 1,
+    "protocolVersion": 1,
+    "platform": "darwin",
+    "arch": "x64",
+    "coreVersion": "1.7.1",
+    "runtimeId": "1.7.1-kaixin-20261117-k12-1-macos-x64-20261112",
+    "baseRuntimeId": "1.7.1-04276f68a-x64",
+    "commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+    "builtAt": 1794851257499,
+    "archive": "kaixin-core-20261117-k12-1.tar.gz",
+    "sha256": "4a98fe6512b6f626f318b8e5546b00ef010c5191191da1f2496cfc9b68835965",
+    "corePayloadSha256": "4a98fe6512b6f626f318b8e5546b00ef010c5191191da1f2496cfc9b68835965",
+    "signature": "lq7K0W3TNcFvtQ2p6+Xwgtyt5+alNEltqXCj2ZDcEgEis2BRJCfp2Wyw7QMKGIuPPSQrmARdCp9/JZGW3FZuAg=="
+  },
+  "core_asset": {
+    "name": "kaixin-core-20261117-k12-1.tar.gz",
+    "bytes": 558930854,
+    "sha256": "4a98fe6512b6f626f318b8e5546b00ef010c5191191da1f2496cfc9b68835965",
+    "id": 755790784
+  },
+  "frozen_stage": {
+    "bytes": 34267,
+    "sha256": "8dc0e7027492f7b737fc1024324eeb73fe1f87ec9925f809298c23ea54b33386",
+    "manifests": 36
+  },
+  "bridge": {
+    "target": "macos-x64",
+    "asset_id": 755936762,
+    "previous_name": "kaixin-bridge-20261115-preview3-macos-x64.tar.gz",
+    "name": "kaixin-bridge-20261117-k12-1-macos-x64.tar.gz",
+    "bytes": 1768192101,
+    "sha256": "f93f06225dae968aa84165b884b3dca9246512dcf502c6e009a2d8802857924e",
+    "runtime_id": "1.7.1-kaixin-20261117-k12-1-macos-x64-universal",
+    "verified": true,
+    "write_response_error": null
+  },
+  "prior_manifest": {
+    "formatVersion": 1,
+    "protocolVersion": 1,
+    "platform": "darwin",
+    "arch": "x64",
+    "coreVersion": "1.7.1",
+    "runtimeId": "1.7.1-kaixin-20261115-preview3-macos-x64-20261112",
+    "baseRuntimeId": "1.7.1-04276f68a-x64",
+    "commit": "896e79b517a008ac6d584526151862ff6191cf77",
+    "builtAt": 1794736390559,
+    "archive": "kaixin-core-20261115-preview3.tar.gz",
+    "sha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+    "corePayloadSha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+    "signature": "JkoQFKto+bfBLw8GQQIsi8KUPQVTT9GiWQzAalW9frxDT1l2nbWM12dSIARuQHYiu3lqfKZNxhnb5XqCreeYDA=="
+  },
+  "prior_core_asset": {
+    "name": "kaixin-core-20261115-preview3.tar.gz",
+    "bytes": 26829700,
+    "sha256": "f44b5c257c92c65d2c0dadcfde32a06a7e7434f10615d08c7ff8b81813aa2ffa",
+    "id": 750541184,
+    "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261115-preview3/kaixin-core-20261115-preview3.tar.gz"
+  },
+  "public_key_sha256": "aed6f122112b2dcd78e98e9811c48dcaa779d0ab7a9150acadca36255603e062",
+  "signed_runtime_assets": [
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-20261112.json",
+      "id": 755978842,
+      "bytes": 640,
+      "sha256": "81019b76ae7be9ba12e3e4351e01b3281466f53d16b4b92489ca73433340c15e",
+      "canonical_sha256": "7ffe71f7ddfde50cc8a3706eeedf912c439e0ad273a12ed50f616a8d39b0d4c4",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-194178f05eea.json",
+      "id": 755979165,
+      "bytes": 678,
+      "sha256": "5ae5934540a5955f724e3f67d397e997cc5625448cf9f5fbd6983a8b106396fb",
+      "canonical_sha256": "9cf6a13981115c79ff33558d1669d448e1e635005c3e594dd1481fa95de5ebfa",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-6c9c7f936933.json",
+      "id": 755979353,
+      "bytes": 677,
+      "sha256": "21c2eb3559caef833758842cb7799171e0c9b21357dc7aec6251b69beaf10c8c",
+      "canonical_sha256": "40e60767e6258787fbf5fdea3f4729f9408bde80813aa0f20d3ae18989ea9aac",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-6f6222533fad.json",
+      "id": 755979235,
+      "bytes": 679,
+      "sha256": "11c675817b8041a1d07ec30acc485ea92c6b212052f46255aa1db27deadf9022",
+      "canonical_sha256": "a691a3342dee95456bff9d0fb0be17f25a793979e8fe4cf33b871a283c5ac219",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-7056f6bb9861.json",
+      "id": 755978973,
+      "bytes": 675,
+      "sha256": "5f3562f0346eb73b3442e39263bc0261e19815f7b9dfce3ac2a7f113d995b652",
+      "canonical_sha256": "5dd2c9de4cf74f61a1a114a228f2f09bfa23708e9972dbca3142f931b187c3aa",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-7744dbeb8d09.json",
+      "id": 755978894,
+      "bytes": 677,
+      "sha256": "32cc1be6cdeb7d8431d303b0771da02693fd52677d5497ec94db0c81b39d336f",
+      "canonical_sha256": "11030c76ad31d987212b1e2b2eaddf786c04a94ea48c4e975efdda7708c67f25",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-b445b7c83c4d.json",
+      "id": 755979033,
+      "bytes": 680,
+      "sha256": "33b7c117757fe887609e3dd22bec54cb5ef5e260b68ab0e7834d5c9f555f248b",
+      "canonical_sha256": "fc1ccb3b9e4ac0edba7c79a998db72ed339947013ecf15b0c853fab3d9f06ca5",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-b83c8329037e.json",
+      "id": 755979304,
+      "bytes": 681,
+      "sha256": "f1ebbbc8414badf80d817621f8eb9522bd543e0a8520d73ee0d9079208c30a6c",
+      "canonical_sha256": "26c9aaef305e9bd9117579f90493023e21ba463a3af372a233926441d35da272",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-ba05e5de452a.json",
+      "id": 755979408,
+      "bytes": 680,
+      "sha256": "6beae1ac0c3726f5cb829b73c2aad303315abf0d453087e1524010d377fccf6c",
+      "canonical_sha256": "fcbc34392e2d9bdbefd9246a9ce03578ff5eb51c1957fb3ebf6fc82753dddd48",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-base-c09b1d53f8d0.json",
+      "id": 755979089,
+      "bytes": 683,
+      "sha256": "fe1e94b578a60cce8b6918ef8f66bd1d9fa40ceb8062241f74ce9bff38604539",
+      "canonical_sha256": "525ec198d64fbe43685af4d2c4e0854500a2d57d123171da5dbb0a318ce25ee4",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-1-prior-current.json",
+      "id": 755979458,
+      "bytes": 676,
+      "sha256": "744a7e1bf8281cc7c4294f1cc49fa244d2bec375b36c1982796aa46122a6f20b",
+      "canonical_sha256": "f1346424e1feacac348394e81ab2470f0e500c871696e6019bd6ba741890e0aa",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-arm64.json",
+      "id": 755979513,
+      "bytes": 2418,
+      "sha256": "22ee6481e0d539c365e32654895130c563f7881364cee2851a2be9c1af7e6350",
+      "canonical_sha256": "9dccf86a9398d332984e67f8f5f6b34a54ba2b7c367a76cecb2dc43a9e1f2e67",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-20261112.json",
+      "id": 755978817,
+      "bytes": 634,
+      "sha256": "202f9649aa54a3cf125357af28b798e32fb24d2f44d3c969fe3c73a5ce32f746",
+      "canonical_sha256": "d38274628cf2ecfb1fb8f01740d8c782f48ee40ec2688e6337421abbb20b1163",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-170a15b2f1a2.json",
+      "id": 755979040,
+      "bytes": 674,
+      "sha256": "7fb34b27941aa298c20313c7762bbaafef392e2d4d999ebac380dbb5dc23a2c4",
+      "canonical_sha256": "d4afabacbb28805ac0e53991270bfee3911b95b8a544f087dbd64d17898a230e",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-22eb20a39a60.json",
+      "id": 755979130,
+      "bytes": 677,
+      "sha256": "21c362d0505ed12564177b171a37a79e1ca18c75deb004ee55de75104a58c2ee",
+      "canonical_sha256": "6b101d5fa03309037a60b8c38c6338d8d4f9a17fc4bba8ac84a9c755888c6348",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-3e8b6a21262c.json",
+      "id": 755979423,
+      "bytes": 671,
+      "sha256": "65f275621cb0e1d069e00ca0a9723bc99bac1b8825d9b7c30cdaa36b3e0b1b5f",
+      "canonical_sha256": "dd9d3c941656f2d6e3a0bcaf4ce006e1819602a7cd52f11e7c63f49bd19da92c",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-681a198cf308.json",
+      "id": 755978951,
+      "bytes": 669,
+      "sha256": "3ab3eb89bc8aa23d2d885891ad0bd1b50d35f0a2387610d052273f859994db97",
+      "canonical_sha256": "21d53f6aa17af5a6b9f9c9a4d53647cae56c46385ba44a06452795930d3ac781",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-80115ecd6d3d.json",
+      "id": 755979197,
+      "bytes": 672,
+      "sha256": "f150c2af56162c2bc16e7ba79b8cb5171e9191863348eb0a6c190c77757d0baf",
+      "canonical_sha256": "9124baebc05e80058add9c24e5487e60f1376df3fd53db229b7acc2bd465d8c8",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-a521f11854b3.json",
+      "id": 755979502,
+      "bytes": 674,
+      "sha256": "36cd367146be974dbdbcfd2b48023dfcbe4e9292a13820a01aa71a78871bd2f7",
+      "canonical_sha256": "a9e71773400ce0aa1f69d2ac82ff8de9d08de591c1fa2ad212cf010df5d7bfd6",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-c41831772671.json",
+      "id": 755979362,
+      "bytes": 675,
+      "sha256": "2aabcc95e7f6766397988b598a7575b6b3ba0836b69707e83dbe348b4fd882ac",
+      "canonical_sha256": "c50c86799656571176dd148899e9d9d116af82e6ad056814b89259c557f83d78",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-c452d12cb482.json",
+      "id": 755979296,
+      "bytes": 673,
+      "sha256": "a9648a739a67d9aa3cac37a40417a9084786322af21e7a326e10115410fc923f",
+      "canonical_sha256": "cdb36aedbbe8243c5fd742a99fd4ab25838d09bda1a448f10afa06494efd8ded",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-base-e2a196e1e65a.json",
+      "id": 755978887,
+      "bytes": 671,
+      "sha256": "c48f77897cd758a0debcbe88eb425807ef164f68e42faa7f39c203c1c6c7c765",
+      "canonical_sha256": "0ef4124c2381b6d32267c89b22e73003398db3a58f61a2e55b3d3f6aa4c7db07",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-1-prior-current.json",
+      "id": 755979572,
+      "bytes": 670,
+      "sha256": "6a981cc8d4ebdadea146d3de5a90d9f123109c0d8db36b02216e57ffad889268",
+      "canonical_sha256": "98f608ebc61cc480ef4c10ecba92342b5c32aa4b103208263ab92727c60ea431",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-macos-x64.json",
+      "id": 755979649,
+      "bytes": 2368,
+      "sha256": "d95c9e240c6a39758d105c076f345c30adeedd7f4e68095655cce20bbdd5ad8a",
+      "canonical_sha256": "cf087a202bfef07c7c27bb0fafc5094bde5930a73a68e57abfe48e7fe5c778fa",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-20261112.json",
+      "id": 755978893,
+      "bytes": 649,
+      "sha256": "d949d61e2dee5262a9f7b44f2f15324c4c480c8d9fe72036274ae7d7adb90aca",
+      "canonical_sha256": "86ba6616807a041fb0cdfcf7c6ce32479ef98340ccff6f481620782c7e31c41a",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-3e01c184c6a4.json",
+      "id": 755979114,
+      "bytes": 694,
+      "sha256": "89a93d8133a90de2396cfbd880a853b65507022caa00719f32ebb3572369a229",
+      "canonical_sha256": "7b1070b0a5cad9cdb7028e0d2cdc75d61eede87c37ef10f4ae3cd124328805d5",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-573f105ed118.json",
+      "id": 755978996,
+      "bytes": 686,
+      "sha256": "ce63723ee008b533514404d0bd02e6f7a4698f8f7588e57397ec3f60db41ee0a",
+      "canonical_sha256": "9c18e19da76146fc718b784e810d9e7c6312fcc59a594d860118979c96e8cb74",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-77b621411568.json",
+      "id": 755979343,
+      "bytes": 688,
+      "sha256": "c447d3f346f55a5cb6fb1ac8cbc4f736b3f485bda11797f2aca1660598438551",
+      "canonical_sha256": "c00da4f32e9f5644095457a0498cbfe5649f9b311545f0546fcd307fadb9610a",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-7a52e2cacc9f.json",
+      "id": 755979164,
+      "bytes": 689,
+      "sha256": "11e606d71dfe1d410126b7fcbd0ae4504d4efe02921f32a0bbd64d7a7ea7d551",
+      "canonical_sha256": "f186189d19f7519d268a67f1570f692c0619b459a7749ef72d7010b65a5ea25e",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-9b7c2b84f908.json",
+      "id": 755979047,
+      "bytes": 691,
+      "sha256": "dd7715cb3af5201a45f7b8142a4e00034344827288176ae0a68a15033368fec8",
+      "canonical_sha256": "898261b90d1f9595083b908a15f1b24bd32648ea20797ef40360ad5a49b4f133",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-a0419326e159.json",
+      "id": 755979398,
+      "bytes": 691,
+      "sha256": "c05c9b15bcfb27012b0681f95168d38b426ac0d54b9b86bd8b3cef1c47fef9a6",
+      "canonical_sha256": "bc27ab3e507a7606815f50ac6abd9021b84f548ef2365b736e9d47bd643b78b1",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-afb4dfe97ae4.json",
+      "id": 755979272,
+      "bytes": 692,
+      "sha256": "60a3c3a9eed1ee28eed34fb3c5e37b90e2bb47b624be9c3d122c642b97c192e9",
+      "canonical_sha256": "73adeaa3d8dffe29daa8ef033b37d217472ed1fb1f4320e52a1e1ceee3d65fa4",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-bb8f5191555d.json",
+      "id": 755978931,
+      "bytes": 688,
+      "sha256": "8bd6be57266e5f178568dc17a52d54b8369f1ef6c076fc2b2608bc4e3588d5d3",
+      "canonical_sha256": "976a8baeb571eab531222a583f6f904bddf5f0f0f57e501d21cff8191e08ec16",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-base-e4abdb1cb594.json",
+      "id": 755979205,
+      "bytes": 690,
+      "sha256": "9b5a23721d604880b2e90dd30be669266d024c0514debea0f0d88478ef7c8d11",
+      "canonical_sha256": "ef77357be422d7a8801f9676ae37ba91cebb5ec5bb9f6d9034867d90c7aeb3d8",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-1-prior-current.json",
+      "id": 755979432,
+      "bytes": 687,
+      "sha256": "4f41569c353a60c3329fdcd689818182de749d3b1934b9374b021e65f4ebac5d",
+      "canonical_sha256": "d8e1fa59fc91df9eff2680d1c5c450e743cd2e9a11e059161360b6d4c9bad71a",
+      "signed_object_equal_to_frozen_stage": true
+    },
+    {
+      "name": "runtime-windows-x64.json",
+      "id": 755979474,
+      "bytes": 2472,
+      "sha256": "2d5fe9b6a6f34fe2849bcad22ea945b46fa1085548e5f19cf9259f09f62dc454",
+      "canonical_sha256": "7e3afc5d7df6188572d3a0ae4540d9e788339775ed071b4fcea57dc874b5a39f",
+      "signed_object_equal_to_frozen_stage": true
+    }
+  ],
+  "baseline_feeds": {
+    "runtime-windows-x64.json": "4f3144b688099d5d1bc683b8568a85e013901a5fe834887c4d03a336d096472f",
+    "runtime-macos-x64.json": "950a454aa745b92953387a4a5e8ebe88bff2fdf3c713b89cf249d7f4a77927cf",
+    "runtime-macos-arm64.json": "9934284a1e2ddf4e2afe603ceefce748f0b1909b0e8cc5af10dbb26ffc450e44"
+  }
+}

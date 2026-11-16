@@ -1,9 +1,15 @@
 """Re-use the verified native environment and validate the new earliest-client bridge."""
-import hashlib,json,os,shutil,subprocess,tarfile,time
+import hashlib,json,os,re,shutil,subprocess,tarfile,time
 from pathlib import Path
 
 def sha(file):
  with file.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
+
+def bridge_identity(tag,target):
+ assert re.fullmatch(r'student-[0-9]{8}-[A-Za-z0-9][A-Za-z0-9._-]*',tag)
+ assert target in {'windows-x64','macos-x64','macos-arm64'}
+ slug=tag.removeprefix('student-')
+ return 'kaixin-bridge-'+slug+'-'+target+'.tar.gz','1.7.1-kaixin-'+slug+'-'+target+'-universal'
 
 def prepare_bridge(root,target,resources,home,evidence,batch):
  base=json.loads((resources/'seed/runtime.json').read_text())
@@ -14,12 +20,13 @@ def prepare_bridge(root,target,resources,home,evidence,batch):
  with tarfile.open(resources/'update'/batch['core_asset']['name']) as archive:archive.extractall(stage,filter='data')
  held.rename(stage/'web/node_modules')
  out=root/('bridge-'+target);out.mkdir()
- archive=out/('kaixin-bridge-20261115-preview3-'+target+'.tar.gz')
+ archive_name,runtime_id=bridge_identity(batch['tag'],target)
+ archive=out/archive_name
  with tarfile.open(archive,'w:gz',compresslevel=6) as bundle:
   for file in sorted(stage.iterdir()):
    if file.name not in {'student-seed','SOURCE.tar.gz','installed.json'}:bundle.add(file,arcname=file.name)
  assert archive.stat().st_size<2*1024**3
- unsigned={**{k:batch['manifests'][target][k] for k in ['formatVersion','protocolVersion','platform','arch','coreVersion','commit','builtAt','corePayloadSha256']},'runtimeId':'1.7.1-kaixin-20261115-preview3-'+target+'-universal','archive':archive.name,'sha256':sha(archive)}
+ unsigned={**{k:batch['manifests'][target][k] for k in ['formatVersion','protocolVersion','platform','arch','coreVersion','commit','builtAt','corePayloadSha256']},'runtimeId':runtime_id,'archive':archive.name,'sha256':sha(archive)}
  unsigned_file=out/('runtime-'+target+'.unsigned.json');unsigned_file.write_text(json.dumps(unsigned,indent=2))
  if not (root/'student-source').is_dir():subprocess.run(['python','bootstrap_source.py','--with-updates'],check=True)
  bridge_home=root/('bridge-profile-'+target)

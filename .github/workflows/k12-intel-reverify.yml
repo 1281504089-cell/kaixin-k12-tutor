@@ -1,0 +1,39 @@
+name: Reverify exact existing Intel candidate installers
+on:
+  push:
+    branches: ['codex/k12-intel-reverify-20261117-*']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  native:
+    timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Revalidate frozen candidate bytes without rebuilding
+        run: python ci-intel-reuse.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attachments-${{ matrix.target }}
+          path: fresh-evidence/${{ matrix.target }}/
+          if-no-files-found: error
