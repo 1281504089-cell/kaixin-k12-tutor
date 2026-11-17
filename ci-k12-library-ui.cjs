@@ -15,6 +15,7 @@ function bodyMarkers(text) {
 const sameGeometry = (a, b) => !!a && !!b && ['left', 'top', 'width', 'height'].every(key => Math.abs(a[key] - b[key]) < 1);
 const nativeWheelDelta = (platform, arch) => platform === 'darwin' && arch === 'x64' ? 160 : null;
 const wheelFeedback = (before, after, event) => !!event?.trusted && event.deltaY < 0 && (before <= 0 || after < before - 1);
+const calibratedWheelDelta = (delta, event) => !event?.trusted || !Number.isFinite(event.deltaY) || event.deltaY === 0 ? null : event.deltaY < 0 ? delta : -delta;
 const imagesReady = (images, expected) => images.length === expected && images.every(image => image.complete && image.width > 0 && image.height > 0);
 
 // Runs in the renderer. Selecting a visible candidate does not activate it.
@@ -42,6 +43,13 @@ function inspectTarget(spec, token, scroll = false) {
     root:root ? { rect:rect(root), scrollTop:root.scrollTop, scrollHeight:root.scrollHeight, clientHeight:root.clientHeight, className:root.className } : null };
 }
 
+function inspectPreparedPicture() {
+  const image=document.querySelector('[aria-label="题库原题图"] img'),root=image?.closest('[data-chat-scroll-root]');
+  const rect=node=>{const r=node.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+  return {viewport:{width:innerWidth,height:innerHeight},image:image?{src:image.src,currentSrc:image.currentSrc,complete:image.complete,naturalWidth:image.naturalWidth,naturalHeight:image.naturalHeight,loading:image.loading,decoding:image.decoding,rect:rect(image)}:null,
+    root:root?{rect:rect(root),scrollTop:root.scrollTop,scrollHeight:root.scrollHeight,clientHeight:root.clientHeight}:null};
+}
+
 module.exports = async function verifyK12Library(view, evidence, seed, options = {}) {
   const requestedEntry = options.entry ?? 'current';
   assert(['current','oldest','update-entry','oldest-update-entry','fresh'].includes(requestedEntry));
@@ -61,7 +69,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   const markers = bodyMarkers(seed.question);
   const debug = view.debugger, views = [], network = [], requestURLs = new Map();
   assert(!debug.isAttached());
-  let width = 0, height = 0, phase = 'starting', lastAction, actionSequence = 0;
+  let width = 0, height = 0, phase = 'starting', lastAction, actionSequence = 0, pictureDiagnostic;
   const file = (kind, extension) => join(evidence, `k12-${entry}-${width}x${height}-${run}-${kind}.${extension}`);
   const save = (name, value) => writeFileSync(name, typeof value === 'string' ? value : JSON.stringify(value,null,2) + '\n', { flag:'wx' });
   async function wait(fn, args, label, timeout = 60000) {
@@ -84,7 +92,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       }, true);
     });
   }
-  async function click(spec) {
+  async function click(spec, { activate = true } = {}) {
     if (typeof spec === 'string') spec = { selector:spec };
     await monitor();
     const token = `k12-${++actionSequence}`;
@@ -98,29 +106,36 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       lastAction.samples.push(current);
       if (lastAction.samples.length > 24) lastAction.samples.splice(4,1);
       stable = current.found && sameGeometry(previous?.rect,current.rect) ? stable + 1 : 1;
-      if (stable >= 3 && current.clickable) break;
+      const releaseBeforeReveal = spec.history && !activate && wheelCount === 0 && current.root;
+      if (stable >= 3 && current.clickable && !releaseBeforeReveal) break;
       // A trusted upward wheel cancels chat's auto-pin. Other native directions remain unverified.
-      if (stable >= 3 && current.found && !current.clickable && current.root && spec.history && wheelCount < 2) {
-        const delta = nativeWheelDelta(process.platform,process.arch);
-        if (delta === null) lastAction.unverifiedWheelPlatform = `${process.platform}/${process.arch}`;
-        else {
+      if (stable >= 3 && current.found && (!current.clickable || releaseBeforeReveal) && current.root && spec.history && wheelCount < 2) {
+        // Unknown native signs are calibrated against the real trusted DOM wheel.
+        let delta = nativeWheelDelta(process.platform,process.arch) ?? 160;
+        {
           const root = current.root, point = { x:Math.round((root.rect.left + root.rect.right) / 2), y:Math.round((root.rect.top + root.rect.bottom) / 2) };
           const contained = await js((token,p) => { const root=document.querySelector(`[data-k12-scroll-id="${token}"]`), hit=document.elementFromPoint(p.x,p.y); return !!root && !!hit && root.contains(hit); },token,point);
           if (contained) {
             wheelCount++;
-            const beforeEvents = await js(() => window.__k12Driver.sequence);
-            view.sendInputEvent({ type:'mouseMove', ...point });
-            view.sendInputEvent({ type:'mouseWheel', ...point, deltaX:0, deltaY:delta, canScroll:true });
-            const feedbackEnd = Date.now() + 5000;
             let feedback;
-            do {
-              feedback = await js(token => { const root=document.querySelector(`[data-k12-scroll-id="${token}"]`); return { top:root?.scrollTop, events:window.__k12Driver.events }; },token);
-              const event = feedback.events.find(event => event.sequence > beforeEvents && event.type === 'wheel' && event.root === token);
-              if (wheelFeedback(root.scrollTop,feedback.top,event)) { feedback.event=event; break; }
-              await pause(50);
-            } while (Date.now() < feedbackEnd);
-            lastAction.wheels.push({ point, nativeDeltaY:delta, beforeTop:root.scrollTop, feedback });
-            assert(wheelFeedback(root.scrollTop,feedback?.top,feedback?.event),'Trusted upward wheel/real scroll feedback missing');
+            for(let calibration=0;calibration<2;calibration++) {
+              const before=await js(token=>({top:document.querySelector(`[data-k12-scroll-id="${token}"]`)?.scrollTop,sequence:window.__k12Driver.sequence}),token);
+              view.sendInputEvent({ type:'mouseMove', ...point });
+              view.sendInputEvent({ type:'mouseWheel', ...point, deltaX:0, deltaY:delta, canScroll:true });
+              const feedbackEnd=Date.now()+5000;
+              do {
+                feedback=await js(token=>({top:document.querySelector(`[data-k12-scroll-id="${token}"]`)?.scrollTop,events:window.__k12Driver.events}),token);
+                feedback.event=feedback.events.find(event=>event.sequence>before.sequence&&event.type==='wheel'&&event.root===token);
+                const next=calibratedWheelDelta(delta,feedback.event);
+                if(wheelFeedback(before.top,feedback.top,feedback.event)||next!==null&&next!==delta)break;
+                await pause(50);
+              } while(Date.now()<feedbackEnd);
+              lastAction.wheels.push({point,nativeDeltaY:delta,beforeTop:before.top,feedback});
+              if(wheelFeedback(before.top,feedback?.top,feedback?.event))break;
+              const next=calibratedWheelDelta(delta,feedback?.event);
+              assert(calibration===0&&next!==null&&next!==delta,'Trusted upward wheel/real scroll feedback missing');
+              delta=next;
+            }
             await frames();
             await js(inspectTarget,spec,token,true);
             await frames();
@@ -137,6 +152,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       const colors=current.color.match(/[\d.]+/g).map(Number);
       assert(colors[2]>colors[0]&&colors[2]>=colors[1],'Actual source is not visibly blue: '+current.color);
     }
+    if (!activate) { lastAction.revealed=current; return current; }
     lastAction.dispatched = current;
     view.sendInputEvent({ type:'mouseDown', button:'left', clickCount:1, ...current.point });
     view.sendInputEvent({ type:'mouseUp', button:'left', clickCount:1, ...current.point });
@@ -145,6 +161,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   async function preparedPictureHistory() {
     phase='prepared-picture-history-delayed';
     const paused=[];
+    pictureDiagnostic={paused};
     const listener=(_event,method,params)=>{
       if(method==='Fetch.requestPaused') paused.push({id:params.requestId,url:params.request.url,at:Date.now()});
     };
@@ -156,7 +173,9 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);
       navigation.catch(()=>{});
       await wait(marker=>document.body.innerText.includes(marker)&&!!document.querySelector('[aria-label="题库原题图"] img'),[pictured.answer_marker],'Saved image source/assistant body did not restore before image bytes');
-      await js(()=>document.querySelector('[aria-label="题库原题图"] img').scrollIntoView({block:'center',behavior:'instant'}));
+      pictureDiagnostic.beforeReveal=await js(inspectPreparedPicture);
+      await click({selector:'[aria-label="题库原题图"] a',history:true},{activate:false});
+      pictureDiagnostic.afterReveal=await js(inspectPreparedPicture);
       const heldUntil=Date.now()+30000;
       while(!paused.length){assert(Date.now()<heldUntil,'Native renderer did not request the prepared image');await pause(50);}
       await pause(1000);
@@ -208,7 +227,8 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     else if (method === 'Network.loadingFailed' && requestURLs.has(params.requestId)) network.push({ entry,width,height,phase,type:'failed',id:params.requestId,url:requestURLs.get(params.requestId),error:params.errorText,at:params.timestamp });
   };
   async function failure(error) {
-    const record = { entry,requestedEntry,width,height,phase,error:String(error.stack ?? error),action:lastAction,network };
+    const record = { entry,requestedEntry,width,height,phase,error:String(error.stack ?? error),action:lastAction,network,pictureDiagnostic };
+    try { record.preparedPicture=await js(inspectPreparedPicture); } catch(captureError) { record.preparedPictureCaptureError=String(captureError); }
     try { record.dom = await js(href => {
       const rect = node => { const r=node.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}; };
       const anchors = [...document.querySelectorAll('a[href]')].filter(node => node.getAttribute('href') === href).map((node,index) => {
@@ -279,4 +299,4 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     if(debug.isAttached())debug.detach();
   }
 };
-module.exports._test = { normalize, bodyMarkers, sameGeometry, nativeWheelDelta, wheelFeedback, imagesReady, inspectTarget };
+module.exports._test = { normalize, bodyMarkers, sameGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture };

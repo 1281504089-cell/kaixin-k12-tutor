@@ -30,6 +30,11 @@ check('wheel must be trusted, upward and move a non-top scroller',()=>{
   assert(!t.wheelFeedback(208.5,75,{trusted:false,deltaY:-320}));
   assert(!t.wheelFeedback(208.5,75,{trusted:true,deltaY:320}));
   assert(t.wheelFeedback(0,0,{trusted:true,deltaY:-160}));
+  assert.equal(t.calibratedWheelDelta(160,{trusted:true,deltaY:-160}),160);
+  assert.equal(t.calibratedWheelDelta(160,{trusted:true,deltaY:160}),-160);
+  assert.equal(t.calibratedWheelDelta(-160,{trusted:true,deltaY:-160}),-160);
+  assert.equal(t.calibratedWheelDelta(160,{trusted:false,deltaY:-160}),null);
+  assert.equal(t.calibratedWheelDelta(160,{trusted:true,deltaY:0}),null);
 });
 check('all expected original images, including exact count',()=>{
   const images=Array.from({length:3},()=>({complete:true,width:12,height:9}));

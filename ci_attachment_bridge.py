@@ -39,7 +39,7 @@ def prepare_bridge(root,target,resources,home,evidence,batch):
  shutil.rmtree(stage);shutil.rmtree(bridge_home)
  # Keep this native job alive for the maintainer's signatures, never publish a feed here.
  branch=os.environ['GITHUB_REF_NAME']
- for _ in range(180):
+ for _ in range(360):
   result=subprocess.run(['gh','api',f'repos/{os.environ["GITHUB_REPOSITORY"]}/contents/attachment-final-manifests.json?ref={branch}','-H','Accept: application/vnd.github.raw+json'],capture_output=True)
   if result.returncode==0:
    final=json.loads(result.stdout)
