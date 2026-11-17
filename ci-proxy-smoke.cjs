@@ -1,7 +1,8 @@
 const { app, session } = require('electron');
 const http = require('node:http');
 const sockets = require('node:net');
-const { readFileSync, writeFileSync } = require('node:fs');
+const { readFileSync, writeFileSync, mkdirSync } = require('node:fs');
+const { createHash } = require('node:crypto');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const assert = require('node:assert/strict');
@@ -30,6 +31,7 @@ app.whenReady().then(async () => {
     await new Promise(resolve => proxy.listen(0, '127.0.0.1', resolve));
     await session.fromPartition('kaixin-updates').setProxy({ mode: 'fixed_servers', proxyRules: `http=127.0.0.1:${proxy.address().port};https=127.0.0.1:${proxy.address().port}` });
     const { findReleaseUpdate, downloadReleaseUpdate } = await import(pathToFileURL(path.join(__dirname, 'release-updates.mjs')));
+    const { verifyManifest } = await import(pathToFileURL(path.join(__dirname, 'bundles.mjs')));
     const { createUpdateFetch } = await import(pathToFileURL(path.join(__dirname, 'update-network.mjs')));
     const systemFetch = createUpdateFetch(session);
     const key = readFileSync(path.join(__dirname, '../assets/runtime-public.pem'));
@@ -57,11 +59,34 @@ app.whenReady().then(async () => {
     await downloadReleaseUpdate(offered, process.env.KX_PROXY_HOME, () => {}, fetch, AbortSignal.timeout(180000));
     assert.equal(failedDirect, true);
     assert.ok(connections > 0, 'Electron must honor its proxy configuration');
+    const fixtureName=`runtime-${target}.json`;
+    const response=await systemFetch(new URL(`https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/${fixtureName}`),{signal:AbortSignal.timeout(30000),credentials:'omit'});
+    assert.equal(response.ok,true);const chunks=[];let bytes=0;
+    for await(const chunk of response.body){bytes+=chunk.length;assert.ok(bytes<=16384);chunks.push(chunk);}
+    const payload=Buffer.concat(chunks);verifyManifest(JSON.parse(payload),key);
+    let recoveries=0,faults=0;
+    const interruptedFetch=async(url,options)=>{
+      const result=await systemFetch(url,options);
+      if(recoveries===0&&result.ok&&result.body&&(url.pathname.endsWith('/'+fixtureName)||options.headers?.Accept==='application/octet-stream')){
+        faults++;
+        return new Response(result.body.pipeThrough(new TransformStream({transform(){throw new TypeError('terminated');}})),{status:result.status,headers:result.headers});
+      }
+      return result;
+    };
+    interruptedFetch.recoverAfterSuspend=async signal=>{
+      await systemFetch.recoverAfterSuspend(signal);recoveries++;
+      await session.fromPartition(`kaixin-updates-resumed-${recoveries}`).setProxy({mode:'fixed_servers',proxyRules:`http=127.0.0.1:${proxy.address().port};https=127.0.0.1:${proxy.address().port}`});
+    };
+    const inbox=path.join(process.env.KX_PROXY_HOME,'interrupted-fixture');mkdirSync(inbox);
+    const fixtureSha=createHash('sha256').update(payload).digest('hex');
+    await downloadReleaseUpdate({archive:fixtureName,sha256:fixtureSha},inbox,()=>{},interruptedFetch,AbortSignal.timeout(90000));
+    assert.equal(faults,2);assert.equal(recoveries,1);assert.deepEqual(readFileSync(path.join(inbox,fixtureName)),payload);
     writeFileSync(process.env.KX_PROXY_RESULT, JSON.stringify({
       native_platform: process.platform, native_arch: process.arch, proxy_connections: connections,
       proxy_used: true, direct_fetch_failed: true, api_fallback_download: 'passed',
       ci_api_authenticated: Boolean(process.env.GH_TOKEN),
       signature_verified: true, archive_checksum_verified: true, runtime_id: offered.runtimeId,
+      anonymous_interrupted_transport_fixture:{faults,recoveries,bytes,sha256:fixtureSha,verified_complete:true,full_installer_or_core:false},
     }, null, 2));
     clearTimeout(timer);
     app.exit(0);

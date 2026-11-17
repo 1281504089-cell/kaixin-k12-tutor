@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -76,7 +77,13 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
     for folder in ['scripts', 'platforms']:
         shutil.copytree(root / 'student-source/apps/desktop' / folder, test_root / folder)
     shutil.copytree(root / 'student-source/apps/desktop/assets', test_root / 'assets')
-    subprocess.run(['node', '--test', *[str(p) for p in (test_root / 'test').glob('*.test.mjs')]], check=True)
+    tests = subprocess.run(['node', '--test', '--test-reporter=tap', *[str(p) for p in (test_root / 'test').glob('*.test.mjs')]], capture_output=True, text=True)
+    (evidence / 'launcher-tests.tap').write_text(tests.stdout + tests.stderr)
+    print(tests.stdout, flush=True)
+    tests.check_returncode()
+    counts = {key: int(re.search(r'^# ' + key + r' (\d+)$', tests.stdout, re.M).group(1)) for key in ['tests','pass','fail','skipped']}
+    assert counts['tests'] >= 79 and counts['fail'] == 0
+    (evidence / 'launcher-tests.json').write_text(json.dumps({'passed':True,'native_target':target,**counts},indent=2))
 
     out = root / ('candidate-' + target)
     out.mkdir()
