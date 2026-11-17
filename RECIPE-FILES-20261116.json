@@ -11,8 +11,8 @@
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 1379,
-    "sha256": "dcaeaba29d402b703226f4b3de753e3734c9f5758a34791101aa8c40cf4849b6"
+    "bytes": 1564,
+    "sha256": "934d5005376bd30b677d3a461c605f9924db53d0f50e06480ee6fe36274d9785"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
@@ -136,8 +136,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 16673,
-    "sha256": "a6a56fee5a48b3594b8f90f3ee1bf24454632e239fc3f9caa83910cf66291128"
+    "bytes": 17550,
+    "sha256": "c1c089ebe2a497cd581b37ad484ef9dd70eaef39cebbf40a9f0cd51cad0539ae"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -448,6 +448,11 @@
     "file": "test_materials_upgrade.py",
     "bytes": 2245,
     "sha256": "6bab1a60dae908fbbafb80aba6bc1bbec1cc5505b03ad2fcbf4ed27879053719"
+  },
+  {
+    "file": "test_native_entry_artifacts.py",
+    "bytes": 2261,
+    "sha256": "6e10ff1c924d79f51dd25253095dcba4f1d775955422c3e05a28410d944166bb"
   },
   {
     "file": "test_native_k12_api.py",

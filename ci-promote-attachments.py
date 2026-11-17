@@ -54,6 +54,16 @@ def verify_update_recovery(report,batch,target):
   assert proof['selected_base_runtime']==(None if legacy else runtime)
   assert proof['selected_archive']==('kaixin-bridge-'+batch['tag'].removeprefix('student-')+'-'+target+'.tar.gz' if legacy else 'kaixin-core-'+batch['tag'].removeprefix('student-')+'.tar.gz')
 
+def verify_native_entry_artifacts(report, evidence):
+ entries={'update_entry':'update-entry','oldest_launcher_entry':'oldest-update-entry','materials_launcher_entry':'materials-update-entry','materials_oldest_launcher_entry':'materials-oldest-update-entry'}
+ for key,name in entries.items():
+  assert json.loads((evidence/(name+'.json')).read_text())==report[key], 'Native entry receipt differs: '+key
+ # Shared UI sidecars are produced by each scenario; the final scenario owns the retained files.
+ final=report['materials_oldest_launcher_entry']
+ for name,key in {'library-bulk.json':'library_bulk_upload','chat-audio.json':'chat_audio','native-science.json':'science_formulas','quick-preview.json':'quick_preview'}.items():
+  assert json.loads((evidence/name).read_text())==final[key], 'Final scenario sidecar differs: '+name
+ return {'per_entry_receipts_verified':len(entries),'shared_sidecars_from':'materials_oldest_launcher_entry'}
+
 assert set(batch['native_runs'])==set(targets)
 for target,proof in batch['native_runs'].items():
  run=api('actions/runs/'+str(proof['run_id']))
@@ -111,6 +121,7 @@ for target in targets:
  native_evidence=work/('evidence-'+target)
  gh('run','download',batch['native_runs'][target]['run_id'],'--name','attachments-'+target,'--dir',native_evidence)
  assert json.loads((native_evidence/'verified.json').read_text())==report
+ report['artifact_scene_binding']=verify_native_entry_artifacts(report,native_evidence)
  for size in ['390x844','1366x900']:
   screenshot=native_evidence/('quick-preview-'+size+'.png');raw=screenshot.read_bytes();assert len(raw)>1000 and raw.startswith(b'\x89PNG\r\n\x1a\n')
   public_screenshot=work/('quick-preview-'+target+'-'+size+'.png');public_screenshot.write_bytes(raw);gh('release','upload',batch['tag'],public_screenshot,'--clobber')
@@ -123,11 +134,9 @@ for target in targets:
  assert legacy['old_pid']!=legacy['restarted_pid'] and legacy['to_launcher']==batch['launcher_build']
  assert update['download_progress_visible'] and update['downloaded_bytes_visible'] and update['to_launcher']==batch['launcher_build']
  bulk=update['library_bulk_upload'];assert bulk['saved_files']==21 and all(bulk[k] for k in ['multiple','library_retention','originals_byte_identical','original_preview_opened','held_real_chunk','chat_and_settings_navigation','appended_while_active','completed_in_chat','document_not_reloaded','draft_preserved','picker_reference_byte_identical','no_duplicate_upload_or_new_chat','html_safe_preview','source_toggle','native_math_display'])
- assert json.loads((native_evidence/'library-bulk.json').read_text())==bulk
  audio=update['chat_audio'];assert audio['passed'] and len(audio['productionCards'])==2
  assert audio['selection']['chatRequests']==0 and audio['selection']['errorShown']
  assert all(card['sha256']==audio['productionCards'][0]['sha256'] for card in audio['productionCards'])
- assert json.loads((native_evidence/'chat-audio.json').read_text())==audio
  science=update['science_formulas'];assert science['passed'] and len(science['views'])==16 and len(science['originalEdits'])>=18 and science['cleanup']['debuggerDetached'] and science['cleanup']['deviceMetricsCleared']
  assert bulk['device_speech']['diagnosticOnly'] and 'nativeEnded' in bulk['device_speech']['diagnostic']
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
