@@ -64,6 +64,24 @@ async function captureNativeResponse(debug, params, spec) {
   }
 }
 
+async function continueNativeRequest(debug, item, network, expectedURL) {
+  assert.equal(item.url,expectedURL);
+  assert(network.some(event=>event.type==='request'&&event.id===item.network_id&&event.url===expectedURL),'Held native request has no original Network identity');
+  const cancelled=()=>network.some(event=>event.type==='failed'&&event.id===item.network_id&&event.error==='net::ERR_ABORTED');
+  if(!cancelled()) {
+    try {
+      await debug.sendCommand('Fetch.continueRequest',{requestId:item.id,interceptResponse:true});
+      return {id:item.network_id,fetch_id:item.id,continued:true};
+    } catch(error) {
+      if(!String(error.message||error).includes('Invalid InterceptionId'))throw error;
+      const until=Date.now()+1000;
+      while(!cancelled()&&Date.now()<until)await pause(20);
+      if(!cancelled())throw error;
+    }
+  }
+  return {id:item.network_id,fetch_id:item.id,continued:false,cancelled_before_response:true};
+}
+
 // Runs in the renderer: loading labels and zero/blank canvases never qualify.
 function inspectNativePages(spec, dialog=false) {
   const root=dialog?document.querySelector('[data-testid="question-source-preview"]'):[...document.querySelectorAll('[aria-label="题库原题图"] figure')].find(figure=>[...figure.querySelectorAll('a[href]')].some(a=>[spec.href,spec.originalHref].includes(a.getAttribute('href'))));
@@ -92,7 +110,8 @@ function inspectNativePages(spec, dialog=false) {
 // Runs in the renderer. Selecting a visible candidate does not activate it.
 function inspectTarget(spec, token, scroll = false) {
   const rect = node => { const r = node.getBoundingClientRect(); return { left:r.left, top:r.top, right:r.right, bottom:r.bottom, width:r.width, height:r.height }; };
-  const candidates = spec.href ? [...document.querySelectorAll('a[href]')].filter(node => node.getAttribute('href') === spec.href)
+  const candidates = spec.cardHref ? [...document.querySelectorAll('[aria-label="题库原题图"] figure')].filter(figure => [...figure.querySelectorAll('a[href]')].some(a => a.getAttribute('href') === spec.cardHref))
+    : spec.href ? [...document.querySelectorAll('a[href]')].filter(node => node.getAttribute('href') === spec.href)
     : spec.text ? [...document.querySelectorAll('button')].filter(node => node.textContent.trim() === spec.text)
       : [...document.querySelectorAll(spec.selector)];
   const visible = node => { const style = getComputedStyle(node); return [...node.getClientRects()].some(r => r.width > 0 && r.height > 0) && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && !node.disabled && node.getAttribute('aria-disabled') !== 'true'; };
@@ -200,8 +219,9 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
         // Unknown native signs are calibrated against the real trusted DOM wheel.
         let delta = nativeWheelDelta(process.platform,process.arch) ?? 160;
         {
-          const root = current.root, point = { x:Math.round((root.rect.left + root.rect.right) / 2), y:Math.round((root.rect.top + root.rect.bottom) / 2) };
-          const contained = await js((token,p) => { const root=document.querySelector(`[data-k12-scroll-id="${token}"]`), hit=document.elementFromPoint(p.x,p.y); return !!root && !!hit && root.contains(hit); },token,point);
+          // The PDF consumes wheel events; reveal its card using the outer chat gutter.
+          const root = current.root, point = { x:Math.round(spec.cardHref ? root.rect.left+2 : (root.rect.left + root.rect.right) / 2), y:Math.round((root.rect.top + root.rect.bottom) / 2) };
+          const contained = await js((token,p,card) => { const root=document.querySelector(`[data-k12-scroll-id="${token}"]`), hit=document.elementFromPoint(p.x,p.y); return !!root && !!hit && root.contains(hit) && (!card || !hit.closest('.dt-reader-scroll')); },token,point,!!spec.cardHref);
           if (contained) {
             wheelCount++;
             let feedback;
@@ -324,8 +344,8 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     return {probe,dialog_within_viewport:true};
   }
   async function nativePageHistory() {
-    phase='native-page-history-delayed';const paused=[];
-    const listener=(_event,method,params)=>{if(method==='Fetch.requestPaused'&&params.responseStatusCode===undefined&&!params.responseErrorReason)paused.push({id:params.requestId,url:params.request.url,at:Date.now()});};
+    phase='native-page-history-delayed';const paused=[],heldRequests=[];
+    const listener=(_event,method,params)=>{if(method==='Fetch.requestPaused'&&params.responseStatusCode===undefined&&!params.responseErrorReason)paused.push({id:params.requestId,network_id:params.networkId,url:params.request.url,at:Date.now()});};
     debug.on('message',listener);let navigation,before,heldMs;
     const started=network.length;
     try {
@@ -333,7 +353,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       await debug.sendCommand('Fetch.enable',{patterns:[{urlPattern:'*question-bank/native/*',requestStage:'Request'},nativeResponsePattern]});
       navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(native.session)}?dt_workspace=`);navigation.catch(()=>{});
       await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Saved native source/assistant body did not restore before PDF bytes');
-      await click({href:native.href,history:true},{activate:false});
+      await click({cardHref:native.href,history:true},{activate:false});
       const until=Date.now()+30000;while(!paused.length){assert(Date.now()<until,'Native reader never requested its PDF');await pause(50);}
       await pause(1000);before=await js(inspectNativePages,native,false);
       assert(!before.painted&&!before.ready,'A held PDF was replaced with a painted fallback');
@@ -343,7 +363,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     } finally {
       try {
         await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
-        for(const item of paused)await debug.sendCommand('Fetch.continueRequest',{requestId:item.id,interceptResponse:true});
+        for(const item of paused)heldRequests.push(await continueNativeRequest(debug,item,network,native.url));
       } finally {debug.removeListener('message',listener);await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:false});}
     }
     await navigation;await wait(inspectNativePages,[native,false],'Saved native card has no real PDF pixels or the wrong page range');
@@ -351,10 +371,13 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     await click({href:native.href,history:true,blue:true});const modal=await nativePreview(native);
     writeFileSync(file('native-source','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
     await click('button[aria-label="关闭题源"]');await wait(()=>!document.querySelector('[role="dialog"]'),[],'Native source did not close');
+    const restoredStart=network.length;
     await view.loadURL(`${origin}/chat/${encodeURIComponent(native.session)}?dt_workspace=`);
-    await wait(marker=>document.body.innerText.includes(marker),[native.answer_marker],'Native history body did not restore twice');
-    await click({href:native.href,history:true},{activate:false});await wait(inspectNativePages,[native,false],'Native PDF did not survive a second saved-history load');
-    return {renderer:'native-pages',qualified_id:native.qualified_id,bank_revision:native.bank_revision,sha256:native.native.sha256,bytes:native.native.bytes,page_count:native.native.page_count,start_page:native.native.start_page,end_page:native.native.end_page,body_dom_before_pdf_response:true,held_response_ms:heldMs,canvas_pixels_verified:true,page_range_verified:true,selected_page_verified:true,...http,correct_source_opened:true,dialog_within_viewport:true,second_history_restore:true,inline_probe:inline,modal_probe:modal.probe,body_probe:before};
+    await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Native history body did not restore twice');
+    await click({cardHref:native.href,history:true},{activate:false});await wait(inspectNativePages,[native,false],'Native PDF did not survive a second saved-history load');
+    const restored=await js(inspectNativePages,native,false),restoredHTTP=await nativeHTTP(native,restoredStart);
+    const restoredCard=await js(inspectTarget,{cardHref:native.href},lastAction.token);assert(restoredCard.clickable,'Restored native card left the visible chat scrollport');
+    return {renderer:'native-pages',qualified_id:native.qualified_id,bank_revision:native.bank_revision,sha256:native.native.sha256,bytes:native.native.bytes,page_count:native.native.page_count,start_page:native.native.start_page,end_page:native.native.end_page,body_dom_before_pdf_response:true,held_response_ms:heldMs,held_requests:heldRequests,canvas_pixels_verified:true,page_range_verified:true,selected_page_verified:true,...http,correct_source_opened:true,dialog_within_viewport:true,second_history_restore:true,second_history_probe:restored,second_history_http:restoredHTTP,second_history_card:restoredCard,inline_probe:inline,modal_probe:modal.probe,body_probe:before};
   }
   async function liveSource(href) {
     const match=/^#dt-question-([a-f0-9]{64})-(.+)$/.exec(href.replace('https://deeptutor.local/library',''));assert(match,'Invalid clicked source href');
@@ -479,4 +502,4 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     if(debug.isAttached())debug.detach();
   }
 };
-module.exports._test = { normalize, bodyMarkers, sameGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse };
+module.exports._test = { normalize, bodyMarkers, sameGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest };

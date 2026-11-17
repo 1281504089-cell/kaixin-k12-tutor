@@ -6,8 +6,8 @@
   },
   {
     "file": ".github/workflows/attachment-native.yml",
-    "bytes": 2779,
-    "sha256": "341e7cf1541ee47ddcee489ebe740ab5590fdfe9ca46f3495f8e5defe2ca8e3a"
+    "bytes": 2757,
+    "sha256": "9ca0e44172323842b6a4a037f4a3275c7f28d299da46e202642c590b59b5a6f0"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
@@ -136,6 +136,11 @@
   },
   {
     "file": "ci-k12-library-ui.cjs",
+    "bytes": 47432,
+    "sha256": "e2ebe8c9da52291db9c273527059a22ae55bef4e40fcf5fcef81e580cea5a03b"
+  },
+  {
+    "file": "ci-k12-library-ui.visibility-baseline.cjs",
     "bytes": 45437,
     "sha256": "c9a87d17b9d35b50e1caf7726a17fbd3e5e34be5a1e4134e5d638edba7bbd033"
   },
@@ -423,6 +428,11 @@
     "file": "native-response-followup-selfcheck.cjs",
     "bytes": 6467,
     "sha256": "41e49dfc541630e8e5745834fb78889d4dbcc0e47476784e1b1ec5756ab83cad"
+  },
+  {
+    "file": "native-visibility-selfcheck.cjs",
+    "bytes": 6037,
+    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
   },
   {
     "file": "prepare-bank-payload.py",

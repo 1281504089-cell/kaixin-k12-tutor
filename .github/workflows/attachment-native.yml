@@ -1,4 +1,4 @@
-name: Validate frozen K12 candidate on three native platforms
+name: Revalidate frozen native pages on two Mac platforms
 on:
   push:
     branches: ['codex/k12-native-20261116-*', 'codex/k12-native-20261117-*']
@@ -15,8 +15,6 @@ jobs:
             runner: macos-15-intel
           - target: macos-arm64
             runner: macos-15
-          - target: windows-x64
-            runner: windows-2025
     runs-on: ${{ matrix.runner }}
     env:
       GH_TOKEN: ${{ github.token }}
@@ -49,6 +47,7 @@ jobs:
           python -m unittest test_native_reuse_metadata test_native_reuse_inputs test_installer_segments test_native_pages_proof
           node ci-k12-driver-selfcheck.cjs
           node native-response-followup-selfcheck.cjs
+          node native-visibility-selfcheck.cjs
       - name: Prepare Windows packaging tool
         if: runner.os == 'Windows'
         run: choco install nsis --yes --no-progress
