@@ -10,7 +10,46 @@ from urllib.parse import quote, urljoin, urlparse
 from urllib.request import urlopen
 
 
-def run(frontend, core):
+NATIVE_EXPECTED = {"manifest_sha256": "91631719fe6e228a0b580d469a15943bb5ba80828f5114ea10e731dcd598da0a",
+    "records": 6915, "pdfs": 698, "total_bytes": 295359867,
+    "samples": {"math:q_e9dd00ffa1178d29b41fadb4_2": "math", "new-five:q_0264cefbf2bc2978e20b01f3_b00012_3": "physics",
+        "five-subject:src_04fccdbddbb0696b58cc5678_b00001_full": "biology", "five-subject:q_075b4515a0802954bc5c6a4f": "chemistry"}}
+
+
+def verify_native_pages(get, core, revision, database, expected):
+    root = core / "deeptutor/services/student_learning/question_native_data"
+    raw_manifest = (root / "manifest.json").read_bytes()
+    assert hashlib.sha256(raw_manifest).hexdigest() == expected["manifest_sha256"]
+    manifest = json.loads(raw_manifest)
+    assert manifest["bank_revision"] == revision and len(manifest["items"]) == expected["records"]
+    files = {item["file"] for item in manifest["items"].values()}
+    assert files == {p.relative_to(root).as_posix() for p in (root / "documents").glob("*.pdf")}
+    assert len(files) == expected["pdfs"] and sum((root / name).stat().st_size for name in files) + len(raw_manifest) == expected["total_bytes"]
+    checks = []
+    for identity, subject in expected["samples"].items():
+        item = manifest["items"][identity]
+        row = database.execute("SELECT q.payload_sha,d.body_json FROM questions q JOIN documents d USING(payload_sha) WHERE q.qualified_id=?", (identity,)).fetchone()
+        assert row and row[0] == item["source_payload_sha256"] == hashlib.sha256(row[1].encode()).hexdigest()
+        payload = json.loads(row[1])
+        assert payload["subject"] == subject and payload["source_hash"] == item["source_hash"]
+        assert [asset["id"] for asset in payload["assets"]] == item["asset_sha256"]
+        detail = get("/api/student/question-bank/questions/" + quote(identity, safe="") + "?revision=" + revision)
+        url = "/api/student/question-bank/native/" + quote(identity, safe="") + "?revision=" + revision + "&sha256=" + item["sha256"]
+        descriptor = {"url": url, **{key: item[key] for key in ("sha256", "bytes", "page_count", "start_page", "end_page", "kind")}}
+        assert detail["source"]["native_required"] is True and detail["source"]["native"] == descriptor
+        raw, headers = get(url, raw=True, headers=True)
+        assert headers["Content-Type"] == "application/pdf" and headers["Cache-Control"] == "private, no-store"
+        assert headers["X-Content-Type-Options"] == "nosniff" and headers["Content-Security-Policy"] == "default-src 'none'; sandbox"
+        assert len(raw) == item["bytes"] and raw.startswith(b"%PDF-") and hashlib.sha256(raw).hexdigest() == item["sha256"]
+        get(url.replace(revision, "0" * 64), 404)
+        get(url.replace(item["sha256"], "0" * 64), 404)
+        checks.append({"qualified_id": identity, "subject": subject, "sha256": item["sha256"], "bytes": len(raw),
+            "pages": [item["start_page"], item["end_page"]], "frozen_payload_and_assets_bound": True, "private_pdf_http_sha_verified": True})
+    return {"passed": True, "manifest_sha256": expected["manifest_sha256"], "records": len(manifest["items"]), "pdfs": len(files),
+        "total_bytes": expected["total_bytes"], "samples": checks, "wrong_sha_and_revision_rejected": True, "model_calls": 0}
+
+
+def run(frontend, core, native_expected=None):
     assert urlparse(frontend).hostname in {"127.0.0.1", "localhost", "::1"}
     pack = core / "deeptutor/services/student_learning/question_bank_data"
     manifest = json.loads((pack / "manifest.json").read_text())
@@ -143,9 +182,10 @@ def run(frontend, core):
             get("/api/student/question-bank/pictures/" + quote(blocked_id, safe="") + "?revision=" + revision, 404)
             for asset in blocked["assets"]:
                 get("/api/student/question-bank/assets/" + asset["id"] + "?question_id=" + quote(blocked_id, safe="") + "&revision=" + revision, 404)
+        native_pages = verify_native_pages(get, core, revision, database, native_expected or NATIVE_EXPECTED)
     finally:
         database.close()
-    return {"passed": True, "bank_revision": revision, "prepared_picture_bindings": len(bindings), "prepared_picture_manifest_sha256": hashlib.sha256((picture_root / "manifest.json").read_bytes()).hexdigest(), "prepared_picture_api": picture_checks, "physical_readable_count": manifest["question_count"], "effective_readable_count": catalog["effective_readable_count"], "runtime_isolated_count": catalog["runtime_isolated_count"], "runtime_exclusion_kinds": excluded_kinds, "runtime_exclusion_ledger_sha256": hashlib.sha256((core / "deeptutor/services/student_learning/question_source_exclusions.json").read_bytes()).hexdigest(), "effective_exercise_candidate_count": catalog["effective_exercise_candidate_count"], "source_count": catalog["total"], "complete_source_unit_compared_to_pack": True, "image_question_checked": bool(image), "pagination_disjoint": True, "subject_filters": True, "fts_search_passed": True, "fts_empty_query_passed": True, "item_quality_metadata_matched": True, "wrong_revision_rejected": True, "unknown_question_rejected": True, "teacher_fields_absent": True, "teacher_fields_check_scope": "JSON sidecar fields only; body compared to frozen student pack, not an exhaustive embedded-answer review", "model_calls": 0, "formal_data_used": False}
+    return {"passed": True, "bank_revision": revision, "native_pages": native_pages, "prepared_picture_bindings": len(bindings), "prepared_picture_manifest_sha256": hashlib.sha256((picture_root / "manifest.json").read_bytes()).hexdigest(), "prepared_picture_api": picture_checks, "physical_readable_count": manifest["question_count"], "effective_readable_count": catalog["effective_readable_count"], "runtime_isolated_count": catalog["runtime_isolated_count"], "runtime_exclusion_kinds": excluded_kinds, "runtime_exclusion_ledger_sha256": hashlib.sha256((core / "deeptutor/services/student_learning/question_source_exclusions.json").read_bytes()).hexdigest(), "effective_exercise_candidate_count": catalog["effective_exercise_candidate_count"], "source_count": catalog["total"], "complete_source_unit_compared_to_pack": True, "image_question_checked": bool(image), "pagination_disjoint": True, "subject_filters": True, "fts_search_passed": True, "fts_empty_query_passed": True, "item_quality_metadata_matched": True, "wrong_revision_rejected": True, "unknown_question_rejected": True, "teacher_fields_absent": True, "teacher_fields_check_scope": "JSON sidecar fields only; body compared to frozen student pack, not an exhaustive embedded-answer review", "model_calls": 0, "formal_data_used": False}
 
 
 if __name__ == "__main__":

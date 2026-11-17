@@ -34,9 +34,14 @@ async def seed(core):
     await store.add_message(session["id"], "assistant", "本消息是来源显示合成验证。[查看本次原题](" + source["url"] + ")", capability="chat", events=[event], metadata={"sources": [source]})
     picture_manifest = json.loads((core / "deeptutor/services/student_learning/question_picture_data/manifest.json").read_text())
     assert picture_manifest["bank_revision"] == manifest["bank_revision"] and picture_manifest["items"], "Required prepared question display pack is absent"
-    picture_id = max(picture_manifest["items"], key=lambda identity: len(picture_manifest["items"][identity]["asset_sha256"]))
-    pictured = question_sources.detail(picture_id, root=pack, revision=manifest["bank_revision"])
-    assert pictured["source"].get("picture"), "Prepared picture failed its frozen-source binding"
+    pictured = None
+    for identity in sorted(picture_manifest["items"], key=lambda identity: len(picture_manifest["items"][identity]["asset_sha256"]), reverse=True):
+        candidate = question_sources.detail(identity, root=pack, revision=manifest["bank_revision"])
+        if candidate["source"].get("picture") and not candidate["source"].get("native") and not candidate["source"].get("native_required"):
+            pictured = candidate
+            break
+    assert pictured is not None, "A non-native prepared image must remain covered independently"
+    picture_id = pictured["qualified_id"]
     picture_session = await store.create_session("完整题目图历史合成验证")
     await store.add_message(picture_session["id"], "user", "只验证完整题目图，不发起模型。")
     picture_source = {**pictured["source"], "reference_used": True}
@@ -46,7 +51,18 @@ async def seed(core):
     picture_fixture = {"session": picture_session["id"], "qualified_id": picture_id, "bank_revision": manifest["bank_revision"],
         "href": picture_source["url"], "picture": picture_source["picture"], "answer_marker": answer_marker,
         "images": len(pictured["assets"]), "question": pictured["question"], "source_payload_sha256": picture_manifest["items"][picture_id]["source_payload_sha256"]}
-    return {"session": session["id"], "qualified_id": question["qualified_id"], "bank_revision": question["bank_revision"], "href": source["url"], "question": question["question"], "title": question["title"], "images": len(question["assets"]), "picture_fixture": picture_fixture, "model_calls": 0}
+    native_id = "math:q_e9dd00ffa1178d29b41fadb4_2"
+    native_question = question_sources.detail(native_id, root=pack, revision=manifest["bank_revision"])
+    assert native_question["source"].get("native_required") and native_question["source"].get("native"), "Native student page fixture is required"
+    native_session = await store.create_session("原生题页历史合成验证")
+    await store.add_message(native_session["id"], "user", "只验证原生题页及历史，不发起模型。")
+    native_source = {**native_question["source"], "reference_used": True}
+    native_marker = "原生题页合成验证正文立即可读"
+    await store.add_message(native_session["id"], "assistant", native_marker + "。[查看本次原题](" + native_source["url"] + ")", capability="chat",
+        events=[{**event, "metadata": {"sources": [native_source]}}], metadata={"sources": [native_source]})
+    native_fixture = {"session": native_session["id"], "qualified_id": native_id, "bank_revision": manifest["bank_revision"],
+        "href": native_source["url"], "answer_marker": native_marker, "native": native_source["native"]}
+    return {"session": session["id"], "qualified_id": question["qualified_id"], "bank_revision": question["bank_revision"], "href": source["url"], "question": question["question"], "title": question["title"], "images": len(question["assets"]), "native": source.get("native"), "picture_fixture": picture_fixture, "native_fixture": native_fixture, "model_calls": 0}
 
 
 if __name__ == "__main__":

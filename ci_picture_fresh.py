@@ -6,6 +6,33 @@ import shutil
 import subprocess
 
 
+NATIVE_PAGE_CHECKS = ("body_dom_before_pdf_response", "canvas_pixels_verified", "page_range_verified", "selected_page_verified", "native_http_pdf_sha_verified", "private_headers_verified", "correct_source_opened", "dialog_within_viewport", "second_history_restore")
+
+
+def validate_native_page_views(ui, fixture):
+    assert ui['passed'] is True and ui['actualNativeRenderer'] is True and ui['schema_version'] == 2
+    assert ui['bank_revision'] == fixture['bank_revision'] and len(ui['views']) == 4
+    for view in ui['views']:
+        assert all(view['preparedPicture'][key] is True for key in ('native_http_image_sha_verified', 'body_dom_before_image_response', 'second_history_restore'))
+        pages = view['nativePages']
+        assert pages['renderer'] == 'native-pages'
+        assert pages['qualified_id'] == fixture['qualified_id'] and pages['bank_revision'] == fixture['bank_revision']
+        for key in ('sha256', 'bytes', 'page_count', 'start_page', 'end_page'):
+            assert pages[key] == fixture['native'][key], key
+        assert 1 <= pages['start_page'] <= pages['end_page'] <= pages['page_count']
+        assert all(pages[key] is True for key in NATIVE_PAGE_CHECKS)
+
+
+def validate_native_page_api(api, expected):
+    proof = api['native_pages']
+    assert proof['passed'] is True and proof['model_calls'] == 0 and proof['wrong_sha_and_revision_rejected'] is True
+    for key in ('manifest_sha256', 'records', 'pdfs', 'total_bytes'):
+        assert proof[key] == expected[key], key
+    assert len(proof['samples']) == 4 and {row['subject'] for row in proof['samples']} == {'math', 'physics', 'chemistry', 'biology'}
+    assert len({row['qualified_id'] for row in proof['samples']}) == 4
+    assert all(row['frozen_payload_and_assets_bound'] is True and row['private_pdf_http_sha_verified'] is True for row in proof['samples'])
+
+
 def verify_picture_fresh(root, target, install, resources, home, evidence):
     active = json.loads((home / 'active.json').read_text())
     base = json.loads((resources / 'seed/runtime.json').read_text())
@@ -47,7 +74,7 @@ def verify_picture_fresh(root, target, install, resources, home, evidence):
         result = json.loads(output.read_text())
         assert result['passed'] and result['active_runtime_id'] == active['runtimeId']
         assert result['k12_library']['passed'] and result['k12_library']['diagnostic_entry'] == 'fresh'
-        assert len(result['k12_library']['views']) == 4 and all(v['preparedPicture']['native_http_image_sha_verified'] for v in result['k12_library']['views'])
+        validate_native_page_views(result['k12_library'], json.loads(fixture.read_text())['native_fixture'])
         assert json.loads((home / 'active.json').read_text()) == active, 'Fresh display QA unexpectedly changed the installed runtime'
         result['production_launcher_source_byte_identical'] = True
         result['qa_code_only_in_disposable_copy'] = True
