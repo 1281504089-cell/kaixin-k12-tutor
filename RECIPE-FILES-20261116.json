@@ -12,12 +12,17 @@
   {
     "file": ".github/workflows/attachment-publish.yml",
     "bytes": 1379,
-    "sha256": "0ff063173a2c48ffc0114cd0719f0c00a775f5e59905dd93df132d25bc58abf6"
+    "sha256": "dcaeaba29d402b703226f4b3de753e3734c9f5758a34791101aa8c40cf4849b6"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
     "bytes": 1100,
     "sha256": "23dec0ee40a2b5836bf57c921a3bfbbaccc815a8dd83d33ea2a406cb5768f94d"
+  },
+  {
+    "file": ".github/workflows/k12-native-reverify.yml",
+    "bytes": 1422,
+    "sha256": "a198dcdf01e9e2ba9e537919a1b4ae9e55cbcb61c0eaaf180c6e7fd2fc58795b"
   },
   {
     "file": "BANK-RECOVERY.md",
@@ -31,8 +36,8 @@
   },
   {
     "file": "INSTALLATION.txt",
-    "bytes": 3974,
-    "sha256": "b137638de31c4253accca07c30ac449ed236eed50c928ea321fcb8dcea70dbf8"
+    "bytes": 4102,
+    "sha256": "ba66ad6b951c9870e3f7b0431200108149b2d3dc61d0d24826ea2f76203d6b49"
   },
   {
     "file": "PICTURE-QUESTION-20261117.md",
@@ -46,23 +51,28 @@
   },
   {
     "file": "RECIPE-STATE.json",
-    "bytes": 3248,
-    "sha256": "d48062eb1e7e5cf3f005bb9e6cc137b74989b3040378c7183845fdc56637e96b"
+    "bytes": 1558,
+    "sha256": "b5bb2558e89489174efd2be58e486a93e1891249417ee66088809868742f201c"
   },
   {
     "file": "RELEASE-NOTES.md",
-    "bytes": 6208,
-    "sha256": "64264877f5ed39da445247f3912d166a650b432777aff905ac06ff353c2c24ee"
+    "bytes": 1684,
+    "sha256": "38bbf846a6219c52afcfd42abfd685e1f112b3ac6e6b239b788a1222eaed3d16"
   },
   {
     "file": "SOURCE-TEST-HANDOFF.json",
-    "bytes": 14678,
-    "sha256": "022aa5b7e35a80ee44f7c63c073a2a48d301869b0d807d4d1a9b67ef870b6be9"
+    "bytes": 7868,
+    "sha256": "5fa83624b83e8c4a79ac489a09fa0d402e253323f6191db839140744bf5c6459"
   },
   {
     "file": "VERIFICATION-QUESTION-PICTURES-20261117.json",
     "bytes": 29963,
     "sha256": "2213222ead94cd3dba10c316ab6b356efc77f5fbd681686d891d0017b80b247c"
+  },
+  {
+    "file": "arm-k12-4-reuse-lock.json",
+    "bytes": 49451,
+    "sha256": "8302dcde0018d51c18a88613c768940395edc0087156249fb87f6a6b62198182"
   },
   {
     "file": "attachment-batch.json",
@@ -71,8 +81,8 @@
   },
   {
     "file": "attachment-publication.json",
-    "bytes": 43230,
-    "sha256": "1ead9bc8399461781384b172d7eb361388cc7d1190ca8ac5d72e962ecdbc3d7c"
+    "bytes": 46271,
+    "sha256": "dda600ae18ca0aafa22ecf8fbff94f1207851ba2b5389e1fab7e0771f0a8ca37"
   },
   {
     "file": "attachment-release.json",
@@ -106,13 +116,18 @@
   },
   {
     "file": "ci-k12-driver-selfcheck.cjs",
-    "bytes": 6872,
-    "sha256": "43043846e14cad6680dc194d0cecb4a1d236003c72e2c0fb3eaa577b9e49ef48"
+    "bytes": 7322,
+    "sha256": "70fb91b8363b1bb784c27fec859bb08f416d48a410a82fd49cc8ef12dcb24dfb"
   },
   {
     "file": "ci-k12-library-ui.cjs",
-    "bytes": 28601,
-    "sha256": "87028aad4729c4641a583cf074b8dbebb3c92e3c9233f4460805336c4b80bad6"
+    "bytes": 28658,
+    "sha256": "04eaa417441aaf342950ba22c63cbad09773eeccd92efdca5aaa7797b0a1a43e"
+  },
+  {
+    "file": "ci-mac-reuse.py",
+    "bytes": 22426,
+    "sha256": "1ed66de9e46e3f7b3c747acc38b026f91a733d3283786bdc1104132a744e5f0d"
   },
   {
     "file": "ci-picture-fresh.cjs",
@@ -121,8 +136,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 15034,
-    "sha256": "e80d93b08827fb79b3958ed2cf29712bfd4c81c1e92ca8d0336d778a19c83783"
+    "bytes": 16673,
+    "sha256": "a6a56fee5a48b3594b8f90f3ee1bf24454632e239fc3f9caa83910cf66291128"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -263,6 +278,11 @@
     "file": "fresh-install-lock.json",
     "bytes": 3829,
     "sha256": "fa450e1a8e251d59205bd1272be6ede894583bce7618c116331f59150801e4b7"
+  },
+  {
+    "file": "intel-k12-4-reuse-lock.json",
+    "bytes": 49365,
+    "sha256": "61a2d5b05a2499919a38fab58c65cd692f762d9d282db1a79942bf323d37c0ef"
   },
   {
     "file": "intel-reuse-lock.json",
@@ -420,6 +440,11 @@
     "sha256": "f56b6700945340d48daa794b43b1a5be053d72cff703dc1041a42733f246f5ca"
   },
   {
+    "file": "test_mac_reuse.py",
+    "bytes": 6087,
+    "sha256": "7293ecdf5efe6dfa178e73f5fd27b9a43287493225845707cd1edf25c7f79ef7"
+  },
+  {
     "file": "test_materials_upgrade.py",
     "bytes": 2245,
     "sha256": "6bab1a60dae908fbbafb80aba6bc1bbec1cc5505b03ad2fcbf4ed27879053719"
@@ -432,7 +457,12 @@
   {
     "file": "test_publication_transaction.py",
     "bytes": 11450,
-    "sha256": "202306bff0762a3cfac121075eeae770a2f3e4466b647aa4ec02a8f85d6711db"
+    "sha256": "4f8057387ecba510bb8cffcc4b8e19a7ffa9170bfba00792aa864646de9a7061"
+  },
+  {
+    "file": "test_recovery_publication_gate.py",
+    "bytes": 2580,
+    "sha256": "c077667608a13d594a236d6c06c80a2ed9a86079a0cd4b8c48a8e3ce9c498e50"
   },
   {
     "file": "test_release_bank.py",
@@ -443,5 +473,10 @@
     "file": "test_release_source.py",
     "bytes": 6211,
     "sha256": "0fe33973d9f40087281d7352414ef8e029d7e519e2d8c319f9413528f58c1224"
+  },
+  {
+    "file": "windows-k12-4-reuse-lock.json",
+    "bytes": 49564,
+    "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
   }
 ]

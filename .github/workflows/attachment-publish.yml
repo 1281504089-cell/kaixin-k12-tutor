@@ -22,7 +22,7 @@ jobs:
           python-version: '3.12'
       - name: Record publication run
         run: |
-          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-2";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
+          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-4";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
       - name: Verify three native proofs and switch signed batch
         run: python ci-promote-attachments.py
       - name: Keep publication receipts and previous defaults
