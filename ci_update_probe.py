@@ -5,7 +5,13 @@ from urllib.request import Request,urlopen
 
 def materials_baseline(root,target,evidence):
  lock=json.loads((root/'materials-upgrade-lock.json').read_text());row=lock['targets'][target]
- directory=root/'materials-baseline';directory.mkdir()
+ directory=root/'materials-baseline'
+ if directory.exists():
+  manifest=directory/'runtime.json';proof=json.loads((evidence/'materials-baseline-download.json').read_text())
+  assert json.loads(manifest.read_text())==row['manifest']
+  assert proof['full_archive_verified'] and proof['sha256']==row['asset']['sha256'] and proof['bytes']==row['asset']['bytes']
+  return manifest
+ directory.mkdir()
  archive=directory/row['manifest']['archive'];asset=row['asset']
  with urlopen(Request(asset['url'],headers={'User-Agent':'Kaixin-Materials-Upgrade-Verification'}),timeout=60) as response,archive.open('xb') as out:
   assert response.geturl().startswith(('https://github.com/','https://release-assets.githubusercontent.com/','https://objects.githubusercontent.com/'))
@@ -16,9 +22,9 @@ def materials_baseline(root,target,evidence):
  return manifest
 
 def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=False,materials=False):
- assert not (legacy and materials)
- entry='materials-update-entry' if materials else 'oldest-update-entry' if legacy else 'update-entry'
- launcher='materials-launcher-src' if materials else 'oldest-launcher-src' if legacy else None
+ assert isinstance(legacy,bool) and isinstance(materials,bool)
+ entry='materials-oldest-update-entry' if materials and legacy else 'materials-update-entry' if materials else 'oldest-update-entry' if legacy else 'update-entry'
+ launcher='oldest-launcher-src' if legacy else 'materials-launcher-src' if materials else None
  base=json.loads((resources/'seed/runtime.json').read_text());native=home/'runtimes'/base['runtimeId']
  active=json.loads((home/'active.json').read_text());prior=materials_baseline(root,target,evidence) if materials else root/'prior-update/runtime.json'
  # Generate synthetic audio with the frozen core before testing its real reinstall over the prior core.
@@ -39,7 +45,7 @@ def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=Fal
  old=json.loads(prior.read_text());assert old['commit']!=active['commit']
  if materials:
   native=home/'runtimes'/old['runtimeId']
-  (prior.parent/old['archive']).unlink()
+  (prior.parent/old['archive']).unlink(missing_ok=True)
  shutil.rmtree(home/'runtimes'/active['runtimeId'])
  python=native/('python/python.exe' if target.startswith('windows') else 'python/bin/python3')
  def python_probe(code,manifest):
@@ -79,13 +85,13 @@ print(json.dumps(asyncio.run(run())))
  if materials:expected_src=root/launcher
  for file in expected_src.iterdir():
   if file.is_file():assert (copied/'app/src'/file.name).read_bytes()==file.read_bytes()
- if materials:
+ if materials and not legacy:
   frozen=json.loads((root/'materials-upgrade-lock.json').read_text())['launcher_files_sha256']
   assert {f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in expected_src.iterdir() if f.is_file()}==frozen
  if target.startswith('macos'):
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
- from_launcher='20261114-unified' if materials else 'a47b05f9136ca6fb72d2f1f8a04eeb425298f358' if legacy else json.loads((root/'launcher-manifest.json').read_text())['buildId']
+ from_launcher='a47b05f9136ca6fb72d2f1f8a04eeb425298f358' if legacy else '20261114-unified' if materials else json.loads((root/'launcher-manifest.json').read_text())['buildId']
  subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if launcher else '0','KX_START_LAUNCHER_BUILD':from_launcher},check=True,timeout=1400)
  deadline=time.monotonic()+1400
  while not (evidence/(entry+'.json')).is_file():
@@ -96,8 +102,12 @@ print(json.dumps(asyncio.run(run())))
  result=json.loads((evidence/(entry+'.json')).read_text())
  if materials:
   assert result['from_runtime']==old['runtimeId']
-  assert result['selected_base_runtime']==old['runtimeId']
-  assert result['selected_archive']==json.loads((root/'attachment-release.json').read_text())['archive']
+  if legacy:
+   assert result['selected_base_runtime'] is None
+   assert result['selected_archive']=='kaixin-bridge-'+json.loads((root/'attachment-batch.json').read_text())['tag'].removeprefix('student-')+'-'+target+'.tar.gz'
+  else:
+   assert result['selected_base_runtime']==old['runtimeId']
+   assert result['selected_archive']==json.loads((root/'attachment-release.json').read_text())['archive']
  subprocess.run([str(python),'-c','import psutil,sys; p=int(sys.argv[1]); psutil.Process(p).wait(timeout=60) if psutil.pid_exists(p) else None',str(result['restarted_pid'])],check=True,timeout=70)
  after=json.loads((home/'active.json').read_text());assert after['commit']==active['commit']
  preserved=python_probe('''

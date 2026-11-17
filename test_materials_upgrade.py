@@ -19,6 +19,9 @@ class MaterialsBaselineTests(unittest.TestCase):
    root=Path(directory);evidence=root/'evidence';evidence.mkdir();data,expected=self.fixture(root)
    with patch('ci_update_probe.urlopen',return_value=PublicResponse(data)) as fetch:
     actual=materials_baseline(root,'macos-arm64',evidence)
+    (actual.parent/expected['archive']).unlink()
+    self.assertEqual(materials_baseline(root,'macos-arm64',evidence),actual)
+    self.assertEqual(fetch.call_count,1)
    self.assertEqual(json.loads(actual.read_text()),expected)
    self.assertIsNone(fetch.call_args.args[0].get_header('Authorization'))
    proof=json.loads((evidence/'materials-baseline-download.json').read_text())
