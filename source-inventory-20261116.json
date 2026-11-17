@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+  "source_commit": "430f587a0ede1a4df1bc2d8f18f1d6c6193805dc",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "excluded_files": [
     "deeptutor/services/student_learning/semantic-reference-bge-windowedCLS-v1.npz",
@@ -538,8 +538,8 @@
     },
     {
       "file": "apps/desktop/src/i18n.mjs",
-      "bytes": 31553,
-      "sha256": "84747b754a403b28f3a610b55384ed183c87732f9d9ef01ce1f277b54406ce3b",
+      "bytes": 31870,
+      "sha256": "46641518a6530a6fbba6d9d2ecc43a75f99e4c429b2a18891065a4638ffb847a",
       "mode": 420
     },
     {
@@ -556,8 +556,8 @@
     },
     {
       "file": "apps/desktop/src/main.mjs",
-      "bytes": 33355,
-      "sha256": "905b302a95b70521a957c9b2a77de86d444bea639fc7730c463d3dcad1079d4b",
+      "bytes": 33673,
+      "sha256": "b8997d6a524fbe2ce1d0aa9e586a6105c589a27decddeb03f89f8a13478f71b0",
       "mode": 420
     },
     {
@@ -580,8 +580,8 @@
     },
     {
       "file": "apps/desktop/src/release-updates.mjs",
-      "bytes": 8799,
-      "sha256": "74ed011a384d459909adc57a2877c15c1050e113e76b27ff873841ba9f4a2720",
+      "bytes": 9292,
+      "sha256": "e4801eb631f9451def18b2f9b8740d1eef976321d74fa04b304dee0bce82daa5",
       "mode": 420
     },
     {
@@ -724,8 +724,8 @@
     },
     {
       "file": "apps/desktop/test/release-updates.test.mjs",
-      "bytes": 13975,
-      "sha256": "d3f6e078c881a2ce50d69acf5069d7aac523a4aeccaf2e2927057e4c053ca77e",
+      "bytes": 17504,
+      "sha256": "59b6e44db930be838a56565fff7927f466b42b4dc2917db0f08a819e41746450",
       "mode": 420
     },
     {
@@ -772,8 +772,8 @@
     },
     {
       "file": "apps/desktop/test/update-notice.test.mjs",
-      "bytes": 9217,
-      "sha256": "1c28dfe079b96d8b58ef9e7e6e68dfcd195cf2568f8385af139634531603bda6",
+      "bytes": 10865,
+      "sha256": "c0e60c1ce80dee8080d4d8ca31dbecf9b4e81af58cd71926bf92a928dcddde72",
       "mode": 420
     },
     {
@@ -2014,8 +2014,8 @@
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
-      "bytes": 5344,
-      "sha256": "7f897cb195f78eb91d1d9e125820a53e62a3ab6c1950c32aa127163e82c69d23",
+      "bytes": 6636,
+      "sha256": "2af819c9723a1a4d012b1048e4223aa90d060ab50f2b1c494421c0fb514d657b",
       "mode": 420
     },
     {
@@ -2086,8 +2086,8 @@
     },
     {
       "file": "deeptutor/agents/loop/loop_host.py",
-      "bytes": 19656,
-      "sha256": "4874905b4b40c8c615dbcf16f6bdc1a9cf348afb579201115f34ee1b94dd8c94",
+      "bytes": 19968,
+      "sha256": "35c953742c27fd9098eab1f1619d61fbb28d4c22745e19c8b78a5a0e35b4f914",
       "mode": 420
     },
     {
@@ -2098,8 +2098,8 @@
     },
     {
       "file": "deeptutor/agents/loop/native_adapter.py",
-      "bytes": 21504,
-      "sha256": "c595e3dfd9b35575bb870a99b5ec2abe3bc3bbdbf73a2ab9dd20a5f4778e1790",
+      "bytes": 21745,
+      "sha256": "e63d1c0288a689a8657a64761aa3649524e2bfd2ca1e1a17a6a2402ee13cbb3a",
       "mode": 420
     },
     {
@@ -2122,8 +2122,8 @@
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
-      "bytes": 100450,
-      "sha256": "481f7b836bb21729e76dac366d18a1a5d7c108007bcab43a21321ab03d9dce42",
+      "bytes": 100792,
+      "sha256": "41576f188d780eef451c632cca3499600461b185d523265e45878a9e4040a32b",
       "mode": 420
     },
     {
@@ -3064,8 +3064,8 @@
     },
     {
       "file": "deeptutor/api/routers/student_question_bank.py",
-      "bytes": 2624,
-      "sha256": "9c6277ac19a1a09d3b18dc78b5d1ac68afe114ad6e62babb33fa23c66de8c387",
+      "bytes": 2710,
+      "sha256": "570b900e1ae6a632dc97980726c8799162f15c64ee8874d439be98768f2a5b71",
       "mode": 420
     },
     {
@@ -9232,8 +9232,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 7129,
-      "sha256": "b31abdafbce2ec6384cd58b16c0e7e84ff6f910b7615c7dbfc008dc09562b3f5",
+      "bytes": 8308,
+      "sha256": "e9fb397f3393af1f710a0708162567a32a99cf3ffca212be27223dc6591e6c09",
       "mode": 420
     },
     {
@@ -11013,6 +11013,12 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/student_learning/question_source_classifications.json",
+      "bytes": 48477,
+      "sha256": "aa8f06ba8e60138dff44d76a96af01ca4b78296cdd21c3d78eb44a5e5205b00a",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/student_learning/question_source_exclusions.json",
       "bytes": 5285,
       "sha256": "d83de01f607be564213c007a6613ca81b3adea2821ef1de83147a298d3f71522",
@@ -11020,8 +11026,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_sources.py",
-      "bytes": 23428,
-      "sha256": "b8e8bb3b2b6cee08d00de3f5967e1478f6cbc4fed5cccb4e7a7d421005ad95b3",
+      "bytes": 28143,
+      "sha256": "1493176405e08435dc079e2450ef985f5e6bc1794d3d46cdea6eb22beff5c015",
       "mode": 420
     },
     {
@@ -11038,8 +11044,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 9789,
-      "sha256": "abe1801550bb79c90c62954b70883cda767b124fc8005c97b5076db6a669c157",
+      "bytes": 9820,
+      "sha256": "edd2c0010de6a9fbc13501fc0f32875e73d071a6779f97faec3313c21a6b50b8",
       "mode": 420
     },
     {
@@ -12891,6 +12897,12 @@
       "mode": 420
     },
     {
+      "file": "docs-for-dev/desktop-update-interruption-20261117.md",
+      "bytes": 4291,
+      "sha256": "fa92ff2ccf21fc6ca103d3fb5b797046253ee0db6f1a6d270b0188c830aaf7a8",
+      "mode": 420
+    },
+    {
       "file": "docs-for-dev/examples/learning_echo/README.md",
       "bytes": 2584,
       "sha256": "c5f5895f42db2281e1a528f4d9c02988ea68a1f7d7221c6711a1d9652d728126",
@@ -13065,6 +13077,12 @@
       "mode": 420
     },
     {
+      "file": "docs-for-dev/k12-question-bank/bank-readability-20261117.md",
+      "bytes": 2747,
+      "sha256": "d90f8f06c0e311a13b1dc56cd19bc00ad59e49ee2ea7605ece323239872bd093",
+      "mode": 420
+    },
+    {
       "file": "docs-for-dev/k12-question-bank/baseline-case.json",
       "bytes": 769,
       "sha256": "7bd5efa9f904c5513acd54a84ad65374e8aaad974efa34a771652ae1df5d81f0",
@@ -13180,8 +13198,8 @@
     },
     {
       "file": "packages/chat-engine/src/native/session.ts",
-      "bytes": 15349,
-      "sha256": "b593e506b4c78a241b866061b21abebcab1f4360da91a448462db9a4549f68cc",
+      "bytes": 15448,
+      "sha256": "e5d55bae212c134400237613e9c1680c2c96307eb028000d705373b511b1c1e6",
       "mode": 420
     },
     {
@@ -13306,8 +13324,8 @@
     },
     {
       "file": "packages/chat-engine/test/native-engine.test.ts",
-      "bytes": 52214,
-      "sha256": "ac32f650ff1c98c02c7a6cfce20e30f7c9d00a442b41b4c36b21ce5176232084",
+      "bytes": 52373,
+      "sha256": "65abdfa143c65c496bc58e31eaab4694712c6ac2ded02e829d3346198cb2428c",
       "mode": 420
     },
     {
@@ -13666,8 +13684,8 @@
     },
     {
       "file": "scripts/build_question_bank.py",
-      "bytes": 21046,
-      "sha256": "c9da1dae1303a7cc3feb36eb4554f3bb9616be34e7c41cd2bf3d111b303f7dd7",
+      "bytes": 21188,
+      "sha256": "ad8446529a6027066e5ee71eacff363798554525c765a3325e1e87667ae2d1fe",
       "mode": 420
     },
     {
@@ -14034,6 +14052,12 @@
       "file": "tests/agents/chat/test_prompt_identity.py",
       "bytes": 3229,
       "sha256": "39237d15b6c3f2aed6d85bb50d16276eb8ab026f417a9cc3cdfd83e4a9c2d694",
+      "mode": 420
+    },
+    {
+      "file": "tests/agents/chat/test_question_resume.py",
+      "bytes": 4428,
+      "sha256": "b692bf9a4778c2e04b021a7d2eb92c137549a0fc044a5365317a9d8ad1be8980",
       "mode": 420
     },
     {
@@ -19438,14 +19462,14 @@
     },
     {
       "file": "tests/services/test_question_grounding.py",
-      "bytes": 9995,
-      "sha256": "0adde3c688bf669ec5fd7de1a527a0ebe63145ca4097e85bf300048654e0e43c",
+      "bytes": 14705,
+      "sha256": "0e34e9b25a3e0e0c16628de776f4ee59e353dda420569b8e72015ec90d4fcd14",
       "mode": 420
     },
     {
       "file": "tests/services/test_question_sources.py",
-      "bytes": 42131,
-      "sha256": "312797baf5c4101c7aa36e2191300ec8779ac89e63b09288154e617be6a7a50a",
+      "bytes": 45181,
+      "sha256": "4af5545b98494fbcb6c357859cf8393188e0811d19245f675a558ecb2544ee5e",
       "mode": 420
     },
     {
@@ -23434,14 +23458,14 @@
     },
     {
       "file": "web/components/student/QuestionSourceLibrary.tsx",
-      "bytes": 6122,
-      "sha256": "8fd00a4465fa298f7c797f813aee3fe735acb2cf6119703e65335492870eae23",
+      "bytes": 8415,
+      "sha256": "646e6f7747a9c5583026a3aaf4212749728addb697b5bce0c2b983f7a14b2d33",
       "mode": 420
     },
     {
       "file": "web/components/student/QuestionSourcePreview.tsx",
-      "bytes": 9166,
-      "sha256": "d30e16089f083497044f523c8c0fd44b9ea4c71dfcb9f2f513b03df4aa80317e",
+      "bytes": 9268,
+      "sha256": "48f5fccc6559e1f48ed7669194a8ef47350c643e9039477220417bc7551d3cfe",
       "mode": 420
     },
     {
@@ -23458,8 +23482,8 @@
     },
     {
       "file": "web/components/student/StudentLearning.module.css",
-      "bytes": 9352,
-      "sha256": "ddce4109b9233d085bf52adc43fc5d7a5f8b281df30beaf6445361ef89e25244",
+      "bytes": 13129,
+      "sha256": "357f589e2aca1f378bf441f7d54c19ed282acebf996a6db95f6db2f33c67e78c",
       "mode": 420
     },
     {
@@ -24022,8 +24046,8 @@
     },
     {
       "file": "web/features/chat/messages/ChatMessageList.tsx",
-      "bytes": 118293,
-      "sha256": "ff6d7c4c86065fb93b70200c27c442bc7b3c7df23500e0c1646303413fea648d",
+      "bytes": 118445,
+      "sha256": "993f02be77273280f211cf33c04b7fca47db9a1759af665d881a8dd19952791e",
       "mode": 420
     },
     {
@@ -26121,6 +26145,12 @@
       "mode": 420
     },
     {
+      "file": "web/lib/question-bank-display.ts",
+      "bytes": 1729,
+      "sha256": "be25cf26a6677c917b0126c7cc0fe77800f940348f4bd90437ef1d233b738977",
+      "mode": 420
+    },
+    {
       "file": "web/lib/quiz-judge.ts",
       "bytes": 3809,
       "sha256": "9e84c0392d464857b28cea2570015ac2ae7285aa846ad90048dbdc80b13f96a8",
@@ -26500,8 +26530,8 @@
     },
     {
       "file": "web/lib/student-learning-api.ts",
-      "bytes": 8246,
-      "sha256": "81b879593b8d477a11ee3eb70df526a017976771e4ec11b40c0e5969e6144471",
+      "bytes": 8266,
+      "sha256": "7defaae063c86f94d00997b1db3ec624446c40c943bf4adca629828ffed9d67e",
       "mode": 420
     },
     {
@@ -30033,6 +30063,12 @@
       "mode": 420
     },
     {
+      "file": "web/tests/question-bank-display.spec.ts",
+      "bytes": 1417,
+      "sha256": "c1abaf0286790469f784ab0f442474eb706aa337612c0c9e616c98645acad0df",
+      "mode": 420
+    },
+    {
       "file": "web/tests/question-bank-filter.test.ts",
       "bytes": 1053,
       "sha256": "376b58bf748bae203d18fdb9d7e94f0c9dffc158d339f8e74ca44f3497f3d48a",
@@ -30064,8 +30100,8 @@
     },
     {
       "file": "web/tests/question-source-preview.spec.tsx",
-      "bytes": 7566,
-      "sha256": "6d8bfeac8020b614ed998229849556bec81f6ec2e43638f48b0168daaa08e946",
+      "bytes": 7567,
+      "sha256": "7b87f1d0754826c04c83575b320416cf7c22c28c8922657996027e1918f0cc39",
       "mode": 420
     },
     {
@@ -30712,8 +30748,8 @@
     },
     {
       "file": "web/tests/source-citation-links.spec.tsx",
-      "bytes": 7665,
-      "sha256": "3beca1d6ec056474452c1333d5fb4aaf354307f9aade343a85162b435cb80fae",
+      "bytes": 8457,
+      "sha256": "7cdde6d31b863b6e5babe55ee1f6e48341d5f0592b2c2d35cc236e48843543c8",
       "mode": 420
     },
     {
@@ -30808,8 +30844,8 @@
     },
     {
       "file": "web/tests/student-source-library.spec.tsx",
-      "bytes": 6236,
-      "sha256": "1955c6b02200d3a04ad3b17bf318a86b0eca74b43e081a2a6ae41ebc5b3525a1",
+      "bytes": 7628,
+      "sha256": "1e7b277301669374442f9f043185f03c253bf88f2d0e8130fe9acfdfefe05a10",
       "mode": 420
     },
     {
@@ -31379,6 +31415,36 @@
       "mode": 420
     },
     {
+      "file": "apps/desktop/src/i18n.mjs",
+      "bytes": 31870,
+      "sha256": "46641518a6530a6fbba6d9d2ecc43a75f99e4c429b2a18891065a4638ffb847a",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/src/main.mjs",
+      "bytes": 33673,
+      "sha256": "b8997d6a524fbe2ce1d0aa9e586a6105c589a27decddeb03f89f8a13478f71b0",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/src/release-updates.mjs",
+      "bytes": 9292,
+      "sha256": "e4801eb631f9451def18b2f9b8740d1eef976321d74fa04b304dee0bce82daa5",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/test/release-updates.test.mjs",
+      "bytes": 17504,
+      "sha256": "59b6e44db930be838a56565fff7927f466b42b4dc2917db0f08a819e41746450",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/test/update-notice.test.mjs",
+      "bytes": 10865,
+      "sha256": "c0e60c1ce80dee8080d4d8ca31dbecf9b4e81af58cd71926bf92a928dcddde72",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/agents/_shared/tool_composition.py",
       "bytes": 16773,
       "sha256": "ae5e8d3cf615e28ef513ca2b2ac162fd95991ef7b2de27f1b9a4de471bfc571f",
@@ -31386,8 +31452,8 @@
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
-      "bytes": 5344,
-      "sha256": "7f897cb195f78eb91d1d9e125820a53e62a3ab6c1950c32aa127163e82c69d23",
+      "bytes": 6636,
+      "sha256": "2af819c9723a1a4d012b1048e4223aa90d060ab50f2b1c494421c0fb514d657b",
       "mode": 420
     },
     {
@@ -31422,8 +31488,8 @@
     },
     {
       "file": "deeptutor/agents/loop/loop_host.py",
-      "bytes": 19656,
-      "sha256": "4874905b4b40c8c615dbcf16f6bdc1a9cf348afb579201115f34ee1b94dd8c94",
+      "bytes": 19968,
+      "sha256": "35c953742c27fd9098eab1f1619d61fbb28d4c22745e19c8b78a5a0e35b4f914",
       "mode": 420
     },
     {
@@ -31434,8 +31500,8 @@
     },
     {
       "file": "deeptutor/agents/loop/native_adapter.py",
-      "bytes": 21504,
-      "sha256": "c595e3dfd9b35575bb870a99b5ec2abe3bc3bbdbf73a2ab9dd20a5f4778e1790",
+      "bytes": 21745,
+      "sha256": "e63d1c0288a689a8657a64761aa3649524e2bfd2ca1e1a17a6a2402ee13cbb3a",
       "mode": 420
     },
     {
@@ -31446,8 +31512,8 @@
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
-      "bytes": 100450,
-      "sha256": "481f7b836bb21729e76dac366d18a1a5d7c108007bcab43a21321ab03d9dce42",
+      "bytes": 100792,
+      "sha256": "41576f188d780eef451c632cca3499600461b185d523265e45878a9e4040a32b",
       "mode": 420
     },
     {
@@ -31476,8 +31542,8 @@
     },
     {
       "file": "deeptutor/api/routers/student_question_bank.py",
-      "bytes": 2624,
-      "sha256": "9c6277ac19a1a09d3b18dc78b5d1ac68afe114ad6e62babb33fa23c66de8c387",
+      "bytes": 2710,
+      "sha256": "570b900e1ae6a632dc97980726c8799162f15c64ee8874d439be98768f2a5b71",
       "mode": 420
     },
     {
@@ -31734,8 +31800,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 7129,
-      "sha256": "b31abdafbce2ec6384cd58b16c0e7e84ff6f910b7615c7dbfc008dc09562b3f5",
+      "bytes": 8308,
+      "sha256": "e9fb397f3393af1f710a0708162567a32a99cf3ffca212be27223dc6591e6c09",
       "mode": 420
     },
     {
@@ -33515,6 +33581,12 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/student_learning/question_source_classifications.json",
+      "bytes": 48477,
+      "sha256": "aa8f06ba8e60138dff44d76a96af01ca4b78296cdd21c3d78eb44a5e5205b00a",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/student_learning/question_source_exclusions.json",
       "bytes": 5285,
       "sha256": "d83de01f607be564213c007a6613ca81b3adea2821ef1de83147a298d3f71522",
@@ -33522,8 +33594,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_sources.py",
-      "bytes": 23428,
-      "sha256": "b8e8bb3b2b6cee08d00de3f5967e1478f6cbc4fed5cccb4e7a7d421005ad95b3",
+      "bytes": 28143,
+      "sha256": "1493176405e08435dc079e2450ef985f5e6bc1794d3d46cdea6eb22beff5c015",
       "mode": 420
     },
     {
@@ -33534,8 +33606,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 9789,
-      "sha256": "abe1801550bb79c90c62954b70883cda767b124fc8005c97b5076db6a669c157",
+      "bytes": 9820,
+      "sha256": "edd2c0010de6a9fbc13501fc0f32875e73d071a6779f97faec3313c21a6b50b8",
       "mode": 420
     },
     {
@@ -33650,6 +33722,12 @@
       "file": "deeptutor/utils/document_images.py",
       "bytes": 41814,
       "sha256": "810ea8ddc32e77904521915f0366933d113b3b74db9c99009da4e643dd331dfb",
+      "mode": 420
+    },
+    {
+      "file": "docs-for-dev/desktop-update-interruption-20261117.md",
+      "bytes": 4291,
+      "sha256": "fa92ff2ccf21fc6ca103d3fb5b797046253ee0db6f1a6d270b0188c830aaf7a8",
       "mode": 420
     },
     {
@@ -33779,6 +33857,12 @@
       "mode": 420
     },
     {
+      "file": "docs-for-dev/k12-question-bank/bank-readability-20261117.md",
+      "bytes": 2747,
+      "sha256": "d90f8f06c0e311a13b1dc56cd19bc00ad59e49ee2ea7605ece323239872bd093",
+      "mode": 420
+    },
+    {
       "file": "docs-for-dev/k12-question-bank/baseline-case.json",
       "bytes": 769,
       "sha256": "7bd5efa9f904c5513acd54a84ad65374e8aaad974efa34a771652ae1df5d81f0",
@@ -33822,8 +33906,8 @@
     },
     {
       "file": "packages/chat-engine/src/native/session.ts",
-      "bytes": 15349,
-      "sha256": "b593e506b4c78a241b866061b21abebcab1f4360da91a448462db9a4549f68cc",
+      "bytes": 15448,
+      "sha256": "e5d55bae212c134400237613e9c1680c2c96307eb028000d705373b511b1c1e6",
       "mode": 420
     },
     {
@@ -33864,8 +33948,8 @@
     },
     {
       "file": "packages/chat-engine/test/native-engine.test.ts",
-      "bytes": 52214,
-      "sha256": "ac32f650ff1c98c02c7a6cfce20e30f7c9d00a442b41b4c36b21ce5176232084",
+      "bytes": 52373,
+      "sha256": "65abdfa143c65c496bc58e31eaab4694712c6ac2ded02e829d3346198cb2428c",
       "mode": 420
     },
     {
@@ -33930,8 +34014,8 @@
     },
     {
       "file": "scripts/build_question_bank.py",
-      "bytes": 21046,
-      "sha256": "c9da1dae1303a7cc3feb36eb4554f3bb9616be34e7c41cd2bf3d111b303f7dd7",
+      "bytes": 21188,
+      "sha256": "ad8446529a6027066e5ee71eacff363798554525c765a3325e1e87667ae2d1fe",
       "mode": 420
     },
     {
@@ -34004,6 +34088,12 @@
       "file": "tests/agents/chat/test_language_prompts.py",
       "bytes": 8288,
       "sha256": "f46f38020e6e77f9a3f9d21739dd5dc3e6337e3fcc49b349a797619ade21769c",
+      "mode": 420
+    },
+    {
+      "file": "tests/agents/chat/test_question_resume.py",
+      "bytes": 4428,
+      "sha256": "b692bf9a4778c2e04b021a7d2eb92c137549a0fc044a5365317a9d8ad1be8980",
       "mode": 420
     },
     {
@@ -34134,14 +34224,14 @@
     },
     {
       "file": "tests/services/test_question_grounding.py",
-      "bytes": 9995,
-      "sha256": "0adde3c688bf669ec5fd7de1a527a0ebe63145ca4097e85bf300048654e0e43c",
+      "bytes": 14705,
+      "sha256": "0e34e9b25a3e0e0c16628de776f4ee59e353dda420569b8e72015ec90d4fcd14",
       "mode": 420
     },
     {
       "file": "tests/services/test_question_sources.py",
-      "bytes": 42131,
-      "sha256": "312797baf5c4101c7aa36e2191300ec8779ac89e63b09288154e617be6a7a50a",
+      "bytes": 45181,
+      "sha256": "4af5545b98494fbcb6c357859cf8393188e0811d19245f675a558ecb2544ee5e",
       "mode": 420
     },
     {
@@ -34284,20 +34374,20 @@
     },
     {
       "file": "web/components/student/QuestionSourceLibrary.tsx",
-      "bytes": 6122,
-      "sha256": "8fd00a4465fa298f7c797f813aee3fe735acb2cf6119703e65335492870eae23",
+      "bytes": 8415,
+      "sha256": "646e6f7747a9c5583026a3aaf4212749728addb697b5bce0c2b983f7a14b2d33",
       "mode": 420
     },
     {
       "file": "web/components/student/QuestionSourcePreview.tsx",
-      "bytes": 9166,
-      "sha256": "d30e16089f083497044f523c8c0fd44b9ea4c71dfcb9f2f513b03df4aa80317e",
+      "bytes": 9268,
+      "sha256": "48f5fccc6559e1f48ed7669194a8ef47350c643e9039477220417bc7551d3cfe",
       "mode": 420
     },
     {
       "file": "web/components/student/StudentLearning.module.css",
-      "bytes": 9352,
-      "sha256": "ddce4109b9233d085bf52adc43fc5d7a5f8b281df30beaf6445361ef89e25244",
+      "bytes": 13129,
+      "sha256": "357f589e2aca1f378bf441f7d54c19ed282acebf996a6db95f6db2f33c67e78c",
       "mode": 420
     },
     {
@@ -34326,8 +34416,8 @@
     },
     {
       "file": "web/features/chat/messages/ChatMessageList.tsx",
-      "bytes": 118293,
-      "sha256": "ff6d7c4c86065fb93b70200c27c442bc7b3c7df23500e0c1646303413fea648d",
+      "bytes": 118445,
+      "sha256": "993f02be77273280f211cf33c04b7fca47db9a1759af665d881a8dd19952791e",
       "mode": 420
     },
     {
@@ -34373,6 +34463,12 @@
       "mode": 420
     },
     {
+      "file": "web/lib/question-bank-display.ts",
+      "bytes": 1729,
+      "sha256": "be25cf26a6677c917b0126c7cc0fe77800f940348f4bd90437ef1d233b738977",
+      "mode": 420
+    },
+    {
       "file": "web/lib/reading-citations.ts",
       "bytes": 18173,
       "sha256": "73ebe253299caa23622627def68ec25eacdd0766133f96e04c4ff1b63b0d2993",
@@ -34386,8 +34482,8 @@
     },
     {
       "file": "web/lib/student-learning-api.ts",
-      "bytes": 8246,
-      "sha256": "81b879593b8d477a11ee3eb70df526a017976771e4ec11b40c0e5969e6144471",
+      "bytes": 8266,
+      "sha256": "7defaae063c86f94d00997b1db3ec624446c40c943bf4adca629828ffed9d67e",
       "mode": 420
     },
     {
@@ -34499,6 +34595,12 @@
       "mode": 420
     },
     {
+      "file": "web/tests/question-bank-display.spec.ts",
+      "bytes": 1417,
+      "sha256": "c1abaf0286790469f784ab0f442474eb706aa337612c0c9e616c98645acad0df",
+      "mode": 420
+    },
+    {
       "file": "web/tests/question-picture-cards.spec.tsx",
       "bytes": 6195,
       "sha256": "e42c5892c73eb2436f786f7f235a6c48275d2e809e3f33e82fa15386a2412d76",
@@ -34506,8 +34608,8 @@
     },
     {
       "file": "web/tests/question-source-preview.spec.tsx",
-      "bytes": 7566,
-      "sha256": "6d8bfeac8020b614ed998229849556bec81f6ec2e43638f48b0168daaa08e946",
+      "bytes": 7567,
+      "sha256": "7b87f1d0754826c04c83575b320416cf7c22c28c8922657996027e1918f0cc39",
       "mode": 420
     },
     {
@@ -34536,8 +34638,8 @@
     },
     {
       "file": "web/tests/source-citation-links.spec.tsx",
-      "bytes": 7665,
-      "sha256": "3beca1d6ec056474452c1333d5fb4aaf354307f9aade343a85162b435cb80fae",
+      "bytes": 8457,
+      "sha256": "7cdde6d31b863b6e5babe55ee1f6e48341d5f0592b2c2d35cc236e48843543c8",
       "mode": 420
     },
     {
@@ -34548,8 +34650,8 @@
     },
     {
       "file": "web/tests/student-source-library.spec.tsx",
-      "bytes": 6236,
-      "sha256": "1955c6b02200d3a04ad3b17bf318a86b0eca74b43e081a2a6ae41ebc5b3525a1",
+      "bytes": 7628,
+      "sha256": "1e7b277301669374442f9f043185f03c253bf88f2d0e8130fe9acfdfefe05a10",
       "mode": 420
     },
     {
