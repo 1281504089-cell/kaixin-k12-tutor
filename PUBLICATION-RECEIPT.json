@@ -1,23 +1,65 @@
 {
-  "status": "published_and_receipt_verified",
-  "tag": "student-20261117-k12-2",
-  "release_id": 447749595,
-  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2",
-  "source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
-  "release_repository_commit": "ea35edb736e84ca39c1adc2776fbb7220b5f82d5",
-  "publication_run": 44007001459,
-  "published_at_utc": "2026-11-17T03:06:05Z",
-  "full_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/PUBLICATION-RECEIPT.json",
-  "full_receipt_sha256": "010899d45790e66fe2f77a01ca9bcf648bf65ac78100ba26d27fa2ed80c314aa",
-  "full_receipt_bytes": 567899,
-  "accepted_native_targets": [
-    "windows-x64",
-    "macos-x64",
-    "macos-arm64"
-  ],
-  "signed_update_manifests_verified": 39,
-  "whole_anonymous_archives_verified_by_publication_ci": 4,
-  "local_actual_online_update_completed": true,
-  "local_actual_update_receipt_file": "LOCAL-ACTUAL-UPDATE-20261117.json",
-  "local_actual_update_receipt_sha256": "efd045295b34a61902cf2bb7699375677ee011dd2b99365975a6fb18ef477b01"
+  "formatVersion": 1,
+  "summary_only": true,
+  "tag": "student-20261117-k12-1",
+  "release_id": 447366728,
+  "release_repository_commit": "6d8b1ff33135dfbfafa48bc3e0b6f6096699cb9d",
+  "publication_run": 43952012536,
+  "full_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-1/PUBLICATION-RECEIPT.json",
+  "full_receipt_sha256": "829f1776d0facadebe7c588c39c549aec01ccf0228630bcd3a408b9b62785bc2",
+  "full_receipt_bytes": 506591,
+  "native_runs": {
+    "original_matrix_run": 43922470199,
+    "original_matrix_conclusion": "failure",
+    "intel_reverification_run": 43944772086,
+    "intel_reverification_conclusion": "success",
+    "accepted_runs_per_target": {
+      "windows-x64": {
+        "run_id": 43922470199,
+        "workflow_commit": "9d614efb87d7bdbfb7e8a70dcc9ec4b0ca03c3f5"
+      },
+      "macos-x64": {
+        "run_id": 43944772086,
+        "workflow_commit": "6df5a9eff169d3cc65cd81ad747680cc1ade7116"
+      },
+      "macos-arm64": {
+        "run_id": 43922470199,
+        "workflow_commit": "9d614efb87d7bdbfb7e8a70dcc9ec4b0ca03c3f5"
+      }
+    }
+  },
+  "local_actual_online_update": {
+    "status": "passed",
+    "actual_online_update_completed": true,
+    "entry": "设置 → 关于 → 检查更新",
+    "formal_tag": "student-20261117-k12-1",
+    "from_commit": "896e79b517a008ac6d584526151862ff6191cf77",
+    "final_source": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+    "runtime": "1.7.1-kaixin-20261117-k12-1-macos-x64-base-c41831772671",
+    "signature_verified": true,
+    "download_confirmed_in_real_ui": true,
+    "download_progress_and_bytes_visible": true,
+    "install_completion_seen_in_real_ui": true,
+    "check_again_current": true,
+    "test_feed_used": false,
+    "manual_core_install_used": false,
+    "launcher_build": "20261115-updater-1",
+    "launcher_files_verified": 24,
+    "chat_databases_logically_compared": 10,
+    "database_tables_compared": 140,
+    "all_existing_rows_preserved": true,
+    "settings_files_unchanged": 19,
+    "reading_files_unchanged": 11,
+    "default_reference_count_before": 7704,
+    "default_reference_count_after": 12101,
+    "private_books_unchanged": true,
+    "private_excerpts_unchanged": true,
+    "private_book_count": 11,
+    "private_excerpt_count": 3,
+    "real_learning_content_uploaded": false,
+    "private_key_uploaded": false,
+    "observed_at": "2026-11-16T20:53:21.630Z"
+  },
+  "anonymous_full_archives": 4,
+  "stable_manifests": 36
 }

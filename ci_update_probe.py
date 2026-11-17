@@ -1,12 +1,26 @@
 """Run the production check-update IPC against the exact signed candidate payload."""
-import json,os,shutil,subprocess,time
+import hashlib,json,os,shutil,subprocess,time
 from pathlib import Path
+from urllib.request import Request,urlopen
 
-def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=False):
- entry='oldest-update-entry' if legacy else 'update-entry'
- launcher='oldest-launcher-src' if legacy else None
+def materials_baseline(root,target,evidence):
+ lock=json.loads((root/'materials-upgrade-lock.json').read_text());row=lock['targets'][target]
+ directory=root/'materials-baseline';directory.mkdir()
+ archive=directory/row['manifest']['archive'];asset=row['asset']
+ with urlopen(Request(asset['url'],headers={'User-Agent':'Kaixin-Materials-Upgrade-Verification'}),timeout=60) as response,archive.open('xb') as out:
+  assert response.geturl().startswith(('https://github.com/','https://release-assets.githubusercontent.com/','https://objects.githubusercontent.com/'))
+  shutil.copyfileobj(response,out,8*1024**2)
+ with archive.open('rb') as stream:assert archive.stat().st_size==asset['bytes'] and hashlib.file_digest(stream,'sha256').hexdigest()==asset['sha256']
+ manifest=directory/'runtime.json';manifest.write_text(json.dumps(row['manifest'],indent=2))
+ (evidence/'materials-baseline-download.json').write_text(json.dumps({'target':target,'runtime_id':row['manifest']['runtimeId'],'bytes':asset['bytes'],'sha256':asset['sha256'],'anonymous_download':True,'full_archive_verified':True,'launcher_build':lock['launcher_build']},indent=2))
+ return manifest
+
+def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=False,materials=False):
+ assert not (legacy and materials)
+ entry='materials-update-entry' if materials else 'oldest-update-entry' if legacy else 'update-entry'
+ launcher='materials-launcher-src' if materials else 'oldest-launcher-src' if legacy else None
  base=json.loads((resources/'seed/runtime.json').read_text());native=home/'runtimes'/base['runtimeId']
- active=json.loads((home/'active.json').read_text());prior=root/'prior-update/runtime.json'
+ active=json.loads((home/'active.json').read_text());prior=materials_baseline(root,target,evidence) if materials else root/'prior-update/runtime.json'
  # Generate synthetic audio with the frozen core before testing its real reinstall over the prior core.
  python=native/('python/python.exe' if target.startswith('windows') else 'python/bin/python3')
  qa_home=home/'workspace'
@@ -23,6 +37,9 @@ def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=Fal
  code="import{readFile,writeFile}from'node:fs/promises';import{pathToFileURL}from'node:url';const{installBundle}=await import(pathToFileURL(process.argv[1]));const key=await readFile(process.argv[2]);const installed=await installBundle(process.argv[3],process.argv[4],key);await writeFile(process.argv[4]+'/active.json',JSON.stringify(installed.manifest));"
  subprocess.run(['node','--input-type=module','-e',code,str(resources/'app/src/bundles.mjs'),str(resources/'app/assets/runtime-public.pem'),str(prior),str(home)],check=True)
  old=json.loads(prior.read_text());assert old['commit']!=active['commit']
+ if materials:
+  native=home/'runtimes'/old['runtimeId']
+  (prior.parent/old['archive']).unlink()
  shutil.rmtree(home/'runtimes'/active['runtimeId'])
  python=native/('python/python.exe' if target.startswith('windows') else 'python/bin/python3')
  def python_probe(code,manifest):
@@ -51,7 +68,7 @@ print(json.dumps(asyncio.run(run())))
  # The production launcher always verifies its seed manifest, even when an older core is already installed.
  (copied/'seed').mkdir();shutil.copyfile(resources/'seed/runtime.json',copied/'seed/runtime.json')
  package=copied/'app/package.json';pkg=json.loads(package.read_text());pkg['main']='qa/update-flow.cjs';package.write_text(json.dumps(pkg,ensure_ascii=False))
- if legacy:
+ if launcher:
   shutil.rmtree(copied/'app/src');shutil.copytree(root/launcher,copied/'app/src')
  (copied/'app/qa').mkdir()
  shutil.copyfile(root/'ci-update-flow.cjs',copied/'app/qa/update-flow.cjs')
@@ -59,12 +76,17 @@ print(json.dumps(asyncio.run(run())))
  for name in ['ci-chat-audio-ui.cjs','audio-card-probe.cjs','native-html-speech-diagnostic.cjs','science-ui.cjs','ci-turn-preview.cjs','ci-k12-library-ui.cjs']:
   shutil.copyfile(root/name,copied/'app/qa'/name)
  expected_src=root/launcher if legacy else resources/'app/src'
+ if materials:expected_src=root/launcher
  for file in expected_src.iterdir():
   if file.is_file():assert (copied/'app/src'/file.name).read_bytes()==file.read_bytes()
+ if materials:
+  frozen=json.loads((root/'materials-upgrade-lock.json').read_text())['launcher_files_sha256']
+  assert {f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in expected_src.iterdir() if f.is_file()}==frozen
  if target.startswith('macos'):
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
- subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if legacy else '0'},check=True,timeout=1400)
+ from_launcher='20261114-unified' if materials else 'a47b05f9136ca6fb72d2f1f8a04eeb425298f358' if legacy else json.loads((root/'launcher-manifest.json').read_text())['buildId']
+ subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if launcher else '0','KX_START_LAUNCHER_BUILD':from_launcher},check=True,timeout=1400)
  deadline=time.monotonic()+1400
  while not (evidence/(entry+'.json')).is_file():
   error=evidence/(entry+'.json.error.json')
@@ -72,6 +94,10 @@ print(json.dumps(asyncio.run(run())))
   assert time.monotonic()<deadline,'The detached application did not finish its real restart test'
   time.sleep(1)
  result=json.loads((evidence/(entry+'.json')).read_text())
+ if materials:
+  assert result['from_runtime']==old['runtimeId']
+  assert result['selected_base_runtime']==old['runtimeId']
+  assert result['selected_archive']==json.loads((root/'attachment-release.json').read_text())['archive']
  subprocess.run([str(python),'-c','import psutil,sys; p=int(sys.argv[1]); psutil.Process(p).wait(timeout=60) if psutil.pid_exists(p) else None',str(result['restarted_pid'])],check=True,timeout=70)
  after=json.loads((home/'active.json').read_text());assert after['commit']==active['commit']
  preserved=python_probe('''

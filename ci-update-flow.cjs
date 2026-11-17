@@ -157,7 +157,7 @@ async function content() {
       entry: 'renderer IPC desktop:check-release', native_dialogs_auto_confirmed: true,
       production_main_unchanged: true, candidate_feed_routed_only_in_test: true, from_runtime: before.runtimeId, to_runtime: after.runtimeId,
       actual_download_install_backup_restart: 'passed', transaction: transaction.phase,
-      check_again_current: true, signed_launcher_restarted: needsRestart, from_launcher: needsRestart?'a47b05f9136ca6fb72d2f1f8a04eeb425298f358':descriptor.buildId, to_launcher: descriptor.buildId, old_pid: saved?.oldPid ?? fromPid, restarted_pid: process.pid, download_progress_visible: progressVisible, downloaded_bytes_visible: progressWithBytes, old_renderer_closed_after_update: Boolean(invokeError),
+      check_again_current: true, signed_launcher_restarted: needsRestart, from_launcher: process.env.KX_START_LAUNCHER_BUILD??(needsRestart?'a47b05f9136ca6fb72d2f1f8a04eeb425298f358':descriptor.buildId), to_launcher: descriptor.buildId, old_pid: saved?.oldPid ?? fromPid, restarted_pid: process.pid, download_progress_visible: progressVisible, downloaded_bytes_visible: progressWithBytes, old_renderer_closed_after_update: Boolean(invokeError), selected_archive:after.archive, selected_base_runtime:after.baseRuntimeId??null,
       library_bulk_upload: library, chat_audio: audio, science_formulas: science, quick_preview: preview, k12_library: k12,
     }, null, 2));
     clearTimeout(timer);
