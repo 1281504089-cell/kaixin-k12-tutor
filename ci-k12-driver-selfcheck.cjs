@@ -5,6 +5,9 @@ const path = require('node:path');
 const vm = require('node:vm');
 const t = require('./ci-k12-library-ui.cjs')._test;
 let checked = 0;
+const entryCheck=fs.readFileSync(path.join(__dirname,'ci-k12-library-ui.cjs'),'utf8').match(/assert\(\[[^\n]+\]\.includes\(requestedEntry\)\);/)[0];
+for(const requestedEntry of ['current','oldest','fresh','update-entry','oldest-update-entry','materials-update-entry','materials-oldest-update-entry']) vm.runInNewContext(entryCheck,{assert,requestedEntry});
+assert.throws(()=>vm.runInNewContext(entryCheck,{assert,requestedEntry:'unrelated-entry'}));
 function check(name, fn) { fn(); checked++; console.log('PASS',name); }
 check('complete seed first/last body, not metadata',()=>{
   const markers=t.bodyMarkers('五、综合性学习\n31．2020年春节热播的影片引发同学的深思，请完成第一项活动。\n[图片:abc]\n________\n32．请结合材料谈谈你会用哪些具体行动回报父母。（写出两点）');

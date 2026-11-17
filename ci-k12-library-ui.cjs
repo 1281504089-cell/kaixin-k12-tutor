@@ -62,7 +62,7 @@ function inspectPreparedPicture() {
 
 module.exports = async function verifyK12Library(view, evidence, seed, options = {}) {
   const requestedEntry = options.entry ?? 'current';
-  assert(['current','oldest','update-entry','oldest-update-entry','fresh'].includes(requestedEntry));
+  assert(['current','oldest','update-entry','oldest-update-entry','materials-update-entry','materials-oldest-update-entry','fresh'].includes(requestedEntry));
   const entry = requestedEntry.includes('oldest') ? 'oldest' : requestedEntry === 'fresh' ? 'fresh' : 'current';
   const run = `${Date.now()}-${process.pid}-${++runSequence}`;
   const js = (fn, ...args) => view.executeJavaScript(`(${fn.toString()})(...${JSON.stringify(args)})`, true);
