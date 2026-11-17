@@ -38,6 +38,8 @@
 
 **新电脑使用同一合格版本的整套安装文件，无需先装旧版或旧补丁。** 按[本批安装步骤](INSTALL-LATEST.md)选择同一版本整套文件；三系统同批验收已通过，正式默认版本以最新 Release 为准。
 
+**U盘安装与离线更新。** 本轮按整批交付三个完整安装包和三个系统的离线更新文件夹；两种Mac各一份普通DMG，Windows一份包含全部五个必需文件的ZIP。先看[版本与安装说明](qa/usb-delivery-20261117/00-先看版本与安装说明.txt)：要在“关于”里看完整构建，不能只看v1.7.1。写盘、旧包清理及其他资料保护以[本轮回执](qa/usb-delivery-20261117/USB-DELIVERY-RECEIPT.json)为准。
+
 **已有电脑优先直接检查更新。** 本批签名核心同时携带启动器脚本；需要替换时通过界面正常重开完成。最早运行环境可能自动补齐兼容资源一次，后续匹配小包。无需删除学习目录或反复运行历史补丁。[已有版本更新与排查](MIGRATE-LEGACY.md)。
 
 **20261114 项目与历史列表。** 修复切换科目时通用历史消失，补齐项目内对话的重命名、置顶、归档、移动和删除，操作限定在来源项目；列表失败保留内容并支持重试。[改动与页面验收](PROJECT-HISTORY-20261114.md)。
@@ -147,6 +149,6 @@ open "$HOME/Downloads/Kaixin-Mac-Complete.dmg"
 
 ## 验证与许可
 
-本批三份 `verification-系统.json` 已记录各系统通过的安装文件大小、SHA256、冻结源码、新装、当前及旧启动器更新和隔离数据保留结果。Windows 沿用原 stage 的成功 job，两种 Mac 按相同冻结资产在新 run 复验通过；原矩阵两 Mac 的失败未改为成功。具体 run、job 与回执摘要见 [验证快照](VERIFICATION-QUESTION-PICTURES-20261117.json)。旧冻结快照、历史版本和增量补丁保留。目标原生构建机为 macOS 15 和 Windows；构建机验收不等于所有实体设备都已测试。体验包采用 Mac 临时签名和 Windows 未签名安装器，首次打开可能看到系统来源提示。
+本批三份 `verification-系统.json` 已记录各系统通过的安装文件大小、SHA256、冻结源码、新装、当前及旧启动器更新和隔离数据保留结果。本批最终三端原生复验run `44049228555`全部通过，每端包含公开完整包新装与四种旧启动器检查更新路径；具体job及最终发布读回以[CURRENT](CURRENT-DESKTOP-RELEASE.json)和PUBLICATION-RECEIPT为准。早期测试及失败候选保留，不将旧验证快照重标为成功。旧冻结快照、历史版本和增量补丁保留。目标原生构建机为 macOS 15 和 Windows；构建机验收不等于所有实体设备都已测试。体验包采用 Mac 临时签名和 Windows 未签名安装器，首次打开可能看到系统来源提示。
 
 源码归档内附 `LICENSE` 与 `THIRD_PARTY_NOTICES.md`。教材、GeoGebra、Remotion 等资源的使用与分发条件请查看各自说明。 [接口与许可说明](delivery-notes.md) · [上游 DeepTutor](https://github.com/HKUDS/DeepTutor)

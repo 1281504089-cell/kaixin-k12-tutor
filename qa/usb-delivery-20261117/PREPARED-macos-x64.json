@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "target": "macos-x64",
+  "tag": "student-20261117-k12-4",
+  "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4.dmg",
+  "bytes": 7711248773,
+  "sha256": "9a6328aa27422a19b5d23b69a828a0496302336298343bc3cb904a0f8b19b8bb",
+  "ordinary_single_file_dmg": true,
+  "hdiutil_verify_passed": true,
+  "readonly_mount_verified": true,
+  "codesign_deep_strict_verified": true,
+  "architecture": "x86_64",
+  "runtime_verification": {
+    "passed": true,
+    "manifest": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "darwin",
+      "arch": "x64",
+      "coreVersion": "1.7.1",
+      "runtimeId": "1.7.1-kaixin-20261117-k12-4-macos-x64-20261112",
+      "baseRuntimeId": "1.7.1-04276f68a-x64",
+      "commit": "2af326481943f7e072036637ba186aa829dce39d",
+      "builtAt": 1794900556998,
+      "archive": "kaixin-core-20261117-k12-4.tar.gz",
+      "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+      "corePayloadSha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+      "signature": "0qCpSfNZSTpKaCqX8cLDH+Hi1Vjj8bze8VJq655GvaHLWVy5JG+ph1IRtiuZFVUox+C1BOxOlKX9uLH74JyZBA=="
+    },
+    "base_runtime": "1.7.1-04276f68a-x64",
+    "base_archive_sha256_verified": true,
+    "included_core_sha256_verified": true,
+    "seed_and_core_signatures_verified": true,
+    "launcher_files_verified": 24,
+    "original_public_key_matches": true,
+    "app_launched": false
+  },
+  "input_segments": [
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.002.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "10c66e9285e5bf000f88789e08e48ee845a6247c5f48df66c794e4b537f0bb89",
+      "existing_verified": true
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.003.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "8fd0e8509e6ba71146113b3471a7a7597ad9508c47eac0d6b0f4b4753841e0ed",
+      "existing_verified": true
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.004.dmgpart",
+      "bytes": 1733668073,
+      "sha256": "3989d5cc1371c231c066d6aabadfb2b101323fda0e2dd171c9328f1bf65bf06e",
+      "existing_verified": true
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.dmg",
+      "bytes": 1992766061,
+      "sha256": "e2f6b287910b8e4d7b166514c1e2ec3781782b3fb828a3f25096611228395f44",
+      "public_anonymous_download": true
+    }
+  ],
+  "usb_written": true,
+  "app_launched": false,
+  "native_install_acceptance_reused_run": 44049228555,
+  "same_app_core_and_launcher_bytes": true,
+  "recorded_at": "2026-11-17T12:37:23.999034+00:00"
+}

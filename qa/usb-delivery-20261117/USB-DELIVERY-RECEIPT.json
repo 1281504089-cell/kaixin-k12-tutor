@@ -1,0 +1,74 @@
+{
+  "passed": true,
+  "tag": "student-20261117-k12-4",
+  "release_id": 448283800,
+  "source_commit": "2af326481943f7e072036637ba186aa829dce39d",
+  "launcher_build": "20261117-updater-2",
+  "volume_uuid": "04580EED-B213-3DEC-96A2-99762DF10457",
+  "installation_directory": "开心动力超级学霸安装包/2026-11-17-最新版",
+  "batch_promoted_after_all_six_verified": true,
+  "files": [
+    {
+      "kind": "full-installer",
+      "target": "macos-x64",
+      "file": "01-新电脑安装/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4.dmg",
+      "bytes": 7711248773,
+      "sha256": "9a6328aa27422a19b5d23b69a828a0496302336298343bc3cb904a0f8b19b8bb",
+      "independent_single_dmg_remounted": true
+    },
+    {
+      "kind": "full-installer",
+      "target": "macos-arm64",
+      "file": "01-新电脑安装/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4.dmg",
+      "bytes": 7641946545,
+      "sha256": "2fe04db9451b56d760f4cff1c182f32ef685ea4ec7e9ecf3cbd1f475d9bb9720",
+      "independent_single_dmg_remounted": true
+    },
+    {
+      "kind": "full-installer",
+      "target": "windows-x64",
+      "file": "01-新电脑安装/Kaixin-K12-Tutor-20261117-k12-4-Windows-Full.zip",
+      "bytes": 7713699837,
+      "sha256": "e03a7de06335843f911f7ad741b49ebd72779503dd21fd112031932a0bcf91d6",
+      "members_fully_verified": 7
+    },
+    {
+      "kind": "offline-update",
+      "target": "windows-x64",
+      "file": "02-已安装电脑离线更新/Windows/kaixin-bridge-20261117-k12-4-windows-x64.tar.gz",
+      "bytes": 1693087954,
+      "sha256": "5712520ebdc58335d0c4d053d5359cf66296fbd75a819247041fe524d07d0650",
+      "signed_manifest_file": "02-已安装电脑离线更新/Windows/选这个文件更新.json"
+    },
+    {
+      "kind": "offline-update",
+      "target": "macos-x64",
+      "file": "02-已安装电脑离线更新/Intel-Mac/kaixin-bridge-20261117-k12-4-macos-x64.tar.gz",
+      "bytes": 1781242161,
+      "sha256": "b720a7d159ac3a4a3de240414caf0a87a6c9f1f2591de897b991f1bce36c5306",
+      "signed_manifest_file": "02-已安装电脑离线更新/Intel-Mac/选这个文件更新.json"
+    },
+    {
+      "kind": "offline-update",
+      "target": "macos-arm64",
+      "file": "02-已安装电脑离线更新/Apple-Mac/kaixin-bridge-20261117-k12-4-macos-arm64.tar.gz",
+      "bytes": 1717937456,
+      "sha256": "b4fcb82d23aad1170e2b2c948242085d582c319f1d3f43024363b00db4c2f53f",
+      "signed_manifest_file": "02-已安装电脑离线更新/Apple-Mac/选这个文件更新.json"
+    }
+  ],
+  "full_installers": 3,
+  "offline_update_folders": 3,
+  "whole_usb_readback_verified": true,
+  "old_installation_removed": "开心动力超级学霸安装包/2026-11-15-最新版",
+  "old_bytes_removed": 21422007060,
+  "old_metadata_archived_locally": true,
+  "protected_math_documents_unchanged": 6,
+  "other_user_materials_deleted": 0,
+  "free_bytes_before": 41427271680,
+  "free_bytes_after": 34587279360,
+  "all_remote_physical_devices_tested": false,
+  "native_fresh_install_and_online_update_run": 44049228555,
+  "local_native_manual_update_test": "Intel Mac, Nov14 old launcher, matching small signed core, retained settings; not three offline file pickers",
+  "completed_at": "2026-11-17T13:45:10.432698+00:00"
+}

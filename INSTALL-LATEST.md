@@ -46,6 +46,6 @@ Mac 如果提示“身份不明的开发者”，先确认文件来自本仓库�
 
 以后的新版通过软件中的“核心 → 检查更新”或“设置 → 关于 → 检查更新”获取；检查和下载需要能够访问 GitHub。仅上传源码不会更新已安装客户端，维护者还需发布对应系统的签名更新包。
 
-本批没有写入 U 盘；旧介质不是本批文件的交付证明。三端验收快照及正式状态的确认依据见 [SOURCE-TEST-HANDOFF.json](SOURCE-TEST-HANDOFF.json)，该文件区分已通过的原生验收与需由正式回执确认的发布、本机升级状态。
+U盘交付、三个完整包与三份离线更新以[本轮写盘回执](qa/usb-delivery-20261117/USB-DELIVERY-RECEIPT.json)为准。U盘两种Mac各是一份独立普通DMG，Windows是一份含Setup和四分卷的ZIP；GitHub仍使用上列分卷下载。先读[版本与安装说明](qa/usb-delivery-20261117/00-先看版本与安装说明.txt)，不要只用v1.7.1判断新旧。[CURRENT-DESKTOP-RELEASE.json](CURRENT-DESKTOP-RELEASE.json)区分原生验收、发布、本机升级与介质状态。
 
 [本批文件页 k12-4](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4) · [上一正式版 k12-2](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2)

@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "target": "macos-arm64",
+  "tag": "student-20261117-k12-4",
+  "file": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4.dmg",
+  "bytes": 7641946545,
+  "sha256": "2fe04db9451b56d760f4cff1c182f32ef685ea4ec7e9ecf3cbd1f475d9bb9720",
+  "ordinary_single_file_dmg": true,
+  "hdiutil_verify_passed": true,
+  "readonly_mount_verified": true,
+  "codesign_deep_strict_verified": true,
+  "architecture": "arm64",
+  "runtime_verification": {
+    "passed": true,
+    "manifest": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "darwin",
+      "arch": "arm64",
+      "coreVersion": "1.7.1",
+      "runtimeId": "1.7.1-kaixin-20261117-k12-4-macos-arm64-20261112",
+      "baseRuntimeId": "1.7.1-04276f68a-arm64",
+      "commit": "2af326481943f7e072036637ba186aa829dce39d",
+      "builtAt": 1794900556998,
+      "archive": "kaixin-core-20261117-k12-4.tar.gz",
+      "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+      "corePayloadSha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+      "signature": "Nrg1gm1FGyoTolO/C4VnG4x2ZpwhPrXLj8WcXHazANoQQjwDHfvyWrM5FnCMXdFQy6EjnLAWVUfq93wzMPifBQ=="
+    },
+    "base_runtime": "1.7.1-04276f68a-arm64",
+    "base_archive_sha256_verified": true,
+    "included_core_sha256_verified": true,
+    "seed_and_core_signatures_verified": true,
+    "launcher_files_verified": 24,
+    "original_public_key_matches": true,
+    "app_launched": false
+  },
+  "input_segments": [
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.002.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "3630dd5ce8c11ca47c97a8b48707297406d8878d0d1ec469cdb16c091cf3fab4",
+      "existing_verified": true
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.003.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "cec8e93467bbf272631c9c8708667f97ab7c2753ad178aa340442e76bf219130",
+      "public_anonymous_download": true
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.004.dmgpart",
+      "bytes": 1664515844,
+      "sha256": "aa61616c1468afc34f7fdd9972410ca29a15670cf5a743831dc464732d884c6c",
+      "public_anonymous_download": true
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.dmg",
+      "bytes": 1992759111,
+      "sha256": "fac1377c822938827f5ef40f94fc4e0adde25e6eac9be756a4c8cbe271e8ec5a",
+      "public_anonymous_download": true
+    }
+  ],
+  "usb_written": true,
+  "app_launched": false,
+  "native_install_acceptance_reused_run": 44049228555,
+  "same_app_core_and_launcher_bytes": true,
+  "recorded_at": "2026-11-17T13:00:41.833957+00:00"
+}
