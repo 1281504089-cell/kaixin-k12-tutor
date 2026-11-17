@@ -42,6 +42,8 @@ jobs:
       - name: Stop this owner's superseded unqualified candidate
         if: github.ref_name == 'codex/k12-core-20261117-4'
         run: python ci-stop-superseded.py
+      - name: Verify exact frozen PDF staging and native proof guards
+        run: python -m unittest test_release_source test_native_pages_proof
       - name: Build and verify core
         run: python ci-attachment-core.py
       - name: Keep core receipt

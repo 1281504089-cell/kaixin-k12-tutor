@@ -1,12 +1,14 @@
 """Promote only the exact three native-tested attachment installers and signed feeds."""
 import hashlib,json,os,subprocess,time
+from ci_picture_fresh import validate_native_page_views, validate_native_page_api
+from ci_repackage import validate_installer_files
 from pathlib import Path
 from urllib.request import Request,urlopen
 from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-4', 'Owner must prepare the exact final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-5', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -100,10 +102,12 @@ for target in targets:
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
+ validate_native_page_api(smoke['k12_api'],batch['native_pages'])
  assert smoke['k12_api']['prepared_picture_bindings']==batch['picture_count']
  assert smoke['k12_api']['prepared_picture_manifest_sha256']==batch['picture_manifest_sha256']
  fresh=report['fresh_picture_ui'];assert fresh['passed'] and fresh['production_launcher_source_byte_identical'] and fresh['qa_code_only_in_disposable_copy']
  for ui in [fresh['k12_library'],*[report[key]['k12_library'] for key in ['update_entry','oldest_launcher_entry','materials_launcher_entry','materials_oldest_launcher_entry']]]:
+  validate_native_page_views(ui,batch['native_pages']['ui_fixture'])
   assert ui['passed'] and ui['actualNativeRenderer'] and len(ui['views'])==4
   for view in ui['views']:
    assert all(view['preparedPicture'][key] for key in ['native_http_image_sha_verified','body_dom_before_image_response','second_history_restore'])
@@ -140,10 +144,11 @@ for target in targets:
  science=update['science_formulas'];assert science['passed'] and len(science['views'])==16 and len(science['originalEdits'])>=18 and science['cleanup']['debuggerDetached'] and science['cleanup']['deviceMetricsCleared']
  assert bulk['device_speech']['diagnosticOnly'] and 'nativeEnded' in bulk['device_speech']['diagnostic']
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
+ validate_installer_files(report['full_files'],target,batch['tag'])
  for row in report['full_files']:
   actual=assets[row['file']];assert actual['digest']=='sha256:'+row['sha256'] and actual['size']==row['bytes']
  full_files+=report['full_files'];proofs[target]=report
-assert len(full_files)==13
+assert 13 <= len(full_files) <= 15
 
 stable_assets={a['name']:a for a in api('releases/tags/core-updates')['assets']}
 for name,expected in batch['expected_previous'].items():

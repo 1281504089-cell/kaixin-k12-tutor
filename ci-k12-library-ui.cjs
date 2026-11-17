@@ -17,6 +17,77 @@ const nativeWheelDelta = (platform, arch) => platform === 'darwin' && arch === '
 const wheelFeedback = (before, after, event) => !!event?.trusted && event.deltaY < 0 && (before <= 0 || after < before - 1);
 const calibratedWheelDelta = (delta, event) => !event?.trusted || !Number.isFinite(event.deltaY) || event.deltaY === 0 ? null : event.deltaY < 0 ? delta : -delta;
 const imagesReady = (images, expected) => images.length === expected && images.every(image => image.complete && image.width > 0 && image.height > 0);
+const waitReady = value => value === true || value?.ready === true;
+
+function nativeSpec(fixture, origin) {
+  const native=fixture.native;
+  assert(native && /^[a-f0-9]{64}$/.test(native.sha256), 'Frozen native-page descriptor required');
+  assert(/^[a-f0-9]{64}$/.test(fixture.bank_revision) && typeof fixture.qualified_id==='string' && fixture.qualified_id.length>0 && fixture.qualified_id.length<=512 && !/[\x00-\x1f\x7f]/.test(fixture.qualified_id));
+  for(const key of ['bytes','page_count','start_page','end_page']) assert(Number.isSafeInteger(native[key])&&native[key]>0, 'Invalid native '+key);
+  assert(native.bytes<=64*1024*1024 && native.start_page<=native.end_page && native.end_page<=native.page_count && native.page_count<=2000);
+  assert(['student-word-pages','original-pdf-pages'].includes(native.kind));
+  const url=new URL(native.url,origin);
+  assert(native.url.startsWith('/api/student/question-bank/native/') && url.origin===origin && url.pathname===`/api/student/question-bank/native/${encodeURIComponent(fixture.qualified_id)}`);
+  assert(url.searchParams.get('revision')===fixture.bank_revision && url.searchParams.get('sha256')===native.sha256);
+  assert(url.searchParams.getAll('revision').length===1 && url.searchParams.getAll('sha256').length===1 && [...url.searchParams.keys()].every(key=>['revision','sha256'].includes(key)) && !url.hash);
+  const href=`#dt-question-${fixture.bank_revision}-${encodeURIComponent(fixture.qualified_id)}`;
+  assert([href,'https://deeptutor.local/library'+href].includes(fixture.href), 'Native citation identity mismatch');
+  url.searchParams.set('dt_workspace','');
+  return { ...fixture, native, href, originalHref:fixture.href, url:url.href };
+}
+
+function assertNativeResponse(spec, reply, raw) {
+  const header=name=>Object.entries(reply.headers||{}).find(([key])=>key.toLowerCase()===name)?.[1];
+  assert.equal(reply.url,spec.url);assert.equal(reply.status,200);
+  assert.equal(String(header('content-type')).split(';')[0].trim().toLowerCase(),'application/pdf');
+  assert.deepEqual(String(header('cache-control')).toLowerCase().split(',').map(v=>v.trim()).sort(),['no-store','private']);
+  assert.equal(String(header('x-content-type-options')).toLowerCase(),'nosniff');
+  assert.equal(String(header('content-security-policy')).trim(),"default-src 'none'; sandbox");
+  assert.equal(raw.length,spec.native.bytes);assert(raw.subarray(0,5).equals(Buffer.from('%PDF-')));
+  assert.equal(require('node:crypto').createHash('sha256').update(raw).digest('hex'),spec.native.sha256,'Native PDF differs from the frozen student pages');
+}
+
+async function captureNativeResponse(debug, params, spec) {
+  try {
+    assert(spec, 'Native response has no frozen expected descriptor');
+    assert(typeof params.networkId==='string' && params.networkId, 'Native response has no original Network request ID');
+    assert(!params.responseErrorReason, 'Native response failed: '+params.responseErrorReason);
+    // Read the original paused response before PDF.js can cancel its consumed stream.
+    const body=await debug.sendCommand('Fetch.getResponseBody',{requestId:params.requestId});
+    const reply={id:params.networkId,fetch_id:params.requestId,url:params.request.url,status:params.responseStatusCode,
+      headers:Object.fromEntries((params.responseHeaders||[]).map(({name,value})=>[name,value])),
+      raw:Buffer.from(body.body,body.base64Encoded?'base64':'utf8')};
+    assertNativeResponse(spec,reply,reply.raw);
+    return reply;
+  } finally {
+    await debug.sendCommand('Fetch.continueResponse',{requestId:params.requestId});
+  }
+}
+
+// Runs in the renderer: loading labels and zero/blank canvases never qualify.
+function inspectNativePages(spec, dialog=false) {
+  const root=dialog?document.querySelector('[data-testid="question-source-preview"]'):[...document.querySelectorAll('[aria-label="题库原题图"] figure')].find(figure=>[...figure.querySelectorAll('a[href]')].some(a=>[spec.href,spec.originalHref].includes(a.getAttribute('href'))));
+  if(!root)return {ready:false,reason:'missing-source'};
+  const identity=!dialog||root.dataset.questionId===spec.qualified_id&&root.dataset.bankRevision===spec.bank_revision&&root.dataset.sourceRenderer==='native-pages';
+  const units=[...root.querySelectorAll('[data-reader-unit]')],pages=units.map(node=>Number(node.dataset.readerUnit));
+  const expected=Array.from({length:dialog?spec.native.page_count:spec.native.end_page-spec.native.start_page+1},(_,i)=>i+(dialog?1:spec.native.start_page));
+  const range=pages.length===expected.length&&pages.every((page,i)=>page===expected[i]);
+  const scroll=root.querySelector('.dt-reader-scroll'),bounds=scroll?.getBoundingClientRect();
+  const visible=units.find(node=>{const r=node.getBoundingClientRect();return bounds&&r.bottom>bounds.top+17&&r.top<bounds.bottom-4;});
+  const locator=Number(visible?.dataset.readerUnit);
+  const selected=units.find(node=>Number(node.dataset.readerUnit)===spec.native.start_page),canvas=selected?.querySelector('canvas');
+  let ink=0,pixelError;
+  let shown=!!canvas&&canvas.getBoundingClientRect().width>=120&&canvas.getBoundingClientRect().height>=120;
+  for(let node=canvas;shown&&node;node=node.parentElement){const style=getComputedStyle(node);shown=style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0;}
+  if(shown&&canvas.width>=120&&canvas.height>=120){
+    try { const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;for(let i=0;i<pixels.length&&ink<64;i+=16)if(pixels[i+3]>0&&(pixels[i]<225||pixels[i+1]<225||pixels[i+2]<225))ink++; }
+    catch(error){pixelError=String(error);}
+  }
+  const input=root.querySelector('input[type="number"]'),number=Number(input?.value),maximum=Number(input?.max);
+  const correctPage=number===(dialog?spec.native.start_page:1)&&maximum===(dialog?spec.native.page_count:expected.length)&&locator===spec.native.start_page;
+  const painted=ink>=64&&!pixelError;
+  return {ready:!!identity&&range&&correctPage&&painted,identity:!!identity,pages,expected,locator,toolbar:{page:number,max:maximum},painted,ink,pixelError,canvas:canvas?{width:canvas.width,height:canvas.height}:null,renderer:dialog?root.dataset.sourceRenderer:'native-pages'};
+}
 
 // Runs in the renderer. Selecting a visible candidate does not activate it.
 function inspectTarget(spec, token, scroll = false) {
@@ -73,18 +144,24 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   assert(Number.isInteger(seed.images) && seed.images >= 0);
   const pictured = seed.picture_fixture;
   assert(pictured?.session && pictured.bank_revision === seed.bank_revision && pictured.picture?.sha256 && pictured.images > 0, 'A prepared-image history fixture is required');
+  assert(!pictured.native && pictured.native_required!==true,'Keep a non-native prepared IMG fixture for regression coverage');
+  const nativeFixture=seed.native_fixture;
+  assert(nativeFixture?.session && nativeFixture.answer_marker && nativeFixture.bank_revision===seed.bank_revision,'A native PDF history fixture is required');
+  const native=nativeSpec(nativeFixture,origin);
+  const nativeSpecifications=new Map([[native.url,native]]);
   const preparedURL = new URL(pictured.picture.url,origin);
   preparedURL.searchParams.set('dt_workspace','');
   const preparedHref = preparedURL.href;
   const markers = bodyMarkers(seed.question);
-  const debug = view.debugger, views = [], network = [], requestURLs = new Map();
+  const debug = view.debugger, views = [], network = [], requestURLs = new Map(), nativeResponses = [];
+  const nativeResponsePattern={urlPattern:'*question-bank/native/*',requestStage:'Response'};
   assert(!debug.isAttached());
   let width = 0, height = 0, phase = 'starting', lastAction, actionSequence = 0, pictureDiagnostic;
   const file = (kind, extension) => join(evidence, `k12-${entry}-${width}x${height}-${run}-${kind}.${extension}`);
   const save = (name, value) => writeFileSync(name, typeof value === 'string' ? value : JSON.stringify(value,null,2) + '\n', { flag:'wx' });
   async function wait(fn, args, label, timeout = 60000) {
     const until = Date.now() + timeout;
-    while (!await js(fn, ...args)) { assert(Date.now() < until, label); await pause(100); }
+    while (!waitReady(await js(fn, ...args))) { assert(Date.now() < until, label); await pause(100); }
   }
   async function monitor() {
     await js(() => {
@@ -170,6 +247,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   }
   async function preparedPictureHistory() {
     phase='prepared-picture-history-delayed';
+    assert(!(await liveSource(pictured.href)).native,'Prepared IMG regression fixture selected a native-priority source');
     const paused=[];
     pictureDiagnostic={paused};
     const listener=(_event,method,params)=>{
@@ -229,15 +307,79 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     await wait((marker,url)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] img')].some(image=>image.src===new URL(url,location.origin).href),[pictured.answer_marker,preparedHref],'Prepared image did not survive a second history load');
     return {qualified_id:pictured.qualified_id,bank_revision:pictured.bank_revision,sha256:pictured.picture.sha256,width:pictured.picture.width,height:pictured.picture.height,body_dom_before_image_response:true,held_response_ms:heldMs,async_decode:true,native_http_image_sha_verified:true,source_caption_blue:true,correct_source_opened:true,dialog_within_viewport:true,second_history_restore:true,body_probe:before};
   }
+  async function nativeHTTP(spec, since=0) {
+    const until=Date.now()+60000;let reply;
+    do {reply=nativeResponses.findLast(item=>item.url===spec.url&&item.sequence>since&&item.complete);if(reply)break;assert(Date.now()<until,'Native PDF original response body was not captured');await pause(50);}while(true);
+    assert(!reply.error,reply.error);
+    assert.equal(requestURLs.get(reply.id),spec.url,'Captured PDF is not bound to its original Network request');
+    assertNativeResponse(spec,reply,reply.raw);
+    network.push({entry,width,height,phase,type:'native-response-verified',id:reply.id,fetch_id:reply.fetch_id,url:spec.url,bytes:reply.raw.length,sha256:spec.native.sha256,via:'Fetch.getResponseBody'});
+    return {native_http_pdf_sha_verified:true,private_headers_verified:true,response_capture:'Fetch.getResponseBody',original_request_id:reply.id};
+  }
+  async function nativePreview(spec) {
+    await wait(inspectNativePages,[spec,true],'Native source lost question identity, PDF pixels, pages or selected page');
+    const probe=await js(inspectNativePages,spec,true);
+    const modal=await js(()=>{const r=document.querySelector('[role="dialog"]').getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:document.documentElement.scrollWidth>innerWidth+1};});
+    assert(modal.left>=-1&&modal.right<=width+1&&modal.top>=-1&&modal.bottom<=height+1&&!modal.overflow,'Native PDF dialog escapes viewport');
+    return {probe,dialog_within_viewport:true};
+  }
+  async function nativePageHistory() {
+    phase='native-page-history-delayed';const paused=[];
+    const listener=(_event,method,params)=>{if(method==='Fetch.requestPaused'&&params.responseStatusCode===undefined&&!params.responseErrorReason)paused.push({id:params.requestId,url:params.request.url,at:Date.now()});};
+    debug.on('message',listener);let navigation,before,heldMs;
+    const started=network.length;
+    try {
+      await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:true});
+      await debug.sendCommand('Fetch.enable',{patterns:[{urlPattern:'*question-bank/native/*',requestStage:'Request'},nativeResponsePattern]});
+      navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(native.session)}?dt_workspace=`);navigation.catch(()=>{});
+      await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Saved native source/assistant body did not restore before PDF bytes');
+      await click({href:native.href,history:true},{activate:false});
+      const until=Date.now()+30000;while(!paused.length){assert(Date.now()<until,'Native reader never requested its PDF');await pause(50);}
+      await pause(1000);before=await js(inspectNativePages,native,false);
+      assert(!before.painted&&!before.ready,'A held PDF was replaced with a painted fallback');
+      assert(await js(marker=>document.body.innerText.includes(marker),native.answer_marker),'PDF bytes blocked existing assistant text');
+      assert(paused.every(item=>item.url===native.url),'Wrong PDF/source/revision/hash was requested');
+      heldMs=Date.now()-paused[0].at;
+    } finally {
+      try {
+        await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
+        for(const item of paused)await debug.sendCommand('Fetch.continueRequest',{requestId:item.id,interceptResponse:true});
+      } finally {debug.removeListener('message',listener);await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:false});}
+    }
+    await navigation;await wait(inspectNativePages,[native,false],'Saved native card has no real PDF pixels or the wrong page range');
+    const inline=await js(inspectNativePages,native,false);const http=await nativeHTTP(native,started);
+    await click({href:native.href,history:true,blue:true});const modal=await nativePreview(native);
+    writeFileSync(file('native-source','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
+    await click('button[aria-label="关闭题源"]');await wait(()=>!document.querySelector('[role="dialog"]'),[],'Native source did not close');
+    await view.loadURL(`${origin}/chat/${encodeURIComponent(native.session)}?dt_workspace=`);
+    await wait(marker=>document.body.innerText.includes(marker),[native.answer_marker],'Native history body did not restore twice');
+    await click({href:native.href,history:true},{activate:false});await wait(inspectNativePages,[native,false],'Native PDF did not survive a second saved-history load');
+    return {renderer:'native-pages',qualified_id:native.qualified_id,bank_revision:native.bank_revision,sha256:native.native.sha256,bytes:native.native.bytes,page_count:native.native.page_count,start_page:native.native.start_page,end_page:native.native.end_page,body_dom_before_pdf_response:true,held_response_ms:heldMs,canvas_pixels_verified:true,page_range_verified:true,selected_page_verified:true,...http,correct_source_opened:true,dialog_within_viewport:true,second_history_restore:true,inline_probe:inline,modal_probe:modal.probe,body_probe:before};
+  }
+  async function liveSource(href) {
+    const match=/^#dt-question-([a-f0-9]{64})-(.+)$/.exec(href.replace('https://deeptutor.local/library',''));assert(match,'Invalid clicked source href');
+    const identity={qualified_id:decodeURIComponent(match[2]),bank_revision:match[1],href};
+    const value=await js(async identity=>{const response=await fetch(`/api/student/question-bank/questions/${encodeURIComponent(identity.qualified_id)}?revision=${identity.bank_revision}&dt_workspace=`,{credentials:'include'});if(!response.ok)throw Error('Source metadata HTTP '+response.status);return response.json();},identity);
+    assert(value.qualified_id===identity.qualified_id&&value.bank_revision===identity.bank_revision&&value.content_read===true);
+    assert(!value.source.native_required||value.source.native,'Required native descriptor is absent');
+    return {...identity,native:value.source.native};
+  }
   const networkListener = (_event, method, params) => {
     if (method === 'Network.requestWillBeSent' && params.request.url.includes('/api/student/question-bank/')) {
       requestURLs.set(params.requestId,params.request.url);
       network.push({ entry,width,height,phase,type:'request',id:params.requestId,url:params.request.url,at:params.timestamp });
-    } else if (method === 'Network.responseReceived' && params.response.url.includes('/api/student/question-bank/')) network.push({ entry,width,height,phase,type:'response',id:params.requestId,url:params.response.url,status:params.response.status,fromDiskCache:params.response.fromDiskCache,at:params.timestamp });
+    } else if (method === 'Network.responseReceived' && params.response.url.includes('/api/student/question-bank/')) network.push({ entry,width,height,phase,type:'response',sequence:network.length+1,id:params.requestId,url:params.response.url,status:params.response.status,headers:Object.fromEntries(Object.entries(params.response.headers||{}).filter(([key])=>['content-type','cache-control','x-content-type-options','content-security-policy'].includes(key.toLowerCase()))),fromDiskCache:params.response.fromDiskCache,at:params.timestamp });
+    else if (method === 'Network.loadingFinished' && requestURLs.has(params.requestId)) network.push({entry,width,height,phase,type:'finished',id:params.requestId,url:requestURLs.get(params.requestId)});
     else if (method === 'Network.loadingFailed' && requestURLs.has(params.requestId)) network.push({ entry,width,height,phase,type:'failed',id:params.requestId,url:requestURLs.get(params.requestId),error:params.errorText,at:params.timestamp });
   };
+  const nativeResponseListener = (_event,method,params) => {
+    if(method!=='Fetch.requestPaused'||!params.request.url.includes('/api/student/question-bank/native/')||(params.responseStatusCode===undefined&&!params.responseErrorReason))return;
+    const reply={sequence:network.length+1,url:params.request.url,id:params.networkId,complete:false};
+    nativeResponses.push(reply);
+    reply.done=captureNativeResponse(debug,params,nativeSpecifications.get(params.request.url)).then(value=>Object.assign(reply,value,{complete:true}),error=>Object.assign(reply,{error:String(error.stack||error),complete:true}));
+  };
   async function failure(error) {
-    const record = { entry,requestedEntry,width,height,phase,error:String(error.stack ?? error),action:lastAction,network,pictureDiagnostic };
+    const record = { entry,requestedEntry,width,height,phase,error:String(error.stack ?? error),action:lastAction,network,pictureDiagnostic,nativeResponses:nativeResponses.map(({raw,done,...reply})=>({...reply,bytes:raw?.length})) };
     try { record.preparedPicture=await js(inspectPreparedPicture); } catch(captureError) { record.preparedPictureCaptureError=String(captureError); }
     try { record.dom = await js(href => {
       const rect = node => { const r=node.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}; };
@@ -257,8 +399,12 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   }
   debug.attach('1.3');
   debug.on('message',networkListener);
+  debug.on('message',nativeResponseListener);
   try {
-    await debug.sendCommand('Network.enable');
+    await debug.sendCommand('Network.enable',{maxResourceBufferSize:64*1024*1024,maxTotalBufferSize:128*1024*1024});
+    await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
+    const savedSource=await liveSource(seed.href);
+    if(savedSource.native){const spec=nativeSpec(savedSource,origin);nativeSpecifications.set(spec.url,spec);}
     for ([width,height] of [[390,844],[844,390],[1366,900],[1920,1080]]) {
       await debug.sendCommand('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
       phase='library-navigation';
@@ -270,8 +416,17 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       await wait(()=>!!document.querySelector('[aria-label="按学科筛选题库"] button[aria-pressed="true"]')&&!!document.querySelector('button[aria-label^="查看题源："]'),[],'Real question-pack catalog did not render');
       await click('button[aria-label^="查看题源："]');
       await wait(()=>!!document.querySelector('section[aria-label="题库"] a[href^="#dt-question-"]'),[],'Source did not list complete original-material links');
+      const libraryHref=await js(()=>document.querySelector('section[aria-label="题库"] a[href^="#dt-question-"]').getAttribute('href'));
+      const librarySource=await liveSource(libraryHref);
+      if(librarySource.native){const spec=nativeSpec(librarySource,origin);nativeSpecifications.set(spec.url,spec);}
+      const libraryStart=network.length;
       await click('section[aria-label="题库"] a[href^="#dt-question-"]');
-      await wait(()=>{const body=document.querySelector('[data-testid="question-source-preview"]');return body?.dataset.sourceReady==='true'&&body.innerText.trim().length>20&&[...body.querySelectorAll('img')].every(image=>image.complete&&image.naturalWidth>0);},[],'Library question did not finish original images');
+      assert.equal(lastAction.dispatched.hit.href,libraryHref,'The native click opened a different library source');
+      if(librarySource.native) {
+        const spec=nativeSpec(librarySource,origin);await nativePreview(spec);await nativeHTTP(spec,libraryStart);
+      } else {
+        await wait((id,revision)=>{const body=document.querySelector('[data-testid="question-source-preview"]');return body?.dataset.questionId===id&&body.dataset.bankRevision===revision&&['original-html','prepared-picture'].includes(body.dataset.sourceRenderer)&&body.dataset.sourceReady==='true'&&body.innerText.trim().length>20&&[...body.querySelectorAll('img')].every(image=>image.complete&&image.naturalWidth>0);},[librarySource.qualified_id,librarySource.bank_revision],'Library question did not finish original images');
+      }
       await click('button[aria-label="关闭题源"]');
       await wait(()=>!document.querySelector('[role="dialog"]'),[],'Source did not close');
       writeFileSync(file('library','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
@@ -279,7 +434,16 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       await view.loadURL(`${origin}/chat/${encodeURIComponent(seed.session)}?dt_workspace=`);
       await wait(href=>[...document.querySelectorAll('a[href]')].some(node=>node.getAttribute('href')===href),[seed.href],'Persisted answer did not restore its actual-source link');
       await frames();
+      const historyExpected=await liveSource(seed.href);assert(historyExpected.qualified_id===seed.qualified_id&&historyExpected.bank_revision===seed.bank_revision);
+      if(seed.native)assert.deepEqual(historyExpected.native,seed.native,'Frozen history native descriptor changed');
+      const historyStart=network.length;
       await click({href:seed.href,history:true,blue:true});
+      let historySource;
+      if(historyExpected.native) {
+        const spec=nativeSpec({...seed,native:seed.native||historyExpected.native},origin);
+        const modal=await nativePreview(spec);const http=await nativeHTTP(spec,historyStart);
+        historySource={renderer:'native-pages',qualified_id:spec.qualified_id,bank_revision:spec.bank_revision,canvas_pixels_verified:true,page_range_verified:true,selected_page_verified:true,...http,probe:modal.probe};
+      } else {
       await wait((id,revision,expected,markers)=>{
         const body=document.querySelector('[data-testid="question-source-preview"]');
         if(!body||body.dataset.questionId!==id||body.dataset.bankRevision!==revision||body.dataset.sourceReady!=='true')return false;
@@ -291,13 +455,18 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       assert(dialog.text.trim().length>20&&imagesReady(dialog.images,seed.images));
       assert(markers.every(marker=>normalize(dialog.text).includes(marker)),'Original question start/end is missing');
       assert(dialog.left>=-1&&dialog.right<=width+1&&dialog.top>=-1&&dialog.bottom<=height+1&&!dialog.overflow,'Original source escapes the viewport');
+      historySource={renderer:'original-html',qualified_id:seed.qualified_id,bank_revision:seed.bank_revision,allOriginalImagesLoaded:true,originalBodyStartEnd:true};
+      }
       writeFileSync(file('source','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
       await click('button[aria-label="关闭题源"]');
       await wait(()=>!document.querySelector('[role="dialog"]'),[],'History source did not close');
+      await Promise.all(nativeResponses.map(reply=>reply.done));
       const preparedPicture = await preparedPictureHistory();
-      views.push({width,height,twoLibraryEntries:true,separateUploads:true,sourceCardOpened:true,restoredCitationBlue:true,exactQuestionAndRevision:true,allOriginalImagesLoaded:true,originalBodyStartEnd:true,dialogWithinViewport:true,closeReturned:true,preparedPicture});
+      await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
+      const nativePages = await nativePageHistory();
+      views.push({width,height,twoLibraryEntries:true,separateUploads:true,sourceCardOpened:true,restoredCitationBlue:true,exactQuestionAndRevision:true,allOriginalImagesLoaded:historySource.allOriginalImagesLoaded??null,originalBodyStartEnd:historySource.originalBodyStartEnd??null,dialogWithinViewport:true,closeReturned:true,historySource,preparedPicture,nativePages});
     }
-    const result={passed:true,actualNativeRenderer:true,bank_revision:seed.bank_revision,views,model_calls:0,formal_data_used:false,diagnostic_entry:entry,evidence_run:run};
+    const result={schema_version:2,passed:true,actualNativeRenderer:true,bank_revision:seed.bank_revision,views,model_calls:0,formal_data_used:false,diagnostic_entry:entry,evidence_run:run};
     save(join(evidence,`k12-library-${entry}-${run}.json`),result);
     // Legacy success summary; immutable entry/run JSON and PNGs retain both runs.
     writeFileSync(join(evidence,'k12-library.json'),JSON.stringify(result,null,2)+'\n');
@@ -305,8 +474,9 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   } catch (error) { await failure(error); throw error; }
   finally {
     debug.removeListener('message',networkListener);
+    debug.removeListener('message',nativeResponseListener);
     try { await debug.sendCommand('Emulation.clearDeviceMetricsOverride'); } catch {}
     if(debug.isAttached())debug.detach();
   }
 };
-module.exports._test = { normalize, bodyMarkers, sameGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture };
+module.exports._test = { normalize, bodyMarkers, sameGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse };

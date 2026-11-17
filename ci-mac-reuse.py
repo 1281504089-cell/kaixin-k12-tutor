@@ -165,9 +165,15 @@ def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, mater
     for field, expected in [('prepared_picture_bindings',lock['picture_count']),('prepared_picture_manifest_sha256',lock['picture_manifest_sha256']),('runtime_isolated_count',lock['runtime_exclusion_count']),('runtime_exclusion_kinds',lock['runtime_exclusion_kinds']),('runtime_exclusion_ledger_sha256',lock['runtime_exclusion_ledger_sha256']),('bank_revision',lock['bank_revision']),('model_calls',0)]:
         assert api_proof[field] == expected, field
     assert api_proof['passed'] is True
+    if 'native_pages' in lock:
+        from ci_picture_fresh import validate_native_page_api
+        validate_native_page_api(api_proof,lock['native_pages'])
     assert fresh['passed'] is True and fresh['production_launcher_source_byte_identical'] is True and fresh['qa_code_only_in_disposable_copy'] is True
     for ui in (fresh['k12_library'], current['k12_library'], oldest['k12_library'],materials['k12_library'],materials_oldest['k12_library']):
         assert ui['passed'] is True and ui['actualNativeRenderer'] is True and ui['bank_revision'] == lock['bank_revision'] and len(ui['views']) == 4
+        if 'native_pages' in lock:
+            from ci_picture_fresh import validate_native_page_views
+            validate_native_page_views(ui,lock['native_pages']['ui_fixture'])
         for view in ui['views']:
             assert all(view['preparedPicture'][key] is True for key in ('native_http_image_sha_verified','body_dom_before_image_response','second_history_restore'))
 

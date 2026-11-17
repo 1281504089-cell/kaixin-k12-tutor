@@ -89,7 +89,7 @@ def join_source_overlay(root, archive, descriptor):
             remote = descriptor["remote_archive"]
             url = urlparse(remote["url"])
             if (url.scheme != "https" or url.netloc != "github.com" or not url.path.startswith("/1281504089-cell/kaixin-k12-tutor/releases/download/")
-                or url.query or url.fragment or not 0 < remote["bytes"] <= 256 * 1024 * 1024
+                or url.query or url.fragment or not 0 < remote["bytes"] <= 512 * 1024 * 1024
                 or remote["sha256"] != descriptor["archive_sha256"]):
                 raise ValueError("Untrusted source overlay release asset")
             with urlopen(Request(remote["url"], headers={"User-Agent": "Kaixin-Frozen-Source"}), timeout=60) as stream:
@@ -108,6 +108,17 @@ def join_source_overlay(root, archive, descriptor):
             raise ValueError("Source overlay transport parts are incomplete")
     if digest.hexdigest() != descriptor["archive_sha256"]:
         raise ValueError("Source overlay archive checksum mismatch")
+
+
+def stage_frozen_files(destination, rows):
+    verify_files(destination, rows)
+    subprocess.run(["git", "-C", str(destination), "add", "--update"], check=True)
+    # Validated PDFs can be ignored by the baseline; force only frozen paths.
+    names = [safe_name(row["file"]) for row in rows]
+    for start in range(0, len(names), 100):
+        subprocess.run(["git", "-C", str(destination), "add", "--force", "--", *names[start:start + 100]], check=True)
+    if aggregate(inventory(destination)) != aggregate(rows):
+        raise ValueError("Staged source differs from the owner freeze")
 
 
 def apply_overlay(root, destination, descriptor):
