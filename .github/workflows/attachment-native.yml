@@ -46,7 +46,7 @@ jobs:
           gh release upload "$tag" "native-run-${KX_TARGET}.json" --clobber
       - name: Check immutable installer reuse and native display guards
         run: |
-          python -m unittest test_native_reuse_inputs test_installer_segments test_native_pages_proof
+          python -m unittest test_native_reuse_metadata test_native_reuse_inputs test_installer_segments test_native_pages_proof
           node ci-k12-driver-selfcheck.cjs
           node native-response-followup-selfcheck.cjs
       - name: Prepare Windows packaging tool

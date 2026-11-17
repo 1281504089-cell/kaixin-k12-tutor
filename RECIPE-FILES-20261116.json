@@ -6,13 +6,13 @@
   },
   {
     "file": ".github/workflows/attachment-native.yml",
-    "bytes": 2752,
-    "sha256": "912bde813b0ba59478f78c924952838cd4d80eb6a3b89c834b000f13b395d6e8"
+    "bytes": 2779,
+    "sha256": "341e7cf1541ee47ddcee489ebe740ab5590fdfe9ca46f3495f8e5defe2ca8e3a"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 1703,
-    "sha256": "380a8c95a8d100847eae1cd03114d97209ec912555392e56e657186468d9ddae"
+    "bytes": 1730,
+    "sha256": "ac5dd1cea41e310a75c06ac836649ca2f9df9f92a0d99c6d7c6208c898651b73"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
@@ -292,7 +292,7 @@
   {
     "file": "fresh-install-lock.json",
     "bytes": 13769,
-    "sha256": "aa63239286e86b06ad04998797947cc5073eb29b00dfc3b22139cce3279d81db"
+    "sha256": "a21f29c36ce5a3c97dbf62f065a875ea43df33fc25d4ee8859945650d80f581d"
   },
   {
     "file": "intel-k12-4-reuse-lock.json",
@@ -503,6 +503,11 @@
     "file": "test_native_reuse_inputs.py",
     "bytes": 3733,
     "sha256": "78d234f1288b9728a35c7c75fff359dbbec64d235f3aa089521e3e96a3d3f7c9"
+  },
+  {
+    "file": "test_native_reuse_metadata.py",
+    "bytes": 2507,
+    "sha256": "55112ffed965f0e7c16f3ecd616405a3b6cbe957596ee47be03f5d5fb496c4b4"
   },
   {
     "file": "test_publication_transaction.py",
