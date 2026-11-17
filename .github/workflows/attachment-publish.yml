@@ -22,9 +22,9 @@ jobs:
           python-version: '3.12'
       - name: Record publication run
         run: |
-          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-4";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
+          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-5";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
       - name: Test transaction and native scene receipt bindings
-        run: python -m unittest test_native_entry_artifacts test_recovery_publication_gate test_publication_transaction
+        run: python -m unittest test_native_pages_proof test_native_entry_artifacts test_recovery_publication_gate test_publication_transaction
       - name: Verify three native proofs and switch signed batch
         run: python ci-promote-attachments.py
       - name: Keep publication receipts and previous defaults

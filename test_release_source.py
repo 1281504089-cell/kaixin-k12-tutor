@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from release_source import add_file, aggregate, apply_overlay, inventory, runtime_rows, safe_name, sha
+from release_source import add_file, aggregate, apply_overlay, inventory, runtime_rows, safe_name, sha, join_source_overlay, stage_frozen_files
 
 
 class ReleaseSourceTests(unittest.TestCase):
@@ -88,6 +88,22 @@ class ReleaseSourceTests(unittest.TestCase):
         selected = {row["file"] for row in runtime_rows([{"file": name} for name in names])}
         self.assertEqual(selected, set(names[:6]))
 
+    def test_staging_keeps_ignored_frozen_pdfs_and_excludes_unlisted_files(self):
+        rows = list(self.base)
+        for name, data in [(".gitignore", b"*.pdf\n"), *[(f"native/{i}.pdf", b"%PDF-fixture") for i in range(101)]]:
+            file = self.source / name
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_bytes(data)
+            rows.append({"file": name, "bytes": len(data), "sha256": sha(file)})
+        (self.source / "unlisted.txt").write_text("must stay outside the freeze")
+        (self.source / "unlisted.pdf").write_bytes(b"not frozen")
+        stage_frozen_files(self.source, rows)
+        self.assertEqual(aggregate(inventory(self.source)), aggregate(rows))
+        names = {row["file"] for row in inventory(self.source)}
+        self.assertNotIn("unlisted.txt", names)
+        self.assertNotIn("unlisted.pdf", names)
+        self.assertIn("native/100.pdf", names)
+
     def test_main_rebuild_can_use_hash_bound_release_asset_without_git_parts(self):
         descriptor = self.overlay()
         file = self.root / "source-overlay.001"
@@ -99,6 +115,20 @@ class ReleaseSourceTests(unittest.TestCase):
         with patch("release_source.urlopen", return_value=Response(data)):
             apply_overlay(self.root, self.source, descriptor)
         self.assertEqual((self.source / "keep.py").read_bytes(), b"new frozen bytes\n")
+
+    def test_native_pages_source_asset_fits_bounded_remote_rebuild(self):
+        descriptor = self.overlay()
+        (self.root / "source-overlay.001").unlink()
+        descriptor["remote_archive"] = {"url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/source-overlay.tar.gz", "bytes": 296762769, "sha256": descriptor["archive_sha256"]}
+        with patch("release_source.urlopen", side_effect=RuntimeError("trusted request reached")) as request:
+            with self.assertRaisesRegex(RuntimeError, "trusted request reached"):
+                join_source_overlay(self.root, self.root / "allowed.tar.gz", descriptor)
+            request.assert_called_once()
+        descriptor["remote_archive"]["bytes"] = 512 * 1024 * 1024 + 1
+        with patch("release_source.urlopen", side_effect=AssertionError("No oversized request")) as request:
+            with self.assertRaisesRegex(ValueError, "Untrusted source overlay"):
+                join_source_overlay(self.root, self.root / "oversized.tar.gz", descriptor)
+            request.assert_not_called()
 
     def test_release_asset_fallback_rejects_another_host_before_request(self):
         descriptor = self.overlay()
