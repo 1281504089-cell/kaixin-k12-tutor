@@ -1,23 +1,28 @@
 [
   {
     "file": ".github/workflows/attachment-core.yml",
-    "bytes": 2232,
-    "sha256": "024f8a24f8b95116794e8da602b24f1dfdd97089d9f3a1482c5e047051faf32c"
+    "bytes": 2458,
+    "sha256": "5038feba169088f06e17c238dea8ef391c592005c324fb34c532ef15ed91a9c5"
   },
   {
     "file": ".github/workflows/attachment-native.yml",
     "bytes": 2466,
-    "sha256": "68f470858580a2dd731c02b629206961f734a0608395e23a668e03675ccea841"
+    "sha256": "0ae2ebb3ef111fd6b254b74931a524f9ab2ecf2e26fb8b4b063efc9e4f25b09e"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 1379,
-    "sha256": "b95c33799439e8f55e0e6cd81512d4449342fbf072eb9f59f8ef26fe063355ac"
+    "bytes": 1564,
+    "sha256": "934d5005376bd30b677d3a461c605f9924db53d0f50e06480ee6fe36274d9785"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
     "bytes": 1100,
     "sha256": "23dec0ee40a2b5836bf57c921a3bfbbaccc815a8dd83d33ea2a406cb5768f94d"
+  },
+  {
+    "file": ".github/workflows/k12-native-reverify.yml",
+    "bytes": 1422,
+    "sha256": "a198dcdf01e9e2ba9e537919a1b4ae9e55cbcb61c0eaaf180c6e7fd2fc58795b"
   },
   {
     "file": "BANK-RECOVERY.md",
@@ -30,34 +35,74 @@
     "sha256": "72584fd6e996a732de691745416d7d83abc24b7b052a8fc3da5d114537f56114"
   },
   {
+    "file": "CURRENT-DESKTOP-RELEASE.json",
+    "bytes": 53442,
+    "sha256": "db14563df0d55afaf77da10b0c527f3f2725d3e60b24e6b3c5b08219ae023344"
+  },
+  {
+    "file": "INSTALLATION.txt",
+    "bytes": 4102,
+    "sha256": "ba66ad6b951c9870e3f7b0431200108149b2d3dc61d0d24826ea2f76203d6b49"
+  },
+  {
+    "file": "LOCAL-ACTUAL-UPDATE-20261117.json",
+    "bytes": 1677,
+    "sha256": "8fa1b73d1508db92a4396561801103515ad62f72312eff151dade8a4180fa83f"
+  },
+  {
+    "file": "PICTURE-QUESTION-20261117.md",
+    "bytes": 4559,
+    "sha256": "4df40303547f76b3a38c1b61f02e90fecf0ed1f40e25e09f6b31417efdaf024b"
+  },
+  {
+    "file": "POST-PUBLISH-VERIFIED.json",
+    "bytes": 650,
+    "sha256": "c4f876182f0a04819365ba4e9bb9ac17c5b5c07bccbe36fe99c7ceecb398f0cf"
+  },
+  {
     "file": "RECIPE-HANDOFF-20261116.md",
     "bytes": 7104,
     "sha256": "6595518f711a6789f5e174e3afd53ce2c69f6f8660b77bb4c16385794f78c50e"
   },
   {
     "file": "RECIPE-STATE.json",
-    "bytes": 1599,
-    "sha256": "93596db9d30ea170807398bb9208652c1ea4f945657d5c3c44eff2d186db4d77"
+    "bytes": 1641,
+    "sha256": "551b4f5a3fba3e49f2515fe7c876605c01b53d1bd4e1edc0bfe4f7929818e1ef"
   },
   {
     "file": "RELEASE-NOTES.md",
-    "bytes": 1977,
-    "sha256": "f99baada7c4f9b08de0b8b7cb0c6e3f3c2aafae35a21388bc68022115676c4bc"
+    "bytes": 1684,
+    "sha256": "38bbf846a6219c52afcfd42abfd685e1f112b3ac6e6b239b788a1222eaed3d16"
   },
   {
     "file": "SOURCE-TEST-HANDOFF.json",
-    "bytes": 2763,
-    "sha256": "6b04b8df7028fe6f110858d4a3f4954b027c73293ec08a24e0c5cb5d6cad17b7"
+    "bytes": 9693,
+    "sha256": "be1bda3824d0854b9a211474fb458dfda558267ac9793eb370bcdb1314dc0dfb"
+  },
+  {
+    "file": "VERIFICATION-QUESTION-PICTURES-20261117.json",
+    "bytes": 29963,
+    "sha256": "2213222ead94cd3dba10c316ab6b356efc77f5fbd681686d891d0017b80b247c"
+  },
+  {
+    "file": "arm-k12-4-reuse-lock.json",
+    "bytes": 49451,
+    "sha256": "8302dcde0018d51c18a88613c768940395edc0087156249fb87f6a6b62198182"
+  },
+  {
+    "file": "attachment-batch.json",
+    "bytes": 7274,
+    "sha256": "14c41127ed26ac35cc22435d34fc521ba8f6dc2381c8278d08cf02c2beb3a9dd"
   },
   {
     "file": "attachment-publication.json",
-    "bytes": 39168,
-    "sha256": "5e6d47f8a9ad0afa1b45992226c0ff948998126f9d135864a7d70652906dbb51"
+    "bytes": 46271,
+    "sha256": "dda600ae18ca0aafa22ecf8fbff94f1207851ba2b5389e1fab7e0771f0a8ca37"
   },
   {
     "file": "attachment-release.json",
-    "bytes": 2836,
-    "sha256": "f123cd0e50eeb64bc7f3aa16dcf81694b9cd0f8baa278f89c59eca27043c479d"
+    "bytes": 2921,
+    "sha256": "b7559e60314410291ec0730b85d77ac78a1e2d6bb270e2d276cf3260e55b0033"
   },
   {
     "file": "bootstrap_source.py",
@@ -68,6 +113,11 @@
     "file": "ci-attachment-core.py",
     "bytes": 9129,
     "sha256": "d674be5a382302075d738cd7967550c71bd6e855a89fa391515b0cc253f76cef"
+  },
+  {
+    "file": "ci-fresh-install.py",
+    "bytes": 8265,
+    "sha256": "6ef3e89274467910a61bb7a1b0a5db152a8710f06dd19627617807967e32d851"
   },
   {
     "file": "ci-fresh-smoke.mjs",
@@ -81,38 +131,63 @@
   },
   {
     "file": "ci-k12-driver-selfcheck.cjs",
-    "bytes": 5097,
-    "sha256": "da517f8c51aa748bb2ab10163ec485a23d3ccd022a06119b7077d0d4b3996e42"
+    "bytes": 7322,
+    "sha256": "70fb91b8363b1bb784c27fec859bb08f416d48a410a82fd49cc8ef12dcb24dfb"
   },
   {
     "file": "ci-k12-library-ui.cjs",
-    "bytes": 18739,
-    "sha256": "af726b67ae71abdc664cf1871732cab30d42675cc539cf3ba7514403d946b74d"
+    "bytes": 28658,
+    "sha256": "04eaa417441aaf342950ba22c63cbad09773eeccd92efdca5aaa7797b0a1a43e"
+  },
+  {
+    "file": "ci-mac-reuse.py",
+    "bytes": 22426,
+    "sha256": "1ed66de9e46e3f7b3c747acc38b026f91a733d3283786bdc1104132a744e5f0d"
+  },
+  {
+    "file": "ci-picture-fresh.cjs",
+    "bytes": 1992,
+    "sha256": "11889ea909eef882f9293a98b0e558d5c6fcef6e693cd0ef8a526797128eda72"
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 12391,
-    "sha256": "e3960dc71933e711537a8bafd3802fe2ceda3de1f80c667845a8c825d6da4e7f"
+    "bytes": 17550,
+    "sha256": "c1c089ebe2a497cd581b37ad484ef9dd70eaef39cebbf40a9f0cd51cad0539ae"
+  },
+  {
+    "file": "ci-proxy-smoke.cjs",
+    "bytes": 7525,
+    "sha256": "cacad3fd3e5ad31951d55e5ffa56ecdbbe75dce7650250d03929d469d68ed875"
+  },
+  {
+    "file": "ci-stop-superseded.py",
+    "bytes": 1153,
+    "sha256": "c6bd2a142e9c4867b97a61b29a6e43360d7f1ac069ccb2a8c0b896a7b82e68ca"
   },
   {
     "file": "ci-update-flow.cjs",
-    "bytes": 11656,
-    "sha256": "88ce8f425c87f8bf4bedaef1ab016145c76afe0d7d262a814ec942c41164befb"
+    "bytes": 11776,
+    "sha256": "3af231152ead24096c09bbd4971668cf153d68ca9adb66a5fef47121c89c86ed"
   },
   {
     "file": "ci_attachment_bridge.py",
     "bytes": 4104,
-    "sha256": "c828c2a659c1b4b64f21640c84d9e1767c12ab940f9288531576cd8714c1ab37"
+    "sha256": "eda4482da18de622396e55166ce1a00138cb4cac7d9f842d318e4552056efbff"
+  },
+  {
+    "file": "ci_picture_fresh.py",
+    "bytes": 3784,
+    "sha256": "770278a15fc515aa715ba3d0c525f1771a6a3d81a3edb2dc8efdb93a00f891bb"
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 7829,
-    "sha256": "fad3ae56658c7e117aba05d6cdf10f40f4f1c2c10768eb89d08741a725004e3c"
+    "bytes": 8346,
+    "sha256": "516bc14f57f5abcafdd2c243cd106ff770bcbcdb4192ab4cea7abfa690d5501f"
   },
   {
     "file": "ci_update_probe.py",
-    "bytes": 8021,
-    "sha256": "04744a3ac8b2c031bff70270fcc7df9fe529d6a5a1984c198cd42f7ec8e37d42"
+    "bytes": 10931,
+    "sha256": "cf4bad6de2fdc20afa147bae4d888020199db53cf14a38d022e35cd8848d2124"
   },
   {
     "file": "connector-part.py",
@@ -125,9 +200,104 @@
     "sha256": "ec166f1f3879888a8c1dc9e2a4145d6e32bd751ce0caa6c345a89896fac33f2f"
   },
   {
+    "file": "fetchfix-tests/archive-runtime.test.mjs",
+    "bytes": 1258,
+    "sha256": "aff510d1177509db652d9be3caaeb3851483c7b6431ffe64f7a2f80fb0808ead"
+  },
+  {
+    "file": "fetchfix-tests/bundled-release.test.mjs",
+    "bytes": 2886,
+    "sha256": "3c83da1b1253965a81cb7e8060d782a74f9958276e3f773f5f8eb407ed0b27a7"
+  },
+  {
+    "file": "fetchfix-tests/i18n.test.mjs",
+    "bytes": 2664,
+    "sha256": "9b3f5e66c94dd5d60467fd05eb841aabbe1026115bf68b6f22d832c5103f20ea"
+  },
+  {
+    "file": "fetchfix-tests/macos-runtime-signing.test.mjs",
+    "bytes": 1526,
+    "sha256": "79fc7f4ef0b00031eaff80cc8774c5cea1649312301283052aa99983b6e427d2"
+  },
+  {
+    "file": "fetchfix-tests/media-permissions.test.mjs",
+    "bytes": 3709,
+    "sha256": "960d107ac305b4705da286e6f50e8f3f7ba988500d71505b9b80a396ae535340"
+  },
+  {
+    "file": "fetchfix-tests/notarize.test.mjs",
+    "bytes": 2415,
+    "sha256": "f291e29b73a9f8fdc7debddd76c57905df59cb725b52da85826ecaf4e26dcb56"
+  },
+  {
+    "file": "fetchfix-tests/offline-update-selection.test.mjs",
+    "bytes": 3107,
+    "sha256": "6740fe671e4762b4940cdbf13f00eb9f93fedb848b68dce4cc4aa6f64ef5e2fa"
+  },
+  {
+    "file": "fetchfix-tests/platform.test.mjs",
+    "bytes": 2378,
+    "sha256": "3fa6934e1e8f9b0dd463d82ff0fc5ed27bcb02c0aa28730293403e6a122a8cdc"
+  },
+  {
+    "file": "fetchfix-tests/release-updates.test.mjs",
+    "bytes": 20085,
+    "sha256": "dd5d00c249e689cf1fce1db96270620fcda72794de18d725b38ee6a644a39701"
+  },
+  {
+    "file": "fetchfix-tests/runtime.test.mjs",
+    "bytes": 8863,
+    "sha256": "37a6f37986c7c670b7da31e194c2392e67942478506352d063628fcfc68add6c"
+  },
+  {
+    "file": "fetchfix-tests/shell-update.test.mjs",
+    "bytes": 6623,
+    "sha256": "15472a3b3e8202439390a446adf62d858cedc909195a54e46e16b156970f5b1e"
+  },
+  {
+    "file": "fetchfix-tests/signing.test.mjs",
+    "bytes": 889,
+    "sha256": "a5765fef7e2aeebfee735129250b7ddfe528b1ad68065da67f56c17f01a7dc54"
+  },
+  {
+    "file": "fetchfix-tests/split-payload.test.mjs",
+    "bytes": 1203,
+    "sha256": "54f059fb9ffaf1d9a6e93e25487882e90e3a513b6782914ce4fe1b87875647c6"
+  },
+  {
+    "file": "fetchfix-tests/student-runtime.test.mjs",
+    "bytes": 1079,
+    "sha256": "def82ca996927979193aeadc32358d463ee7ed5925c6c419a93b6a4cbb4cb7dd"
+  },
+  {
+    "file": "fetchfix-tests/update-batch.test.mjs",
+    "bytes": 2746,
+    "sha256": "b1010ae62881a8caa3f55450fae3a092b74bd08d87b9b94dcb52cb2d73331848"
+  },
+  {
+    "file": "fetchfix-tests/update-network.test.mjs",
+    "bytes": 2492,
+    "sha256": "d63f5db5cc5e4ea5d746cc467defa19143e8ef1db39c7d9e743204b793931f56"
+  },
+  {
+    "file": "fetchfix-tests/update-notice.test.mjs",
+    "bytes": 10865,
+    "sha256": "c0e60c1ce80dee8080d4d8ca31dbecf9b4e81af58cd71926bf92a928dcddde72"
+  },
+  {
+    "file": "fetchfix-tests/workspace-snapshot.test.mjs",
+    "bytes": 2259,
+    "sha256": "9400692a569514b88c222eac282086b8096f94e8d7fea6d4967959556f147bab"
+  },
+  {
     "file": "fresh-install-lock.json",
-    "bytes": 3837,
-    "sha256": "43c6d648187e135d7b018fbb097aecdd86c25326618cb8847a7884034eb6d3e7"
+    "bytes": 3829,
+    "sha256": "fa450e1a8e251d59205bd1272be6ede894583bce7618c116331f59150801e4b7"
+  },
+  {
+    "file": "intel-k12-4-reuse-lock.json",
+    "bytes": 49365,
+    "sha256": "61a2d5b05a2499919a38fab58c65cd692f762d9d282db1a79942bf323d37c0ef"
   },
   {
     "file": "intel-reuse-lock.json",
@@ -135,14 +305,114 @@
     "sha256": "e7cdebe0cfafcb26370044e6cf5d3e1ca2bd02b134e9fe05dff5aedf1c852faa"
   },
   {
+    "file": "materials-launcher-src/bundles.mjs",
+    "bytes": 6427,
+    "sha256": "ab5edd2e8e775178fefdec0dd6f9242f7993fda635d9bfd7d158c1af652a59db"
+  },
+  {
+    "file": "materials-launcher-src/config.mjs",
+    "bytes": 2844,
+    "sha256": "5442ee3b716c8234ba4e9c00cac5a999fc305ad07cb51088b4aedd5840d9af5f"
+  },
+  {
+    "file": "materials-launcher-src/entry.mjs",
+    "bytes": 214,
+    "sha256": "ed6bc9c89a241beed2314d042f23f9fbf4003394e87dcfd3391a493014acad8f"
+  },
+  {
+    "file": "materials-launcher-src/i18n.mjs",
+    "bytes": 31255,
+    "sha256": "82b489024c64c61e26c9ca84397a7293ad40b7248c7ef0a2ce52055755e98fc5"
+  },
+  {
+    "file": "materials-launcher-src/index.html",
+    "bytes": 1393,
+    "sha256": "d54b3176d0a28aac53e9fbf66bdf62bde10f035807049f65446d0ed3de939516"
+  },
+  {
+    "file": "materials-launcher-src/lesson-browser.cjs",
+    "bytes": 1693,
+    "sha256": "b15e395a9b40c63d78d93d43854e8e93eebb8c752d6651615921b004423cc87f"
+  },
+  {
+    "file": "materials-launcher-src/main.mjs",
+    "bytes": 29608,
+    "sha256": "57b36431bef3bb45430ba07701ad79e06ec10ffa93a9c513be9ce4f3a1f73a3f"
+  },
+  {
+    "file": "materials-launcher-src/platform.mjs",
+    "bytes": 2461,
+    "sha256": "2244e4e11c57c508cf2d6e986b460a8d2689c1587e6e2b9e271302be6db71723"
+  },
+  {
+    "file": "materials-launcher-src/preload.cjs",
+    "bytes": 398,
+    "sha256": "ed17b465880e7eacf624e7858335d1ed7469ff2f60134da446d8cb975cab541b"
+  },
+  {
+    "file": "materials-launcher-src/processes.mjs",
+    "bytes": 4842,
+    "sha256": "df57131cf94992e30e8474b21611ba78289942b98f56bdef0d417677ffa03c32"
+  },
+  {
+    "file": "materials-launcher-src/release-updates.mjs",
+    "bytes": 8017,
+    "sha256": "e1d19421545668f85cf280a399cb96acdd5a4724d420d3b4d81daca024a64ee4"
+  },
+  {
+    "file": "materials-launcher-src/renderer.js",
+    "bytes": 1338,
+    "sha256": "808dc4adcdcc670872d21413620aaa121b5519a1d24c44a75c02c0d890252994"
+  },
+  {
+    "file": "materials-launcher-src/runtime.mjs",
+    "bytes": 10652,
+    "sha256": "28356dddd93b7ce614a07d98cbccf2504a367f88138da0df1f20426210385327"
+  },
+  {
+    "file": "materials-launcher-src/shell.css",
+    "bytes": 4882,
+    "sha256": "dce67c67e27000cc5cad2fe886fcd4c0d9b266084a5b91fbd8594a9a16d9cd04"
+  },
+  {
+    "file": "materials-launcher-src/student-runtime.mjs",
+    "bytes": 1217,
+    "sha256": "ab6d5978baf5d88451b1384c9c8e902d5a62f95d8c27e99ec0a42514133b634a"
+  },
+  {
+    "file": "materials-launcher-src/supervisor.mjs",
+    "bytes": 1521,
+    "sha256": "11f9a1dfda92ef72c92623ba98345da067bff85c201aa733828e9391d4d85e19"
+  },
+  {
+    "file": "materials-launcher-src/update-bridge.cjs",
+    "bytes": 491,
+    "sha256": "411ec4e95e2ef9a0d57df035fd53e45796dddeedfa7cdd3df7d250b540e3a9a8"
+  },
+  {
+    "file": "materials-launcher-src/update-network.mjs",
+    "bytes": 627,
+    "sha256": "d8664ce99adac17cbd2f2ebd1ffe21c49232d55dc8f41d1b200d6d50813084b1"
+  },
+  {
+    "file": "materials-launcher-src/workspace-snapshot.mjs",
+    "bytes": 1242,
+    "sha256": "246197cdfcf8fbeb482d5b3d6370e5c0af10d072a6c2eef9b105072fc4d69613"
+  },
+  {
+    "file": "materials-upgrade-lock.json",
+    "bytes": 9247,
+    "sha256": "396935beedd7b6c0040b8c72717867e6dc09024acb9238f51d93b8043fe155d2"
+  },
+  {
     "file": "native-k12-api-smoke.py",
-    "bytes": 7923,
-    "sha256": "744f1b2d814de3fbece7c9594b7caf09966b53c0f4f828269bcdf452a9f06825"
+    "bytes": 12752,
+    "sha256": "61e87c5387f1f0a6208b5889aca788156fba42dca433aee6a3b92f9ca3997895"
   },
   {
     "file": "native-k12-fixture.py",
-    "bytes": 2981,
-    "sha256": "574a9c5219c5b5637dcace5300e16090361ef11d26d01d370fe910a6e0c71f9c"
+    "bytes": 4696,
+    "sha256": "d4cdf272a994258ff9f5a29eb9174b0bbbeab64648680935800e147d9122d71b"
   },
   {
     "file": "prepare-bank-payload.py",
@@ -185,14 +455,34 @@
     "sha256": "f56b6700945340d48daa794b43b1a5be053d72cff703dc1041a42733f246f5ca"
   },
   {
+    "file": "test_mac_reuse.py",
+    "bytes": 6087,
+    "sha256": "7293ecdf5efe6dfa178e73f5fd27b9a43287493225845707cd1edf25c7f79ef7"
+  },
+  {
+    "file": "test_materials_upgrade.py",
+    "bytes": 2245,
+    "sha256": "6bab1a60dae908fbbafb80aba6bc1bbec1cc5505b03ad2fcbf4ed27879053719"
+  },
+  {
+    "file": "test_native_entry_artifacts.py",
+    "bytes": 2261,
+    "sha256": "6e10ff1c924d79f51dd25253095dcba4f1d775955422c3e05a28410d944166bb"
+  },
+  {
     "file": "test_native_k12_api.py",
-    "bytes": 6726,
-    "sha256": "4bef1f4a440e2979fd618198e5768575124802158015135f9c8f6b17a42a4054"
+    "bytes": 10902,
+    "sha256": "8793c4536e4f9bf098bef01b87d6ed4ff5e0bcd8cf1104c9b5266b8c64e1946e"
   },
   {
     "file": "test_publication_transaction.py",
     "bytes": 11450,
-    "sha256": "519f8cba434b943ba2e741128741ab580cc8c05fc491ea2591fd06cb41077cf3"
+    "sha256": "4f8057387ecba510bb8cffcc4b8e19a7ffa9170bfba00792aa864646de9a7061"
+  },
+  {
+    "file": "test_recovery_publication_gate.py",
+    "bytes": 2580,
+    "sha256": "c077667608a13d594a236d6c06c80a2ed9a86079a0cd4b8c48a8e3ce9c498e50"
   },
   {
     "file": "test_release_bank.py",
@@ -203,5 +493,10 @@
     "file": "test_release_source.py",
     "bytes": 6211,
     "sha256": "0fe33973d9f40087281d7352414ef8e029d7e519e2d8c319f9413528f58c1224"
+  },
+  {
+    "file": "windows-k12-4-reuse-lock.json",
+    "bytes": 49564,
+    "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
   }
 ]

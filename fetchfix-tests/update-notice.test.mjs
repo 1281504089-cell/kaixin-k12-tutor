@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runInNewContext } from 'node:vm';
 import test from 'node:test';
+import { isInterruptedDownload } from '../src/release-updates.mjs';
 
 const source = await readFile(new URL('../src/main.mjs', import.meta.url), 'utf8');
 const stateBlock = source.slice(source.indexOf('function releaseSnapshot()'), source.indexOf('const t ='));
@@ -24,6 +25,7 @@ function updater(next, { base = true, transaction = null } = {}) {
     readJSON:async()=>transaction, access:async()=> { if (!base) throw new Error('missing'); },
     path, userRoot:'/isolated-preview', transactionFile:'upgrade.json', AbortController,
     updateNotice:async key=>notices.push(key),
+    isInterruptedDownload,
     view:{ webContents:{ isDestroyed:()=>false, send:(_channel,payload)=>sent.push(payload) } },
     window:{ isDestroyed:()=>false, setProgressBar:()=>{} },
     dialog:{ showMessageBox:async(_window,options)=> { dialogs.push(options); return {response:0}; } },
@@ -80,6 +82,34 @@ test('confirmed updates prevent idle suspension only until download and installa
     assert.ok(released > 0 && released < notified);
     assert.equal(events[notified][1], fail ? 'releaseSuspended' : 'next');
     assert.equal(events.at(-1), 'cleanup');
+    assert.equal(h.context.busy, false);
+  }
+});
+
+test('an interrupted download has a readable notice and stage log without starting installation', async () => {
+  for (const stage of ['downloading', 'installing']) {
+    const h = updater({ runtimeId: 'next' });
+    const events = [], logs = [];
+    const error = new TypeError('terminated', { cause: Object.assign(new Error('socket closed'), { code: 'UND_ERR_SOCKET' }) });
+    Object.assign(h.context, {
+      powerSaveBlocker: { start() { return 0; }, stop() {} },
+      mkdtemp: async () => '/isolated-preview/download', rm: async () => { events.push('cleanup'); },
+      appendFile: async (_path, text) => logs.push(text),
+      downloadReleaseUpdate: async () => {
+        if (stage === 'downloading') throw error;
+        return '/isolated-preview/download/runtime.json';
+      },
+      applyCoreUpdate: async () => { events.push('install'); throw error; },
+      isNetworkSuspended: () => false,
+      updateNotice: async (...values) => events.push(values),
+    });
+    h.context.dialog.showMessageBox = async () => ({ response: 1 });
+    await h.context.checkRelease(true);
+    assert.deepEqual(events.find(Array.isArray), ['updateFailed', stage === 'downloading' ? 'releaseInterrupted' : 'terminated', 'error']);
+    assert.equal(events.includes('install'), stage === 'installing');
+    assert.match(logs[0], new RegExp(`failed \\[${stage}\\]: terminated \\(UND_ERR_SOCKET\\)`));
+    assert.equal(events.at(-1), 'cleanup');
+    assert.equal(h.context.active.manifest.runtimeId, 'installed');
     assert.equal(h.context.busy, false);
   }
 });

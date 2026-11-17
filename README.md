@@ -6,11 +6,13 @@
 - **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
 - **九科有各自的 AI 老师。** 每科都有自己的学习项目。做题卡住时可以选对应科目的老师，先要个提示，自己做下去。
 
-**最新正式版为 [`student-20261117-k12-2`](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2)。** 学习源码 `f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9`；最终核心与三系统同批原生新装、当前和旧启动器检查更新验收已通过。正式状态以[最新 Release](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)、PUBLICATION-RECEIPT 和 CURRENT 为准；本机真实升级结果单独记录在 CURRENT，不将构建机验收混同于全部实体设备。
+**最新正式版为 [`student-20261117-k12-4`](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4)。** 学习源码 `2af326481943f7e072036637ba186aa829dce39d`；最终核心与三系统同批原生新装、当前和旧启动器检查更新验收已通过。正式状态以[最新 Release](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)、PUBLICATION-RECEIPT 和 CURRENT 为准；本机真实升级结果单独记录在 CURRENT，不将构建机验收混同于全部实体设备。
 
-[本批文件：Windows / Apple 芯片 Mac / Intel Mac](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2) · [上一正式版 k12-1](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-1)
+[本批文件：Windows / Apple 芯片 Mac / Intel Mac](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4) · [上一正式版 k12-2](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2)
 
-**本次版本：精准选题与完整题目图。** 增加 294 道完整题目图，来自 26 份题源、82 个不同原图；题干、公式、必要图示及 A–D 选项一起显示，实际采用时带淡蓝色原题跳转。展示图提前生成，不在学生端截图，也不额外送入模型。题库共隔离 17 条（原有 16 条坏 PNG，新增 1 条原件题设冲突），有效 20,845 条可读题源单位、18,890 条结构练习候选。普通可选取题共用 1 秒检索期限，并优先走纯文字题源；本批没有开放普通取题的自动视觉模型切换。[图片题用法与边界](PICTURE-QUESTION-20261117.md) · [本批说明及对照时间](RELEASE-NOTES.md)。
+**本次更新：题库来源、科目年级筛选与更新中断恢复。** 题库请求和后续“再出一题”优先保持真实题源，采用时带淡蓝色原题跳转；题源预览隐藏内部导入标记，科目与年级独立筛选，不猜测未确认年级。修复共享更新器下载体中断与备用通道拒绝组合时无法恢复的问题，保留验签和完整校验；遇到可恢复断流仅有限重试一次，不是断点续传。三系统完整新装及四种历史更新路径通过，本机 Intel Mac 也已从 k12-2 实际点击检查更新到 k12-4、重开并再次确认最新。
+
+沿用已准备的 294 条题图绑定，但并非全理科题库都可直接展示题图。4,525 个不同理科原件已核对大小和摘要，42 条理科记录已有直接题图，其余 4,518 条含图片记录多数仍需打开原文件；这些记录含整卷和公式图片，不能等同于独立配图题数量。放大原图候选与完整展示覆盖正在独立验证，未混入本次冻结包。[图片题用法与边界](PICTURE-QUESTION-20261117.md) · [本批说明及对照时间](RELEASE-NOTES.md)。
 
 历史模型对照累计 **9 次实际请求、7 份完整回答、2 次诊断中止**；数学完整样本仅 1 份基线与 2 份采用题库的回答，不能宣称整体平均提速。294 道题目图通过显示完整性与像素核对，不代表全库答案、任意长篇讲解或所有题型完成学术审核。图包自身为 13,579,283 字节，整个核心与安装包大小以下载页及更新窗口为准。冻结身份与验收状态见 [SOURCE-TEST-HANDOFF.json](SOURCE-TEST-HANDOFF.json)。
 
@@ -68,15 +70,17 @@ Kaixin K12 Tutor is a DeepTutor-based desktop study companion for Chinese-speaki
 
 [历史源码修复、使用方式和验证范围](SOURCE-FIXES-20261113.md)：附件可选临时／长期保存、科目项目新建对话、离线语音转写和录音声波反馈、模型切换兼容、DeepSeek 分级生成预算与摘要失败提示。相关历史试装结果仅属于当时版本，本批三系统新装、更新与隔离测试数据保留已通过。
 
+本批新增题库科目与年级筛选、可核实分类修复、浅蓝来源入口，以及断流后一次受限的连接重建。三端均验证当前、早期启动器和 11 月 14 日核心搭配两种启动器的完整升级。预制整题图 294 条中理科为 42 条；其余带图题源保留原件，但尚未全部实现聊天直接展示。
+
 ## 下载安装
 
 本次主版本为 **1.7.1**，核心编号包含 **20261117-k12-2**，包含本机运行环境、136 册教材及本轮优化，界面默认简体中文。三系统同批验收已通过；下载同一版本整套文件，正式默认入口以最新 Release 为准。
 
 | 电脑 | 本批文件 | 本批验收状态 |
 | --- | --- | --- |
-| Apple 芯片 Mac | [Apple 芯片安装文件](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2) | 同批新装、当前/旧启动器更新及隔离历史与设置保留通过 |
-| Intel Mac | [Intel 安装文件](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2) | 同批新装、当前/旧启动器更新及隔离历史与设置保留通过 |
-| Windows x64 | [Windows x64 安装文件](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2) | 同批中文路径新装、当前/旧启动器更新及隔离记录保留通过 |
+| Apple 芯片 Mac | [Apple 芯片安装文件](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4) | 同批新装、当前/旧启动器更新及隔离历史与设置保留通过 |
+| Intel Mac | [Intel 安装文件](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4) | 同批新装、当前/旧启动器更新及隔离历史与设置保留通过 |
+| Windows x64 | [Windows x64 安装文件](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4) | 同批中文路径新装、当前/旧启动器更新及隔离记录保留通过 |
 
 1. 下载同一版本页面的全部平台分卷，放进一个新文件夹并保留原名。正式默认版本以最新 Release 为准。
 2. Mac 下载 1 个 `.dmg` 和 3 个 `.dmgpart`。双击 `.dmg`，把应用拖入 Applications。
@@ -139,7 +143,7 @@ open "$HOME/Downloads/Kaixin-Mac-Complete.dmg"
 
 ## 开发者
 
-本批目录见[版本标签](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/student-20261117-k12-2)，学习源码与导出摘要以 [SOURCE-TEST-HANDOFF.json](SOURCE-TEST-HANDOFF.json) 为准；这不构成正式发布回执。从同批发行目录运行 `python3 bootstrap_source.py --with-updates` 可校验、解包并应用冻结源码。题库按[BANK-RECOVERY.md](BANK-RECOVERY.md)从同批签名核心恢复，不把临时大数据分卷提交作为 main 祖先。[开发者指南](DEVELOPMENT.md) · [源码清单](source-manifest.json)
+本批目录见[版本标签](https://github.com/1281504089-cell/kaixin-k12-tutor/tree/student-20261117-k12-4)，学习源码与导出摘要以 [SOURCE-TEST-HANDOFF.json](SOURCE-TEST-HANDOFF.json) 为准；这不构成正式发布回执。从同批发行目录运行 `python3 bootstrap_source.py --with-updates` 可校验、解包并应用冻结源码。题库按[BANK-RECOVERY.md](BANK-RECOVERY.md)从同批签名核心恢复，不把临时大数据分卷提交作为 main 祖先。[开发者指南](DEVELOPMENT.md) · [源码清单](source-manifest.json)
 
 ## 验证与许可
 

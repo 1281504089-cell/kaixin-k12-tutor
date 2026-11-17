@@ -7,7 +7,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { bundleConfig, canonicalManifest, installBundle } from '../src/bundles.mjs';
 import { systemTar, runtimeLayout, targetId } from '../src/platform.mjs';
-import { downloadReleaseUpdate, findReleaseUpdate } from '../src/release-updates.mjs';
+import { downloadReleaseUpdate, findReleaseUpdate, isInterruptedDownload } from '../src/release-updates.mjs';
 import { createUpdateFetch } from '../src/update-network.mjs';
 
 const { publicKey, privateKey } = generateKeyPairSync('ed25519');
@@ -163,6 +163,112 @@ test('a suspended request or body recovers once with a fresh session and verifie
     assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
     assert.equal(JSON.parse(await readFile(path.join(root, 'runtime.json'))).signature, manifest.signature);
   }
+});
+
+test('interrupted downloads on both public routes rebuild the network session once and verify every byte', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-terminated-recovery-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bytes = Buffer.from('complete archive after both routes were interrupted');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  let generation = 0, archives = 0;
+  const names = [];
+  const fetch = createUpdateFetch({ fromPartition(name) {
+    names.push(name);
+    const currentGeneration = ++generation;
+    return { webRequest: { onBeforeRequest() {} }, fetch: async url => {
+      if (new URL(url).pathname.endsWith('/tags/core-updates')) return Response.json({ tag_name: 'core-updates', draft: false,
+        assets: [{ name: manifest.archive, state: 'uploaded', id: 12 }] });
+      archives++;
+      if (currentGeneration === 1) return new Response(new ReadableStream({ start(controller) {
+        controller.enqueue(bytes.subarray(0, 4));
+        queueMicrotask(() => controller.error(new TypeError('terminated')));
+      } }));
+      return new Response(bytes, { headers: { 'content-length': String(bytes.length) } });
+    } };
+  } });
+  const file = await downloadReleaseUpdate(manifest, root, () => {}, fetch);
+  assert.equal(archives, 3);
+  assert.deepEqual(names, ['kaixin-updates', 'kaixin-updates-resumed-1']);
+  assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+  assert.equal(JSON.parse(await readFile(file)).signature, manifest.signature);
+});
+
+test('persistent interrupted downloads stop after one session recovery; cancellation never retries', async t => {
+  for (const cancel of [false, true]) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-terminated-limit-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    const controller = new AbortController();
+    let archives = 0, recoveries = 0;
+    const fetch = async url => {
+      if (url.pathname.endsWith('/tags/core-updates')) return Response.json({ tag_name: 'core-updates', draft: false,
+        assets: [{ name: 'patch.tar.gz', state: 'uploaded', id: 12 }] });
+      archives++;
+      return new Response(new ReadableStream({ start(stream) { stream.error(new TypeError('terminated')); } }));
+    };
+    fetch.recoverAfterSuspend = async signal => {
+      recoveries++;
+      if (cancel) controller.abort(new Error('user cancelled'));
+      signal.throwIfAborted();
+    };
+    await assert.rejects(downloadReleaseUpdate(signed(), root, () => {}, fetch, controller.signal), cancel ? /user cancelled/ : /terminated/);
+    assert.equal(recoveries, 1);
+    assert.equal(archives, cancel ? 2 : 3);
+    for (const file of ['patch.tar.gz', 'runtime.json']) await assert.rejects(readFile(path.join(root, file)), { code: 'ENOENT' });
+  }
+});
+
+test('only transport interruption errors qualify for a fresh download session', () => {
+  for (const error of [new TypeError('terminated'), new Error('net::ERR_CONNECTION_RESET'),
+    new TypeError('fetch failed', { cause: Object.assign(new Error('other side closed'), { code: 'UND_ERR_SOCKET' }) })]) {
+    assert.equal(isInterruptedDownload(error), true);
+  }
+  for (const error of [new Error('Terminated'), new Error('checksum does not match'),
+    Object.assign(new Error('disk full'), { code: 'ENOSPC' }), new DOMException('Cancelled', 'AbortError')]) {
+    assert.equal(isInterruptedDownload(error), false);
+  }
+});
+
+test('an interrupted direct download can recover even when the public API refuses access', async t => {
+  const bytes = Buffer.from('complete archive from a rebuilt direct connection');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  for (const persistent of [false, true]) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-interrupted-denied-api-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    let directs = 0, apis = 0, recoveries = 0;
+    const fetch = async url => {
+      if (url.hostname === 'api.github.com') { apis++; return new Response(null, { status: 403 }); }
+      directs++;
+      if (!persistent && recoveries) return new Response(bytes);
+      return new Response(new ReadableStream({ start(controller) { controller.error(new TypeError('terminated')); } }));
+    };
+    fetch.recoverAfterSuspend = async () => { recoveries++; };
+    if (persistent) {
+      await assert.rejects(downloadReleaseUpdate(manifest, root, () => {}, fetch), /HTTP 403/);
+      for (const name of [manifest.archive, 'runtime.json']) await assert.rejects(readFile(path.join(root, name)), { code: 'ENOENT' });
+    } else {
+      await downloadReleaseUpdate(manifest, root, () => {}, fetch);
+      assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+    }
+    assert.equal(recoveries, 1); assert.equal(directs, 2); assert.equal(apis, persistent ? 2 : 1);
+  }
+});
+
+test('a disk error on the fallback route prevents a pending transport recovery', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-fallback-disk-error-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  let archives = 0, recoveries = 0;
+  const fetch = async url => {
+    if (url.pathname.endsWith('/tags/core-updates')) return Response.json({ tag_name: 'core-updates', draft: false,
+      assets: [{ name: 'patch.tar.gz', state: 'uploaded', id: 12 }] });
+    archives++;
+    return archives === 1 ? new Response(new ReadableStream({ start(controller) { controller.error(new TypeError('terminated')); } })) : new Response('complete');
+  };
+  fetch.recoverAfterSuspend = async () => { recoveries++; };
+  await assert.rejects(downloadReleaseUpdate(signed(), root, () => {
+    if (archives === 2) throw Object.assign(new Error('disk full'), { code: 'ENOSPC' });
+  }, fetch), { code: 'ENOSPC' });
+  assert.equal(archives, 2);assert.equal(recoveries, 0);
+  for (const name of ['patch.tar.gz', 'runtime.json']) await assert.rejects(readFile(path.join(root, name)), { code: 'ENOENT' });
 });
 
 test('persistent suspension is bounded and cancellation during recovery starts no new request', async t => {

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-2', 'Owner must prepare the exact final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-4', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -38,6 +38,32 @@ def download_public_archive(asset,destination):
    partial.unlink(missing_ok=True);last=error
  raise last
 
+def verify_update_recovery(report,batch,target):
+ tests=report['launcher_tests'];assert tests['passed'] and tests['tests']>=81 and tests['fail']==0
+ transport=report['network']['interrupted_transport_fixture']
+ assert transport['faults']==2 and transport['recoveries']==1 and transport['verified_complete']
+ mixed=report['network']['interrupted_direct_denied_api_fixture']
+ assert mixed['mixedFaults']==mixed['apiDenials']==mixed['mixedRecoveries']==1 and mixed['verified_complete']
+ assert mixed['anonymous_direct_download'] and mixed['injected_api_denial']
+ runtime='1.7.1-kaixin-20261114-materials-'+target+'-universal'
+ for name,legacy in [('materials_launcher_entry',False),('materials_oldest_launcher_entry',True)]:
+  proof=report[name];assert proof['from_runtime']==runtime
+  assert proof['actual_download_install_backup_restart']=='passed' and proof['check_again_current']
+  assert proof['signed_launcher_restarted'] and proof['old_pid']!=proof['restarted_pid'] and proof['to_launcher']==batch['launcher_build']
+  assert all(proof[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
+  assert proof['selected_base_runtime']==(None if legacy else runtime)
+  assert proof['selected_archive']==('kaixin-bridge-'+batch['tag'].removeprefix('student-')+'-'+target+'.tar.gz' if legacy else 'kaixin-core-'+batch['tag'].removeprefix('student-')+'.tar.gz')
+
+def verify_native_entry_artifacts(report, evidence):
+ entries={'update_entry':'update-entry','oldest_launcher_entry':'oldest-update-entry','materials_launcher_entry':'materials-update-entry','materials_oldest_launcher_entry':'materials-oldest-update-entry'}
+ for key,name in entries.items():
+  assert json.loads((evidence/(name+'.json')).read_text())==report[key], 'Native entry receipt differs: '+key
+ # Shared UI sidecars are produced by each scenario; the final scenario owns the retained files.
+ final=report['materials_oldest_launcher_entry']
+ for name,key in {'library-bulk.json':'library_bulk_upload','chat-audio.json':'chat_audio','native-science.json':'science_formulas','quick-preview.json':'quick_preview'}.items():
+  assert json.loads((evidence/name).read_text())==final[key], 'Final scenario sidecar differs: '+name
+ return {'per_entry_receipts_verified':len(entries),'shared_sidecars_from':'materials_oldest_launcher_entry'}
+
 assert set(batch['native_runs'])==set(targets)
 for target,proof in batch['native_runs'].items():
  run=api('actions/runs/'+str(proof['run_id']))
@@ -53,8 +79,8 @@ for target in targets:
  report=json.loads(public(assets['verification-'+target+'.json']))
  assert report['release']==batch['tag'] and report['core_commit']==batch['core_commit']
  if batch['native_runs'][target]['run_id'] != batch['native_staging_run']:
-  assert target in {'macos-arm64','macos-x64'}
-  lock_name={'macos-arm64':'arm-reuse-lock.json','macos-x64':'intel-k12-2-reuse-lock.json'}[target]
+  assert target in {'macos-arm64','macos-x64','windows-x64'}
+  lock_name={'macos-arm64':'arm-k12-4-reuse-lock.json','macos-x64':'intel-k12-4-reuse-lock.json','windows-x64':'windows-k12-4-reuse-lock.json'}[target]
   lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
   accepted=batch['native_rechecks'][target];p=report['provenance']
   assert hashlib.sha256(lock_raw).hexdigest()==accepted['lock_sha256']==p['reuse_lock_sha256']
@@ -67,16 +93,17 @@ for target in targets:
   assert lock['source_commit']==batch['core_commit'] and lock['candidate_tag']==batch['tag']
   assert lock['frozen_stage']['sha256']==batch['signed_stage_sha256']==p['frozen_stage_sha256']
   assert all(p[k] is False for k in ['bridge_rebuilt','installers_repackaged','existing_assets_overwritten'])
-  assert all(p[k] is True for k in ['fresh_smoke_rerun','fresh_picture_ui_rerun','proxy_smoke_rerun','oldest_and_current_ipc_rerun'])
+  assert all(p[k] is True for k in ['fresh_smoke_rerun','fresh_picture_ui_rerun','proxy_smoke_rerun','oldest_and_current_ipc_rerun','materials_both_variants_rerun'])
   assert sorted((r['file'],r['bytes'],r['sha256']) for r in report['full_files'])==sorted((r['name'],r['bytes'],r['sha256']) for r in lock['candidate_files'])
  assert report['launcher_build']==batch['launcher_build'] and report['shell_files']==batch['shell_files']
+ verify_update_recovery(report,batch,target)
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
  assert smoke['k12_api']['prepared_picture_bindings']==batch['picture_count']
  assert smoke['k12_api']['prepared_picture_manifest_sha256']==batch['picture_manifest_sha256']
  fresh=report['fresh_picture_ui'];assert fresh['passed'] and fresh['production_launcher_source_byte_identical'] and fresh['qa_code_only_in_disposable_copy']
- for ui in [fresh['k12_library'],*[report[key]['k12_library'] for key in ['update_entry','oldest_launcher_entry']]]:
+ for ui in [fresh['k12_library'],*[report[key]['k12_library'] for key in ['update_entry','oldest_launcher_entry','materials_launcher_entry','materials_oldest_launcher_entry']]]:
   assert ui['passed'] and ui['actualNativeRenderer'] and len(ui['views'])==4
   for view in ui['views']:
    assert all(view['preparedPicture'][key] for key in ['native_http_image_sha_verified','body_dom_before_image_response','second_history_restore'])
@@ -84,7 +111,7 @@ for target in targets:
  assert all(smoke['k12_api'][key] for key in ['fts_search_passed','fts_empty_query_passed','item_quality_metadata_matched'])
  assert smoke['k12_api']['runtime_isolated_count']==batch['runtime_exclusion_count'] and smoke['k12_api']['physical_readable_count']-smoke['k12_api']['effective_readable_count']==batch['runtime_exclusion_count']
  assert smoke['k12_api']['runtime_exclusion_kinds']==batch['runtime_exclusion_kinds'] and smoke['k12_api']['runtime_exclusion_ledger_sha256']==batch['runtime_exclusion_ledger_sha256']
- for field in ['update_entry','oldest_launcher_entry']:
+ for field in ['update_entry','oldest_launcher_entry','materials_launcher_entry','materials_oldest_launcher_entry']:
   k12=report[field]['k12_library'];assert k12['passed'] and k12['actualNativeRenderer'] and k12['model_calls']==0 and len(k12['views'])==4
   assert k12['bank_revision']==smoke['k12_api']['bank_revision']
  study=smoke['study_reports'];assert study['passed'] and len(study['cases'])==9 and study['real_model_calls']==0
@@ -94,6 +121,7 @@ for target in targets:
  native_evidence=work/('evidence-'+target)
  gh('run','download',batch['native_runs'][target]['run_id'],'--name','attachments-'+target,'--dir',native_evidence)
  assert json.loads((native_evidence/'verified.json').read_text())==report
+ report['artifact_scene_binding']=verify_native_entry_artifacts(report,native_evidence)
  for size in ['390x844','1366x900']:
   screenshot=native_evidence/('quick-preview-'+size+'.png');raw=screenshot.read_bytes();assert len(raw)>1000 and raw.startswith(b'\x89PNG\r\n\x1a\n')
   public_screenshot=work/('quick-preview-'+target+'-'+size+'.png');public_screenshot.write_bytes(raw);gh('release','upload',batch['tag'],public_screenshot,'--clobber')
@@ -106,11 +134,9 @@ for target in targets:
  assert legacy['old_pid']!=legacy['restarted_pid'] and legacy['to_launcher']==batch['launcher_build']
  assert update['download_progress_visible'] and update['downloaded_bytes_visible'] and update['to_launcher']==batch['launcher_build']
  bulk=update['library_bulk_upload'];assert bulk['saved_files']==21 and all(bulk[k] for k in ['multiple','library_retention','originals_byte_identical','original_preview_opened','held_real_chunk','chat_and_settings_navigation','appended_while_active','completed_in_chat','document_not_reloaded','draft_preserved','picker_reference_byte_identical','no_duplicate_upload_or_new_chat','html_safe_preview','source_toggle','native_math_display'])
- assert json.loads((native_evidence/'library-bulk.json').read_text())==bulk
  audio=update['chat_audio'];assert audio['passed'] and len(audio['productionCards'])==2
  assert audio['selection']['chatRequests']==0 and audio['selection']['errorShown']
  assert all(card['sha256']==audio['productionCards'][0]['sha256'] for card in audio['productionCards'])
- assert json.loads((native_evidence/'chat-audio.json').read_text())==audio
  science=update['science_formulas'];assert science['passed'] and len(science['views'])==16 and len(science['originalEdits'])>=18 and science['cleanup']['debuggerDetached'] and science['cleanup']['deviceMetricsCleared']
  assert bulk['device_speech']['diagnosticOnly'] and 'nativeEnded' in bulk['device_speech']['diagnostic']
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])

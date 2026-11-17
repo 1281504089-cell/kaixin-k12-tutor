@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
-  "published_export_sha256": "f5f25cbc43a74efc134f8b4d6fcf623c7ec3d8c3ddf043ae16ee824dcfb979b0",
+  "source_commit": "2af326481943f7e072036637ba186aa829dce39d",
+  "published_export_sha256": "1413eb96e13aa1de1e006ec1b1206476dde5cdae2dac69734be8b25e5b6d0ecd",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "files": [
     {
@@ -811,8 +811,8 @@
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
-      "bytes": 5344,
-      "sha256": "7f897cb195f78eb91d1d9e125820a53e62a3ab6c1950c32aa127163e82c69d23",
+      "bytes": 6636,
+      "sha256": "2af819c9723a1a4d012b1048e4223aa90d060ab50f2b1c494421c0fb514d657b",
       "mode": 420
     },
     {
@@ -883,8 +883,8 @@
     },
     {
       "file": "deeptutor/agents/loop/loop_host.py",
-      "bytes": 19656,
-      "sha256": "4874905b4b40c8c615dbcf16f6bdc1a9cf348afb579201115f34ee1b94dd8c94",
+      "bytes": 19968,
+      "sha256": "35c953742c27fd9098eab1f1619d61fbb28d4c22745e19c8b78a5a0e35b4f914",
       "mode": 420
     },
     {
@@ -895,8 +895,8 @@
     },
     {
       "file": "deeptutor/agents/loop/native_adapter.py",
-      "bytes": 21504,
-      "sha256": "c595e3dfd9b35575bb870a99b5ec2abe3bc3bbdbf73a2ab9dd20a5f4778e1790",
+      "bytes": 21745,
+      "sha256": "e63d1c0288a689a8657a64761aa3649524e2bfd2ca1e1a17a6a2402ee13cbb3a",
       "mode": 420
     },
     {
@@ -919,8 +919,8 @@
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
-      "bytes": 100450,
-      "sha256": "481f7b836bb21729e76dac366d18a1a5d7c108007bcab43a21321ab03d9dce42",
+      "bytes": 100792,
+      "sha256": "41576f188d780eef451c632cca3499600461b185d523265e45878a9e4040a32b",
       "mode": 420
     },
     {
@@ -1861,8 +1861,8 @@
     },
     {
       "file": "deeptutor/api/routers/student_question_bank.py",
-      "bytes": 2624,
-      "sha256": "9c6277ac19a1a09d3b18dc78b5d1ac68afe114ad6e62babb33fa23c66de8c387",
+      "bytes": 2710,
+      "sha256": "570b900e1ae6a632dc97980726c8799162f15c64ee8874d439be98768f2a5b71",
       "mode": 420
     },
     {
@@ -8029,8 +8029,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 7129,
-      "sha256": "b31abdafbce2ec6384cd58b16c0e7e84ff6f910b7615c7dbfc008dc09562b3f5",
+      "bytes": 8308,
+      "sha256": "e9fb397f3393af1f710a0708162567a32a99cf3ffca212be27223dc6591e6c09",
       "mode": 420
     },
     {
@@ -9810,6 +9810,12 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/student_learning/question_source_classifications.json",
+      "bytes": 48477,
+      "sha256": "aa8f06ba8e60138dff44d76a96af01ca4b78296cdd21c3d78eb44a5e5205b00a",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/student_learning/question_source_exclusions.json",
       "bytes": 5285,
       "sha256": "d83de01f607be564213c007a6613ca81b3adea2821ef1de83147a298d3f71522",
@@ -9817,8 +9823,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_sources.py",
-      "bytes": 23428,
-      "sha256": "b8e8bb3b2b6cee08d00de3f5967e1478f6cbc4fed5cccb4e7a7d421005ad95b3",
+      "bytes": 28143,
+      "sha256": "1493176405e08435dc079e2450ef985f5e6bc1794d3d46cdea6eb22beff5c015",
       "mode": 420
     },
     {
@@ -9835,8 +9841,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 9789,
-      "sha256": "abe1801550bb79c90c62954b70883cda767b124fc8005c97b5076db6a669c157",
+      "bytes": 9820,
+      "sha256": "edd2c0010de6a9fbc13501fc0f32875e73d071a6779f97faec3313c21a6b50b8",
       "mode": 420
     },
     {
@@ -11797,8 +11803,8 @@
     },
     {
       "file": "scripts/build_question_bank.py",
-      "bytes": 21046,
-      "sha256": "c9da1dae1303a7cc3feb36eb4554f3bb9616be34e7c41cd2bf3d111b303f7dd7",
+      "bytes": 21188,
+      "sha256": "ad8446529a6027066e5ee71eacff363798554525c765a3325e1e87667ae2d1fe",
       "mode": 420
     },
     {

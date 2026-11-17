@@ -1,6 +1,6 @@
 # 新电脑首次安装
 
-本次版本：**`student-20261117-k12-2`（1.7.1）**，学习源码 `f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9`。最终核心与三系统同批原生新装、当前和旧启动器检查更新验收已通过；正式状态以[最新 Release](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)、PUBLICATION-RECEIPT 和 CURRENT 为准。本机真实升级单独记录。
+本次版本：**`student-20261117-k12-4`（1.7.1）**，学习源码 `2af326481943f7e072036637ba186aa829dce39d`。最终核心与三系统同批原生新装、当前和旧启动器检查更新验收已通过；正式状态以[最新 Release](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)、PUBLICATION-RECEIPT 和 CURRENT 为准。本机真实升级单独记录。
 
 本批增加 294 道完整题目图（26 份题源、82 个不同原图），继续保留教材库/题库两分页、学科过滤、12,101 条默认教材参考、完整题源跳转和 136 册教材，以及既有语音、高拍仪、阅读、笔记、资料、历史与更新功能。显示检查不代表全部题目完成学术审核；17 条题源精确隔离后，有效 20,845 条可读题源单位、18,890 条结构练习候选。[本批说明及验证边界](RELEASE-NOTES.md)。
 
@@ -8,29 +8,29 @@
 
 ## Apple 芯片 Mac（M 系列）
 
-- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.dmg)
-- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.002.dmgpart)
-- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.003.dmgpart)
-- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.004.dmgpart)
+- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.dmg)
+- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.002.dmgpart)
+- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.003.dmgpart)
+- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-4-part.004.dmgpart)
 
 需要 macOS 13 或以上。四个文件下齐后，只打开主文件 `.dmg`，把“开心动力超级学霸”拖进“应用程序”，再从“应用程序”打开。其余 `.dmgpart` 保持原位，不需要逐个打开。
 
 ## Intel Mac
 
-- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.dmg)
-- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.002.dmgpart)
-- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.003.dmgpart)
-- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.004.dmgpart)
+- [主文件 .dmg](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.dmg)
+- [分卷 002.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.002.dmgpart)
+- [分卷 003.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.003.dmgpart)
+- [分卷 004.dmgpart](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-4-part.004.dmgpart)
 
 需要 macOS 13 或以上。四个文件下齐后，只打开主文件 `.dmg`，把“开心动力超级学霸”拖进“应用程序”，再从“应用程序”打开。其余 `.dmgpart` 保持原位，不需要逐个打开。
 
 ## Windows 64 位
 
-- [安装程序 Setup.exe](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe)
-- [Runtime.001](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001)
-- [Runtime.002](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002)
-- [Runtime.003](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003)
-- [Runtime.004](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004)
+- [安装程序 Setup.exe](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe)
+- [Runtime.001](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001)
+- [Runtime.002](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002)
+- [Runtime.003](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003)
+- [Runtime.004](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004)
 
 五个文件下齐后，只运行 `Setup.exe`，按向导安装；安装器会校验其余四个 Runtime 分卷。不要单独解压或改名分卷。
 
@@ -48,4 +48,4 @@ Mac 如果提示“身份不明的开发者”，先确认文件来自本仓库�
 
 本批没有写入 U 盘；旧介质不是本批文件的交付证明。三端验收快照及正式状态的确认依据见 [SOURCE-TEST-HANDOFF.json](SOURCE-TEST-HANDOFF.json)，该文件区分已通过的原生验收与需由正式回执确认的发布、本机升级状态。
 
-[本批文件页 k12-2](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2) · [上一正式版 k12-1](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-1)
+[本批文件页 k12-4](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-4) · [上一正式版 k12-2](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2)

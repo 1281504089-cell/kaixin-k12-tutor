@@ -1,255 +1,232 @@
 {
-  "schema_version": 2,
-  "status": "verified_frozen_source_snapshot",
-  "recorded_at_utc": "2026-11-17T02:56:15.112795+00:00",
-  "final_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
-  "published_export_sha256": "f5f25cbc43a74efc134f8b4d6fcf623c7ec3d8c3ddf043ae16ee824dcfb979b0",
-  "candidate_release_tag": "student-20261117-k12-2",
-  "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
-  "picture_manifest_sha256": "3983e0c365daef3e15e3352323e1b5ec19d7be42de924744094c20567477cd10",
-  "supersedes_prior_recipe_handoff": {
-    "prior_file_sha256": "6b04b8df7028fe6f110858d4a3f4954b027c73293ec08a24e0c5cb5d6cad17b7",
-    "prior_final_source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
-    "reason": "The inherited recipe handoff described the previous batch. This handoff binds this question-picture/topic-guard batch to its actual final source and exported bytes; previous release evidence remains historical, not recounted as newly rerun."
-  },
-  "verification_summary": {
-    "file": "VERIFICATION-QUESTION-PICTURES-20261117.json",
-    "sha256": "2213222ead94cd3dba10c316ab6b356efc77f5fbd681686d891d0017b80b247c"
+  "schema_version": 3,
+  "status": "published_three_native_targets_and_actual_local_update_verified",
+  "recorded_at_utc": "2026-11-17T10:41:39.273340+00:00",
+  "candidate_release_tag": "student-20261117-k12-4",
+  "final_source_commit": "2af326481943f7e072036637ba186aa829dce39d",
+  "published_export_sha256": "1413eb96e13aa1de1e006ec1b1206476dde5cdae2dac69734be8b25e5b6d0ecd",
+  "runtime_source_manifest_sha256": "252ef9541f305e936751e563b8ceda5512397d84a275634f0e8684f790a48887",
+  "launcher_build": "20261117-updater-2",
+  "prior_published_release": "student-20261117-k12-2",
+  "prior_handoff_sha256": "022aa5b7e35a80ee44f7c63c073a2a48d301869b0d807d4d1a9b67ef870b6be9",
+  "source_contract": {
+    "teaching_model_or_budget_changed": false,
+    "original_bank_database_modified": false,
+    "classification_repairs_require_exact_original_labels": true,
+    "unconfirmed_grade_units": 11140,
+    "existing_17_exact_source_isolations_retained": true,
+    "prepared_picture_bindings": 294,
+    "no_claim_all_bank_answers_reviewed": true
   },
   "completed_local_checks": {
-    "owner_final_frozen_pytest_passed": 216,
-    "related_frontend_vitest_passed": 78,
-    "trace_memory_node_passed": 9,
-    "full_web_typecheck_exit_code": 0,
-    "source_to_existing_model_seed_and_raw_image_message_identity_cases": 5,
-    "isolated_actual_chrome_cases": 12,
-    "fresh_context_missing_prepared_picture_full_original_fallback": true,
-    "source_permission_revocation_and_runtime_quarantine_denied": true,
-    "all_294_picture_source_asset_and_lossless_pixel_bindings": true,
-    "final_source_exact_payload_exclusion_zero_network_tests": true
+    "status": "candidate_checks_passed_pending_desktop_release",
+    "prior_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+    "backend_regressions": 240,
+    "frontend_regressions": 74,
+    "native_engine_unit_tests": 32,
+    "web_typecheck": "passed",
+    "frontend_contracts": "passed",
+    "browser_viewports": [
+      320,
+      390,
+      1024,
+      1680
+    ],
+    "real_model_pair": {
+      "teacher_history_settings_and_budget_identical": true,
+      "wire_sha256_except_source": "a313743700c8983ac10919f1836b102602717abc94a841d4d9da95f6c0fbdd4e",
+      "model": "deepseek-flash",
+      "reasoning_effort": "high",
+      "output_budget": 65536,
+      "no_reference_first_content_s": 7.022506819921546,
+      "reference_first_content_s": 3.121013568015769,
+      "reference_lookup_cold_s": 0.34997831599321216,
+      "reference_complete_s": 4.242045585997403,
+      "source_and_full_question_manually_reviewed": true,
+      "whole_bank_quality_or_speed_claim": false
+    },
+    "all_real_model_HTTP_posts_this_task": 3,
+    "preflight_failures_with_zero_posts": 2,
+    "source_classifications": {
+      "sources_updated": 219,
+      "conflicting_sources_unchanged": [],
+      "subject_rows_recovered": 5448,
+      "grade_rows_recovered": 2753,
+      "remaining_unclassified_subject_rows": 0,
+      "remaining_unclassified_grade_rows": 11140
+    },
+    "classifications_sha256": "aa8f06ba8e60138dff44d76a96af01ca4b78296cdd21c3d78eb44a5e5205b00a",
+    "formal_profile_modified": false,
+    "original_bank_database_modified": false,
+    "released": false,
+    "scope": "source candidate evidence; published status determined by PUBLICATION-RECEIPT and CURRENT"
   },
-  "controlled_model_scope": {
-    "physical_provider_posts": 9,
-    "complete_content_reviewed_outputs": 7,
-    "diagnostic_stops_excluded": 2,
-    "physics_complete_ABBA": true,
-    "math_complete_balanced_ABBA": false,
-    "math_complete_A_count": 1,
-    "math_complete_H_count": 2,
-    "all_outputs_or_all_8_trials_passed_claim": false,
-    "cross_case_or_population_mean_speedup_claim": false,
-    "no_extra_model_call_from_screenshot_display": true,
-    "default_model_or_output_budget_changed": false,
-    "live_calls_are_historical": true,
-    "historical_live_plan_source_commit": "5d566fe74294fb8dbad328e9ace0726645ebddfb",
-    "historical_presentation_source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
-    "final_source_additional_paid_calls": 0,
-    "final_source_zero_network_seed_and_raw_image_identity_proof": true
+  "local_updater_checks": {
+    "desktop_tests": 81,
+    "full_archive_mixed_interruption_recovery": {
+      "passed": true,
+      "electron": "45.1.0",
+      "platform": "darwin",
+      "arch": "x64",
+      "archive": "kaixin-core-20261117-k12-4.tar.gz",
+      "bytes": 572023510,
+      "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+      "injected_direct_interruption_after_1MiB": 1,
+      "injected_api_refusals": 1,
+      "names": [
+        "kaixin-updates",
+        "kaixin-updates-resumed-1"
+      ],
+      "signature_verified": true,
+      "complete_archive_sha256_verified": true,
+      "anonymous_public_candidate_download": true,
+      "candidate_route_mapped_only_in_test": true,
+      "elapsed_seconds": 83.573,
+      "installation_executed": false,
+      "formal_profile_accessed": false
+    },
+    "remote_runtime_confirmed": "1.7.1-kaixin-20261114-materials-macos-arm64-universal",
+    "remote_log_does_not_identify_actual_update_failure_phase": true
   },
-  "source_test_file_sha256": {
-    "web/components/common/ReadingCitationChip.tsx": "16bc10d307019c65dd58d526f1cbe07e10772faa10551bdf4bc8b05676052a54",
-    "web/components/student/QuestionSourcePreview.tsx": "d30e16089f083497044f523c8c0fd44b9ea4c71dfcb9f2f513b03df4aa80317e",
-    "web/components/student/StudentLearning.module.css": "ddce4109b9233d085bf52adc43fc5d7a5f8b281df30beaf6445361ef89e25244",
-    "web/features/chat/messages/ChatMessageList.tsx": "ff6d7c4c86065fb93b70200c27c442bc7b3c7df23500e0c1646303413fea648d",
-    "web/features/chat/messages/QuestionPictureCards.tsx": "fd089b44cc284bdfc4b77910ab889767ceb1eca6d8cc3328c0527e1c677cea3d",
-    "web/features/chat/trace/memory.ts": "298dbff0cb196e7a5bce635bfc29635029d68d69eac44d918e8f60d4bd0d3354",
-    "web/lib/question-bank-citations.ts": "4a07fd1d8aa2e7b5a61beb85f1d9da31027d04820115c1d5f4ab2bcb42e0140b",
-    "web/lib/student-learning-api.ts": "81b879593b8d477a11ee3eb70df526a017976771e4ec11b40c0e5969e6144471",
-    "web/tests/question-picture-cards.spec.tsx": "e42c5892c73eb2436f786f7f235a6c48275d2e809e3f33e82fa15386a2412d76",
-    "web/tests/question-source-preview.spec.tsx": "6d8bfeac8020b614ed998229849556bec81f6ec2e43638f48b0168daaa08e946",
-    "web/tests/source-citation-links.spec.tsx": "3beca1d6ec056474452c1333d5fb4aaf354307f9aade343a85162b435cb80fae"
-  },
-  "key_local_evidence": {
-    "picture_pack": {
-      "local_evidence_relative_path": "qa/picture-pack/context-isolation-294/FINAL-SUBSET-AUDIT-294.json",
-      "sha256": "95463537a553dc01f2f9eb7f2f0d0d0acb53fb690ca715c7c49be63272b9d629"
+  "evidence": {
+    "bank_candidate": {
+      "local_path": "qa/bank-readability/CANDIDATE-RECEIPT.json",
+      "sha256": "e290120069cf6b4eaad85cfb7a70aad7ef49b59c3b54da602d541144e8d0435c"
     },
-    "independent_full_picture_audit": {
-      "local_evidence_relative_path": "qa/picture-delivery/FINAL-AUDIT-294.json",
-      "sha256": "9e3f1cf6af4f843f0d126666b893eff2616d4097b1dab455c7253306c1c4fd2b"
+    "bank_browser": {
+      "local_path": "qa/bank-readability/run-003/RESULT.json",
+      "sha256": "cc2d76278001195f8e4c4c0234aad2f53d96cf592f342835415094988810ea3f"
     },
-    "final_exact_payload_exclusion_and_zero_network_proof": {
-      "local_evidence_relative_path": "qa/payload-exclusion-proof/FINAL-RECEIPT.json",
-      "sha256": "aed6ca91ed7312c27d38e17234411aea071a64333edfff6d603fd24bb3eb7691"
+    "mixed_full_archive": {
+      "local_path": "qa/update-terminated/FULL-CORE-MIXED-RECOVERY-4.json",
+      "sha256": "faa1193e417e4332b3018ecbbe139881ec732aea53d3cc43a8e03affefc2f404"
     },
-    "frontend_verification": {
-      "local_evidence_relative_path": "qa/picture-ui/FRONTEND-VERIFICATION.json",
-      "sha256": "4a8afa245f1978985ca93e5090aafde80dc92d48108d6653698f140653f34e75"
-    },
-    "actual_chrome_picture_ui": {
-      "local_evidence_relative_path": "qa/picture-ui/run-006-real-pack/RESULT.json",
-      "sha256": "116f0ec27bef457e6806db37d886c6a0a5d14837e4cee342faca66aa9f9647c4"
-    },
-    "controlled_model_quality": {
-      "local_evidence_relative_path": "qa/controlled-topic-v2/INDEPENDENT-QUALITY.json",
-      "sha256": "04fd83b35b11df5c5fa0eae57dcff3540782bfb3134af359292778965b5f08e9"
-    },
-    "controlled_model_metrics": {
-      "local_evidence_relative_path": "qa/controlled-topic-v2/live-001/METRICS.json",
-      "sha256": "93b9381b9694cddc018551ae63199b0baf5d6703f88420a7bdd834bc6dc175d6"
-    },
-    "published_source_manifest": {
-      "local_evidence_relative_path": "release-20261117/recipe/runtime-source-manifest.json",
-      "sha256": "d0bd315cfeabcf7e3e5b42d4e538a47081c6af1ccad197fa92f140b8185d0cf7"
+    "remote_log_findings": {
+      "local_path": "qa/update-terminated/REMOTE-LOG-FINDINGS.json",
+      "sha256": "023e8bd390a2cb9511e8ffa5b8030aca02423c8a75693bdf5c0f07c3dcbfcee3"
     }
   },
-  "carrier_and_data_contract": {
-    "carrier": "Learning core/web and precomputed picture assets; native/launcher acceptance is a separate owner gate.",
-    "model_picture_behavior": "Keep complete original question text and original image messages. Prepared screenshots are display-only.",
-    "picture_display_adoption": "Require a valid reference-used source event plus a matching current-prose qid/revision citation; lookup alone or a code-example citation is insufficient.",
-    "history_behavior": "Keep adopted picture-source metadata through preview compaction and saved-history restore; preserve prior records/settings during actual upgrade.",
-    "fallback": "Unavailable prepared picture retains source navigation and falls back to complete original HTML with all required original assets.",
-    "source_locator_policy": "Keep actual source units such as Word paragraphs; do not invent original PDF page numbers.",
-    "public_export_privacy": "No API keys, user profile files or raw private prompts. Existing excluded private embedding resources stay excluded; do not re-enable unlicensed or failed semantic paths."
-  },
-  "next_owner_gates": [
-    "Publish only the owner-prepared final batch; retain and reuse all 39 original signed stage manifests, and verify anonymous archives and stable feed readback before marking publication complete.",
-    "Use the actual local desktop Check Update entry and verify restart, newest-version recheck and preservation of chats, settings and reading state.",
-    "Only successful publication receipts and CURRENT may mark this batch released; this verified-source snapshot remains a record of the completed source/native tests. USB status is separate."
-  ],
   "release_gates": {
-    "release_owner_only": "Verified frozen-source snapshot. This file is not a publication receipt; CURRENT and PUBLICATION-RECEIPT determine actual availability and later local-upgrade evidence.",
-    "core_build": {
-      "run_id": 43984610812,
-      "workflow_commit": "266647a564f09af471df177662756ed70480d638",
-      "state_at_handoff": "completed_success",
-      "acceptance_claimed": true,
-      "archive": "kaixin-core-20261117-k12-2.tar.gz",
-      "sha256": "9308765179203bc4c1972e82f373c699ff68c8d712f677226b7a0d0f05cf3160",
-      "bytes": 572015195,
-      "discarded_previous_core_run": {
-        "run_id": 43979958228,
-        "result": "passed",
-        "published": false,
-        "counts_as_final_gate": false
+    "source_commit": "2af326481943f7e072036637ba186aa829dce39d",
+    "core_run": 44038224404,
+    "core_distribution_commit": "283a15d9bd1cb95cfce162c664a635e7da92de5e",
+    "core_verified": true,
+    "native_run": 44039243704,
+    "native_distribution_commit": "6970e2923f7a0bc260a83d1b2dc9466cc8f5f843",
+    "native_status": "completed_success",
+    "native_verified": true,
+    "verification_runs": {
+      "windows-x64": {
+        "run_id": 44049228555,
+        "workflow_commit": "b62edee907f845953b57422c5ba4d58b17b9b33b",
+        "lock_sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb",
+        "job_id": 133922547034,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "macos-arm64": {
+        "run_id": 44049228555,
+        "workflow_commit": "b62edee907f845953b57422c5ba4d58b17b9b33b",
+        "lock_sha256": "8302dcde0018d51c18a88613c768940395edc0087156249fb87f6a6b62198182",
+        "job_id": 133922547547,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "macos-x64": {
+        "run_id": 44049228555,
+        "workflow_commit": "b62edee907f845953b57422c5ba4d58b17b9b33b",
+        "lock_sha256": "61a2d5b05a2499919a38fab58c65cd692f762d9d282db1a79942bf323d37c0ef",
+        "job_id": 133922547406,
+        "status": "completed",
+        "conclusion": "success"
       }
     },
-    "windows_x64": {
-      "native_acceptance_verified": true,
-      "state": "completed_success",
-      "verification_run": 43992310720,
-      "workflow_commit": "a93cf7c961315cce4dd40d7f4da506e1fbff2bbd",
-      "job_id": 133735729964,
-      "proof_file": "verification-windows-x64.json",
-      "proof_sha256": "873e164fc8e455f553149cc1c5a6833935714ffdf98104c786db7d20e0cae005",
-      "fresh_current_and_oldest_each_four_native_views_passed": true,
-      "chat_task_and_saved_key_preservation_in_isolated_native_fixture_verified": true,
-      "physical_student_device_claim": false
+    "original_native_failure_reason": "New materials UI entry names omitted from QA driver allow-list after real update restart; original evidence retained, no failed run relabelled.",
+    "verification_rechecks": {
+      "macos-arm64": {
+        "run_id": 44049228555,
+        "workflow_commit": "b62edee907f845953b57422c5ba4d58b17b9b33b",
+        "lock_sha256": "8302dcde0018d51c18a88613c768940395edc0087156249fb87f6a6b62198182"
+      },
+      "macos-x64": {
+        "run_id": 44049228555,
+        "workflow_commit": "b62edee907f845953b57422c5ba4d58b17b9b33b",
+        "lock_sha256": "61a2d5b05a2499919a38fab58c65cd692f762d9d282db1a79942bf323d37c0ef"
+      },
+      "windows-x64": {
+        "run_id": 44049228555,
+        "workflow_commit": "b62edee907f845953b57422c5ba4d58b17b9b33b",
+        "lock_sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
+      }
     },
-    "macos_arm64": {
-      "native_acceptance_verified": true,
-      "state": "completed_success",
-      "verification_run": 44001736439,
-      "workflow_commit": "7fdc90489656e6d51d266e001f9989435a3068e3",
-      "job_id": 133767220562,
-      "proof_file": "verification-macos-arm64.json",
-      "proof_sha256": "d9c080559160b5c4f74d90d68fa7627692038fdc5f3b6e7cc31d58c7a82f25d8",
-      "fresh_current_and_oldest_each_four_native_views_passed": true,
-      "chat_task_and_saved_key_preservation_in_isolated_native_fixture_verified": true,
-      "physical_student_device_claim": false,
-      "frozen_reverification": true,
-      "reuse_lock_file": "arm-reuse-lock.json",
-      "reuse_lock_sha256": "a9b847cbd850da0a1ca76094d78a02e7533c373f0816f0c855555d59cac74b6b",
-      "existing_assets_before_after_unchanged": 70,
-      "original_failed_job": 133735729738,
-      "same_four_installer_parts_reused": true,
-      "bridge_rebuilt": false,
-      "installers_repackaged": false,
-      "existing_assets_overwritten": false
-    },
-    "macos_x64": {
-      "native_acceptance_verified": true,
-      "state": "completed_success",
-      "verification_run": 44001736439,
-      "workflow_commit": "7fdc90489656e6d51d266e001f9989435a3068e3",
-      "job_id": 133767220992,
-      "proof_file": "verification-macos-x64.json",
-      "proof_sha256": "0727265818c181a95ac2f3e914a6725a36266184330b6608077be14769a3d229",
-      "fresh_current_and_oldest_each_four_native_views_passed": true,
-      "chat_task_and_saved_key_preservation_in_isolated_native_fixture_verified": true,
-      "physical_student_device_claim": false,
-      "frozen_reverification": true,
-      "reuse_lock_file": "intel-k12-2-reuse-lock.json",
-      "reuse_lock_sha256": "b6369ec976a42563d788524e6489522254f6799c7a75eb44edf02886f2ac1730",
-      "existing_assets_before_after_unchanged": 70,
-      "original_failed_job": 133735729961,
-      "same_four_installer_parts_reused": true,
-      "bridge_rebuilt": false,
-      "installers_repackaged": false,
-      "existing_assets_overwritten": false
-    },
-    "original_native_stage": {
-      "run_id": 43992310720,
-      "workflow_commit": "a93cf7c961315cce4dd40d7f4da506e1fbff2bbd",
-      "original_matrix_conclusion": "failure",
-      "windows_job_succeeded": true,
-      "original_mac_failed_jobs": [
-        133735729738,
-        133735729961
-      ],
-      "mac_failures_not_relabelled_success": true,
-      "accepted_mac_reverification_run": 44001736439,
-      "accepted_mac_workflow_commit": "7fdc90489656e6d51d266e001f9989435a3068e3"
-    },
-    "owner_signed_stage": {
-      "raw_sha256": "15d74b06b44ed8afa233d39a290d2ef94806f87e23ce0370c791860636978ab1",
-      "bytes": 37189,
-      "manifests": 39,
-      "signatures_reused_byte_identical": true,
-      "private_key_reopened_for_final_preparation": false,
-      "owner_final_preparation": "passed"
-    },
-    "actual_local_desktop_check_update": {
-      "verified": false,
-      "record_and_setting_preservation_verified_for_this_batch": false,
-      "state": "not_completed_at_snapshot",
-      "authority": "Later local check-update evidence and CURRENT; native isolated fixtures are not the user desktop."
-    },
-    "github_stable_publication": {
-      "published": false,
-      "signed_feeds_and_anonymous_archive_readback_verified": false,
-      "state": "not_completed_at_snapshot",
-      "authority": "Later PUBLICATION-RECEIPT and CURRENT; this snapshot is not the release receipt."
-    },
-    "usb_updated_by_this_handoff": false
+    "original_native_status": "completed_failure_qa_entry_names",
+    "publication_run": 44061884297,
+    "publication_verified": true
   },
-  "not_a_publication_receipt": true,
-  "previous_candidate_handoff": {
-    "source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
-    "picture_count": 295,
-    "verification_summary_sha256": "ea1d2f0efde9691d9a6cd0db056c6fd4f9a383608094bd258c453d86ccd6c5dd",
-    "source_test_handoff_sha256": "aa5d2e82528fad7eae3535eda5b74606bba15385b8678dae68195ab65e8aa0b9",
-    "status": "Historical candidate receipts preserved. One contradictory original question is now exactly isolated before any final publication."
+  "actual_local_desktop_check_update": {
+    "passed": true,
+    "recorded_at": "2026-11-17T10:40:06.782585+00:00",
+    "entry": "核心 → 检查更新…",
+    "tag": "student-20261117-k12-4",
+    "platform": "darwin",
+    "architecture": "x64",
+    "macos": "15.7.9",
+    "download_confirmed_in_real_ui": true,
+    "download_progress_bytes_and_speed_visible": true,
+    "install_completion_seen_in_real_ui": true,
+    "restart_via_existing_ui_button": true,
+    "launcher_build": "20261117-updater-2",
+    "launcher_files_sha256_verified": 24,
+    "runtime_and_launcher_signatures_verified": true,
+    "app_codesign_deep_strict_passed": true,
+    "check_again_dialog": "已是最新版本",
+    "data_preservation": {
+      "passed": true,
+      "databases": 11,
+      "settings": 19,
+      "all_previous_rows_retained": true,
+      "private_contents_uploaded": false
+    },
+    "reading_json_exact_sha_preserved": 287,
+    "library_original_metadata_sqlite_exact_sha_preserved": true,
+    "default_books": 136,
+    "default_reference_excerpts": 12101,
+    "actual_reference_books_including_private": 147,
+    "actual_reference_excerpts_including_private": 12104,
+    "private_books_preserved": 11,
+    "private_excerpts_preserved": 3,
+    "chat_messages_sent": 0,
+    "paid_model_calls": 0,
+    "test_feed_used": false,
+    "manual_core_install_used": false,
+    "screenshots_private_not_uploaded": true,
+    "known_unsent_user_draft_verified": false,
+    "physical_student_arm_mac_tested": false,
+    "runtime": "1.7.1-kaixin-20261117-k12-4-macos-x64-base-c41831772671",
+    "core_payload_sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+    "from_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+    "final_source": "2af326481943f7e072036637ba186aa829dce39d"
   },
-  "source_quality_scope": {
-    "exact_question_id": "new-five:q_cc0971c5b93f4e187667d965_b00032_7",
-    "payload_sha256": "d4214db38a04cf0968dfaccddbab76a4a78fba95b2b7c0c5724c0526dce15d4d",
-    "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
-    "reason": "The original source itself uses 6 cm and 6 m for incompatible conditions. The question is isolated; no guessed correction is applied.",
-    "original_index_and_source_file_unchanged": true,
-    "runtime_isolated_count": 17,
-    "prior_bad_png_asset_rules_unchanged_count": 16,
-    "additional_conflicting_original_payload_count": 1,
-    "effective_readable_units": 20845,
-    "effective_structural_exercise_candidates": 18890,
-    "all_read_surfaces_deny_this_exact_payload": true,
-    "other_questions_of_same_source_not_blanket_blocked": true,
-    "remaining_images_byte_identical": true,
-    "remaining_entries_byte_equivalent": true,
-    "remaining_webp_pixels_equal_validated_png": true,
-    "no_new_claim_of_all_294_academic_answers_reviewed": true
+  "usb_updated": false,
+  "private_key_uploaded": false,
+  "not_a_publication_receipt": false,
+  "owner_signed_stage": {
+    "source_commit": "2af326481943f7e072036637ba186aa829dce39d",
+    "raw_sha256": "4feedfad84343983983b3738f678799d272a96a0c7b4789b566e23951a928c18",
+    "bytes": 40111,
+    "manifests": 42,
+    "signatures_reused_byte_identical": true,
+    "private_key_reopened_for_final_preparation": false
   },
-  "evidence_reuse": {
-    "historical_presentation_source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
-    "historical_picture_count": 295,
-    "historical_manifest_sha256": "4eb484103be8c8f2d1be04102caa3fff9a8c262689c4b5dd4cac8f003ff5dc44",
-    "historical_receipts_preserved": true,
-    "current_294_is_verified_unchanged_subset_after_one_exact_payload_isolation": true,
-    "frontend_file_bytes_identical_to_historical_freeze": true,
-    "frontend_vitest_78_trace_9_typecheck_browser_12_and_404_reused_for_unchanged_files": true,
-    "removed_question_not_in_the_four_browser_fixture_questions": true,
-    "final_subset_and_payload_isolation_have_fresh_local_zero_network_evidence": true,
-    "new_paid_model_calls_for_final_source": 0,
-    "does_not_turn_historical_live_calls_into_fresh_final_source_calls": true
+  "picture_display_scope": {
+    "original_science_unique_assets_sha_length_verified": 4525,
+    "asset_bearing_science_records": 4560,
+    "prepared_science_records": 42,
+    "all_prepared_records": 294,
+    "all_asset_bearing_science_records_are_single_questions": false,
+    "all_science_records_directly_inlined": false,
+    "isolated_improvement_not_merged": true,
+    "audit_file_relative": "qa/science-image-audit-20261117/HANDOFF.json",
+    "coverage_followup_status": "isolated_work_in_progress_not_in_this_release"
   }
 }

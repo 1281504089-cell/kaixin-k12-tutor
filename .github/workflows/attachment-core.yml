@@ -8,6 +8,9 @@ jobs:
   core:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: write
+      actions: write
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -36,6 +39,9 @@ jobs:
           python -c 'import json,os;open("core-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
           tag=$(python -c 'import json;print(json.load(open("attachment-release.json"))["tag"])')
           gh release upload "$tag" core-run.json --clobber
+      - name: Stop this owner's superseded unqualified candidate
+        if: github.ref_name == 'codex/k12-core-20261117-4'
+        run: python ci-stop-superseded.py
       - name: Build and verify core
         run: python ci-attachment-core.py
       - name: Keep core receipt

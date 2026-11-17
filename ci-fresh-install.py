@@ -124,6 +124,8 @@ prepare_bridge(root, target, resources, work / '全新学习目录', evidence, b
 from ci_update_probe import verify_update_entry
 oldest_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, legacy=True)
 update_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence)
+materials_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, materials=True)
+materials_oldest_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, materials=True, legacy=True)
 after = release_metadata()
 assert after['id'] == lock['release_id'], 'Latest release changed during validation'
 for file in expected['files']:
@@ -135,8 +137,9 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'download_files': download_rows, 'native_install': 'passed',
           'native_smoke': json.loads((evidence / 'app.json').read_text()),
           'network': json.loads((evidence / 'network.json').read_text()),
+          'launcher_tests': json.loads((evidence / 'launcher-tests.json').read_text()),
           'fresh_picture_ui': fresh_picture_ui,
-          'update_entry': update_entry, 'oldest_launcher_entry': oldest_entry,
+          'update_entry': update_entry, 'oldest_launcher_entry': oldest_entry, 'materials_launcher_entry': materials_entry, 'materials_oldest_launcher_entry': materials_oldest_entry,
           'launcher_migration': {'from_published_launcher': lock['tag'], 'signed_core_carrier': oldest_entry['signed_launcher_restarted']},
           'shell_files': batch['shell_files'],
           'full_files': [{'file': file.name, 'bytes': file.stat().st_size, 'sha256': sha(file)} for file in sorted(candidate_out.iterdir())],
