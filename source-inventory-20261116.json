@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "9328240380d13ef75435434a8c901028ea4470dc",
+  "source_commit": "4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "excluded_files": [
     "deeptutor/services/student_learning/semantic-reference-bge-windowedCLS-v1.npz",
@@ -598,8 +598,8 @@
     },
     {
       "file": "apps/desktop/src/shell-update.mjs",
-      "bytes": 8510,
-      "sha256": "10447abf363023e6e2143afd664d0e774720adfbe639ee165b6ec5056c653773",
+      "bytes": 8975,
+      "sha256": "62a91d46a7bb53411768579d9e10ccac7f7acd004cba0bb2990b02cf3613c605",
       "mode": 420
     },
     {
@@ -736,8 +736,8 @@
     },
     {
       "file": "apps/desktop/test/shell-update.test.mjs",
-      "bytes": 6623,
-      "sha256": "15472a3b3e8202439390a446adf62d858cedc909195a54e46e16b156970f5b1e",
+      "bytes": 8237,
+      "sha256": "88b9e9437d95eb683d5d24a163ffb05135d018b37d65ab38d73324973717c72d",
       "mode": 420
     },
     {
@@ -35645,9 +35645,21 @@
       "mode": 420
     },
     {
+      "file": "apps/desktop/src/shell-update.mjs",
+      "bytes": 8975,
+      "sha256": "62a91d46a7bb53411768579d9e10ccac7f7acd004cba0bb2990b02cf3613c605",
+      "mode": 420
+    },
+    {
       "file": "apps/desktop/test/release-updates.test.mjs",
       "bytes": 20085,
       "sha256": "dd5d00c249e689cf1fce1db96270620fcda72794de18d725b38ee6a644a39701",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/test/shell-update.test.mjs",
+      "bytes": 8237,
+      "sha256": "88b9e9437d95eb683d5d24a163ffb05135d018b37d65ab38d73324973717c72d",
       "mode": 420
     },
     {

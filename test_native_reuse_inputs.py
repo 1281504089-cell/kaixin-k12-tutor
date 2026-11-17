@@ -7,6 +7,7 @@ from ci_repackage import validate_reuse_lock
 class ReuseInputTests(unittest.TestCase):
     def setUp(self):
         self.batch=json.loads(Path('attachment-batch.json').read_text())
+        self.batch.update(tag='student-20261117-k12-5',core_commit='9328240380d13ef75435434a8c901028ea4470dc')
         target='windows-x64';names=['Kaixin-Super-Scholar-Windows-v1.7.1-'+n for n in ['Setup.exe','Runtime.001','Runtime.002','Runtime.003','Runtime.004']]
         rows=[{'name':n,'id':i+1,'bytes':100,'sha256':'a'*64,'url':'https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/'+n} for i,n in enumerate(names)]
         prior={'commit':'2af326481943f7e072036637ba186aa829dce39d','baseRuntimeId':self.batch['manifests'][target]['baseRuntimeId'],'sha256':'3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f','archive':'kaixin-core-20261117-k12-4.tar.gz'}

@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-5', 'Owner must prepare the exact final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-6', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -41,7 +41,8 @@ def download_public_archive(asset,destination):
  raise last
 
 def verify_update_recovery(report,batch,target):
- tests=report['launcher_tests'];assert tests['passed'] and tests['tests']>=81 and tests['fail']==0
+ tests=report['launcher_tests'];skipped=4 if target=='windows-x64' else 0
+ assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':82,'pass':82-skipped,'fail':0,'skipped':skipped}
  transport=report['network']['interrupted_transport_fixture']
  assert transport['faults']==2 and transport['recoveries']==1 and transport['verified_complete']
  mixed=report['network']['interrupted_direct_denied_api_fixture']

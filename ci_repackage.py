@@ -86,7 +86,8 @@ def verify_production_launcher(root, target, install, resources, evidence):
     print(tests.stdout, flush=True)
     tests.check_returncode()
     counts = {key: int(re.search(r'^# ' + key + r' (\d+)$', tests.stdout, re.M).group(1)) for key in ['tests','pass','fail','skipped']}
-    assert counts['tests'] >= 81 and counts['fail'] == 0
+    skipped = 4 if target == 'windows-x64' else 0
+    assert counts == {'tests': 82, 'pass': 82 - skipped, 'fail': 0, 'skipped': skipped}, counts
     (evidence / 'launcher-tests.json').write_text(json.dumps({'passed':True,'native_target':target,**counts},indent=2))
 
 

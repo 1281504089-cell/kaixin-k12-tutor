@@ -12,7 +12,7 @@
   {
     "file": ".github/workflows/attachment-publish.yml",
     "bytes": 2047,
-    "sha256": "38e013536909e98c6d89e77b03d54570173faea249e9271ebad5557a402a4931"
+    "sha256": "5607867a495f17ae3a46ac683898290236a6156e24859dcc99a96909d01bbf2a"
   },
   {
     "file": ".github/workflows/k12-existing5-reverify.yml",
@@ -96,8 +96,8 @@
   },
   {
     "file": "attachment-batch.json",
-    "bytes": 6666,
-    "sha256": "a4c975bdfd288f4042ddf51514e9f818c124b02dafaac86350c2c96a406ec729"
+    "bytes": 8174,
+    "sha256": "66ead0a97b0b73c946748b41c73871e59fe3c2441c2629e6be006610728ef2c4"
   },
   {
     "file": "attachment-publication.json",
@@ -107,7 +107,7 @@
   {
     "file": "attachment-release.json",
     "bytes": 3901,
-    "sha256": "fb379b34c027c0fad0c2bb82a1d90a1d386252d4d8094fc399e09ad3d63e378b"
+    "sha256": "697ba1ea27aa832788902eb76bee7757cfdd106edc048a24c126d872cad1c876"
   },
   {
     "file": "bootstrap_source.py",
@@ -156,8 +156,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 20083,
-    "sha256": "ce1f03a10d0e23b066f94ec549f53073ba3ab4e2ac00daf609b6acacd88a6077"
+    "bytes": 20207,
+    "sha256": "16741842ac5c7f18ccab714d82800ce35746dcbe90d810aa9e24e005ea3f85d5"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -201,8 +201,8 @@
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 11721,
-    "sha256": "22d4802b6b845c2a26ad85c079f31238df8aaebbf05567fbd61ba519b32f4ced"
+    "bytes": 11810,
+    "sha256": "97b8c3a8c35597e94307f21af531dadcb93270d9ae3c6fbaabebb459663fa7d1"
   },
   {
     "file": "ci_update_probe.py",
@@ -271,8 +271,8 @@
   },
   {
     "file": "fetchfix-tests/shell-update.test.mjs",
-    "bytes": 6623,
-    "sha256": "15472a3b3e8202439390a446adf62d858cedc909195a54e46e16b156970f5b1e"
+    "bytes": 8237,
+    "sha256": "88b9e9437d95eb683d5d24a163ffb05135d018b37d65ab38d73324973717c72d"
   },
   {
     "file": "fetchfix-tests/signing.test.mjs",
@@ -311,8 +311,8 @@
   },
   {
     "file": "fresh-install-lock.json",
-    "bytes": 13769,
-    "sha256": "a21f29c36ce5a3c97dbf62f065a875ea43df33fc25d4ee8859945650d80f581d"
+    "bytes": 3829,
+    "sha256": "66be8d6e5d4dd3174ea26cf0bd2d53c6be4d82abf166a690e067b73125525446"
   },
   {
     "file": "intel-k12-4-reuse-lock.json",
@@ -326,8 +326,8 @@
   },
   {
     "file": "launcher-changes-20261117.json",
-    "bytes": 3,
-    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    "bytes": 198,
+    "sha256": "c140c8ee7eeeb19cba7192e7a5434967f4da8a868caa9a277a4b8b17b4a45b8f"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -546,8 +546,8 @@
   },
   {
     "file": "test_native_reuse_inputs.py",
-    "bytes": 3733,
-    "sha256": "78d234f1288b9728a35c7c75fff359dbbec64d235f3aa089521e3e96a3d3f7c9"
+    "bytes": 3844,
+    "sha256": "71e971b7c137be2829de53ad37d21ca6b90fd5536404938c7225124b6e105b1d"
   },
   {
     "file": "test_native_reuse_metadata.py",
@@ -562,12 +562,12 @@
   {
     "file": "test_publication_transaction.py",
     "bytes": 11450,
-    "sha256": "ff3b122251e799ee08e28d69c0105f48411272eab5b38e092d3e4c07dc9aaf9c"
+    "sha256": "a4faddf7cfdf86351134f9fc334dd1318dec8d9f21c31ed0d224ecffdf9f3a6c"
   },
   {
     "file": "test_recovery_publication_gate.py",
-    "bytes": 2580,
-    "sha256": "c077667608a13d594a236d6c06c80a2ed9a86079a0cd4b8c48a8e3ce9c498e50"
+    "bytes": 3407,
+    "sha256": "de1b0afb74a57b16e0e2f873c14e22c8605d7948d6671d493ccd61fdd7a29a36"
   },
   {
     "file": "test_release_bank.py",
@@ -598,5 +598,15 @@
     "file": "windows-k12-4-reuse-lock.json",
     "bytes": 49564,
     "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
+  },
+  {
+    "file": "native-visibility-selfcheck.cjs",
+    "bytes": 6037,
+    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
+  },
+  {
+    "file": "native-click-followup-selfcheck.cjs",
+    "bytes": 3633,
+    "sha256": "eb23d6325e253ed4548d0e4adefd5d872ac2bd9da594ecea8ea528a2a855d76b"
   }
 ]
