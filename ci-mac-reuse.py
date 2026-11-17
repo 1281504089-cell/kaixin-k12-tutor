@@ -34,18 +34,27 @@ def api(path):
     return json.loads(gh('api', 'repos/' + REPO + '/' + path))
 
 def validate_lock(lock, frozen_raw):
-    assert lock['target'] in TARGETS and lock['candidate_tag'] == 'student-20261117-k12-4'
+    assert lock['target'] in TARGETS and lock['candidate_tag'] in {'student-20261117-k12-4','student-20261117-k12-5'}
+    newer=lock['candidate_tag']=='student-20261117-k12-5'
+    if newer:
+        assert lock['target']=='macos-x64', 'Only the explicitly frozen failed Intel stage may use this recheck'
+        assert {'ci-mac-reuse.py','ci_update_probe.py','ci-update-flow.cjs','ci-k12-library-ui.cjs','ci_picture_fresh.py','native-k12-fixture.py'}.issubset(lock['recipe_inputs_sha256'])
+        assert all(re.fullmatch(r'[a-f0-9]{64}',value) for value in lock['recipe_inputs_sha256'].values())
+        assert lock['prior_manifest_asset']['url']=='https://github.com/'+REPO+'/releases/download/student-20261117-k12-4/runtime-macos-x64-20261117-k12-4-20261112.json'
+        if 'resume_artifact' in lock:
+            from partial_native_evidence import validate_partial_lock
+            validate_partial_lock(lock)
     target=lock['target'];spec=TARGETS[target]
-    assert lock['candidate_release_id'] == 448283800 and lock['baseline_latest_id'] == 447749595
-    assert lock['source_commit'] == '2af326481943f7e072036637ba186aa829dce39d'
-    assert lock['original_native_run'] == 44039243704
-    assert lock['original_native_workflow_commit'] == '6970e2923f7a0bc260a83d1b2dc9466cc8f5f843'
-    assert lock['original_failed_job'] == spec['failed_job']
-    assert lock['stage_delivery_commit'] == 'dc4e0f5d29f8b07222ecc62780f39ce4f820ec20'
-    expected_files = 5 if target.startswith('windows') else 4
+    assert lock['candidate_release_id'] == (448792391 if newer else 448283800) and lock['baseline_latest_id'] == (448283800 if newer else 447749595)
+    assert lock['source_commit'] == ('9328240380d13ef75435434a8c901028ea4470dc' if newer else '2af326481943f7e072036637ba186aa829dce39d')
+    assert lock['original_native_run'] == (44132557405 if newer else 44039243704)
+    assert lock['original_native_workflow_commit'] == ('5a76064003f5544b2a665ae4ef952538f969cb7f' if newer else '6970e2923f7a0bc260a83d1b2dc9466cc8f5f843')
+    assert lock['original_failed_job'] == (134213284667 if newer else spec['failed_job'])
+    assert lock['stage_delivery_commit'] == ('4792a1edcc960149b68da314b2ed075141646a14' if newer else 'dc4e0f5d29f8b07222ecc62780f39ce4f820ec20')
+    expected_files = 5 if target.startswith('windows') or newer else 4
     assert len(lock['candidate_files']) == len({r['id'] for r in lock['candidate_files']}) == expected_files
-    stem = 'Kaixin-Super-Scholar-Windows-v1.7.1-' if target.startswith('windows') else 'Kaixin-Super-Scholar-MacOS-'+spec['brand']+'-v1.7.1-20261117-k12-4-part'
-    expected_names = {stem+'Setup.exe', *(stem+'Runtime.00'+str(i) for i in range(1,5))} if target.startswith('windows') else {stem + suffix for suffix in ('.dmg','.002.dmgpart','.003.dmgpart','.004.dmgpart')}
+    stem = 'Kaixin-Super-Scholar-Windows-v1.7.1-' if target.startswith('windows') else 'Kaixin-Super-Scholar-MacOS-'+spec['brand']+'-v1.7.1-'+lock['candidate_tag'].removeprefix('student-')+'-part'
+    expected_names = {stem+'Setup.exe', *(stem+'Runtime.00'+str(i) for i in range(1,5))} if target.startswith('windows') else {stem+'.dmg',*(stem+f'.{i:03d}.dmgpart' for i in range(2,expected_files+1))}
     assert {r['name'] for r in lock['candidate_files']} == expected_names
     for row in lock['candidate_files']:
         assert Path(row['name']).name == row['name'] and row['name'].startswith(stem)
@@ -53,12 +62,12 @@ def validate_lock(lock, frozen_raw):
         assert len(row['sha256']) == 64 and row['bytes'] > 0
     assert hashlib.sha256(frozen_raw).hexdigest() == lock['frozen_stage']['sha256']
     assert len(frozen_raw) == lock['frozen_stage']['bytes']
-    assert lock['frozen_stage'] == {'bytes':40111,'sha256':'4feedfad84343983983b3738f678799d272a96a0c7b4789b566e23951a928c18','manifests':42}
+    assert lock['frozen_stage'] == ({'bytes':43033,'sha256':'e710fbbeb73959d8ec9841b70f059db01be7df9fdebe018a816db4c5ec2bfa14','manifests':45} if newer else {'bytes':40111,'sha256':'4feedfad84343983983b3738f678799d272a96a0c7b4789b566e23951a928c18','manifests':42})
     frozen = json.loads(frozen_raw)
-    assert frozen['core_commit'] == lock['source_commit'] and len(frozen['manifests']) == 42
-    assert len(lock['signed_runtime_assets']) == 42
+    assert frozen['core_commit'] == lock['source_commit'] and len(frozen['manifests']) == lock['frozen_stage']['manifests']
+    assert len(lock['signed_runtime_assets']) == lock['frozen_stage']['manifests']
     assert {r['name'] for r in lock['signed_runtime_assets']} == set(frozen['manifests'])
-    assert len({r['id'] for r in lock['signed_runtime_assets']}) == 42
+    assert len({r['id'] for r in lock['signed_runtime_assets']}) == lock['frozen_stage']['manifests']
     assert all(m['commit'] == lock['source_commit'] and m['corePayloadSha256'] == lock['core_asset']['sha256'] for m in frozen['manifests'].values())
     assert lock['included_manifest']['platform'] == spec['platform'] and lock['included_manifest']['arch'] == spec['arch']
     assert lock['prior_manifest'].get('baseRuntimeId'), 'A full runtime cannot substitute for the prior small core'
@@ -123,8 +132,8 @@ def download(row, directory):
 def verify_signatures(root, resources, lock, signed_downloads):
     key = resources / 'app/assets/runtime-public.pem'
     assert sha(key) == lock['public_key_sha256']
-    code = """import{readFile}from'node:fs/promises';import{pathToFileURL}from'node:url';import path from'node:path';import assert from'node:assert/strict';const{verifyManifest}=await import(pathToFileURL(process.argv[1]));const key=await readFile(process.argv[2]);const lock=JSON.parse(await readFile(process.argv[3]));const f=JSON.parse(await readFile(process.argv[4]));for(const m of [lock.included_manifest,lock.prior_manifest,...Object.values(f.manifests)])verifyManifest(m,key,m.arch,m.platform);for(const row of lock.signed_runtime_assets){const actual=JSON.parse(await readFile(path.join(process.argv[5],row.name)));assert.deepEqual(actual,f.manifests[row.name]);}console.log('PASS: installed public key verified included/prior/all42 immutable downloaded stage manifests');"""
-    run(['node','--input-type=module','-e',code,resources/'app/src/bundles.mjs',key,root/TARGETS[lock['target']]['lock'],root/'attachment-final-manifests.json',signed_downloads])
+    code = """import{readFile}from'node:fs/promises';import{pathToFileURL}from'node:url';import path from'node:path';import assert from'node:assert/strict';const{verifyManifest}=await import(pathToFileURL(process.argv[1]));const key=await readFile(process.argv[2]);const lock=JSON.parse(await readFile(process.argv[3]));const f=JSON.parse(await readFile(process.argv[4]));for(const m of [lock.included_manifest,lock.prior_manifest,...Object.values(f.manifests)])verifyManifest(m,key,m.arch,m.platform);for(const row of lock.signed_runtime_assets){const actual=JSON.parse(await readFile(path.join(process.argv[5],row.name)));assert.deepEqual(actual,f.manifests[row.name]);}console.log('PASS: installed public key verified included/prior/all immutable downloaded stage manifests');"""
+    run(['node','--input-type=module','-e',code,resources/'app/src/bundles.mjs',key,root/('intel-k12-5-reuse-lock.json' if lock['candidate_tag']=='student-20261117-k12-5' else TARGETS[lock['target']]['lock']),root/'attachment-final-manifests.json',signed_downloads])
 
 def verify_proxy(root, resources, evidence, target):
     mac=target.startswith('macos')
@@ -148,7 +157,8 @@ def verify_proxy(root, resources, evidence, target):
         shutil.rmtree(qa_home)
 
 def upload_new(tag, path, target):
-    assert target in TARGETS and tag == 'student-20261117-k12-4'
+    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5'}
+    if tag=='student-20261117-k12-5':assert target=='macos-x64'
     assert path.name == 'verification-'+target+'.json' or re.fullmatch(r'native-reverify-run-'+re.escape(target)+r'-[0-9]+\.json', path.name), 'Only this Mac target\'s new evidence may be uploaded'
     before = api('releases/tags/' + tag)
     assert not any(a['name'] == path.name for a in before['assets']), 'Refuse to overwrite existing evidence: ' + path.name
@@ -165,21 +175,29 @@ def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, mater
     for field, expected in [('prepared_picture_bindings',lock['picture_count']),('prepared_picture_manifest_sha256',lock['picture_manifest_sha256']),('runtime_isolated_count',lock['runtime_exclusion_count']),('runtime_exclusion_kinds',lock['runtime_exclusion_kinds']),('runtime_exclusion_ledger_sha256',lock['runtime_exclusion_ledger_sha256']),('bank_revision',lock['bank_revision']),('model_calls',0)]:
         assert api_proof[field] == expected, field
     assert api_proof['passed'] is True
+    if 'native_pages' in lock:
+        from ci_picture_fresh import validate_native_page_api
+        validate_native_page_api(api_proof,lock['native_pages'])
     assert fresh['passed'] is True and fresh['production_launcher_source_byte_identical'] is True and fresh['qa_code_only_in_disposable_copy'] is True
     for ui in (fresh['k12_library'], current['k12_library'], oldest['k12_library'],materials['k12_library'],materials_oldest['k12_library']):
         assert ui['passed'] is True and ui['actualNativeRenderer'] is True and ui['bank_revision'] == lock['bank_revision'] and len(ui['views']) == 4
+        if 'native_pages' in lock:
+            from ci_picture_fresh import validate_native_page_views
+            validate_native_page_views(ui,lock['native_pages']['ui_fixture'])
         for view in ui['views']:
             assert all(view['preparedPicture'][key] is True for key in ('native_http_image_sha_verified','body_dom_before_image_response','second_history_restore'))
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', required=True, choices=tuple(TARGETS))
-    target = parser.parse_args().target
+    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5'),default='student-20261117-k12-4')
+    args=parser.parse_args();target=args.target
+    if args.release_tag=='student-20261117-k12-5':assert target=='macos-x64'
     spec = TARGETS[target]
     assert sys.platform == spec['platform'] and platform.machine() == spec['machine'], 'The selected platform must be tested on its actual native runner'
     mac=target.startswith('macos')
     root = Path.cwd()
-    lock_file = root/spec['lock']
+    lock_file = root/('intel-k12-5-reuse-lock.json' if args.release_tag=='student-20261117-k12-5' else spec['lock'])
     lock = json.loads(lock_file.read_text())
     assert lock['target'] == target
     frozen = validate_lock(lock, (root/'attachment-final-manifests.json').read_bytes())
@@ -188,15 +206,24 @@ def main():
     assert batch['manifests'][target] == lock['included_manifest']
     release = verify_metadata(lock)
     assert not any(a['name'] == 'verification-'+target+'.json' for a in release['assets']), 'Verification already exists; do not replace it'
+    completed = None
+    if 'resume_artifact' in lock:
+        from partial_native_evidence import fetch_partial_archive
+        completed = fetch_partial_archive(lock, api, gh)
     evidence = root/'fresh-evidence'/target;evidence.mkdir(parents=True)
     names={row['name'] for row in lock['immutable_existing_assets']}
     before=[{k:a[k] for k in ('name','id','size','digest')} for a in release['assets'] if a['name'] in names]
     before.sort(key=lambda row:row['name'])
     (evidence/'immutable-assets-before.json').write_text(json.dumps(before,indent=2))
     (evidence/'reuse-lock.json').write_bytes(lock_file.read_bytes())
+    if completed:
+        for name,raw in completed['files'].items():
+            destination=evidence/('completed-source-reuse-lock.json' if name=='reuse-lock.json' else name)
+            assert not destination.exists()
+            destination.write_bytes(raw)
     run_id = int(os.environ['GITHUB_RUN_ID']);head = os.environ['GITHUB_SHA']
     marker = evidence/('native-reverify-run-'+target+'-' + str(run_id) + '.json')
-    marker.write_text(json.dumps(dict(target=target,run_id=run_id,workflow_commit=head,source_commit=lock['source_commit'],original_failed_run=lock['original_native_run'],original_failed_job=lock['original_failed_job'],reuse_lock_file=spec['lock'],reuse_lock_sha256=sha(lock_file),frozen_stage_sha256=lock['frozen_stage']['sha256'],candidate_reuse=True)))
+    marker.write_text(json.dumps(dict(target=target,run_id=run_id,workflow_commit=head,source_commit=lock['source_commit'],original_failed_run=lock['original_native_run'],original_failed_job=lock['original_failed_job'],reuse_lock_file=lock_file.name,reuse_lock_sha256=sha(lock_file),frozen_stage_sha256=lock['frozen_stage']['sha256'],candidate_reuse=True)))
     upload_new(lock['candidate_tag'],marker,target)
     work = root/(target+'-reuse-work');work.mkdir()
     signed_downloads=work/'signed-manifests';signed_downloads.mkdir()
@@ -263,8 +290,8 @@ def main():
     from ci_picture_fresh import verify_picture_fresh
     fresh_picture_ui = verify_picture_fresh(root,target,install,resources,home,evidence)
     from ci_update_probe import verify_update_entry
-    oldest = verify_update_entry(root,target,install,resources,home,evidence,legacy=True)
-    current = verify_update_entry(root,target,install,resources,home,evidence)
+    oldest = completed['entries']['oldest_launcher_entry'] if completed else verify_update_entry(root,target,install,resources,home,evidence,legacy=True)
+    current = completed['entries']['update_entry'] if completed else verify_update_entry(root,target,install,resources,home,evidence)
     materials=verify_update_entry(root,target,install,resources,home,evidence,materials=True)
     materials_oldest=verify_update_entry(root,target,install,resources,home,evidence,materials=True,legacy=True)
     smoke=json.loads((evidence/'app.json').read_text())
@@ -287,8 +314,9 @@ def main():
         provenance=dict(verification_run=run_id,workflow_commit=head,original_failed_run=lock['original_native_run'],original_failed_job=lock['original_failed_job'],
                         original_stage_run=lock['original_native_run'],original_stage_workflow_commit=lock['original_native_workflow_commit'],
                         frozen_stage_sha256=lock['frozen_stage']['sha256'],bridge_rebuilt=False,installers_repackaged=False,
-                        existing_assets_overwritten=False,fresh_smoke_rerun=True,proxy_smoke_rerun=True,oldest_and_current_ipc_rerun=True,
-                        fresh_picture_ui_rerun=True,materials_both_variants_rerun=True,production_launcher_byte_identical=True,reuse_lock_file=spec['lock'],reuse_lock_sha256=sha(lock_file),existing_asset_metadata_before_after_unchanged=True))
+                        existing_assets_overwritten=False,fresh_smoke_rerun=True,proxy_smoke_rerun=True,oldest_and_current_ipc_rerun=not bool(completed),
+                        fresh_picture_ui_rerun=True,materials_both_variants_rerun=True,production_launcher_byte_identical=True,reuse_lock_file=lock_file.name,reuse_lock_sha256=sha(lock_file),existing_asset_metadata_before_after_unchanged=True))
+    if completed:report['provenance'].update(completed_entry_receipts_reused=lock['reused_complete_entries'],partial_artifact_sha256=lock['resume_artifact']['sha256'],partial_artifact_source_verified=True)
     (evidence/'verified.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     public = evidence/('verification-'+target+'.json');public.write_text(json.dumps(report,ensure_ascii=False,indent=2))
     upload_new(batch['tag'],public,target)

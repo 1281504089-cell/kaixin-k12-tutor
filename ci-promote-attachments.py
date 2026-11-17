@@ -1,12 +1,14 @@
 """Promote only the exact three native-tested attachment installers and signed feeds."""
-import hashlib,json,os,subprocess,time
+import hashlib,json,os,re,subprocess,time
+from ci_picture_fresh import validate_native_page_views, validate_native_page_api
+from ci_repackage import validate_installer_files
 from pathlib import Path
 from urllib.request import Request,urlopen
 from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-4', 'Owner must prepare the exact final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-5', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -64,6 +66,22 @@ def verify_native_entry_artifacts(report, evidence):
   assert json.loads((evidence/name).read_text())==final[key], 'Final scenario sidecar differs: '+name
  return {'per_entry_receipts_verified':len(entries),'shared_sidecars_from':'materials_oldest_launcher_entry'}
 
+def stage_run_for_target(batch,target):
+ assert target in {'windows-x64','macos-x64','macos-arm64'}
+ mapping=batch.get('native_staging_runs')
+ if mapping is not None:
+  assert set(mapping)=={'windows-x64','macos-x64','macos-arm64'}, 'Missing explicit native stage target'
+  row=mapping[target]
+ else:row={'run_id':batch['native_staging_run'],'workflow_commit':batch['native_staging_workflow_commit']}
+ assert type(row['run_id']) is int and row['run_id']>0 and re.fullmatch(r'[a-f0-9]{40}',row['workflow_commit'])
+ return row
+
+def recheck_lock_for_target(batch,target):
+ old={'windows-x64':'windows-k12-4-reuse-lock.json','macos-x64':'intel-k12-4-reuse-lock.json','macos-arm64':'arm-k12-4-reuse-lock.json'}[target]
+ selected=batch.get('native_rechecks',{}).get(target,{}).get('lock_file',old)
+ assert selected==old or batch['tag']=='student-20261117-k12-5' and target=='macos-x64' and selected=='intel-k12-5-reuse-lock.json'
+ return selected
+
 assert set(batch['native_runs'])==set(targets)
 for target,proof in batch['native_runs'].items():
  run=api('actions/runs/'+str(proof['run_id']))
@@ -77,33 +95,45 @@ assets={a['name']:a for a in candidate['assets']};proofs={};full_files=[]
 work=root/'publication-work';work.mkdir();previous=work/'previous';previous.mkdir()
 for target in targets:
  report=json.loads(public(assets['verification-'+target+'.json']))
+ resumed=None
  assert report['release']==batch['tag'] and report['core_commit']==batch['core_commit']
- if batch['native_runs'][target]['run_id'] != batch['native_staging_run']:
+ staged=stage_run_for_target(batch,target)
+ if batch['native_runs'][target]['run_id']==staged['run_id']:assert batch['native_runs'][target]['workflow_commit']==staged['workflow_commit']
+ if batch['native_runs'][target]['run_id'] != staged['run_id']:
   assert target in {'macos-arm64','macos-x64','windows-x64'}
-  lock_name={'macos-arm64':'arm-k12-4-reuse-lock.json','macos-x64':'intel-k12-4-reuse-lock.json','windows-x64':'windows-k12-4-reuse-lock.json'}[target]
+  lock_name=recheck_lock_for_target(batch,target)
   lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
   accepted=batch['native_rechecks'][target];p=report['provenance']
   assert hashlib.sha256(lock_raw).hexdigest()==accepted['lock_sha256']==p['reuse_lock_sha256']
   assert p['reuse_lock_file']==lock_name
   assert accepted['run_id']==batch['native_runs'][target]['run_id']==p['verification_run']
   assert accepted['workflow_commit']==batch['native_runs'][target]['workflow_commit']==p['workflow_commit']
-  assert lock['original_native_run']==batch['native_staging_run']==p['original_stage_run']==p['original_failed_run']
-  assert lock['original_native_workflow_commit']==batch['native_staging_workflow_commit']==p['original_stage_workflow_commit']
+  assert lock['original_native_run']==staged['run_id']==p['original_stage_run']==p['original_failed_run']
+  assert lock['original_native_workflow_commit']==staged['workflow_commit']==p['original_stage_workflow_commit']
   assert lock['original_failed_job']==p['original_failed_job']
   assert lock['source_commit']==batch['core_commit'] and lock['candidate_tag']==batch['tag']
   assert lock['frozen_stage']['sha256']==batch['signed_stage_sha256']==p['frozen_stage_sha256']
   assert all(p[k] is False for k in ['bridge_rebuilt','installers_repackaged','existing_assets_overwritten'])
-  assert all(p[k] is True for k in ['fresh_smoke_rerun','fresh_picture_ui_rerun','proxy_smoke_rerun','oldest_and_current_ipc_rerun','materials_both_variants_rerun'])
+  assert all(p[k] is True for k in ['fresh_smoke_rerun','fresh_picture_ui_rerun','proxy_smoke_rerun','materials_both_variants_rerun'])
+  if 'resume_artifact' in lock:
+   from partial_native_evidence import fetch_partial_archive
+   resumed=fetch_partial_archive(lock,api,gh)
+   assert p['oldest_and_current_ipc_rerun'] is False and p['partial_artifact_source_verified'] is True
+   assert p['partial_artifact_sha256']==lock['resume_artifact']['sha256'] and p['completed_entry_receipts_reused']==lock['reused_complete_entries']
+   for key,value in resumed['entries'].items():assert report[key]==value, 'Completed entry differs from its original source artifact'
+  else:assert p['oldest_and_current_ipc_rerun'] is True
   assert sorted((r['file'],r['bytes'],r['sha256']) for r in report['full_files'])==sorted((r['name'],r['bytes'],r['sha256']) for r in lock['candidate_files'])
  assert report['launcher_build']==batch['launcher_build'] and report['shell_files']==batch['shell_files']
  verify_update_recovery(report,batch,target)
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
+ validate_native_page_api(smoke['k12_api'],batch['native_pages'])
  assert smoke['k12_api']['prepared_picture_bindings']==batch['picture_count']
  assert smoke['k12_api']['prepared_picture_manifest_sha256']==batch['picture_manifest_sha256']
  fresh=report['fresh_picture_ui'];assert fresh['passed'] and fresh['production_launcher_source_byte_identical'] and fresh['qa_code_only_in_disposable_copy']
  for ui in [fresh['k12_library'],*[report[key]['k12_library'] for key in ['update_entry','oldest_launcher_entry','materials_launcher_entry','materials_oldest_launcher_entry']]]:
+  validate_native_page_views(ui,batch['native_pages']['ui_fixture'])
   assert ui['passed'] and ui['actualNativeRenderer'] and len(ui['views'])==4
   for view in ui['views']:
    assert all(view['preparedPicture'][key] for key in ['native_http_image_sha_verified','body_dom_before_image_response','second_history_restore'])
@@ -121,6 +151,10 @@ for target in targets:
  native_evidence=work/('evidence-'+target)
  gh('run','download',batch['native_runs'][target]['run_id'],'--name','attachments-'+target,'--dir',native_evidence)
  assert json.loads((native_evidence/'verified.json').read_text())==report
+ if resumed:
+  for name,raw in resumed['files'].items():
+   copied='completed-source-reuse-lock.json' if name=='reuse-lock.json' else name
+   assert (native_evidence/copied).read_bytes()==raw, 'Reused native evidence was modified: '+name
  report['artifact_scene_binding']=verify_native_entry_artifacts(report,native_evidence)
  for size in ['390x844','1366x900']:
   screenshot=native_evidence/('quick-preview-'+size+'.png');raw=screenshot.read_bytes();assert len(raw)>1000 and raw.startswith(b'\x89PNG\r\n\x1a\n')
@@ -140,10 +174,11 @@ for target in targets:
  science=update['science_formulas'];assert science['passed'] and len(science['views'])==16 and len(science['originalEdits'])>=18 and science['cleanup']['debuggerDetached'] and science['cleanup']['deviceMetricsCleared']
  assert bulk['device_speech']['diagnosticOnly'] and 'nativeEnded' in bulk['device_speech']['diagnostic']
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
+ validate_installer_files(report['full_files'],target,batch['tag'])
  for row in report['full_files']:
   actual=assets[row['file']];assert actual['digest']=='sha256:'+row['sha256'] and actual['size']==row['bytes']
  full_files+=report['full_files'];proofs[target]=report
-assert len(full_files)==13
+assert 13 <= len(full_files) <= 15
 
 stable_assets={a['name']:a for a in api('releases/tags/core-updates')['assets']}
 for name,expected in batch['expected_previous'].items():

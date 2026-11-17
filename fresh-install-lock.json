@@ -1,15 +1,15 @@
 {
-  "release_id": 447749595,
-  "tag": "student-20261117-k12-2",
-  "core_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
-  "core_sha256": "9308765179203bc4c1972e82f373c699ff68c8d712f677226b7a0d0f05cf3160",
-  "builtAt": 1794874327567,
+  "release_id": 448792391,
+  "tag": "student-20261117-k12-5",
+  "core_commit": "9328240380d13ef75435434a8c901028ea4470dc",
+  "core_sha256": "c120f28113bdac687e7e4a575abaa37078279db8f4d0e96fba3b94f6300983c0",
+  "builtAt": 1794929226943,
   "targets": {
     "windows-x64": {
       "platform": "win32",
       "arch": "x64",
       "base_runtime_id": "1.7.1-04276f68a-x64",
-      "runtime_id": "1.7.1-kaixin-20261117-k12-2-windows-x64-20261112",
+      "runtime_id": "1.7.1-kaixin-20261117-k12-5-windows-x64-20261112",
       "files": [
         {
           "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
@@ -33,8 +33,8 @@
         },
         {
           "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
-          "bytes": 731246842,
-          "sha256": "4910447a6a4d65d0e32eb4172acbd631feb1472282492ce1051a1b42999e8986"
+          "bytes": 996818267,
+          "sha256": "7765d7084383ab86d58678ecfa27da45b7074a7619678f90ecb722f028b79298"
         }
       ]
     },
@@ -42,27 +42,32 @@
       "platform": "darwin",
       "arch": "x64",
       "base_runtime_id": "1.7.1-04276f68a-x64",
-      "runtime_id": "1.7.1-kaixin-20261117-k12-2-macos-x64-20261112",
+      "runtime_id": "1.7.1-kaixin-20261117-k12-5-macos-x64-20261112",
       "files": [
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.002.dmgpart",
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.002.dmgpart",
           "bytes": 1992295135,
-          "sha256": "27aef7618512b8bdce466e65df10dc6022a20e6b8deeab6af9485bbf3a79aa94"
+          "sha256": "422436de9a1c2fbb198fbd09f992d027e65955c20a1a5dd95ce13ed53d9bb87c"
         },
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.003.dmgpart",
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.003.dmgpart",
           "bytes": 1992295135,
-          "sha256": "9bf3af19eaf18f849aa0c9effd18fc816b6603c59545567f482a4a6aff4b743c"
+          "sha256": "37dee348e8eb4d0d854ecfbc2735f782db268168ae301709687f088f7541a541"
         },
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.004.dmgpart",
-          "bytes": 1733624993,
-          "sha256": "23d539ad9f7d49a1cabc19dfc16b829bb8bbe3e20dd01429e8e7dfe625675612"
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.004.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "1c74cb2772ab107a1054c8970b45873753593447d10da0127dd1e7b6e495ba2e"
         },
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-2-part.dmg",
-          "bytes": 1992764642,
-          "sha256": "bd5fb1363a1b7f74e7a067a592d3924d2076652a21ac42fac6d02b466f3986b0"
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.005.dmgpart",
+          "bytes": 9588741,
+          "sha256": "16ff23db1064860900cc7a95018f56510072e9ba666c36a744d653c87a35887f"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.dmg",
+          "bytes": 1992779303,
+          "sha256": "4f198a680675e651e2e5a5cb385d103bd9f3d87878efabe92641a431c6821034"
         }
       ]
     },
@@ -70,29 +75,213 @@
       "platform": "darwin",
       "arch": "arm64",
       "base_runtime_id": "1.7.1-04276f68a-arm64",
-      "runtime_id": "1.7.1-kaixin-20261117-k12-2-macos-arm64-20261112",
+      "runtime_id": "1.7.1-kaixin-20261117-k12-5-macos-arm64-20261112",
       "files": [
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.002.dmgpart",
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.002.dmgpart",
           "bytes": 1992295135,
-          "sha256": "dc2a63666baa6f563478d62977bfcabddd3debc267571171f646ed0da33d022d"
+          "sha256": "5b892882f8cef99579551f3f58ce345b04244f5a10426211a20483fdf0fb5c68"
         },
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.003.dmgpart",
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.003.dmgpart",
           "bytes": 1992295135,
-          "sha256": "f045b766fa0939c4b64b261e6fc09a897ccb3117a3d071d848c196edf4aa1fda"
+          "sha256": "acbb969e0b07f942ce9816253beedd3bc9411795826fb627e576379e1584dcd8"
         },
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.004.dmgpart",
-          "bytes": 1664562870,
-          "sha256": "aa83c0c679cde8b0143922e1ee13c58fdad4a762c51ee1ebbd9bba6c7e9a0b00"
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.004.dmgpart",
+          "bytes": 1932651872,
+          "sha256": "52702c57303767e60cf22ea17452bba23fcd2f1c018827a4c7fc804eead561cc"
         },
         {
-          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-2-part.dmg",
-          "bytes": 1992759589,
-          "sha256": "9678964707363dd04752366dfc6d05fa63c4a95a249a75e6a5cc2f211b62dc8a"
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.dmg",
+          "bytes": 1992774673,
+          "sha256": "a90732ac6228a11747b6107d439503641379de32d89f3b9bfb15cc3b65b4fdd3"
         }
       ]
+    }
+  },
+  "reuse_existing_native": {
+    "baseline_latest_id": 448283800,
+    "baseline_feeds": {
+      "runtime-macos-arm64.json": "87507b2cee9fa9d48dec408f69c926b667c830303e49f99c735e744955b58fac",
+      "runtime-macos-x64.json": "093397000b3223356aa5751550c2f1c7dc50f0fb3aeb15f548b7000df05d74f1",
+      "runtime-windows-x64.json": "e4f4be39cc44455a6815c48016d96a4bb939fd43d3df2005508ddc0c2e61b03e"
+    },
+    "original_native_run": 44114676923,
+    "original_native_workflow_commit": "800eeeece85fd1f36a5d3f55854bfabd6baa89dd",
+    "original_installer_assets": {
+      "windows-x64": [
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+          "id": 759608672,
+          "bytes": 1992294400,
+          "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+          "id": 759608671,
+          "bytes": 1992294400,
+          "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+          "id": 759608676,
+          "bytes": 1992294400,
+          "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+          "id": 759608673,
+          "bytes": 1005564586,
+          "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+          "id": 759608675,
+          "bytes": 996818267,
+          "sha256": "7765d7084383ab86d58678ecfa27da45b7074a7619678f90ecb722f028b79298",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+          "state": "uploaded"
+        }
+      ],
+      "macos-x64": [
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.002.dmgpart",
+          "id": 759669168,
+          "bytes": 1992295135,
+          "sha256": "422436de9a1c2fbb198fbd09f992d027e65955c20a1a5dd95ce13ed53d9bb87c",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.002.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.003.dmgpart",
+          "id": 759669173,
+          "bytes": 1992295135,
+          "sha256": "37dee348e8eb4d0d854ecfbc2735f782db268168ae301709687f088f7541a541",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.003.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.004.dmgpart",
+          "id": 759669177,
+          "bytes": 1992295135,
+          "sha256": "1c74cb2772ab107a1054c8970b45873753593447d10da0127dd1e7b6e495ba2e",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.004.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.005.dmgpart",
+          "id": 759669170,
+          "bytes": 9588741,
+          "sha256": "16ff23db1064860900cc7a95018f56510072e9ba666c36a744d653c87a35887f",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.005.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.dmg",
+          "id": 759669166,
+          "bytes": 1992779303,
+          "sha256": "4f198a680675e651e2e5a5cb385d103bd9f3d87878efabe92641a431c6821034",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-5-part.dmg",
+          "state": "uploaded"
+        }
+      ],
+      "macos-arm64": [
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.002.dmgpart",
+          "id": 759634311,
+          "bytes": 1992295135,
+          "sha256": "5b892882f8cef99579551f3f58ce345b04244f5a10426211a20483fdf0fb5c68",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.002.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.003.dmgpart",
+          "id": 759634313,
+          "bytes": 1992295135,
+          "sha256": "acbb969e0b07f942ce9816253beedd3bc9411795826fb627e576379e1584dcd8",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.003.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.004.dmgpart",
+          "id": 759634307,
+          "bytes": 1932651872,
+          "sha256": "52702c57303767e60cf22ea17452bba23fcd2f1c018827a4c7fc804eead561cc",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.004.dmgpart",
+          "state": "uploaded"
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.dmg",
+          "id": 759634305,
+          "bytes": 1992774673,
+          "sha256": "a90732ac6228a11747b6107d439503641379de32d89f3b9bfb15cc3b65b4fdd3",
+          "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-5-part.dmg",
+          "state": "uploaded"
+        }
+      ]
+    },
+    "prior_manifests": {
+      "windows-x64": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "win32",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-4-windows-x64-20261112",
+        "baseRuntimeId": "1.7.1-04276f68a-x64",
+        "commit": "2af326481943f7e072036637ba186aa829dce39d",
+        "builtAt": 1794900556998,
+        "archive": "kaixin-core-20261117-k12-4.tar.gz",
+        "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+        "corePayloadSha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+        "signature": "yO48Q//A2DrgSq4u3zIWdKfND7xYUjWEKzi0OziYhLyAZsUK0mj6NncC7k5mYklGY0fRzcSgclkOlGRUNxY7CA=="
+      },
+      "macos-x64": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-4-macos-x64-20261112",
+        "baseRuntimeId": "1.7.1-04276f68a-x64",
+        "commit": "2af326481943f7e072036637ba186aa829dce39d",
+        "builtAt": 1794900556998,
+        "archive": "kaixin-core-20261117-k12-4.tar.gz",
+        "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+        "corePayloadSha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+        "signature": "0qCpSfNZSTpKaCqX8cLDH+Hi1Vjj8bze8VJq655GvaHLWVy5JG+ph1IRtiuZFVUox+C1BOxOlKX9uLH74JyZBA=="
+      },
+      "macos-arm64": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "arm64",
+        "coreVersion": "1.7.1",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-4-macos-arm64-20261112",
+        "baseRuntimeId": "1.7.1-04276f68a-arm64",
+        "commit": "2af326481943f7e072036637ba186aa829dce39d",
+        "builtAt": 1794900556998,
+        "archive": "kaixin-core-20261117-k12-4.tar.gz",
+        "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+        "corePayloadSha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+        "signature": "Nrg1gm1FGyoTolO/C4VnG4x2ZpwhPrXLj8WcXHazANoQQjwDHfvyWrM5FnCMXdFQy6EjnLAWVUfq93wzMPifBQ=="
+      }
+    },
+    "prior_core_asset": {
+      "name": "kaixin-core-20261117-k12-4.tar.gz",
+      "id": 758074993,
+      "bytes": 572023510,
+      "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/kaixin-core-20261117-k12-4.tar.gz"
     }
   }
 }
