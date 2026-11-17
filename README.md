@@ -6,7 +6,7 @@
 - **在课本上圈一段就能问。** 选一句话、圈一条公式，提问时能带上原页。翻到下一页，也可以接着问前面的问题。
 - **九科有各自的 AI 老师。** 每科都有自己的学习项目。做题卡住时可以选对应科目的老师，先要个提示，自己做下去。
 
-**本页交付目标为 `student-20261117-k12-2`。** 学习源码 `f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9`；最终核心与三系统同批原生新装、当前和旧启动器检查更新验收已通过。正式状态以[最新 Release](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)、PUBLICATION-RECEIPT 和 CURRENT 为准；本机真实升级单独记录。
+**最新正式版为 [`student-20261117-k12-2`](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2)。** 学习源码 `f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9`；最终核心与三系统同批原生新装、当前和旧启动器检查更新验收已通过。正式状态以[最新 Release](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)、PUBLICATION-RECEIPT 和 CURRENT 为准；本机真实升级结果单独记录在 CURRENT，不将构建机验收混同于全部实体设备。
 
 [本批文件：Windows / Apple 芯片 Mac / Intel Mac](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2) · [上一正式版 k12-1](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-1)
 

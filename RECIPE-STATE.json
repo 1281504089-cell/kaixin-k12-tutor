@@ -1,32 +1,44 @@
 {
-  "status": "final_source_prepared_all_bank_objects_ready_unsigned_core_not_built",
-  "baseline_tag": "student-20261115-preview3",
-  "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
-  "prior_recipe_unchanged": true,
-  "published_export_required": true,
-  "models_with_pending_distribution_rights": "isolated_by_owner_ledger",
-  "bank_archive_prefix": "core/deeptutor/services/student_learning/question_bank_data",
-  "source_and_bank_transport_part_bytes": 524288,
-  "normal_git_credential_helper": "osxkeychain_configured_root_reports_no_usable_github_credential",
-  "candidate_delivery": "connector blobs/tree/commit on isolated push-triggered branch; runner github.token creates candidate assets",
-  "pending": [
-    "source/recipe immutable blobs and isolated candidate core workflow",
-    "core readback and owner signed native batch",
-    "three native candidate install/update passes",
-    "owner-only promotion and local install/update"
-  ],
-  "nested_base64_full_part_characters": 699052,
-  "nested_tool_measured_output_cap_characters": 1048607,
-  "final_source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
-  "planned_tag": "student-20261117-k12-1",
-  "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
-  "bank_blobs_checkpointed": 985,
-  "source_overlay_parts": 35,
-  "source_prepared": true,
-  "physical_readable_count": 20862,
-  "effective_readable_count": 20846,
-  "physical_exercise_candidate_count": 18907,
-  "effective_exercise_candidate_count": 18891,
-  "runtime_isolated_count": 16,
-  "owner_launcher_signed": true
+  "status": "published_native_verified_local_ui_waiting_unlock",
+  "tag": "student-20261117-k12-2",
+  "final_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+  "source_files_sha256": "f5f25cbc43a74efc134f8b4d6fcf623c7ec3d8c3ddf043ae16ee824dcfb979b0",
+  "core_run": 43984610812,
+  "publication_run": 44007001459,
+  "publication_commit": "ea35edb736e84ca39c1adc2776fbb7220b5f82d5",
+  "accepted_native_runs": {
+    "windows-x64": {
+      "run_id": 43992310720,
+      "workflow_commit": "a93cf7c961315cce4dd40d7f4da506e1fbff2bbd"
+    },
+    "macos-x64": {
+      "run_id": 44001736439,
+      "workflow_commit": "7fdc90489656e6d51d266e001f9989435a3068e3"
+    },
+    "macos-arm64": {
+      "run_id": 44001736439,
+      "workflow_commit": "7fdc90489656e6d51d266e001f9989435a3068e3"
+    }
+  },
+  "all_native_targets_passed": true,
+  "publication_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/PUBLICATION-RECEIPT.json",
+  "local_actual_update": {
+    "status": "waiting_user_unlock_macos_screen",
+    "actual_online_update_completed": false,
+    "entry": "核心 → 检查更新…",
+    "from_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+    "target_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+    "normal_menu_update_pending": true,
+    "manual_core_install_used": false,
+    "test_feed_used": false,
+    "backup_databases": 10,
+    "backup_settings": 19,
+    "reading_files_before": 283,
+    "local_book_count_before": 147,
+    "local_excerpt_count_before": 12104,
+    "default_reference_count_before": 12101,
+    "private_contents_uploaded": false,
+    "reason": "macOS reports CGSSessionScreenIsLocked=Yes; real update confirmation and restart are not yet verified."
+  },
+  "usb_updated": false
 }

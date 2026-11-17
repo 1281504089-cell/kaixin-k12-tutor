@@ -1,7 +1,21 @@
 {
-  "status": "not_a_publication_receipt_at_git_freeze",
-  "target_tag": "student-20261117-k12-2",
-  "learning_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+  "status": "published_and_receipt_verified",
+  "tag": "student-20261117-k12-2",
+  "release_id": 447749595,
+  "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-2",
+  "source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+  "release_repository_commit": "ea35edb736e84ca39c1adc2776fbb7220b5f82d5",
+  "publication_run": 44007001459,
+  "published_at_utc": "2026-11-17T03:06:05Z",
   "full_receipt_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-2/PUBLICATION-RECEIPT.json",
-  "note": "The publication transaction creates and verifies the actual receipt as this release attachment. This file does not claim publication or local upgrade."
+  "full_receipt_sha256": "010899d45790e66fe2f77a01ca9bcf648bf65ac78100ba26d27fa2ed80c314aa",
+  "full_receipt_bytes": 567899,
+  "accepted_native_targets": [
+    "windows-x64",
+    "macos-x64",
+    "macos-arm64"
+  ],
+  "signed_update_manifests_verified": 39,
+  "whole_anonymous_archives_verified_by_publication_ci": 4,
+  "local_actual_online_update_completed": false
 }
