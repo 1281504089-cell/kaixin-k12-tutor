@@ -62,6 +62,21 @@ check('visible duplicate selection and NAV occlusion are not actionable',()=>{
   document.elementFromPoint=()=>visible;
   assert.equal(vm.runInNewContext(`(${t.inspectTarget.toString()})({href:${JSON.stringify(href)}},'test',false)`,context).clickable,true);
 });
+check('visible card fragment is actionable while a wholly clipped card is rejected',()=>{
+  const card=fakeNode({left:308,top:115.5,width:500,height:183.03125});
+  const root=fakeNode({left:272,top:52,width:572,height:138},{overflowY:'auto'});root.clientHeight=138;root.clientWidth=572;root.scrollHeight=545;root.scrollTop=172;card.parentElement=root;
+  const composer=fakeNode({left:272,top:190,width:572,height:200});
+  const document={documentElement:{},querySelectorAll:()=>[card],elementFromPoint:(x,y)=>y>=52&&y<190?card:composer};
+  const context={document,getComputedStyle:node=>node.style,innerWidth:844,innerHeight:390};
+  const probe=()=>vm.runInNewContext(`(${t.inspectTarget.toString()})({selector:'a'},'clip-test',false)`,context);
+  const result=probe();assert.equal(result.clickable,true);assert(result.point.y>=115.5&&result.point.y<190);assert.equal(result.clippedRect.bottom,190);
+  card.getBoundingClientRect=()=>({left:308,top:210,right:808,bottom:393.03125,width:500,height:183.03125});
+  assert.equal(probe().clickable,false);
+  // A farther hidden ancestor must also clip an otherwise-visible scrollport.
+  card.getBoundingClientRect=()=>({left:308,top:115.5,right:808,bottom:298.53125,width:500,height:183.03125});
+  const hidden=fakeNode({left:0,top:0,width:844,height:90},{overflowY:'hidden'});root.parentElement=hidden;
+  assert.equal(probe().clickable,false);
+});
 check('history and all navigation activation use native mouse, no DOM click',()=>{
   const source=fs.readFileSync(path.join(__dirname,'ci-k12-library-ui.cjs'),'utf8');
   assert(!/\.click\s*\(/.test(source));

@@ -30,15 +30,25 @@ function inspectTarget(spec, token, scroll = false) {
   if (!node) return { found:false, candidates:all };
   node.setAttribute('data-k12-click-id', token);
   if (scroll) node.scrollIntoView({ block:'center', inline:'nearest', behavior:'instant' });
-  const bounds = rect(node), point = { x:Math.round(bounds.left + bounds.width / 2), y:Math.round(bounds.top + bounds.height / 2) };
-  const hit = document.elementFromPoint(point.x, point.y);
+  const bounds = rect(node), clip = { left:0, top:0, right:innerWidth, bottom:innerHeight };
   let root;
   for (let parent=node.parentElement; parent && parent !== document.documentElement; parent=parent.parentElement) {
-    if (/auto|scroll/.test(getComputedStyle(parent).overflowY) && parent.scrollHeight > parent.clientHeight + 1) { root=parent; break; }
+    const style=getComputedStyle(parent), box=rect(parent);
+    const left=box.left+(parent.clientLeft||0), top=box.top+(parent.clientTop||0);
+    const right=left+(typeof parent.clientWidth==='number'?parent.clientWidth:box.width), bottom=top+(typeof parent.clientHeight==='number'?parent.clientHeight:box.height);
+    if (/auto|scroll|hidden|clip/.test(style.overflowX)) { clip.left=Math.max(clip.left,left); clip.right=Math.min(clip.right,right); }
+    if (/auto|scroll|hidden|clip/.test(style.overflowY)) { clip.top=Math.max(clip.top,top); clip.bottom=Math.min(clip.bottom,bottom); }
+    if (!root && /auto|scroll/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight + 1) root=parent;
   }
+  const exposed=[...node.getClientRects()].map(box=>({left:Math.max(box.left,clip.left),top:Math.max(box.top,clip.top),right:Math.min(box.right,clip.right),bottom:Math.min(box.bottom,clip.bottom)}))
+    .filter(box=>box.right>box.left&&box.bottom>box.top).sort((a,b)=>(b.right-b.left)*(b.bottom-b.top)-(a.right-a.left)*(a.bottom-a.top));
+  const choices=exposed.map(box=>{const point={x:Math.floor((box.left+box.right)/2),y:Math.floor((box.top+box.bottom)/2)};return {point,box,hit:document.elementFromPoint(point.x,point.y)};});
+  const actionable=choice=>choice.point.x>=choice.box.left&&choice.point.x<choice.box.right&&choice.point.y>=choice.box.top&&choice.point.y<choice.box.bottom&&!!choice.hit&&node.contains(choice.hit)&&(!spec.href||choice.hit.closest('a[href]')?.getAttribute('href')===spec.href);
+  const chosen=choices.find(actionable), fallback=choices[0], point=chosen?.point||fallback?.point||{x:Math.round(bounds.left+bounds.width/2),y:Math.round(bounds.top+bounds.height/2)};
+  const hit=chosen?.hit||fallback?.hit||document.elementFromPoint(point.x,point.y);
   if (root) root.setAttribute('data-k12-scroll-id', token);
-  return { found:true, rect:bounds, point, candidates:all, selectedIndex:candidates.indexOf(node), color:getComputedStyle(node).color,
-    clickable:point.x >= 0 && point.y >= 0 && point.x < innerWidth && point.y < innerHeight && !!hit && node.contains(hit) && (!spec.href || hit.closest('a[href]')?.getAttribute('href') === spec.href),
+  return { found:true, rect:bounds, point, clippedRect:chosen?.box||fallback?.box||null,clip,candidates:all, selectedIndex:candidates.indexOf(node), color:getComputedStyle(node).color,
+    clickable:!!chosen,
     hit:hit ? { tag:hit.tagName, text:hit.innerText?.slice(0,120), href:hit.closest('a[href]')?.getAttribute('href') } : null,
     root:root ? { rect:rect(root), scrollTop:root.scrollTop, scrollHeight:root.scrollHeight, clientHeight:root.clientHeight, className:root.className } : null };
 }

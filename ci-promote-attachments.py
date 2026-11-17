@@ -52,6 +52,23 @@ work=root/'publication-work';work.mkdir();previous=work/'previous';previous.mkdi
 for target in targets:
  report=json.loads(public(assets['verification-'+target+'.json']))
  assert report['release']==batch['tag'] and report['core_commit']==batch['core_commit']
+ if batch['native_runs'][target]['run_id'] != batch['native_staging_run']:
+  assert target in {'macos-arm64','macos-x64'}
+  lock_name={'macos-arm64':'arm-reuse-lock.json','macos-x64':'intel-k12-2-reuse-lock.json'}[target]
+  lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
+  accepted=batch['native_rechecks'][target];p=report['provenance']
+  assert hashlib.sha256(lock_raw).hexdigest()==accepted['lock_sha256']==p['reuse_lock_sha256']
+  assert p['reuse_lock_file']==lock_name
+  assert accepted['run_id']==batch['native_runs'][target]['run_id']==p['verification_run']
+  assert accepted['workflow_commit']==batch['native_runs'][target]['workflow_commit']==p['workflow_commit']
+  assert lock['original_native_run']==batch['native_staging_run']==p['original_stage_run']==p['original_failed_run']
+  assert lock['original_native_workflow_commit']==batch['native_staging_workflow_commit']==p['original_stage_workflow_commit']
+  assert lock['original_failed_job']==p['original_failed_job']
+  assert lock['source_commit']==batch['core_commit'] and lock['candidate_tag']==batch['tag']
+  assert lock['frozen_stage']['sha256']==batch['signed_stage_sha256']==p['frozen_stage_sha256']
+  assert all(p[k] is False for k in ['bridge_rebuilt','installers_repackaged','existing_assets_overwritten'])
+  assert all(p[k] is True for k in ['fresh_smoke_rerun','fresh_picture_ui_rerun','proxy_smoke_rerun','oldest_and_current_ipc_rerun'])
+  assert sorted((r['file'],r['bytes'],r['sha256']) for r in report['full_files'])==sorted((r['name'],r['bytes'],r['sha256']) for r in lock['candidate_files'])
  assert report['launcher_build']==batch['launcher_build'] and report['shell_files']==batch['shell_files']
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'

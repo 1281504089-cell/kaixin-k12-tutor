@@ -2,6 +2,38 @@
 const assert = require('node:assert/strict');
 const { writeFile } = require('node:fs/promises');
 const path = require('node:path');
+async function loadInitialLibrary(view, evidence) {
+  const initial = new URL(view.getURL());
+  const target = new URL('/space?dt_workspace=', initial).href;
+  try {
+    return await view.loadURL(target);
+  } catch (error) {
+    const retry = initial.protocol === 'http:' && initial.hostname === '127.0.0.1'
+      && !initial.username && !initial.password
+      && error.code === 'ERR_NETWORK_CHANGED' && error.errno === -21 && error.url === target;
+    const receipt = { url: target, first_error: { message: error.message, code: error.code, errno: error.errno, url: error.url },
+      retry_count: 0, status: retry ? 'retry_scheduled' : 'failed', recorded_at: new Date().toISOString() };
+    const file = path.join(evidence, `materials-navigation-${process.pid}-${Date.now()}.json`);
+    await writeFile(file, JSON.stringify(receipt, null, 2));
+    if (!retry) throw error;
+    // Only this safe first GET can repeat; uploads and all later acceptance gates remain untouched.
+    await new Promise(resolve => setTimeout(resolve, 500));
+    receipt.retry_count = 1;
+    try {
+      const result = await view.loadURL(target);
+      receipt.status = 'retry_succeeded';
+      receipt.completed_at = new Date().toISOString();
+      await writeFile(file, JSON.stringify(receipt, null, 2));
+      return result;
+    } catch (retryError) {
+      receipt.status = 'retry_failed';
+      receipt.retry_error = { message: retryError.message, code: retryError.code, errno: retryError.errno, url: retryError.url };
+      receipt.completed_at = new Date().toISOString();
+      await writeFile(file, JSON.stringify(receipt, null, 2));
+      throw retryError;
+    }
+  }
+}
 module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   const js = (fn, ...args) => view.executeJavaScript(`(${fn.toString()})(...${JSON.stringify(args)})`);
@@ -33,7 +65,7 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
     await click('资料库 · 教材与长期资料');
     await wait('location.pathname === "/space" && Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))', 'Library navigation failed');
   }
-  await view.loadURL(new URL('/space?dt_workspace=', view.getURL()).href);
+  await loadInitialLibrary(view, evidence);
   await wait('Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))', 'Updated library did not expose bulk upload');
   const originals = Array.from({ length: 20 }, (_, index) => ({ name: `native-background-${index.toString().padStart(2, '0')}.txt`, text: `SYNTHETIC NATIVE ORIGINAL ${index}\n切换页面后继续保存。` }));
   originals.push({ name: 'native-listening.html', text: '<!DOCTYPE html><html><body><h1>Synthetic listening</h1><div class="row"><span class="text">Hello student.</span><button onclick="speakOne(0)">Play one</button></div><script>window.attachmentExecuted=true</script><a href="https://example.com">external</a></body></html>' });
@@ -177,3 +209,4 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   await writeFile(path.join(evidence, 'library-bulk.json'), JSON.stringify(report, null, 2));
   return report;
 };
+module.exports.loadInitialLibrary = loadInitialLibrary;
