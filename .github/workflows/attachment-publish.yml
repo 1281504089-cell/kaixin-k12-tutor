@@ -22,9 +22,15 @@ jobs:
           python-version: '3.12'
       - name: Record publication run
         run: |
-          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-4";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
+          python -c 'import json,os;b=json.load(open("attachment-publication.json"));assert b.get("prepared") is True and b["tag"]=="student-20261117-k12-5";open("publication-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
       - name: Test transaction and native scene receipt bindings
-        run: python -m unittest test_native_entry_artifacts test_recovery_publication_gate test_publication_transaction
+        run: |
+          python -m unittest test_partial_native_evidence test_native_stage_binding test_native_recheck_lock test_native_reuse_metadata test_native_reuse_inputs test_installer_segments test_native_pages_proof test_native_entry_artifacts test_recovery_publication_gate test_publication_transaction
+          node native-response-followup-selfcheck.cjs
+          node native-visibility-selfcheck.cjs
+          node native-click-followup-selfcheck.cjs
+          node update-flow-selfcheck.cjs
+          node update-flow-disposal-selfcheck.cjs
       - name: Verify three native proofs and switch signed batch
         run: python ci-promote-attachments.py
       - name: Keep publication receipts and previous defaults

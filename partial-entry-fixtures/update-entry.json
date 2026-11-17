@@ -1,0 +1,3365 @@
+{
+  "native_platform": "darwin",
+  "native_arch": "x64",
+  "entry": "renderer IPC desktop:check-release",
+  "native_dialogs_auto_confirmed": true,
+  "production_main_unchanged": true,
+  "candidate_feed_routed_only_in_test": true,
+  "from_runtime": "1.7.1-kaixin-20261117-k12-4-macos-x64-20261112",
+  "to_runtime": "1.7.1-kaixin-20261117-k12-5-macos-x64-20261112",
+  "actual_download_install_backup_restart": "passed",
+  "transaction": "complete",
+  "check_again_current": true,
+  "signed_launcher_restarted": false,
+  "from_launcher": "20261117-updater-2",
+  "to_launcher": "20261117-updater-2",
+  "old_pid": 52495,
+  "restarted_pid": 52495,
+  "download_progress_visible": true,
+  "downloaded_bytes_visible": true,
+  "old_renderer_closed_after_update": true,
+  "selected_archive": "kaixin-core-20261117-k12-5.tar.gz",
+  "selected_base_runtime": "1.7.1-04276f68a-x64",
+  "library_bulk_upload": {
+    "multiple": true,
+    "saved_files": 21,
+    "library_retention": true,
+    "originals_byte_identical": true,
+    "original_preview_opened": true,
+    "held_real_chunk": true,
+    "chat_and_settings_navigation": true,
+    "appended_while_active": true,
+    "completed_in_chat": true,
+    "document_not_reloaded": true,
+    "draft_preserved": true,
+    "picker_reference_byte_identical": true,
+    "no_duplicate_upload_or_new_chat": true,
+    "html_safe_preview": true,
+    "source_toggle": true,
+    "device_speech": {
+      "attachmentScriptBlocked": true,
+      "available": true,
+      "localVoices": 0,
+      "networkBlocked": true,
+      "noDesktopIPC": true,
+      "noNode": true,
+      "parentBlocked": true,
+      "diagnostic": {
+        "available": true,
+        "events": [
+          {
+            "charIndex": 0,
+            "elapsedTime": 26.799999237060547,
+            "type": "start"
+          },
+          {
+            "charIndex": 0,
+            "elapsedTime": 2630.699951171875,
+            "type": "end"
+          }
+        ],
+        "language": "en-US",
+        "localVoices": [
+          {
+            "lang": "en-US",
+            "name": "Samantha"
+          },
+          {
+            "lang": "en-US",
+            "name": "Aaron"
+          },
+          {
+            "lang": "en-US",
+            "name": "Albert"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Alice"
+          },
+          {
+            "lang": "sv-SE",
+            "name": "Alva"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Am\u00e9lie"
+          },
+          {
+            "lang": "ms-MY",
+            "name": "Amira"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Anna"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Arthur"
+          },
+          {
+            "lang": "en-US",
+            "name": "Bad News"
+          },
+          {
+            "lang": "en-US",
+            "name": "Bahh"
+          },
+          {
+            "lang": "en-US",
+            "name": "Bells"
+          },
+          {
+            "lang": "en-US",
+            "name": "Boing"
+          },
+          {
+            "lang": "en-US",
+            "name": "Bubbles"
+          },
+          {
+            "lang": "he-IL",
+            "name": "Carmit"
+          },
+          {
+            "lang": "en-AU",
+            "name": "Catherine"
+          },
+          {
+            "lang": "en-US",
+            "name": "Cellos"
+          },
+          {
+            "lang": "id-ID",
+            "name": "Damayanti"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Daniel (English (United Kingdom))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Daniel (French (France))"
+          },
+          {
+            "lang": "bg-BG",
+            "name": "Daria"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Eddy (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Eddy (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Eddy (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Eddy (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Eddy (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Eddy (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Eddy (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Eddy (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Eddy (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Eddy (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Eddy (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Eddy (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Eddy (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Eddy (Chinese (Taiwan))"
+          },
+          {
+            "lang": "nl-BE",
+            "name": "Ellen"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Flo (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Flo (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Flo (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Flo (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Flo (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Flo (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Flo (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Flo (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Flo (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Flo (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Flo (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Flo (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Flo (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Flo (Chinese (Taiwan))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Fred"
+          },
+          {
+            "lang": "en-US",
+            "name": "Good News"
+          },
+          {
+            "lang": "en-AU",
+            "name": "Gordon"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Grandma (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Grandma (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Grandma (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Grandma (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Grandma (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Grandma (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Grandma (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Grandma (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Grandma (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Grandma (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Grandma (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Grandma (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Grandma (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Grandma (Chinese (Taiwan))"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Grandpa (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Grandpa (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Grandpa (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Grandpa (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Grandpa (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Grandpa (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Grandpa (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Grandpa (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Grandpa (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Grandpa (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Grandpa (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Grandpa (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Grandpa (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Grandpa (Chinese (Taiwan))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Hattori"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Helena"
+          },
+          {
+            "lang": "ro-RO",
+            "name": "Ioana"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Jacques"
+          },
+          {
+            "lang": "en-US",
+            "name": "Jester"
+          },
+          {
+            "lang": "pt-PT",
+            "name": "Joana"
+          },
+          {
+            "lang": "en-US",
+            "name": "Junior"
+          },
+          {
+            "lang": "th-TH",
+            "name": "Kanya"
+          },
+          {
+            "lang": "en-AU",
+            "name": "Karen"
+          },
+          {
+            "lang": "en-US",
+            "name": "Kathy"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Kyoko"
+          },
+          {
+            "lang": "hr-HR",
+            "name": "Lana"
+          },
+          {
+            "lang": "sk-SK",
+            "name": "Laura"
+          },
+          {
+            "lang": "hi-IN",
+            "name": "Lekha"
+          },
+          {
+            "lang": "uk-UA",
+            "name": "Lesya"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Li-Mu"
+          },
+          {
+            "lang": "vi-VN",
+            "name": "Linh"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Luciana"
+          },
+          {
+            "lang": "ar-001",
+            "name": "Majed"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Marie"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Martha"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Martin"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Meijia"
+          },
+          {
+            "lang": "el-GR",
+            "name": "Melina"
+          },
+          {
+            "lang": "ru-RU",
+            "name": "Milena"
+          },
+          {
+            "lang": "en-IE",
+            "name": "Moira"
+          },
+          {
+            "lang": "ca-ES",
+            "name": "Montse"
+          },
+          {
+            "lang": "es-ES",
+            "name": "M\u00f3nica"
+          },
+          {
+            "lang": "en-US",
+            "name": "Nicky"
+          },
+          {
+            "lang": "nb-NO",
+            "name": "Nora"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "O-Ren"
+          },
+          {
+            "lang": "en-US",
+            "name": "Organ"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Paulina"
+          },
+          {
+            "lang": "en-US",
+            "name": "Ralph"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Reed (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Reed (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Reed (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Reed (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Reed (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Reed (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Reed (French (Canada))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Reed (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Reed (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Reed (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Reed (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Reed (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Reed (Chinese (Taiwan))"
+          },
+          {
+            "lang": "en-IN",
+            "name": "Rishi"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Rocko (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Rocko (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Rocko (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Rocko (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Rocko (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Rocko (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Rocko (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Rocko (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Rocko (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Rocko (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Rocko (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Rocko (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Rocko (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Rocko (Chinese (Taiwan))"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Sandy (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Sandy (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Sandy (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Sandy (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Sandy (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Sandy (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Sandy (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Sandy (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Sandy (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Sandy (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Sandy (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Sandy (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Sandy (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Sandy (Chinese (Taiwan))"
+          },
+          {
+            "lang": "da-DK",
+            "name": "Sara"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Satu"
+          },
+          {
+            "lang": "de-DE",
+            "name": "Shelley (German (Germany))"
+          },
+          {
+            "lang": "en-GB",
+            "name": "Shelley (English (United Kingdom))"
+          },
+          {
+            "lang": "en-US",
+            "name": "Shelley (English (United States))"
+          },
+          {
+            "lang": "es-ES",
+            "name": "Shelley (Spanish (Spain))"
+          },
+          {
+            "lang": "es-MX",
+            "name": "Shelley (Spanish (Mexico))"
+          },
+          {
+            "lang": "fi-FI",
+            "name": "Shelley (Finnish (Finland))"
+          },
+          {
+            "lang": "fr-CA",
+            "name": "Shelley (French (Canada))"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Shelley (French (France))"
+          },
+          {
+            "lang": "it-IT",
+            "name": "Shelley (Italian (Italy))"
+          },
+          {
+            "lang": "ja-JP",
+            "name": "Shelley (Japanese (Japan))"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Shelley (Korean (South Korea))"
+          },
+          {
+            "lang": "pt-BR",
+            "name": "Shelley (Portuguese (Brazil))"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Shelley (Chinese (China mainland))"
+          },
+          {
+            "lang": "zh-TW",
+            "name": "Shelley (Chinese (Taiwan))"
+          },
+          {
+            "lang": "zh-HK",
+            "name": "Sinji"
+          },
+          {
+            "lang": "en-US",
+            "name": "Superstar"
+          },
+          {
+            "lang": "en-ZA",
+            "name": "Tessa"
+          },
+          {
+            "lang": "fr-FR",
+            "name": "Thomas"
+          },
+          {
+            "lang": "sl-SI",
+            "name": "Tina"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Tingting"
+          },
+          {
+            "lang": "en-US",
+            "name": "Trinoids"
+          },
+          {
+            "lang": "hu-HU",
+            "name": "T\u00fcnde"
+          },
+          {
+            "lang": "ta-IN",
+            "name": "Vani"
+          },
+          {
+            "lang": "en-US",
+            "name": "Whisper"
+          },
+          {
+            "lang": "en-US",
+            "name": "Wobble"
+          },
+          {
+            "lang": "nl-NL",
+            "name": "Xander"
+          },
+          {
+            "lang": "tr-TR",
+            "name": "Yelda"
+          },
+          {
+            "lang": "zh-CN",
+            "name": "Yu-shu"
+          },
+          {
+            "lang": "ko-KR",
+            "name": "Yuna"
+          },
+          {
+            "lang": "en-US",
+            "name": "Zarvox"
+          },
+          {
+            "lang": "pl-PL",
+            "name": "Zosia"
+          },
+          {
+            "lang": "cs-CZ",
+            "name": "Zuzana"
+          }
+        ],
+        "nativeEnded": true,
+        "observedStatus": "\u6717\u8bfb\u5b8c\u6210",
+        "physicalSpeakerOrLoopbackCaptured": false,
+        "timedOut": false,
+        "voice": {
+          "lang": "en-US",
+          "local": true,
+          "name": "Samantha"
+        }
+      },
+      "observedStatus": "\u6717\u8bfb\u5b8c\u6210",
+      "playbackVerified": true,
+      "diagnosticOnly": true
+    },
+    "native_math_display": true,
+    "real_model_calls": 0
+  },
+  "chat_audio": {
+    "productionCards": [
+      {
+        "events": [
+          {
+            "type": "play",
+            "time": 4128.899999999907,
+            "currentTime": 0,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "playing",
+            "time": 4129,
+            "currentTime": 0,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 4391.399999999907,
+            "currentTime": 0.16471,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 4657.800000000279,
+            "currentTime": 0.430211,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 4950.300000000279,
+            "currentTime": 0.712345,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5258.5,
+            "currentTime": 1.031741,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5563.399999999907,
+            "currentTime": 1.319761,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5869,
+            "currentTime": 1.612853,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 6172.200000000186,
+            "currentTime": 1.912911,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 6483.399999999907,
+            "currentTime": 2.188838,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 6762.399999999907,
+            "currentTime": 2.447701,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7039.399999999907,
+            "currentTime": 2.671743,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7309.700000000186,
+            "currentTime": 2.942135,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7560.700000000186,
+            "currentTime": 3.185807,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7825.300000000279,
+            "currentTime": 3.44321,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 8122.800000000279,
+            "currentTime": 3.737589,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 8434.200000000186,
+            "currentTime": 4.045851,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 8739.100000000093,
+            "currentTime": 4.345662,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9046.399999999907,
+            "currentTime": 4.649729,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9352.200000000186,
+            "currentTime": 4.97365,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9632.30000000028,
+            "currentTime": 5.252499,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9912.899999999907,
+            "currentTime": 5.531837,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10176.5,
+            "currentTime": 5.795656,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10484.399999999907,
+            "currentTime": 6.100725,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10747.100000000093,
+            "currentTime": 6.345652,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11099.80000000028,
+            "currentTime": 6.691099,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11407.600000000093,
+            "currentTime": 6.988166,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11719,
+            "currentTime": 7.315717,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11994,
+            "currentTime": 7.589435,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12313.30000000028,
+            "currentTime": 7.905587,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12581.30000000028,
+            "currentTime": 8.172312,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12840.700000000186,
+            "currentTime": 8.432167,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13141.600000000093,
+            "currentTime": 8.729891,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13447,
+            "currentTime": 9.032215,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13714,
+            "currentTime": 9.297792,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13995.200000000186,
+            "currentTime": 9.577922,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 14296.30000000028,
+            "currentTime": 9.875667,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 14583.100000000093,
+            "currentTime": 10.161215,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 14847.30000000028,
+            "currentTime": 10.426091,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 15116.600000000093,
+            "currentTime": 10.693975,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 15382,
+            "currentTime": 10.958163,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 15703.399999999907,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 15708,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "pause",
+            "time": 15708.200000000186,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "ended",
+            "time": 15708.200000000186,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          }
+        ],
+        "error": null,
+        "done": true,
+        "graphPeak": 0.7745981216430664,
+        "controlClickIssued": true,
+        "source": "http://127.0.0.1:18802/files/workspace-items/ws_4821d0183c3c540e82ba3735f65e4b20/wsi_e8f3d96bdafe5dc88df06e70c7304400?dt_workspace=",
+        "initial": {
+          "readyState": 4,
+          "networkState": 1,
+          "paused": true,
+          "currentSrc": "http://127.0.0.1:18802/files/workspace-items/ws_4821d0183c3c540e82ba3735f65e4b20/wsi_e8f3d96bdafe5dc88df06e70c7304400?dt_workspace=",
+          "duration": 11.28
+        },
+        "bytes": 67680,
+        "sha256": "6c802ccc5ff9d2dcd3aef7d8919c462efa4e80f0b07e6add1b3fe378e9160acb",
+        "decoded": {
+          "duration": 11.279977324263038,
+          "sampleRate": 44100,
+          "channels": 1,
+          "peak": 0.7718572616577148,
+          "rms": 0.07150710962087622
+        },
+        "beforeClick": {
+          "readyState": 4,
+          "networkState": 1,
+          "paused": true,
+          "currentSrc": "http://127.0.0.1:18802/files/workspace-items/ws_4821d0183c3c540e82ba3735f65e4b20/wsi_e8f3d96bdafe5dc88df06e70c7304400?dt_workspace=",
+          "duration": 11.28,
+          "rect": {
+            "x": 373,
+            "y": 351,
+            "width": 494,
+            "height": 54
+          }
+        },
+        "finalTime": 11.28,
+        "duration": 11.28,
+        "productionElementObserved": true,
+        "physicalSpeakerOrLoopbackCaptured": false
+      },
+      {
+        "events": [
+          {
+            "type": "play",
+            "time": 2805.399999999907,
+            "currentTime": 0,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "playing",
+            "time": 2805.5,
+            "currentTime": 0,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 3068.2999999998137,
+            "currentTime": 0.257726,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 3327.399999999907,
+            "currentTime": 0.517313,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 3622.6999999997206,
+            "currentTime": 0.809475,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 3927,
+            "currentTime": 1.110598,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 4232.299999999814,
+            "currentTime": 1.412627,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 4539.100000000093,
+            "currentTime": 1.716174,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 4800.600000000093,
+            "currentTime": 1.978464,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5072.899999999907,
+            "currentTime": 2.249388,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5326.600000000093,
+            "currentTime": 2.503566,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5590.399999999907,
+            "currentTime": 2.766134,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 5864.199999999721,
+            "currentTime": 3.040477,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 6127.199999999721,
+            "currentTime": 3.26791,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 6408.399999999907,
+            "currentTime": 3.54775,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 6715,
+            "currentTime": 3.851116,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7018.899999999907,
+            "currentTime": 4.151918,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7294.299999999814,
+            "currentTime": 4.447145,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7628.799999999814,
+            "currentTime": 4.774707,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 7933.899999999907,
+            "currentTime": 5.076778,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 8216.5,
+            "currentTime": 5.357984,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 8547.899999999907,
+            "currentTime": 5.684379,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 8853.299999999814,
+            "currentTime": 5.98669,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9157.600000000093,
+            "currentTime": 6.308978,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9463.19999999972,
+            "currentTime": 6.609512,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 9770.100000000093,
+            "currentTime": 6.913166,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10040,
+            "currentTime": 7.18367,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10330.100000000093,
+            "currentTime": 7.470493,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10592.899999999907,
+            "currentTime": 7.733999,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 10861.399999999907,
+            "currentTime": 8.001186,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11198.19999999972,
+            "currentTime": 8.332852,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11480.19999999972,
+            "currentTime": 8.632965,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 11812.5,
+            "currentTime": 8.960324,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12101,
+            "currentTime": 9.247492,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12358.69999999972,
+            "currentTime": 9.505666,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12630.19999999972,
+            "currentTime": 9.775929,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 12904,
+            "currentTime": 10.048373,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13182.899999999907,
+            "currentTime": 10.32602,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13449.600000000093,
+            "currentTime": 10.59334,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 13752.899999999907,
+            "currentTime": 10.893382,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 14016.399999999907,
+            "currentTime": 11.155539,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "timeupdate",
+            "time": 14150.5,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "pause",
+            "time": 14150.600000000093,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          },
+          {
+            "type": "ended",
+            "time": 14150.69999999972,
+            "currentTime": 11.28,
+            "readyState": 4,
+            "networkState": 1
+          }
+        ],
+        "error": null,
+        "done": true,
+        "graphPeak": 0.7745981216430664,
+        "controlClickIssued": true,
+        "source": "http://127.0.0.1:18802/files/workspace-items/ws_4821d0183c3c540e82ba3735f65e4b20/wsi_e8f3d96bdafe5dc88df06e70c7304400?dt_workspace=",
+        "initial": {
+          "readyState": 4,
+          "networkState": 1,
+          "paused": true,
+          "currentSrc": "http://127.0.0.1:18802/files/workspace-items/ws_4821d0183c3c540e82ba3735f65e4b20/wsi_e8f3d96bdafe5dc88df06e70c7304400?dt_workspace=",
+          "duration": 11.28
+        },
+        "bytes": 67680,
+        "sha256": "6c802ccc5ff9d2dcd3aef7d8919c462efa4e80f0b07e6add1b3fe378e9160acb",
+        "decoded": {
+          "duration": 11.279977324263038,
+          "sampleRate": 44100,
+          "channels": 1,
+          "peak": 0.7718572616577148,
+          "rms": 0.07150710962087622
+        },
+        "beforeClick": {
+          "readyState": 4,
+          "networkState": 1,
+          "paused": true,
+          "currentSrc": "http://127.0.0.1:18802/files/workspace-items/ws_4821d0183c3c540e82ba3735f65e4b20/wsi_e8f3d96bdafe5dc88df06e70c7304400?dt_workspace=",
+          "duration": 11.28,
+          "rect": {
+            "x": 373,
+            "y": 351,
+            "width": 494,
+            "height": 54
+          }
+        },
+        "finalTime": 11.28,
+        "duration": 11.28,
+        "productionElementObserved": true,
+        "physicalSpeakerOrLoopbackCaptured": false
+      }
+    ],
+    "selection": {
+      "stopped": {
+        "events": [
+          {
+            "type": "playing",
+            "time": 14746.19999999972,
+            "currentTime": 0
+          },
+          {
+            "type": "timeupdate",
+            "time": 14856.600000000093,
+            "currentTime": 0.080856
+          },
+          {
+            "type": "pause",
+            "time": 14856.69999999972,
+            "currentTime": 0.080856
+          }
+        ],
+        "error": null,
+        "graphPeak": 0,
+        "done": true,
+        "decoded": {
+          "duration": 9.023990929705215,
+          "peak": 0.7572171688079834,
+          "rms": 0.07180165647193645
+        },
+        "finalTime": 0.080856,
+        "duration": 9.024
+      },
+      "completed": {
+        "events": [
+          {
+            "type": "playing",
+            "time": 15236.299999999814,
+            "currentTime": 0
+          },
+          {
+            "type": "timeupdate",
+            "time": 15508.19999999972,
+            "currentTime": 0.260122
+          },
+          {
+            "type": "timeupdate",
+            "time": 15786.399999999907,
+            "currentTime": 0.53708
+          },
+          {
+            "type": "timeupdate",
+            "time": 16091.799999999814,
+            "currentTime": 0.839294
+          },
+          {
+            "type": "timeupdate",
+            "time": 16359.399999999907,
+            "currentTime": 1.105467
+          },
+          {
+            "type": "timeupdate",
+            "time": 16680,
+            "currentTime": 1.422973
+          },
+          {
+            "type": "timeupdate",
+            "time": 16949.299999999814,
+            "currentTime": 1.690879
+          },
+          {
+            "type": "timeupdate",
+            "time": 17219.69999999972,
+            "currentTime": 1.959995
+          },
+          {
+            "type": "timeupdate",
+            "time": 17518.100000000093,
+            "currentTime": 2.255172
+          },
+          {
+            "type": "timeupdate",
+            "time": 17822.299999999814,
+            "currentTime": 2.556269
+          },
+          {
+            "type": "timeupdate",
+            "time": 18083.5,
+            "currentTime": 2.817977
+          },
+          {
+            "type": "timeupdate",
+            "time": 18383,
+            "currentTime": 3.135613
+          },
+          {
+            "type": "timeupdate",
+            "time": 18640.100000000093,
+            "currentTime": 3.37372
+          },
+          {
+            "type": "timeupdate",
+            "time": 18946.19999999972,
+            "currentTime": 3.686973
+          },
+          {
+            "type": "timeupdate",
+            "time": 19203.600000000093,
+            "currentTime": 3.944913
+          },
+          {
+            "type": "timeupdate",
+            "time": 19464.899999999907,
+            "currentTime": 4.206797
+          },
+          {
+            "type": "timeupdate",
+            "time": 19763.100000000093,
+            "currentTime": 4.501706
+          },
+          {
+            "type": "timeupdate",
+            "time": 20069.399999999907,
+            "currentTime": 4.804923
+          },
+          {
+            "type": "timeupdate",
+            "time": 20324.5,
+            "currentTime": 5.060511
+          },
+          {
+            "type": "timeupdate",
+            "time": 20616.5,
+            "currentTime": 5.349402
+          },
+          {
+            "type": "timeupdate",
+            "time": 20882,
+            "currentTime": 5.615486
+          },
+          {
+            "type": "timeupdate",
+            "time": 21185.299999999814,
+            "currentTime": 5.915564
+          },
+          {
+            "type": "timeupdate",
+            "time": 21449.399999999907,
+            "currentTime": 6.180274
+          },
+          {
+            "type": "timeupdate",
+            "time": 21799.5,
+            "currentTime": 6.542792
+          },
+          {
+            "type": "timeupdate",
+            "time": 22071.600000000093,
+            "currentTime": 6.815367
+          },
+          {
+            "type": "timeupdate",
+            "time": 22324.299999999814,
+            "currentTime": 7.068751
+          },
+          {
+            "type": "timeupdate",
+            "time": 22616.899999999907,
+            "currentTime": 7.358169
+          },
+          {
+            "type": "timeupdate",
+            "time": 22871.69999999972,
+            "currentTime": 7.61361
+          },
+          {
+            "type": "timeupdate",
+            "time": 23218.100000000093,
+            "currentTime": 7.953039
+          },
+          {
+            "type": "timeupdate",
+            "time": 23535.799999999814,
+            "currentTime": 8.26754
+          },
+          {
+            "type": "timeupdate",
+            "time": 23840.19999999972,
+            "currentTime": 8.568756
+          },
+          {
+            "type": "timeupdate",
+            "time": 24138.899999999907,
+            "currentTime": 8.864322
+          },
+          {
+            "type": "timeupdate",
+            "time": 24306.899999999907,
+            "currentTime": 9.024
+          },
+          {
+            "type": "pause",
+            "time": 24306.899999999907,
+            "currentTime": 9.024
+          },
+          {
+            "type": "ended",
+            "time": 24308.19999999972,
+            "currentTime": 9.024
+          }
+        ],
+        "error": null,
+        "graphPeak": 0.791824221611023,
+        "done": true,
+        "decoded": {
+          "duration": 9.023990929705215,
+          "peak": 0.7866445779800415,
+          "rms": 0.07186776047713253
+        },
+        "finalTime": 9.024,
+        "duration": 9.024
+      },
+      "chatRequests": 0,
+      "errorShown": true,
+      "errorInjectedOnly": true
+    },
+    "passed": true,
+    "physicalSpeakerOrLoopbackCaptured": false
+  },
+  "science_formulas": {
+    "passed": true,
+    "interface": "Electron WebContents",
+    "viewportMode": "CDP Emulation.setDeviceMetricsOverride",
+    "native_platform": "darwin",
+    "native_arch": "x64",
+    "views": [
+      {
+        "surface": "chat",
+        "target": {
+          "width": 390,
+          "height": 844
+        },
+        "actual": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "chat",
+        "target": {
+          "width": 844,
+          "height": 390
+        },
+        "actual": {
+          "width": 844,
+          "height": 390
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "chat",
+        "target": {
+          "width": 1366,
+          "height": 900
+        },
+        "actual": {
+          "width": 1366,
+          "height": 900
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "chat",
+        "target": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actual": {
+          "width": 1920,
+          "height": 1080
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "notes",
+        "target": {
+          "width": 390,
+          "height": 844
+        },
+        "actual": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "notes",
+        "target": {
+          "width": 844,
+          "height": 390
+        },
+        "actual": {
+          "width": 844,
+          "height": 390
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "notes",
+        "target": {
+          "width": 1366,
+          "height": 900
+        },
+        "actual": {
+          "width": 1366,
+          "height": 900
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "notes",
+        "target": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actual": {
+          "width": 1920,
+          "height": 1080
+        },
+        "horizontalOverflow": false,
+        "formulas": 12,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "mistakes-chemistry",
+        "target": {
+          "width": 390,
+          "height": 844
+        },
+        "actual": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "formulas": 15,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2193",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "mistakes-chemistry",
+        "target": {
+          "width": 844,
+          "height": 390
+        },
+        "actual": {
+          "width": 844,
+          "height": 390
+        },
+        "horizontalOverflow": false,
+        "formulas": 15,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2193",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "mistakes-chemistry",
+        "target": {
+          "width": 1366,
+          "height": 900
+        },
+        "actual": {
+          "width": 1366,
+          "height": 900
+        },
+        "horizontalOverflow": false,
+        "formulas": 15,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2193",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "mistakes-chemistry",
+        "target": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actual": {
+          "width": 1920,
+          "height": 1080
+        },
+        "horizontalOverflow": false,
+        "formulas": 15,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2193",
+          "\u2192",
+          "\u2192",
+          "\u2193",
+          "\u21cc",
+          "\u2192",
+          "\u2191",
+          "\u2192",
+          "\u2192",
+          "\u2193"
+        ],
+        "chargeSuperscript": true
+      },
+      {
+        "surface": "mistakes-physics",
+        "target": {
+          "width": 390,
+          "height": 844
+        },
+        "actual": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "formulas": 13,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [],
+        "chargeSuperscript": false
+      },
+      {
+        "surface": "mistakes-physics",
+        "target": {
+          "width": 844,
+          "height": 390
+        },
+        "actual": {
+          "width": 844,
+          "height": 390
+        },
+        "horizontalOverflow": false,
+        "formulas": 13,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [],
+        "chargeSuperscript": false
+      },
+      {
+        "surface": "mistakes-physics",
+        "target": {
+          "width": 1366,
+          "height": 900
+        },
+        "actual": {
+          "width": 1366,
+          "height": 900
+        },
+        "horizontalOverflow": false,
+        "formulas": 13,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [],
+        "chargeSuperscript": false
+      },
+      {
+        "surface": "mistakes-physics",
+        "target": {
+          "width": 1920,
+          "height": 1080
+        },
+        "actual": {
+          "width": 1920,
+          "height": 1080
+        },
+        "horizontalOverflow": false,
+        "formulas": 13,
+        "errors": 0,
+        "rawCommands": false,
+        "chemistryArrows": [],
+        "chargeSuperscript": false
+      }
+    ],
+    "originalEdits": [
+      {
+        "surface": "notes",
+        "formula": "\\vec{F}=m\\vec{a}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "v=9.8\\,\\mathrm{m}\\,\\mathrm{s}^{-1}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "a=\\frac{\\mathrm{d}v}{\\mathrm{d}t},\\quad v=\\frac{\\partial x}{\\partial t}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "R=10\\,\\mathrm{k}\\Omega,\\quad I=2\\,\\mu\\mathrm{A}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\ce{Fe^{3+} + 3 OH- -> Fe(OH)3 v}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\ce{N2 + 3H2 <=> 2NH3}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\ce{CaCO3 ->[\\Delta] CaO + CO2 ^}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\ce{^{14}_{6}C}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\ce{2H2 + O2 ->[\\text{\u70b9\u71c3}] 2H2O}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\ce{6CO2 + 6H2O ->[\\text{\u5149\u7167}] C6H12O6 + 6O2}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\text{\u6bd4\u4f8b\u5c3a}=\\frac{\\text{\u56fe\u4e0a\u8ddd\u79bb}}{\\text{\u5b9e\u9645\u8ddd\u79bb}}",
+        "unchanged": true
+      },
+      {
+        "surface": "notes",
+        "formula": "\\pu{1.2e3 J mol-1}",
+        "unchanged": true
+      },
+      {
+        "surface": "saved-notes",
+        "formula": "\\vec{F}=m\\vec{a}",
+        "unchanged": true
+      },
+      {
+        "surface": "saved-notes",
+        "formula": "\\ce{Fe^{3+} + 3 OH- -> Fe(OH)3 v}",
+        "unchanged": true
+      },
+      {
+        "surface": "saved-notes",
+        "formula": "\\ce{N2 + 3H2 <=> 2NH3}",
+        "unchanged": true
+      },
+      {
+        "surface": "saved-notes",
+        "formula": "\\pu{1.2e3 J mol-1}",
+        "unchanged": true
+      },
+      {
+        "surface": "mistakes-chemistry",
+        "formulas": [
+          "\\ce{Fe^{3+} + 3 OH- -> Fe(OH)3 v}",
+          "\\ce{N2 + 3H2 <=> 2NH3}",
+          "\\ce{CaCO3 ->[\\Delta] CaO + CO2 ^}",
+          "\\ce{^{14}_{6}C}",
+          "\\ce{2H2 + O2 ->[\\text{\u70b9\u71c3}] 2H2O}"
+        ],
+        "unchanged": true
+      },
+      {
+        "surface": "mistakes-physics",
+        "formulas": [
+          "\\vec{F}=m\\vec{a}",
+          "v=9.8\\,\\mathrm{m}\\,\\mathrm{s}^{-1}",
+          "a=\\frac{\\mathrm{d}v}{\\mathrm{d}t},\\quad v=\\frac{\\partial x}{\\partial t}",
+          "R=10\\,\\mathrm{k}\\Omega,\\quad I=2\\,\\mu\\mathrm{A}"
+        ],
+        "unchanged": true
+      }
+    ],
+    "cases": [
+      [
+        "physics-vector",
+        "\\vec{F}=m\\vec{a}"
+      ],
+      [
+        "physics-units",
+        "v=9.8\\,\\mathrm{m}\\,\\mathrm{s}^{-1}"
+      ],
+      [
+        "physics-derivative",
+        "a=\\frac{\\mathrm{d}v}{\\mathrm{d}t},\\quad v=\\frac{\\partial x}{\\partial t}"
+      ],
+      [
+        "physics-electricity",
+        "R=10\\,\\mathrm{k}\\Omega,\\quad I=2\\,\\mu\\mathrm{A}"
+      ],
+      [
+        "chemistry-charge",
+        "\\ce{Fe^{3+} + 3 OH- -> Fe(OH)3 v}"
+      ],
+      [
+        "chemistry-reversible",
+        "\\ce{N2 + 3H2 <=> 2NH3}"
+      ],
+      [
+        "chemistry-conditions",
+        "\\ce{CaCO3 ->[\\Delta] CaO + CO2 ^}"
+      ],
+      [
+        "chemistry-isotope",
+        "\\ce{^{14}_{6}C}"
+      ],
+      [
+        "chemistry-chinese-conditions",
+        "\\ce{2H2 + O2 ->[\\text{\u70b9\u71c3}] 2H2O}"
+      ],
+      [
+        "biology-photosynthesis",
+        "\\ce{6CO2 + 6H2O ->[\\text{\u5149\u7167}] C6H12O6 + 6O2}"
+      ],
+      [
+        "geography-ratio",
+        "\\text{\u6bd4\u4f8b\u5c3a}=\\frac{\\text{\u56fe\u4e0a\u8ddd\u79bb}}{\\text{\u5b9e\u9645\u8ddd\u79bb}}"
+      ],
+      [
+        "science-physical-units",
+        "\\pu{1.2e3 J mol-1}"
+      ]
+    ],
+    "paidModelCalls": 0,
+    "originalStudentData": false,
+    "cleanup": {
+      "deviceMetricsCleared": true,
+      "debuggerDetached": true,
+      "originalViewport": {
+        "width": 1360,
+        "height": 876
+      },
+      "restoredViewport": {
+        "width": 1360,
+        "height": 876
+      }
+    }
+  },
+  "quick_preview": {
+    "passed": true,
+    "actualNativeRenderer": true,
+    "views": [
+      {
+        "width": 390,
+        "height": 844,
+        "visible": true,
+        "previewCorrect": true,
+        "jumpToOriginal": true,
+        "jumpMilliseconds": 1265,
+        "cardWithinViewport": true,
+        "cardWithinMessagePane": true
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "visible": true,
+        "previewCorrect": true,
+        "jumpToOriginal": true,
+        "jumpMilliseconds": 1040,
+        "cardWithinViewport": true,
+        "cardWithinMessagePane": true
+      },
+      {
+        "width": 1366,
+        "height": 900,
+        "visible": true,
+        "previewCorrect": true,
+        "jumpToOriginal": true,
+        "jumpMilliseconds": 732,
+        "cardWithinViewport": true,
+        "cardWithinMessagePane": true
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "visible": true,
+        "previewCorrect": true,
+        "jumpToOriginal": true,
+        "jumpMilliseconds": 719,
+        "cardWithinViewport": true,
+        "cardWithinMessagePane": true
+      }
+    ],
+    "conversationSwitchCleared": true,
+    "paidModelCalls": 0,
+    "realStudentData": false
+  },
+  "k12_library": {
+    "schema_version": 2,
+    "passed": true,
+    "actualNativeRenderer": true,
+    "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+    "views": [
+      {
+        "width": 390,
+        "height": 844,
+        "twoLibraryEntries": true,
+        "separateUploads": true,
+        "sourceCardOpened": true,
+        "restoredCitationBlue": true,
+        "exactQuestionAndRevision": true,
+        "allOriginalImagesLoaded": true,
+        "originalBodyStartEnd": true,
+        "dialogWithinViewport": true,
+        "closeReturned": true,
+        "historySource": {
+          "renderer": "original-html",
+          "qualified_id": "chinese:q_0121da9f0838144a54b3e661_b00164",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "allOriginalImagesLoaded": true,
+          "originalBodyStartEnd": true
+        },
+        "preparedPicture": {
+          "qualified_id": "chinese:src_996804266ab436617a8db7b1_b00048_01cefb0c53",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "75d61e2b2692e50cf796b1805daf668c76f087e0a2ef6205fb7777a3ac5a5a61",
+          "width": 1920,
+          "height": 1038,
+          "body_dom_before_image_response": true,
+          "held_response_ms": 1568,
+          "async_decode": true,
+          "native_http_image_sha_verified": true,
+          "source_caption_blue": true,
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "body_probe": {
+            "bodyRendered": true,
+            "imageRequested": true,
+            "imageComplete": false,
+            "naturalWidth": 0,
+            "decoding": "async",
+            "captionColor": "rgb(3, 105, 161)",
+            "overflow": false
+          }
+        },
+        "nativePages": {
+          "renderer": "native-pages",
+          "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+          "bytes": 161962,
+          "page_count": 3,
+          "start_page": 1,
+          "end_page": 1,
+          "body_dom_before_pdf_response": true,
+          "held_response_ms": 1006,
+          "held_requests": [
+            {
+              "id": "56467.6234",
+              "fetch_id": "interception-job-463.0",
+              "continued": true
+            }
+          ],
+          "canvas_pixels_verified": true,
+          "page_range_verified": true,
+          "selected_page_verified": true,
+          "native_http_pdf_sha_verified": true,
+          "private_headers_verified": true,
+          "response_capture": "Fetch.getResponseBody",
+          "original_request_id": "56467.6234",
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "second_history_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 270,
+              "height": 381
+            },
+            "renderer": "native-pages"
+          },
+          "second_history_http": {
+            "native_http_pdf_sha_verified": true,
+            "private_headers_verified": true,
+            "response_capture": "Fetch.getResponseBody",
+            "original_request_id": "56467.6514"
+          },
+          "second_history_card": {
+            "found": true,
+            "layoutPending": false,
+            "rect": {
+              "left": 35,
+              "top": 123,
+              "right": 355,
+              "bottom": 747.796875,
+              "width": 320,
+              "height": 624.796875
+            },
+            "point": {
+              "x": 195,
+              "y": 381
+            },
+            "clippedRect": {
+              "left": 35,
+              "top": 123,
+              "right": 355,
+              "bottom": 640
+            },
+            "clip": {
+              "left": 11,
+              "top": 88,
+              "right": 379,
+              "bottom": 640
+            },
+            "candidates": [
+              {
+                "index": 0,
+                "text": "\u4e0a\u4e00\u9875\n/ 1\n\u4e0b\u4e00\u9875\n\u7f29\u5c0f\n100%\n\u653e\u5927\n\u9002\u5e94\u7a97\u53e3\n1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684\u6709\n\n\nA\n\uff0e\n1\n \n\u4e2a\n \nB\n\uff0e\n2\n \n\u4e2a\n\n\nC\n\uff0e\n3\n \n\u4e2a\n \nD\n\uff0e\n4\n \n\u4e2a\n\n\n3\n\uff0e\uff08-\n \n\uff09\n2\n\n\n\u7684\u503c\u4e3a\n\n\nA\n\uff0e\na\n \nB\n\uff0e-\na\n\n\nC\n\uff0e\n \nD\n\uff0e-\n\n\n4\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\uff0c\u4e00\u5b9a\u80fd\u6210\u7acb\u7684\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \n=\nx\n-\n1\n \nD\n\uff0e\n\n\n5\n\uff0e\u5df2\u77e5\n \n\uff0c\u5219\n \n\u7684\u503c\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \nD\n\uff0e\n\n\n6\n\uff0e\u5df2\u77e5\n \nb\n>0\n\uff0c\u5316\u7b80\n \n=__________\n\uff0e\n\n\n7\n\uff0e\u4e8c\u6b21\u6839\u5f0f\n \n\u7684\u503c\u662f\n__________\n\uff0e\n\u5b8c\u6574\u9898\u76ee \u00b7 Word \u539f\u751f\u5b66\u751f\u9875 \u00b7 \u70b9\u51fb\u67e5\u770b\u6765\u6e90",
+                "rect": {
+                  "left": 35,
+                  "top": 123,
+                  "right": 355,
+                  "bottom": 747.796875,
+                  "width": 320,
+                  "height": 624.796875
+                },
+                "display": "block",
+                "visibility": "visible"
+              }
+            ],
+            "selectedIndex": 0,
+            "color": "rgb(55, 53, 47)",
+            "clickable": true,
+            "hit": {
+              "tag": "DIV",
+              "text": "1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684"
+            },
+            "root": {
+              "rect": {
+                "left": 0,
+                "top": 88,
+                "right": 390,
+                "bottom": 640,
+                "width": 390,
+                "height": 552
+              },
+              "scrollTop": 252,
+              "scrollHeight": 1037,
+              "clientHeight": 552,
+              "className": "w-full flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges] pt-6"
+            }
+          },
+          "inline_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 270,
+              "height": 381
+            },
+            "renderer": "native-pages"
+          },
+          "modal_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1,
+              2,
+              3
+            ],
+            "expected": [
+              1,
+              2,
+              3
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 3
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 246,
+              "height": 347
+            },
+            "renderer": "native-pages"
+          },
+          "body_probe": {
+            "ready": false,
+            "identity": true,
+            "pages": [],
+            "expected": [
+              1
+            ],
+            "locator": null,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": false,
+            "ink": 0,
+            "canvas": null,
+            "renderer": "native-pages"
+          }
+        }
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "twoLibraryEntries": true,
+        "separateUploads": true,
+        "sourceCardOpened": true,
+        "restoredCitationBlue": true,
+        "exactQuestionAndRevision": true,
+        "allOriginalImagesLoaded": true,
+        "originalBodyStartEnd": true,
+        "dialogWithinViewport": true,
+        "closeReturned": true,
+        "historySource": {
+          "renderer": "original-html",
+          "qualified_id": "chinese:q_0121da9f0838144a54b3e661_b00164",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "allOriginalImagesLoaded": true,
+          "originalBodyStartEnd": true
+        },
+        "preparedPicture": {
+          "qualified_id": "chinese:src_996804266ab436617a8db7b1_b00048_01cefb0c53",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "75d61e2b2692e50cf796b1805daf668c76f087e0a2ef6205fb7777a3ac5a5a61",
+          "width": 1920,
+          "height": 1038,
+          "body_dom_before_image_response": true,
+          "held_response_ms": 1567,
+          "async_decode": true,
+          "native_http_image_sha_verified": true,
+          "source_caption_blue": true,
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "body_probe": {
+            "bodyRendered": true,
+            "imageRequested": true,
+            "imageComplete": false,
+            "naturalWidth": 0,
+            "decoding": "async",
+            "captionColor": "rgb(3, 105, 161)",
+            "overflow": false
+          }
+        },
+        "nativePages": {
+          "renderer": "native-pages",
+          "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+          "bytes": 161962,
+          "page_count": 3,
+          "start_page": 1,
+          "end_page": 1,
+          "body_dom_before_pdf_response": true,
+          "held_response_ms": 59830,
+          "held_requests": [
+            {
+              "id": "56467.7835",
+              "fetch_id": "interception-job-879.0",
+              "continued": true
+            }
+          ],
+          "canvas_pixels_verified": true,
+          "page_range_verified": true,
+          "selected_page_verified": true,
+          "native_http_pdf_sha_verified": true,
+          "private_headers_verified": true,
+          "response_capture": "Fetch.getResponseBody",
+          "original_request_id": "56467.7835",
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "second_history_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 441,
+              "height": 623
+            },
+            "renderer": "native-pages"
+          },
+          "second_history_http": {
+            "native_http_pdf_sha_verified": true,
+            "private_headers_verified": true,
+            "response_capture": "Fetch.getResponseBody",
+            "original_request_id": "56467.8115"
+          },
+          "second_history_card": {
+            "found": true,
+            "layoutPending": false,
+            "rect": {
+              "left": 307,
+              "top": -32.5,
+              "right": 809,
+              "bottom": 274.5,
+              "width": 502,
+              "height": 307
+            },
+            "point": {
+              "x": 558,
+              "y": 121
+            },
+            "clippedRect": {
+              "left": 307,
+              "top": 52,
+              "right": 809,
+              "bottom": 190
+            },
+            "clip": {
+              "left": 283,
+              "top": 52,
+              "right": 833,
+              "bottom": 190
+            },
+            "candidates": [
+              {
+                "index": 0,
+                "text": "\u4e0a\u4e00\u9875\n/ 1\n\u4e0b\u4e00\u9875\n\u7f29\u5c0f\n100%\n\u653e\u5927\n\u9002\u5e94\u7a97\u53e3\n1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684\u6709\n\n\nA\n\uff0e\n1\n \n\u4e2a\n \nB\n\uff0e\n2\n \n\u4e2a\n\n\nC\n\uff0e\n3\n \n\u4e2a\n \nD\n\uff0e\n4\n \n\u4e2a\n\n\n3\n\uff0e\uff08-\n \n\uff09\n2\n\n\n\u7684\u503c\u4e3a\n\n\nA\n\uff0e\na\n \nB\n\uff0e-\na\n\n\nC\n\uff0e\n \nD\n\uff0e-\n\n\n4\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\uff0c\u4e00\u5b9a\u80fd\u6210\u7acb\u7684\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \n=\nx\n-\n1\n \nD\n\uff0e\n\n\n5\n\uff0e\u5df2\u77e5\n \n\uff0c\u5219\n \n\u7684\u503c\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \nD\n\uff0e\n\n\n6\n\uff0e\u5df2\u77e5\n \nb\n>0\n\uff0c\u5316\u7b80\n \n=__________\n\uff0e\n\n\n7\n\uff0e\u4e8c\u6b21\u6839\u5f0f\n \n\u7684\u503c\u662f\n__________\n\uff0e\n\u5b8c\u6574\u9898\u76ee \u00b7 Word \u539f\u751f\u5b66\u751f\u9875 \u00b7 \u70b9\u51fb\u67e5\u770b\u6765\u6e90",
+                "rect": {
+                  "left": 307,
+                  "top": -32.5,
+                  "right": 809,
+                  "bottom": 274.5,
+                  "width": 502,
+                  "height": 307
+                },
+                "display": "block",
+                "visibility": "visible"
+              }
+            ],
+            "selectedIndex": 0,
+            "color": "rgb(55, 53, 47)",
+            "clickable": true,
+            "hit": {
+              "tag": "SPAN",
+              "text": "x"
+            },
+            "root": {
+              "rect": {
+                "left": 272,
+                "top": 52,
+                "right": 844,
+                "bottom": 190,
+                "width": 572,
+                "height": 138
+              },
+              "scrollTop": 319,
+              "scrollHeight": 667,
+              "clientHeight": 138,
+              "className": "w-full flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges] pt-6"
+            }
+          },
+          "inline_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 441,
+              "height": 623
+            },
+            "renderer": "native-pages"
+          },
+          "modal_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1,
+              2,
+              3
+            ],
+            "expected": [
+              1,
+              2,
+              3
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 3
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 700,
+              "height": 989
+            },
+            "renderer": "native-pages"
+          },
+          "body_probe": {
+            "ready": false,
+            "identity": true,
+            "pages": [],
+            "expected": [
+              1
+            ],
+            "locator": null,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": false,
+            "ink": 0,
+            "canvas": null,
+            "renderer": "native-pages"
+          }
+        }
+      },
+      {
+        "width": 1366,
+        "height": 900,
+        "twoLibraryEntries": true,
+        "separateUploads": true,
+        "sourceCardOpened": true,
+        "restoredCitationBlue": true,
+        "exactQuestionAndRevision": true,
+        "allOriginalImagesLoaded": true,
+        "originalBodyStartEnd": true,
+        "dialogWithinViewport": true,
+        "closeReturned": true,
+        "historySource": {
+          "renderer": "original-html",
+          "qualified_id": "chinese:q_0121da9f0838144a54b3e661_b00164",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "allOriginalImagesLoaded": true,
+          "originalBodyStartEnd": true
+        },
+        "preparedPicture": {
+          "qualified_id": "chinese:src_996804266ab436617a8db7b1_b00048_01cefb0c53",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "75d61e2b2692e50cf796b1805daf668c76f087e0a2ef6205fb7777a3ac5a5a61",
+          "width": 1920,
+          "height": 1038,
+          "body_dom_before_image_response": true,
+          "held_response_ms": 1661,
+          "async_decode": true,
+          "native_http_image_sha_verified": true,
+          "source_caption_blue": true,
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "body_probe": {
+            "bodyRendered": true,
+            "imageRequested": true,
+            "imageComplete": false,
+            "naturalWidth": 0,
+            "decoding": "async",
+            "captionColor": "rgb(3, 105, 161)",
+            "overflow": false
+          }
+        },
+        "nativePages": {
+          "renderer": "native-pages",
+          "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+          "bytes": 161962,
+          "page_count": 3,
+          "start_page": 1,
+          "end_page": 1,
+          "body_dom_before_pdf_response": true,
+          "held_response_ms": 60052,
+          "held_requests": [
+            {
+              "id": "56467.9429",
+              "fetch_id": "interception-job-1291.0",
+              "continued": true
+            }
+          ],
+          "canvas_pixels_verified": true,
+          "page_range_verified": true,
+          "selected_page_verified": true,
+          "native_http_pdf_sha_verified": true,
+          "private_headers_verified": true,
+          "response_capture": "Fetch.getResponseBody",
+          "original_request_id": "56467.9429",
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "second_history_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 851,
+              "height": 1203
+            },
+            "renderer": "native-pages"
+          },
+          "second_history_http": {
+            "native_http_pdf_sha_verified": true,
+            "private_headers_verified": true,
+            "response_capture": "Fetch.getResponseBody",
+            "original_request_id": "56467.9707"
+          },
+          "second_history_card": {
+            "found": true,
+            "layoutPending": false,
+            "rect": {
+              "left": 363,
+              "top": 41.5,
+              "right": 1275,
+              "bottom": 705.5,
+              "width": 912,
+              "height": 664
+            },
+            "point": {
+              "x": 819,
+              "y": 374
+            },
+            "clippedRect": {
+              "left": 363,
+              "top": 52,
+              "right": 1275,
+              "bottom": 696
+            },
+            "clip": {
+              "left": 283,
+              "top": 52,
+              "right": 1355,
+              "bottom": 696
+            },
+            "candidates": [
+              {
+                "index": 0,
+                "text": "\u4e0a\u4e00\u9875\n/ 1\n\u4e0b\u4e00\u9875\n\u7f29\u5c0f\n100%\n\u653e\u5927\n\u9002\u5e94\u7a97\u53e3\n1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684\u6709\n\n\nA\n\uff0e\n1\n \n\u4e2a\n \nB\n\uff0e\n2\n \n\u4e2a\n\n\nC\n\uff0e\n3\n \n\u4e2a\n \nD\n\uff0e\n4\n \n\u4e2a\n\n\n3\n\uff0e\uff08-\n \n\uff09\n2\n\n\n\u7684\u503c\u4e3a\n\n\nA\n\uff0e\na\n \nB\n\uff0e-\na\n\n\nC\n\uff0e\n \nD\n\uff0e-\n\n\n4\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\uff0c\u4e00\u5b9a\u80fd\u6210\u7acb\u7684\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \n=\nx\n-\n1\n \nD\n\uff0e\n\n\n5\n\uff0e\u5df2\u77e5\n \n\uff0c\u5219\n \n\u7684\u503c\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \nD\n\uff0e\n\n\n6\n\uff0e\u5df2\u77e5\n \nb\n>0\n\uff0c\u5316\u7b80\n \n=__________\n\uff0e\n\n\n7\n\uff0e\u4e8c\u6b21\u6839\u5f0f\n \n\u7684\u503c\u662f\n__________\n\uff0e\n\u5b8c\u6574\u9898\u76ee \u00b7 Word \u539f\u751f\u5b66\u751f\u9875 \u00b7 \u70b9\u51fb\u67e5\u770b\u6765\u6e90",
+                "rect": {
+                  "left": 363,
+                  "top": 41.5,
+                  "right": 1275,
+                  "bottom": 705.5,
+                  "width": 912,
+                  "height": 664
+                },
+                "display": "block",
+                "visibility": "visible"
+              }
+            ],
+            "selectedIndex": 0,
+            "color": "rgb(55, 53, 47)",
+            "clickable": true,
+            "hit": {
+              "tag": "DIV",
+              "text": "1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684"
+            },
+            "root": {
+              "rect": {
+                "left": 272,
+                "top": 52,
+                "right": 1366,
+                "bottom": 696,
+                "width": 1094,
+                "height": 644
+              },
+              "scrollTop": 245,
+              "scrollHeight": 1024,
+              "clientHeight": 644,
+              "className": "w-full flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges] pt-6"
+            }
+          },
+          "inline_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 851,
+              "height": 1203
+            },
+            "renderer": "native-pages"
+          },
+          "modal_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1,
+              2,
+              3
+            ],
+            "expected": [
+              1,
+              2,
+              3
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 3
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 795,
+              "height": 1124
+            },
+            "renderer": "native-pages"
+          },
+          "body_probe": {
+            "ready": false,
+            "identity": true,
+            "pages": [],
+            "expected": [
+              1
+            ],
+            "locator": null,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": false,
+            "ink": 0,
+            "canvas": null,
+            "renderer": "native-pages"
+          }
+        }
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "twoLibraryEntries": true,
+        "separateUploads": true,
+        "sourceCardOpened": true,
+        "restoredCitationBlue": true,
+        "exactQuestionAndRevision": true,
+        "allOriginalImagesLoaded": true,
+        "originalBodyStartEnd": true,
+        "dialogWithinViewport": true,
+        "closeReturned": true,
+        "historySource": {
+          "renderer": "original-html",
+          "qualified_id": "chinese:q_0121da9f0838144a54b3e661_b00164",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "allOriginalImagesLoaded": true,
+          "originalBodyStartEnd": true
+        },
+        "preparedPicture": {
+          "qualified_id": "chinese:src_996804266ab436617a8db7b1_b00048_01cefb0c53",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "75d61e2b2692e50cf796b1805daf668c76f087e0a2ef6205fb7777a3ac5a5a61",
+          "width": 1920,
+          "height": 1038,
+          "body_dom_before_image_response": true,
+          "held_response_ms": 2323,
+          "async_decode": true,
+          "native_http_image_sha_verified": true,
+          "source_caption_blue": true,
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "body_probe": {
+            "bodyRendered": true,
+            "imageRequested": true,
+            "imageComplete": false,
+            "naturalWidth": 0,
+            "decoding": "async",
+            "captionColor": "rgb(3, 105, 161)",
+            "overflow": false
+          }
+        },
+        "nativePages": {
+          "renderer": "native-pages",
+          "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
+          "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+          "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+          "bytes": 161962,
+          "page_count": 3,
+          "start_page": 1,
+          "end_page": 1,
+          "body_dom_before_pdf_response": true,
+          "held_response_ms": 59234,
+          "held_requests": [
+            {
+              "id": "56467.11024",
+              "fetch_id": "interception-job-1703.0",
+              "continued": true
+            }
+          ],
+          "canvas_pixels_verified": true,
+          "page_range_verified": true,
+          "selected_page_verified": true,
+          "native_http_pdf_sha_verified": true,
+          "private_headers_verified": true,
+          "response_capture": "Fetch.getResponseBody",
+          "original_request_id": "56467.11024",
+          "correct_source_opened": true,
+          "dialog_within_viewport": true,
+          "second_history_restore": true,
+          "second_history_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 851,
+              "height": 1203
+            },
+            "renderer": "native-pages"
+          },
+          "second_history_http": {
+            "native_http_pdf_sha_verified": true,
+            "private_headers_verified": true,
+            "response_capture": "Fetch.getResponseBody",
+            "original_request_id": "56467.11302"
+          },
+          "second_history_card": {
+            "found": true,
+            "layoutPending": false,
+            "rect": {
+              "left": 640,
+              "top": 76.5,
+              "right": 1552,
+              "bottom": 750.5,
+              "width": 912,
+              "height": 674
+            },
+            "point": {
+              "x": 1096,
+              "y": 413
+            },
+            "clippedRect": {
+              "left": 640,
+              "top": 76.5,
+              "right": 1552,
+              "bottom": 750.5
+            },
+            "clip": {
+              "left": 283,
+              "top": 52,
+              "right": 1909,
+              "bottom": 876
+            },
+            "candidates": [
+              {
+                "index": 0,
+                "text": "\u4e0a\u4e00\u9875\n/ 1\n\u4e0b\u4e00\u9875\n\u7f29\u5c0f\n100%\n\u653e\u5927\n\u9002\u5e94\u7a97\u53e3\n1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684\u6709\n\n\nA\n\uff0e\n1\n \n\u4e2a\n \nB\n\uff0e\n2\n \n\u4e2a\n\n\nC\n\uff0e\n3\n \n\u4e2a\n \nD\n\uff0e\n4\n \n\u4e2a\n\n\n3\n\uff0e\uff08-\n \n\uff09\n2\n\n\n\u7684\u503c\u4e3a\n\n\nA\n\uff0e\na\n \nB\n\uff0e-\na\n\n\nC\n\uff0e\n \nD\n\uff0e-\n\n\n4\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\uff0c\u4e00\u5b9a\u80fd\u6210\u7acb\u7684\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \n=\nx\n-\n1\n \nD\n\uff0e\n\n\n5\n\uff0e\u5df2\u77e5\n \n\uff0c\u5219\n \n\u7684\u503c\u662f\n\n\nA\n\uff0e\n \nB\n\uff0e\n\n\nC\n\uff0e\n \nD\n\uff0e\n\n\n6\n\uff0e\u5df2\u77e5\n \nb\n>0\n\uff0c\u5316\u7b80\n \n=__________\n\uff0e\n\n\n7\n\uff0e\u4e8c\u6b21\u6839\u5f0f\n \n\u7684\u503c\u662f\n__________\n\uff0e\n\u5b8c\u6574\u9898\u76ee \u00b7 Word \u539f\u751f\u5b66\u751f\u9875 \u00b7 \u70b9\u51fb\u67e5\u770b\u6765\u6e90",
+                "rect": {
+                  "left": 640,
+                  "top": 76.5,
+                  "right": 1552,
+                  "bottom": 750.5,
+                  "width": 912,
+                  "height": 674
+                },
+                "display": "block",
+                "visibility": "visible"
+              }
+            ],
+            "selectedIndex": 0,
+            "color": "rgb(55, 53, 47)",
+            "clickable": true,
+            "hit": {
+              "tag": "DIV",
+              "text": "1\n\uff0e\u5f0f\u5b50\n \n\u5728\u5b9e\u6570\u8303\u56f4\u5185\u6709\u610f\u4e49\uff0c\u5219\n \nx\n \n\u7684\u53d6\u503c\u8303\u56f4\u662f\n\n\nA\n\uff0e\nx\n\u22641\n \nB\n\uff0e\nx\n\u22651\n \nC\n\uff0e\nx\n<1\n \nD\n\uff0e\nx\n>1\n\n\n2\n\uff0e\u4e0b\u5217\u5404\u5f0f\u4e2d\u2460\n \n\uff1b\u2461\n \n\uff1b\u2462\n \n\uff1b\u2463\n \n\uff1b\u2464\n \n\uff0c\u4e00\u5b9a\u662f\u4e8c\u6b21\u6839\u5f0f\u7684"
+            },
+            "root": {
+              "rect": {
+                "left": 272,
+                "top": 52,
+                "right": 1920,
+                "bottom": 876,
+                "width": 1648,
+                "height": 824
+              },
+              "scrollTop": 210,
+              "scrollHeight": 1034,
+              "clientHeight": 824,
+              "className": "w-full flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable_both-edges] pt-6"
+            }
+          },
+          "inline_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1
+            ],
+            "expected": [
+              1
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 851,
+              "height": 1203
+            },
+            "renderer": "native-pages"
+          },
+          "modal_probe": {
+            "ready": true,
+            "identity": true,
+            "pages": [
+              1,
+              2,
+              3
+            ],
+            "expected": [
+              1,
+              2,
+              3
+            ],
+            "locator": 1,
+            "toolbar": {
+              "page": 1,
+              "max": 3
+            },
+            "painted": true,
+            "ink": 64,
+            "canvas": {
+              "width": 795,
+              "height": 1124
+            },
+            "renderer": "native-pages"
+          },
+          "body_probe": {
+            "ready": false,
+            "identity": true,
+            "pages": [],
+            "expected": [
+              1
+            ],
+            "locator": null,
+            "toolbar": {
+              "page": 1,
+              "max": 1
+            },
+            "painted": false,
+            "ink": 0,
+            "canvas": null,
+            "renderer": "native-pages"
+          }
+        }
+      }
+    ],
+    "model_calls": 0,
+    "formal_data_used": false,
+    "diagnostic_entry": "current",
+    "evidence_run": "1794942794842-52495-1"
+  },
+  "chat_preserved": true,
+  "task_preserved": true,
+  "saved_key_preserved": true
+}

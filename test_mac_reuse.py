@@ -18,7 +18,7 @@ spec.loader.exec_module(reuse)
 class MacReuseContract:
     def setUp(self):
         self.lock=json.loads((ROOT/reuse.TARGETS[self.target]['lock']).read_text())
-        self.raw=(ROOT/'attachment-final-manifests.json').read_bytes()
+        self.raw=(ROOT/('frozen-k12-4-manifests.json' if (ROOT/'frozen-k12-4-manifests.json').exists() else 'attachment-final-manifests.json')).read_bytes()
 
     def test_exact_lock_without_network_or_execution(self):
         with patch.object(reuse,'api',side_effect=AssertionError('no network')),patch.object(reuse,'run',side_effect=AssertionError('no execution')):

@@ -47,8 +47,8 @@ if options.with_updates:
 
 
 if options.with_updates and manifest.get("sourceOverlay"):
-    from release_source import apply_overlay
+    from release_source import apply_overlay, stage_frozen_files
     overlay = apply_overlay(root, destination, manifest["sourceOverlay"])
-    for arguments in (["add", "--all"], ["commit", "-m", "Frozen release source " + overlay["source_commit"]]):
-        subprocess.run(["git", "-C", str(destination), *arguments], check=True)
+    stage_frozen_files(destination, overlay["files"])
+    subprocess.run(["git", "-C", str(destination), "commit", "-m", "Frozen release source " + overlay["source_commit"]], check=True)
     print("Verified final owner-frozen source", overlay["source_commit"])

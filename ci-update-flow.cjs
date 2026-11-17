@@ -10,11 +10,129 @@ const stateFile = output + '.state.json';
 const saved = require('node:fs').existsSync(stateFile) ? JSON.parse(readFileSync(stateFile)) : null;
 const before = saved?.before ?? JSON.parse(readFileSync(path.join(home, 'active.json')));
 let installed = false, current = false, accepted = saved?.accepted ?? 0, invokeError = saved?.invokeError ?? '';
+let checkAttempts=saved?.check_attempts??0, currentCheckAttempts=saved?.current_check_attempts??0;
+const readOnlyRetries=saved?.read_only_retry_reasons??[];
 const phase = saved?.phase ?? 'old-launcher';
+let stage=phase, downloadStarted=saved?.download_started??false, initialUpgrade, lastTransportError;
+let shellTranslate, applyingEvidence, nativeFailure, applyPhases={},lastShellStatus=saved?.last_shell_status??null;
+const phaseBudgets={updating:60000,checking:70000,preparingUi:240000,startingCore:190000,openingSpace:250000,ready:60000};
+const watchedShells=new WeakSet(), rendererDisposals=saved?.renderer_disposal_waits??[];
 const needsRestart=process.env.KX_EXPECT_SHELL_RESTART==='1';
-let progressVisible=false, progressWithBytes=false;
+let progressVisible=saved?.download_progress_visible??false, progressWithBytes=saved?.downloaded_bytes_visible??false;
 let fromPid=process.pid;
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+function optionalRead(name) {
+  try { return readFileSync(path.join(home,name),'utf8'); } catch(error) { if(error.code==='ENOENT')return null;throw error; }
+}
+function connectionTimeout(error) {
+  const chain=[];for(let item=error;item&&chain.length<5;item=item.cause)chain.push(item);
+  if(chain.some(item=>/signature|checksum|验签|签名|校验|ENOSPC|EACCES|EPERM/i.test(String(item.message||item)+' '+String(item.code||''))))return null;
+  for(const item of chain) {
+    const message=String(item.message||item).replace(/^Error invoking remote method 'desktop:check-release': (?:Error: )?/,'').replace(/^Error: /,'');
+    if(item.code==='UND_ERR_CONNECT_TIMEOUT')return item.code;
+    if((item.code==='ETIMEDOUT'&&item.syscall==='connect')||/^connect ETIMEDOUT\b/.test(message))return 'connect ETIMEDOUT';
+    if(['net::ERR_CONNECTION_TIMED_OUT','GitHub update connection timed out','核心更新未完成: GitHub update connection timed out'].includes(message))return message;
+  }
+  return null;
+}
+async function checkedFetch(fetch,url,options) {
+  const tracked=['github.com','api.github.com','release-assets.githubusercontent.com','objects.githubusercontent.com'].includes(new URL(url).hostname);
+  if(/\.tar\.gz$/.test(new URL(url).pathname))downloadStarted=true;
+  try {const response=await fetch(url,options);if(tracked)lastTransportError=null;return response;}
+  catch(error){if(tracked)lastTransportError={attempt:checkAttempts,url:new URL(url).origin+new URL(url).pathname,error};throw error;}
+}
+function flowState() {
+  return {check_attempts:checkAttempts,current_check_attempts:currentCheckAttempts,read_only_retry_reasons:readOnlyRetries,download_started:downloadStarted,download_progress_visible:progressVisible,downloaded_bytes_visible:progressWithBytes,renderer_disposal_waits:rendererDisposals,last_shell_status:lastShellStatus,native_error:nativeFailure?String(nativeFailure.stack||nativeFailure):null};
+}
+function watchShell() {
+  const shellURL=pathToFileURL(path.join(__dirname,'../src/index.html')).href;
+  for(const win of BrowserWindow.getAllWindows()) {
+    const contents=win.webContents;
+    if(contents.getURL()!==shellURL||watchedShells.has(contents))continue;
+    const send=contents.send.bind(contents);watchedShells.add(contents);
+    contents.send=(channel,...args)=>{
+      if(channel==='desktop:status') {
+        const state=args[0]??{},step=state.phase==='ready'?'ready':Object.keys(phaseBudgets).find(key=>typeof shellTranslate==='function'&&state.message===shellTranslate(state.language,key));
+        lastShellStatus={...state,observed_step:step,at:Date.now(),check_attempt:checkAttempts,shell_url:shellURL};
+        if(state.phase==='error')nativeFailure=new Error('Native shell error: '+(state.detail||state.message));
+        if(state.phase==='starting'&&typeof shellTranslate==='function'&&state.message===shellTranslate(state.language,'updating')&&accepted===1&&downloadStarted)applyingEvidence={...lastShellStatus,accepted,download_started:downloadStarted};
+        if(step&&accepted===1&&downloadStarted&&applyingEvidence?.check_attempt===checkAttempts&&!applyPhases[step])applyPhases[step]=lastShellStatus;
+      }
+      return send(channel,...args);
+    };
+  }
+}
+function fail(error, failedStage=stage) {
+  console.error(error.message||error);
+  let launcher,active,tail,differences=[];
+  try {launcher=JSON.parse(optionalRead('launcher-update.json'));} catch {}
+  try {active=JSON.parse(optionalRead('active.json'));} catch {}
+  try {tail=optionalRead('logs/runtime.log')?.slice(-18000);} catch {}
+  try {
+    const d=JSON.parse(readFileSync(path.join(home,'runtimes',active.runtimeId,'launcher/manifest.json')));
+    for(const row of d.files) {
+      let actual;try {actual=require('node:crypto').createHash('sha256').update(readFileSync(path.join(__dirname,'..',row.file))).digest('hex');}catch(e){actual=e.message;}
+      if(actual!==row.sha256)differences.push({file:row.file,expected:row.sha256,actual});
+    }
+  } catch(e) {console.error('Evidence collection:',e.message);}
+  try {writeFileSync(output+'.error.json',JSON.stringify({phase,stage:failedStage,error:String(error.stack||error),accepted,installed,current,before_runtime:before.runtimeId,invokeError,...flowState(),launcher,active:active??null,tail,differences,transport_error:lastTransportError?{attempt:lastTransportError.attempt,url:lastTransportError.url,error:String(lastTransportError.error.stack||lastTransportError.error)}:null}));}
+  finally {clearTimeout(timer);app.exit(1);}
+}
+async function collectProgress() {
+  for(const win of BrowserWindow.getAllWindows())if(win.webContents.getURL().endsWith('/update-progress.html')) {
+    progressVisible=true;downloadStarted=true;
+    const text=await win.webContents.executeJavaScript('document.body.innerText').catch(()=> '');
+    if(/\d+\.\d+ MB/.test(text))progressWithBytes=true;
+  }
+}
+async function runCheck(view, expectCurrent=false) {
+  for(;;) {
+    if(nativeFailure)throw nativeFailure;
+    checkAttempts++;if(expectCurrent)currentCheckAttempts++;
+    stage=expectCurrent?'check-current':'check-install';lastTransportError=null;applyingEvidence=null;applyPhases={};watchShell();
+    let error,done=false,disposal;
+    const invocation=Promise.resolve().then(()=>view.executeJavaScript('window.kaixinDesktop.checkForUpdates()')).then(()=>{done=true;},value=>{error=value||new Error('Update check rejected without an error detail');invokeError=String(error.message||error);done=true;});
+    for(;;) {
+      await collectProgress();
+      if(nativeFailure&&!done&&accepted===0&&!expectCurrent&&connectionTimeout(nativeFailure))await Promise.race([invocation,pause(1000)]);
+      if(nativeFailure){error=nativeFailure;invokeError=String(error.message||error);}
+      if(error) {
+        const active=JSON.parse(readFileSync(path.join(home,'active.json'))),journal=JSON.parse(optionalRead('upgrade.json'));
+        const changed=optionalRead('upgrade.json')!==initialUpgrade;
+        const transaction=changed&&journal?.previous?.runtimeId===before.runtimeId&&typeof journal?.candidate?.runtimeId==='string'&&journal.candidate.runtimeId.length>0&&journal.candidate.runtimeId!==before.runtimeId&&['testing','complete'].includes(journal.phase);
+        // Legacy shells close the old view after verification, before writing the journal.
+        const replacing=!expectCurrent&&accepted===1&&!nativeFailure&&invokeError==='Render frame was disposed before the request completed'&&(transaction||applyingEvidence?.check_attempt===checkAttempts);
+        if(replacing) {
+          if(!disposal){disposal={started_at:Date.now(),pre_journal_deadline:Date.now()+60000,evidence:applyingEvidence??{source:'verified-upgrade-journal'}};rendererDisposals.push(disposal);}
+          Object.assign(disposal,{journal_phase:journal?.phase??null,active_runtime:active.runtimeId,installed,last_shell:lastShellStatus});
+          assert(!changed||transaction,'The renderer disposal was followed by an unexpected upgrade transaction');
+          if(installed){assert(journal?.phase==='complete'&&transaction&&active.runtimeId===journal.candidate.runtimeId,'Installed confirmation does not match the completed transaction and active runtime');disposal.completed_at=Date.now();return;}
+          disposal.wait_phase='pre-journal';disposal.phase_started_at=disposal.started_at;disposal.phase_budget_ms=60000;disposal.deadline=disposal.pre_journal_deadline;
+          if(transaction) {
+            disposal.transaction_at??=Date.now();
+            const step=lastShellStatus?.observed_step,event=applyPhases[step];
+            disposal.wait_phase=event&&step!=='updating'?step:'testing';
+            let budget=phaseBudgets[disposal.wait_phase]??490000;
+            if(disposal.wait_phase==='checking'&&require('node:fs').existsSync(path.join(home,'runtimes',journal.candidate.runtimeId,'core/deeptutor/services/student_learning/bootstrap.py'))){budget+=600000;disposal.bootstrap_module_present=true;}
+            disposal.phase_budget_ms=budget;disposal.phase_started_at=disposal.wait_phase==='testing'?disposal.transaction_at:event.at;disposal.deadline=disposal.phase_started_at+budget;
+          }
+          assert(Date.now()<disposal.deadline,'The verified apply stage exceeded its bounded '+disposal.wait_phase+' wait');
+          stage='await-installed-after-renderer-close';await pause(100);continue;
+        }
+        let status,reason=connectionTimeout(error);
+        if(done&&!expectCurrent&&reason&&accepted===0&&!installed&&!current&&!downloadStarted&&!progressVisible&&readOnlyRetries.length===0&&active.runtimeId===before.runtimeId&&optionalRead('upgrade.json')===initialUpgrade) {
+          try {status=await view.executeJavaScript('window.kaixinDesktop.getUpdateStatus()');}catch{}
+          if(status?.available===false&&status.runtimeId===''&&[undefined,'idle'].includes(status.phase)&&[undefined,0].includes(status.received)&&[undefined,0].includes(status.total)&&accepted===0&&!installed&&!current&&!downloadStarted&&!progressVisible&&JSON.parse(readFileSync(path.join(home,'active.json'))).runtimeId===before.runtimeId&&optionalRead('upgrade.json')===initialUpgrade) {
+            readOnlyRetries.push({attempt:checkAttempts,reason,invoke_error:invokeError,accepted,active_runtime_id:active.runtimeId,download_started:false,update_status:status});nativeFailure=null;break;
+          }
+        }
+        throw error;
+      }
+      if(done) {assert(expectCurrent?current:installed,expectCurrent?'Current-version check returned without confirmation':'Update check returned without an installed update');return;}
+      await pause(100);
+    }
+  }
+}
 dialog.showMessageBox = async (...args) => {
   const options = args.at(-1);
   if (options.message === '发现开心动力超级学霸新版') {
@@ -24,12 +142,12 @@ dialog.showMessageBox = async (...args) => {
   if (options.message === '更新已安装') installed = true;
   else if (options.message === '已是最新版本') current = true;
   else if (options.type === 'error' || options.type === 'warning') {
-    throw new Error(options.message + ': ' + options.detail);
+    nativeFailure=new Error(options.message + ': ' + options.detail, {cause:lastTransportError?.attempt===checkAttempts?lastTransportError.error:undefined});throw nativeFailure;
   }
   return { response: 0 };
 };
-dialog.showErrorBox = (title, detail) => { console.error(title + ': ' + detail); app.exit(1); };
-const timer = setTimeout(() => { console.error('Native update flow timed out'); app.exit(1); }, 1300000);
+dialog.showErrorBox = (title, detail) => fail(new Error(title + ': ' + detail),'native-error-box');
+const timer = setTimeout(() => fail(new Error('Native update flow timed out')), 1300000);
 async function content() {
   for (const window of BrowserWindow.getAllWindows()) {
     const found = window.contentView.children.find(view => view.webContents?.getURL().startsWith('http://127.0.0.1:'));
@@ -47,7 +165,7 @@ async function content() {
       const mapped = original.replace('/tags/core-updates', '/tags/' + tag).replace('/download/core-updates/', '/download/' + tag + '/');
       const ciOptions = new URL(mapped).hostname === 'api.github.com' && process.env.GH_TOKEN
         ? { ...options, headers: { ...options?.headers, Authorization: `Bearer ${process.env.GH_TOKEN}` } } : options;
-      const response = await originalFetch(mapped, ciOptions);
+      const response = await checkedFetch(originalFetch,mapped,ciOptions);
       if (original.includes('/tags/core-updates') && response.ok) {
         const metadata = await response.json();
         return Response.json({ ...metadata, tag_name: 'core-updates' });
@@ -62,12 +180,13 @@ async function content() {
     globalThis.fetch=async(url,options)=> {
       const original=String(url),tag=process.env.KX_CANDIDATE_TAG;
       const mapped=original.replace('/tags/core-updates','/tags/'+tag).replace('/download/core-updates/','/download/'+tag+'/');
-      const result=await nodeFetch(mapped,new URL(mapped).hostname==='api.github.com' && process.env.GH_TOKEN
+      const result=await checkedFetch(nodeFetch,mapped,new URL(mapped).hostname==='api.github.com' && process.env.GH_TOKEN
         ? {...options,headers:{...options?.headers,Authorization:`Bearer ${process.env.GH_TOKEN}`}}:options);
       if(original.includes('/tags/core-updates') && result.ok){const data=await result.json();return Response.json({...data,tag_name:'core-updates'});}
       return result;
     };
     await import(pathToFileURL(path.join(__dirname, '../src/main.mjs')));
+    ({translate:shellTranslate}=await import(pathToFileURL(path.join(__dirname,'../src/i18n.mjs'))));
     await app.whenReady();
     let view;
     const readyDeadline = Date.now() + 120000;
@@ -77,17 +196,9 @@ async function content() {
     }
     if (phase === 'old-launcher') {
       await pause(1000);
-      void view.executeJavaScript('window.kaixinDesktop.checkForUpdates()').catch(error => { invokeError = error.message; });
-      while (!installed) {
-        for(const win of BrowserWindow.getAllWindows()) {
-          if(win.webContents.getURL().endsWith('/update-progress.html')) {
-            progressVisible=true;
-            const text=await win.webContents.executeJavaScript('document.body.innerText').catch(()=> '');
-            if(/\d+\.\d+ MB/.test(text))progressWithBytes=true;
-          }
-        }
-        await pause(100);
-      }
+      initialUpgrade=optionalRead('upgrade.json');
+      await runCheck(view);
+      stage='validate-installed';
       const updated = JSON.parse(readFileSync(path.join(home, 'active.json')));
       assert.notEqual(updated.runtimeId, before.runtimeId);
       assert.ok(updated.builtAt > (before.builtAt ?? 0));
@@ -102,16 +213,16 @@ async function content() {
         assert.ok(Date.now() < restartDeadline, 'The old launcher did not receive a restart action from the signed core');
         await pause(200);
       }
-      writeFileSync(stateFile, JSON.stringify({phase:'new-launcher',before,accepted,invokeError,oldPid:process.pid}));
+      stage='await-signed-restart';
+      writeFileSync(stateFile, JSON.stringify({phase:'new-launcher',before,accepted,invokeError,oldPid:process.pid,...flowState()}));
       await view.executeJavaScript(`Array.from(document.querySelectorAll('button')).find(button=>button.textContent==='重新打开完成更新').click()`);
       setTimeout(() => {
-        let launcher;try {launcher=JSON.parse(readFileSync(path.join(home,'launcher-update.json')));}catch{}
-        writeFileSync(output+'.error.json',JSON.stringify({phase:'restart-timeout',launcher}));
-        app.exit(1);
+        fail(new Error('The signed launcher did not reopen'),'restart-timeout');
       },90000).unref();
       return; // The signed helper must normally close and relaunch this process.
       }
     }
+    stage='verify-new-launcher';
     if (needsRestart) assert.notEqual(process.pid, saved.oldPid, 'The whole application must have restarted');
     const after = JSON.parse(readFileSync(path.join(home, 'active.json')));
     const transaction = JSON.parse(readFileSync(path.join(home, 'upgrade.json')));
@@ -140,6 +251,7 @@ async function content() {
     for (const label of ['收藏夹', '学习日志', '题库', '书籍', '阅读']) assert.ok(!menu.split('\n').includes(label), label);
     await view.executeJavaScript(`document.querySelector('button[aria-label="资源"]')?.click()`);
     await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-ui-updated.png'), (await view.capturePage()).toPNG());
+    stage='ui-checks';
     const fixture = JSON.parse(readFileSync(path.join(home, 'attachment-fixture.json')));
     const library = await require('./materials-ui.cjs')(view, path.dirname(output), fixture);
     const audio = await require('./ci-chat-audio-ui.cjs')(view, path.dirname(output), fixture.audio);
@@ -150,33 +262,20 @@ async function content() {
     assert.equal(preview.passed, true);
     assert.equal(audio.passed, true);
     assert.equal(science.passed, true);
-    await view.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
+    await runCheck(view,true);
     assert.equal(current, true);
     writeFileSync(output, JSON.stringify({
       native_platform: process.platform, native_arch: process.arch,
+      ...flowState(),
       entry: 'renderer IPC desktop:check-release', native_dialogs_auto_confirmed: true,
       production_main_unchanged: true, candidate_feed_routed_only_in_test: true, from_runtime: before.runtimeId, to_runtime: after.runtimeId,
       actual_download_install_backup_restart: 'passed', transaction: transaction.phase,
-      check_again_current: true, signed_launcher_restarted: needsRestart, from_launcher: process.env.KX_START_LAUNCHER_BUILD??(needsRestart?'a47b05f9136ca6fb72d2f1f8a04eeb425298f358':descriptor.buildId), to_launcher: descriptor.buildId, old_pid: saved?.oldPid ?? fromPid, restarted_pid: process.pid, download_progress_visible: progressVisible, downloaded_bytes_visible: progressWithBytes, old_renderer_closed_after_update: Boolean(invokeError), selected_archive:after.archive, selected_base_runtime:after.baseRuntimeId??null,
+      check_again_current: true, signed_launcher_restarted: needsRestart, from_launcher: process.env.KX_START_LAUNCHER_BUILD??(needsRestart?'a47b05f9136ca6fb72d2f1f8a04eeb425298f358':descriptor.buildId), to_launcher: descriptor.buildId, old_pid: saved?.oldPid ?? fromPid, restarted_pid: process.pid, download_progress_visible: progressVisible, downloaded_bytes_visible: progressWithBytes, old_renderer_closed_after_update: invokeError==='Render frame was disposed before the request completed', selected_archive:after.archive, selected_base_runtime:after.baseRuntimeId??null,
       library_bulk_upload: library, chat_audio: audio, science_formulas: science, quick_preview: preview, k12_library: k12,
     }, null, 2));
     clearTimeout(timer);
     app.quit();
   } catch (error) {
-    console.error(error.message);
-    let launcher,active,tail,differences=[];
-    try {
-      launcher=JSON.parse(readFileSync(path.join(home,'launcher-update.json')));
-      active=JSON.parse(readFileSync(path.join(home,'active.json')));
-      tail=readFileSync(path.join(home,'logs/runtime.log'),'utf8').slice(-18000);
-      const d=JSON.parse(readFileSync(path.join(home,'runtimes',active.runtimeId,'launcher/manifest.json')));
-      for(const row of d.files) {
-        let actual;try {actual=require('node:crypto').createHash('sha256').update(readFileSync(path.join(__dirname,'..',row.file))).digest('hex');}catch(e){actual=e.message;}
-        if(actual!==row.sha256) differences.push({file:row.file,expected:row.sha256,actual});
-      }
-    } catch(e) { console.error('Evidence collection:',e.message); }
-    writeFileSync(output+'.error.json',JSON.stringify({phase,error:error.stack,launcher,active,tail,differences}));
-    clearTimeout(timer);
-    app.exit(1);
+    fail(error);
   }
 })();

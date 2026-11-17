@@ -27,6 +27,8 @@ class NativeApiSmokeTests(unittest.TestCase):
         self.corrupt_html = False
         self.corrupt_picture = False
         self.missing_picture_descriptor = False
+        self.corrupt_native = False
+        self.missing_native_descriptor = False
         image = b"synthetic fixture image bytes"
         image_id = hashlib.sha256(image).hexdigest()
         payloads = {}
@@ -65,6 +67,22 @@ class NativeApiSmokeTests(unittest.TestCase):
             "source_payload_sha256": payload_sha, "source_hash": "b" * 64, "asset_sha256": [image_id]}
         self.picture_manifest_path = picture_root / "manifest.json"
         self.picture_manifest_path.write_text(json.dumps({"schema_version": 1, "bank_revision": revision, "teacher_evidence_included": False, "items": {"source:q1": self.picture_item}}))
+        native_pdf = b"%PDF-1.4\nsynthetic student page for HTTP integrity checks\n%%EOF"
+        native_sha = hashlib.sha256(native_pdf).hexdigest()
+        native_root = pack.parent / "question_native_data"
+        (native_root / "documents").mkdir(parents=True)
+        (native_root / "documents" / (native_sha + ".pdf")).write_bytes(native_pdf)
+        native_items = {}
+        with sqlite3.connect(pack / "index.sqlite3") as conn:
+            for identity in ['source:q0', 'source:q1']:
+                digest = conn.execute("SELECT payload_sha FROM questions WHERE qualified_id=?", (identity,)).fetchone()[0]
+                native_items[identity] = {"file": "documents/" + native_sha + ".pdf", "sha256": native_sha, "bytes": len(native_pdf),
+                    "page_count": 1, "start_page": 1, "end_page": 1, "kind": "student-word-pages", "source_payload_sha256": digest,
+                    "source_hash": payloads[identity]["source_hash"], "asset_sha256": [a["id"] for a in payloads[identity]["assets"]]}
+        self.native_manifest_path = native_root / "manifest.json"
+        self.native_manifest_path.write_text(json.dumps({"schema_version": 1, "bank_revision": revision, "items": native_items}))
+        self.native_expected = {"manifest_sha256": hashlib.sha256(self.native_manifest_path.read_bytes()).hexdigest(), "records": 2, "pdfs": 1,
+            "total_bytes": len(native_pdf) + self.native_manifest_path.stat().st_size, "samples": {'source:q0': 'math', 'source:q1': 'physics'}}
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -82,6 +100,16 @@ class NativeApiSmokeTests(unittest.TestCase):
                     if params.get('query', [''])[0].startswith('qaemptyfts'): rows = []
                     offset = int(params.get('offset', ['0'])[0])
                     result = {"bank_revision": revision, "content_read": False, "total": len(rows), "questions": rows[offset:offset + 2]}
+                elif '/native/' in url.path:
+                    from urllib.parse import unquote
+                    identity = unquote(url.path.rsplit('/', 1)[-1])
+                    if identity not in native_items or params.get('revision') != [revision] or params.get('sha256') != [native_sha]:
+                        self.send_response(404); self.end_headers(); return
+                    self.send_response(200)
+                    for key, value in [('Content-Type', 'application/pdf'), ('Cache-Control', 'private, no-store'),
+                            ('X-Content-Type-Options', 'nosniff'), ('Content-Security-Policy', "default-src 'none'; sandbox")]:
+                        self.send_header(key, value)
+                    self.end_headers(); self.wfile.write(native_pdf + (b'tamper' if owner.corrupt_native else b'')); return
                 elif '/pictures/' in url.path:
                     from urllib.parse import unquote
                     identity = unquote(url.path.rsplit('/', 1)[-1])
@@ -105,6 +133,11 @@ class NativeApiSmokeTests(unittest.TestCase):
                     if identity not in {'source:q0','source:q1'} or params.get('revision') != [revision]:
                         self.send_response(404); self.end_headers(); return
                     result = {**payloads[identity], "bank_revision": revision, "content_read": True, "source": {"url": '#dt-question-' + revision + '-' + quote(identity, safe='')}}
+                    if not owner.missing_native_descriptor:
+                        item = native_items[identity]
+                        result['source']['native_required'] = True
+                        result['source']['native'] = {"url": '/api/student/question-bank/native/' + quote(identity, safe='') + '?revision=' + revision + '&sha256=' + native_sha,
+                            **{key: item[key] for key in ('sha256', 'bytes', 'page_count', 'start_page', 'end_page', 'kind')}}
                     if identity == 'source:q1' and not owner.missing_picture_descriptor:
                         result['source']['picture'] = {"url": '/api/student/question-bank/pictures/' + quote(identity, safe='') + '?revision=' + revision,
                             **{key: owner.picture_item[key] for key in ('sha256', 'bytes', 'width', 'height')}}
@@ -124,8 +157,11 @@ class NativeApiSmokeTests(unittest.TestCase):
         self.server.shutdown(); self.server.server_close(); self.thread.join()
         self.temp.cleanup()
 
+    def run_smoke(self):
+        return smoke.run(self.url, self.core, native_expected=self.native_expected)
+
     def test_complete_original_and_image_roundtrip(self):
-        report = smoke.run(self.url, self.core)
+        report = self.run_smoke()
         self.assertTrue(report['passed'] and report['image_question_checked'])
         self.assertEqual(report['model_calls'], 0)
         self.assertEqual(report['prepared_picture_bindings'], 1)
@@ -134,35 +170,51 @@ class NativeApiSmokeTests(unittest.TestCase):
     def test_changed_image_is_rejected(self):
         self.corrupt_image = True
         with self.assertRaises(AssertionError):
-            smoke.run(self.url, self.core)
+            self.run_smoke()
 
     def test_extra_html_not_in_student_pack_is_rejected(self):
         self.corrupt_html = True
         with self.assertRaises(AssertionError):
-            smoke.run(self.url, self.core)
+            self.run_smoke()
 
 
     def test_prepared_picture_http_tampering_is_rejected(self):
         self.corrupt_picture = True
         with self.assertRaises(AssertionError):
-            smoke.run(self.url, self.core)
+            self.run_smoke()
 
     def test_prepared_picture_api_descriptor_is_required(self):
         self.missing_picture_descriptor = True
         with self.assertRaises(KeyError):
-            smoke.run(self.url, self.core)
+            self.run_smoke()
 
     def test_prepared_manifest_missing_is_not_silently_skipped(self):
         self.picture_manifest_path.unlink()
         with self.assertRaises(FileNotFoundError):
-            smoke.run(self.url, self.core)
+            self.run_smoke()
 
     def test_prepared_picture_source_payload_binding_is_required(self):
         manifest = json.loads(self.picture_manifest_path.read_text())
         manifest['items']['source:q1']['source_payload_sha256'] = 'f' * 64
         self.picture_manifest_path.write_text(json.dumps(manifest))
         with self.assertRaises(AssertionError):
-            smoke.run(self.url, self.core)
+            self.run_smoke()
+
+
+    def test_native_pdf_http_tampering_is_rejected(self):
+        self.corrupt_native = True
+        with self.assertRaises(AssertionError):
+            self.run_smoke()
+
+    def test_native_pdf_descriptor_is_required(self):
+        self.missing_native_descriptor = True
+        with self.assertRaises(KeyError):
+            self.run_smoke()
+
+    def test_native_pack_missing_is_not_silently_skipped(self):
+        self.native_manifest_path.unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.run_smoke()
 
 
 if __name__ == '__main__':

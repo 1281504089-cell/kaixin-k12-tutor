@@ -1,11 +1,11 @@
 {
-  "tag": "student-20261117-k12-4",
-  "source_commit": "2af326481943f7e072036637ba186aa829dce39d",
+  "tag": "student-20261117-k12-5",
+  "source_commit": "9328240380d13ef75435434a8c901028ea4470dc",
   "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
-  "archive": "kaixin-core-20261117-k12-4.tar.gz",
+  "archive": "kaixin-core-20261117-k12-5.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261117-k12-2.tar.gz",
-    "sha256": "9308765179203bc4c1972e82f373c699ff68c8d712f677226b7a0d0f05cf3160"
+    "archive": "kaixin-core-20261117-k12-4.tar.gz",
+    "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f"
   },
   "web_tests": [
     "tests/pending-material.spec.ts",
@@ -53,13 +53,36 @@
     "tests/session-viewer-panel.spec.tsx",
     "tests/chat-reading-selection.spec.tsx",
     "tests/question-picture-cards.spec.tsx",
-    "tests/question-bank-display.spec.ts"
+    "tests/question-bank-display.spec.ts",
+    "tests/question-native-cards.spec.tsx",
+    "tests/image-preview.spec.tsx"
   ],
-  "source_files_sha256": "1413eb96e13aa1de1e006ec1b1206476dde5cdae2dac69734be8b25e5b6d0ecd",
+  "source_files_sha256": "d41f2264e086cc508fe16886a09cdb0966aa45381a5a5664a27a9a024c33392d",
   "prepared": true,
   "source_scope": "published_export",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
-  "runtime_manifest_sha256": "252ef9541f305e936751e563b8ceda5512397d84a275634f0e8684f790a48887",
+  "runtime_manifest_sha256": "c65322eb667c4a65682fc99833495c4cd94e08b49ff21ae43e21f777c367808a",
   "bank_manifest_sha256": "6743986468d69c720dfb5b59bb2ab07c69d515243406db86ebacfaef35643606",
-  "bank_payload_manifest_sha256": "fe3acc9a3e671075d67f6cf3ba33a80440af7bf5581810bb2dff311d8759b179"
+  "bank_payload_manifest_sha256": "fe3acc9a3e671075d67f6cf3ba33a80440af7bf5581810bb2dff311d8759b179",
+  "native_pages": {
+    "manifest_sha256": "91631719fe6e228a0b580d469a15943bb5ba80828f5114ea10e731dcd598da0a",
+    "records": 6915,
+    "pdfs": 698,
+    "total_bytes": 295359867,
+    "pdf_bytes": 289848249,
+    "manifest_bytes": 5511618,
+    "ui_fixture": {
+      "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
+      "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+      "native": {
+        "url": "/api/student/question-bank/native/math%3Aq_e9dd00ffa1178d29b41fadb4_2?revision=26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee&sha256=7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+        "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+        "bytes": 161962,
+        "page_count": 3,
+        "start_page": 1,
+        "end_page": 1,
+        "kind": "student-word-pages"
+      }
+    }
+  }
 }
