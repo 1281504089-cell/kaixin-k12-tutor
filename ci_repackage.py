@@ -10,6 +10,20 @@ import tarfile
 from urllib.request import Request, urlopen
 
 
+def validate_installer_files(files, target, tag):
+    names = {row['file'] for row in files}
+    assert len(names) == len(files) and all(0 < row['bytes'] < 2_000_000_000 for row in files)
+    if target == 'windows-x64':
+        stem = 'Kaixin-Super-Scholar-Windows-v1.7.1-'
+        expected = {stem+'Setup.exe', *(stem+'Runtime.00'+str(i) for i in range(1,5))}
+    else:
+        assert target in {'macos-x64', 'macos-arm64'} and 4 <= len(files) <= 5
+        brand = 'Intel' if target == 'macos-x64' else 'Apple-Silicon'
+        stem = 'Kaixin-Super-Scholar-MacOS-'+brand+'-v1.7.1-'+tag.removeprefix('student-')+'-part'
+        expected = {stem+'.dmg', *(stem+f'.{i:03d}.dmgpart' for i in range(2,len(files)+1))}
+    assert names == expected, 'Missing or unexpected full-installer segment'
+
+
 def prepare_candidate(root, target, install, resources, downloads, evidence, lock):
     batch = json.loads((root / 'attachment-batch.json').read_text())
     manifest = batch['manifests'][target]
@@ -133,4 +147,5 @@ def prepare_candidate(root, target, install, resources, downloads, evidence, loc
         assert result.returncode == 0
         parts_file.unlink()
         shutil.rmtree(downloads)
+    validate_installer_files([{'file': f.name, 'bytes': f.stat().st_size} for f in out.iterdir()], target, batch['tag'])
     return out, batch

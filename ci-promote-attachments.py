@@ -1,6 +1,7 @@
 """Promote only the exact three native-tested attachment installers and signed feeds."""
 import hashlib,json,os,subprocess,time
 from ci_picture_fresh import validate_native_page_views, validate_native_page_api
+from ci_repackage import validate_installer_files
 from pathlib import Path
 from urllib.request import Request,urlopen
 from urllib.parse import urlparse
@@ -143,10 +144,11 @@ for target in targets:
  science=update['science_formulas'];assert science['passed'] and len(science['views'])==16 and len(science['originalEdits'])>=18 and science['cleanup']['debuggerDetached'] and science['cleanup']['deviceMetricsCleared']
  assert bulk['device_speech']['diagnosticOnly'] and 'nativeEnded' in bulk['device_speech']['diagnostic']
  assert all(update[k] for k in ['chat_preserved','task_preserved','saved_key_preserved'])
+ validate_installer_files(report['full_files'],target,batch['tag'])
  for row in report['full_files']:
   actual=assets[row['file']];assert actual['digest']=='sha256:'+row['sha256'] and actual['size']==row['bytes']
  full_files+=report['full_files'];proofs[target]=report
-assert len(full_files)==13
+assert 13 <= len(full_files) <= 15
 
 stable_assets={a['name']:a for a in api('releases/tags/core-updates')['assets']}
 for name,expected in batch['expected_previous'].items():

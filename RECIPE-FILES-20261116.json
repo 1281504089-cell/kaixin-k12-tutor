@@ -11,8 +11,8 @@
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 1588,
-    "sha256": "130f42beb32c9816664596324429682a84cb0a61b0822af0db64c8cd036dc98a"
+    "bytes": 1612,
+    "sha256": "c89cf8570d90717f4e6f631246b42b1119fdafaab40c48505a74b26a5a147444"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
@@ -91,8 +91,8 @@
   },
   {
     "file": "attachment-batch.json",
-    "bytes": 7274,
-    "sha256": "14c41127ed26ac35cc22435d34fc521ba8f6dc2381c8278d08cf02c2beb3a9dd"
+    "bytes": 6666,
+    "sha256": "a4c975bdfd288f4042ddf51514e9f818c124b02dafaac86350c2c96a406ec729"
   },
   {
     "file": "attachment-publication.json",
@@ -151,8 +151,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 17767,
-    "sha256": "1f56d9c2c70de166529052f1207f7341e5c6a4ccdce835f8f583f52929158a3a"
+    "bytes": 17893,
+    "sha256": "b98f7c8987f624485d0ccfa39e6bc49aed17db17ddc6fe757fc36e80193af457"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -181,8 +181,8 @@
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 8346,
-    "sha256": "516bc14f57f5abcafdd2c243cd106ff770bcbcdb4192ab4cea7abfa690d5501f"
+    "bytes": 9258,
+    "sha256": "0b487c2a8b1f2c9e82925b6ceee2de4e8adc77f4069ac427abb028b8fd02021e"
   },
   {
     "file": "ci_update_probe.py",
@@ -460,6 +460,11 @@
     "sha256": "4e9c50fc1f4c1d5274de1c5c06b33686ea04a1b5feec13cdbeb839220dbaad9f"
   },
   {
+    "file": "test_installer_segments.py",
+    "bytes": 1492,
+    "sha256": "cd2a94f259afcfc5ed63b5d90a6a59e2fc0231f33259aaac9cb91bc71360bdee"
+  },
+  {
     "file": "test_intel_reuse.py",
     "bytes": 5543,
     "sha256": "f56b6700945340d48daa794b43b1a5be053d72cff703dc1041a42733f246f5ca"
@@ -515,4 +520,3 @@
     "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
   }
 ]
-
