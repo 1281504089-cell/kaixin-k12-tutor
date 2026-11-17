@@ -117,6 +117,8 @@ assert included == batch['manifests'][target]
 run(['gh', 'release', 'upload', batch['tag'], *candidate_out.iterdir(), '--clobber'])
 environment = {**os.environ, 'KX_EXPECTED_PLATFORM': expected['platform'], 'KX_EXPECTED_ARCH': expected['arch']}
 run(['node', 'ci-fresh-smoke.mjs', executable, resources, work / '全新学习目录', evidence], env=environment, timeout=1100)
+from ci_picture_fresh import verify_picture_fresh
+fresh_picture_ui = verify_picture_fresh(root, target, install, resources, work / '全新学习目录', evidence)
 from ci_attachment_bridge import prepare_bridge
 prepare_bridge(root, target, resources, work / '全新学习目录', evidence, batch)
 from ci_update_probe import verify_update_entry
@@ -133,6 +135,7 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'download_files': download_rows, 'native_install': 'passed',
           'native_smoke': json.loads((evidence / 'app.json').read_text()),
           'network': json.loads((evidence / 'network.json').read_text()),
+          'fresh_picture_ui': fresh_picture_ui,
           'update_entry': update_entry, 'oldest_launcher_entry': oldest_entry,
           'launcher_migration': {'from_published_launcher': lock['tag'], 'signed_core_carrier': oldest_entry['signed_launcher_restarted']},
           'shell_files': batch['shell_files'],

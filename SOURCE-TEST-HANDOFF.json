@@ -1,54 +1,187 @@
 {
-  "final_source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
-  "frontend": {
-    "freeze": "/Users/Admin1/Documents/Kaixin-20261115-K12题库工程/qa/k12-library-frontend-20261116/v3/FREEZE.json",
-    "freeze_sha256": "b45914ab75e927af53757257a0bd3093a2c133230f3118f83fe15cafe8db7e42",
-    "tested_files": [
-      "tests/student-materials.spec.tsx",
-      "tests/student-source-library.spec.tsx",
-      "tests/question-source-preview.spec.tsx",
-      "tests/source-citation-links.spec.tsx",
-      "tests/attachment-citation-viewport.spec.tsx",
-      "tests/file-citation-navigation.spec.tsx",
-      "tests/textbook-reference-links.spec.tsx",
-      "tests/related-material-links.spec.tsx",
-      "tests/chat-reading-navigation.spec.tsx",
-      "tests/session-viewer-panel.spec.tsx",
-      "tests/pdf-preview-quote.spec.tsx"
-    ],
-    "command": "/Users/Admin1/.local/bin/node node_modules/vitest/vitest.mjs run tests/student-materials.spec.tsx tests/student-source-library.spec.tsx tests/question-source-preview.spec.tsx tests/source-citation-links.spec.tsx tests/attachment-citation-viewport.spec.tsx tests/file-citation-navigation.spec.tsx tests/textbook-reference-links.spec.tsx tests/related-material-links.spec.tsx tests/chat-reading-navigation.spec.tsx tests/session-viewer-panel.spec.tsx tests/pdf-preview-quote.spec.tsx",
-    "cwd": "integration-20261116/source/web",
-    "passed": 89,
-    "full_typescript_errors": 0
+  "schema_version": 2,
+  "status": "frozen_source_local_checks_complete_publication_and_native_gates_pending",
+  "recorded_at_utc": "2026-11-16T23:55:00.173797+00:00",
+  "final_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+  "published_export_sha256": "f5f25cbc43a74efc134f8b4d6fcf623c7ec3d8c3ddf043ae16ee824dcfb979b0",
+  "candidate_release_tag": "student-20261117-k12-2",
+  "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+  "picture_manifest_sha256": "3983e0c365daef3e15e3352323e1b5ec19d7be42de924744094c20567477cd10",
+  "supersedes_prior_recipe_handoff": {
+    "prior_file_sha256": "6b04b8df7028fe6f110858d4a3f4954b027c73293ec08a24e0c5cb5d6cad17b7",
+    "prior_final_source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
+    "reason": "The inherited recipe handoff described the previous batch. This handoff binds this question-picture/topic-guard batch to its actual final source and exported bytes; previous release evidence remains historical, not recounted as newly rerun."
   },
-  "source_citation": {
-    "freeze": "/Users/Admin1/Documents/Kaixin-20261115-K12题库工程/qa/source-citation-handoff-20261116/FREEZE.json",
-    "freeze_sha256": "14d1d69389d8ce92d79a8f3cfbaa7ea4f847bd3cdfd1a9443bb94774676b1e74",
-    "passed": 107,
-    "seconds": 5.28,
-    "tested_files": [
-      "tests/services/session/test_source_citations.py",
-      "tests/services/session/test_source_inventory.py",
-      "tests/reading/test_references.py",
-      "tests/tools/test_read_source.py",
-      "tests/agents/chat/test_document_source_policy.py",
-      "tests/capabilities/test_explore_context_capability.py",
-      "tests/capabilities/test_source_citation_handoff.py"
-    ],
-    "scope": "At its own source-citation freeze; excludes later root teaching-image/metadata fixes."
+  "verification_summary": {
+    "file": "VERIFICATION-QUESTION-PICTURES-20261117.json",
+    "sha256": "aa76534d406bc03df8dbeaca6ad167670ab74877392dc68d5cd76cb803311c4e"
   },
-  "metadata_v3_question_sources": {
-    "tested_file": "tests/services/test_question_sources.py",
-    "passed": 25,
-    "real_inprocess_fastapi_conservative_flags": true
+  "completed_local_checks": {
+    "owner_final_frozen_pytest_passed": 216,
+    "related_frontend_vitest_passed": 78,
+    "trace_memory_node_passed": 9,
+    "full_web_typecheck_exit_code": 0,
+    "source_to_existing_model_seed_and_raw_image_message_identity_cases": 5,
+    "isolated_actual_chrome_cases": 12,
+    "fresh_context_missing_prepared_picture_full_original_fallback": true,
+    "source_permission_revocation_and_runtime_quarantine_denied": true,
+    "all_294_picture_source_asset_and_lossless_pixel_bindings": true,
+    "final_source_exact_payload_exclusion_zero_network_tests": true
   },
-  "new_release_native_acceptance": false,
-  "runtime_image_isolation": {
-    "tested_file": "tests/services/test_question_sources.py",
-    "passed": 28,
-    "runtime_exclusions": 16,
-    "predicate": "Exact qualified_id plus current body asset SHA; not an inference of missing conditions",
-    "cold_prepare_ms": 323.86,
-    "cached_prepare_sql_calls": 0
+  "controlled_model_scope": {
+    "physical_provider_posts": 9,
+    "complete_content_reviewed_outputs": 7,
+    "diagnostic_stops_excluded": 2,
+    "physics_complete_ABBA": true,
+    "math_complete_balanced_ABBA": false,
+    "math_complete_A_count": 1,
+    "math_complete_H_count": 2,
+    "all_outputs_or_all_8_trials_passed_claim": false,
+    "cross_case_or_population_mean_speedup_claim": false,
+    "no_extra_model_call_from_screenshot_display": true,
+    "default_model_or_output_budget_changed": false,
+    "live_calls_are_historical": true,
+    "historical_live_plan_source_commit": "5d566fe74294fb8dbad328e9ace0726645ebddfb",
+    "historical_presentation_source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
+    "final_source_additional_paid_calls": 0,
+    "final_source_zero_network_seed_and_raw_image_identity_proof": true
+  },
+  "source_test_file_sha256": {
+    "web/components/common/ReadingCitationChip.tsx": "16bc10d307019c65dd58d526f1cbe07e10772faa10551bdf4bc8b05676052a54",
+    "web/components/student/QuestionSourcePreview.tsx": "d30e16089f083497044f523c8c0fd44b9ea4c71dfcb9f2f513b03df4aa80317e",
+    "web/components/student/StudentLearning.module.css": "ddce4109b9233d085bf52adc43fc5d7a5f8b281df30beaf6445361ef89e25244",
+    "web/features/chat/messages/ChatMessageList.tsx": "ff6d7c4c86065fb93b70200c27c442bc7b3c7df23500e0c1646303413fea648d",
+    "web/features/chat/messages/QuestionPictureCards.tsx": "fd089b44cc284bdfc4b77910ab889767ceb1eca6d8cc3328c0527e1c677cea3d",
+    "web/features/chat/trace/memory.ts": "298dbff0cb196e7a5bce635bfc29635029d68d69eac44d918e8f60d4bd0d3354",
+    "web/lib/question-bank-citations.ts": "4a07fd1d8aa2e7b5a61beb85f1d9da31027d04820115c1d5f4ab2bcb42e0140b",
+    "web/lib/student-learning-api.ts": "81b879593b8d477a11ee3eb70df526a017976771e4ec11b40c0e5969e6144471",
+    "web/tests/question-picture-cards.spec.tsx": "e42c5892c73eb2436f786f7f235a6c48275d2e809e3f33e82fa15386a2412d76",
+    "web/tests/question-source-preview.spec.tsx": "6d8bfeac8020b614ed998229849556bec81f6ec2e43638f48b0168daaa08e946",
+    "web/tests/source-citation-links.spec.tsx": "3beca1d6ec056474452c1333d5fb4aaf354307f9aade343a85162b435cb80fae"
+  },
+  "key_local_evidence": {
+    "picture_pack": {
+      "local_evidence_relative_path": "qa/picture-pack/context-isolation-294/FINAL-SUBSET-AUDIT-294.json",
+      "sha256": "95463537a553dc01f2f9eb7f2f0d0d0acb53fb690ca715c7c49be63272b9d629"
+    },
+    "independent_full_picture_audit": {
+      "local_evidence_relative_path": "qa/picture-delivery/FINAL-AUDIT-294.json",
+      "sha256": "9e3f1cf6af4f843f0d126666b893eff2616d4097b1dab455c7253306c1c4fd2b"
+    },
+    "final_exact_payload_exclusion_and_zero_network_proof": {
+      "local_evidence_relative_path": "qa/payload-exclusion-proof/FINAL-RECEIPT.json",
+      "sha256": "aed6ca91ed7312c27d38e17234411aea071a64333edfff6d603fd24bb3eb7691"
+    },
+    "frontend_verification": {
+      "local_evidence_relative_path": "qa/picture-ui/FRONTEND-VERIFICATION.json",
+      "sha256": "4a8afa245f1978985ca93e5090aafde80dc92d48108d6653698f140653f34e75"
+    },
+    "actual_chrome_picture_ui": {
+      "local_evidence_relative_path": "qa/picture-ui/run-006-real-pack/RESULT.json",
+      "sha256": "116f0ec27bef457e6806db37d886c6a0a5d14837e4cee342faca66aa9f9647c4"
+    },
+    "controlled_model_quality": {
+      "local_evidence_relative_path": "qa/controlled-topic-v2/INDEPENDENT-QUALITY.json",
+      "sha256": "04fd83b35b11df5c5fa0eae57dcff3540782bfb3134af359292778965b5f08e9"
+    },
+    "controlled_model_metrics": {
+      "local_evidence_relative_path": "qa/controlled-topic-v2/live-001/METRICS.json",
+      "sha256": "93b9381b9694cddc018551ae63199b0baf5d6703f88420a7bdd834bc6dc175d6"
+    },
+    "published_source_manifest": {
+      "local_evidence_relative_path": "release-20261117/recipe/runtime-source-manifest.json",
+      "sha256": "d0bd315cfeabcf7e3e5b42d4e538a47081c6af1ccad197fa92f140b8185d0cf7"
+    }
+  },
+  "carrier_and_data_contract": {
+    "carrier": "Learning core/web and precomputed picture assets; native/launcher acceptance is a separate owner gate.",
+    "model_picture_behavior": "Keep complete original question text and original image messages. Prepared screenshots are display-only.",
+    "picture_display_adoption": "Require a valid reference-used source event plus a matching current-prose qid/revision citation; lookup alone or a code-example citation is insufficient.",
+    "history_behavior": "Keep adopted picture-source metadata through preview compaction and saved-history restore; preserve prior records/settings during actual upgrade.",
+    "fallback": "Unavailable prepared picture retains source navigation and falls back to complete original HTML with all required original assets.",
+    "source_locator_policy": "Keep actual source units such as Word paragraphs; do not invent original PDF page numbers.",
+    "public_export_privacy": "No API keys, user profile files or raw private prompts. Existing excluded private embedding resources stay excluded; do not re-enable unlicensed or failed semantic paths."
+  },
+  "next_owner_gates": [
+    "Build and verify a new final-source core for f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9. Earlier core CI 43979958228 passed but is abandoned, unpublished and not a final gate.",
+    "Run three native platform gates on final installer/update bytes; verify new install, current and supported old updater paths, failure/cancel behavior and data preservation.",
+    "Sign candidate manifests locally; verify anonymous final archive bytes and signatures before changing stable feeds/Latest.",
+    "Use the actual local desktop Check Update entry and verify restart, newest-version recheck and preservation of chats, settings and reading state.",
+    "Only successful owner publication receipts and final CURRENT metadata may mark this batch released. USB status is separate."
+  ],
+  "release_gates": {
+    "release_owner_only": "This final-source local prepublication handoff supersedes the earlier candidate scope. Later signed final-source publication receipts and CURRENT determine actual availability.",
+    "core_build": {
+      "run_id": null,
+      "state_at_handoff": "final_frozen_source_rebuild_pending",
+      "acceptance_claimed": false,
+      "discarded_previous_core_run": {
+        "run_id": 43979958228,
+        "result": "passed",
+        "published": false,
+        "counts_as_final_gate": false
+      }
+    },
+    "windows_x64": {
+      "native_acceptance_verified": false,
+      "state": "pending"
+    },
+    "macos_x64": {
+      "native_acceptance_verified": false,
+      "state": "pending"
+    },
+    "macos_arm64": {
+      "native_acceptance_verified": false,
+      "state": "pending"
+    },
+    "actual_local_desktop_check_update": {
+      "verified": false,
+      "record_and_setting_preservation_verified_for_this_batch": false,
+      "state": "pending"
+    },
+    "github_stable_publication": {
+      "published": false,
+      "signed_feeds_and_anonymous_archive_readback_verified": false
+    },
+    "usb_updated_by_this_handoff": false
+  },
+  "not_a_publication_receipt": true,
+  "previous_candidate_handoff": {
+    "source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
+    "picture_count": 295,
+    "verification_summary_sha256": "ea1d2f0efde9691d9a6cd0db056c6fd4f9a383608094bd258c453d86ccd6c5dd",
+    "source_test_handoff_sha256": "aa5d2e82528fad7eae3535eda5b74606bba15385b8678dae68195ab65e8aa0b9",
+    "status": "Historical candidate receipts preserved. One contradictory original question is now exactly isolated before any final publication."
+  },
+  "source_quality_scope": {
+    "exact_question_id": "new-five:q_cc0971c5b93f4e187667d965_b00032_7",
+    "payload_sha256": "d4214db38a04cf0968dfaccddbab76a4a78fba95b2b7c0c5724c0526dce15d4d",
+    "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+    "reason": "The original source itself uses 6 cm and 6 m for incompatible conditions. The question is isolated; no guessed correction is applied.",
+    "original_index_and_source_file_unchanged": true,
+    "runtime_isolated_count": 17,
+    "prior_bad_png_asset_rules_unchanged_count": 16,
+    "additional_conflicting_original_payload_count": 1,
+    "effective_readable_units": 20845,
+    "effective_structural_exercise_candidates": 18890,
+    "all_read_surfaces_deny_this_exact_payload": true,
+    "other_questions_of_same_source_not_blanket_blocked": true,
+    "remaining_images_byte_identical": true,
+    "remaining_entries_byte_equivalent": true,
+    "remaining_webp_pixels_equal_validated_png": true,
+    "no_new_claim_of_all_294_academic_answers_reviewed": true
+  },
+  "evidence_reuse": {
+    "historical_presentation_source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
+    "historical_picture_count": 295,
+    "historical_manifest_sha256": "4eb484103be8c8f2d1be04102caa3fff9a8c262689c4b5dd4cac8f003ff5dc44",
+    "historical_receipts_preserved": true,
+    "current_294_is_verified_unchanged_subset_after_one_exact_payload_isolation": true,
+    "frontend_file_bytes_identical_to_historical_freeze": true,
+    "frontend_vitest_78_trace_9_typecheck_browser_12_and_404_reused_for_unchanged_files": true,
+    "removed_question_not_in_the_four_browser_fixture_questions": true,
+    "final_subset_and_payload_isolation_have_fresh_local_zero_network_evidence": true,
+    "new_paid_model_calls_for_final_source": 0,
+    "does_not_turn_historical_live_calls_into_fresh_final_source_calls": true
   }
 }

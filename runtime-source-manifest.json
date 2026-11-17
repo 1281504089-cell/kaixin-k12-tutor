@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "5ff65526b0665ae844d865ef21a88eaebbf63da2",
-  "published_export_sha256": "c75d2b04b5144fa9da10855803a82807417a085198db05497b6e5b255c86ae5f",
+  "source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+  "published_export_sha256": "f5f25cbc43a74efc134f8b4d6fcf623c7ec3d8c3ddf043ae16ee824dcfb979b0",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "files": [
     {
@@ -1861,8 +1861,8 @@
     },
     {
       "file": "deeptutor/api/routers/student_question_bank.py",
-      "bytes": 2199,
-      "sha256": "283d24035e7ed327efea1a06144e952c78fe8563da93a950441c15ef3d7d3a0f",
+      "bytes": 2624,
+      "sha256": "9c6277ac19a1a09d3b18dc78b5d1ac68afe114ad6e62babb33fa23c66de8c387",
       "mode": 420
     },
     {
@@ -8029,20 +8029,1796 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 6405,
-      "sha256": "fe99bfc7aced6a9021db0ce95dedc4ad0ed04261a8d70e3774513c68270a58f3",
+      "bytes": 7129,
+      "sha256": "b31abdafbce2ec6384cd58b16c0e7e84ff6f910b7615c7dbfc008dc09562b3f5",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/0184958dc3803da21c4dc7bf0a41371474c23693333f07a56df3174fa25124f1.webp",
+      "bytes": 40144,
+      "sha256": "0184958dc3803da21c4dc7bf0a41371474c23693333f07a56df3174fa25124f1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/0306aec6e195f2a14d6d834e6e27ee119785ff176f192aed4009799753f8fa07.webp",
+      "bytes": 19624,
+      "sha256": "0306aec6e195f2a14d6d834e6e27ee119785ff176f192aed4009799753f8fa07",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/0382305c670e67ec29787c9eaac2b640b3618c8608fef243e8be66ca1129c0ad.webp",
+      "bytes": 54658,
+      "sha256": "0382305c670e67ec29787c9eaac2b640b3618c8608fef243e8be66ca1129c0ad",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/047ccc11f0e2c17a617e496f8f78783c34232e2e481336e7fac11c282d519f9b.webp",
+      "bytes": 41122,
+      "sha256": "047ccc11f0e2c17a617e496f8f78783c34232e2e481336e7fac11c282d519f9b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/0783d3a4cf7ae1c04c4b69f94cf17395212f9dd3825ad7667806b194d57265bd.webp",
+      "bytes": 42682,
+      "sha256": "0783d3a4cf7ae1c04c4b69f94cf17395212f9dd3825ad7667806b194d57265bd",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/08164d4ce1d9995484f7e1f7095603992104c27bf2fcd29ff39b5b26e1a25063.webp",
+      "bytes": 48546,
+      "sha256": "08164d4ce1d9995484f7e1f7095603992104c27bf2fcd29ff39b5b26e1a25063",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/08e109a67d9a854ce96a78576a3f49966d1af11eb7ff6d4e06c0cfb35ddbd320.webp",
+      "bytes": 42402,
+      "sha256": "08e109a67d9a854ce96a78576a3f49966d1af11eb7ff6d4e06c0cfb35ddbd320",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/0aa9c1d0a4fdfef848d5d53f3a92f2619e1a5877ebfc24a75842f12246bc5b91.webp",
+      "bytes": 45910,
+      "sha256": "0aa9c1d0a4fdfef848d5d53f3a92f2619e1a5877ebfc24a75842f12246bc5b91",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/114300e5501e16a3e1e90634b20a90631752fe7320d21e358f76075e320c5fa0.webp",
+      "bytes": 18188,
+      "sha256": "114300e5501e16a3e1e90634b20a90631752fe7320d21e358f76075e320c5fa0",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/116159cb62493b4d30ae01a7c0b06742cd36ff0cf07013867082af43563dc55b.webp",
+      "bytes": 41302,
+      "sha256": "116159cb62493b4d30ae01a7c0b06742cd36ff0cf07013867082af43563dc55b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/11e589d2edb9d516be29e45ddfccd9c1d590136cd6dbfa3df735d4d78f3c8078.webp",
+      "bytes": 40870,
+      "sha256": "11e589d2edb9d516be29e45ddfccd9c1d590136cd6dbfa3df735d4d78f3c8078",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/146612c426a3ec8e050234372bcfa1aca2eac24358e57d034f06a4fd0768c108.webp",
+      "bytes": 46492,
+      "sha256": "146612c426a3ec8e050234372bcfa1aca2eac24358e57d034f06a4fd0768c108",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/14e3882ca81e255501f9f35737f2a82e889638984304567830e7c57f07984b04.webp",
+      "bytes": 35966,
+      "sha256": "14e3882ca81e255501f9f35737f2a82e889638984304567830e7c57f07984b04",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/15de2843b35c2b179f9a7070869feff76297bc8ccdffb2317ab49a139f64dd40.webp",
+      "bytes": 40084,
+      "sha256": "15de2843b35c2b179f9a7070869feff76297bc8ccdffb2317ab49a139f64dd40",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/16f06451851245bfae936002253a8d294ebf8e25c51b7cbccff220c4fa4fa63e.webp",
+      "bytes": 35534,
+      "sha256": "16f06451851245bfae936002253a8d294ebf8e25c51b7cbccff220c4fa4fa63e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/1792a72646cc3ae97f802e8f96272edb16eb9698bd61a8be55be8f91f452ed12.webp",
+      "bytes": 43792,
+      "sha256": "1792a72646cc3ae97f802e8f96272edb16eb9698bd61a8be55be8f91f452ed12",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/18f4ffef2d87c72871be0b8ca8277c755902aced40656116d34ecd105d199d7b.webp",
+      "bytes": 50756,
+      "sha256": "18f4ffef2d87c72871be0b8ca8277c755902aced40656116d34ecd105d199d7b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/19399ebfee86ef0d993cb8ba880ecb469cd8ee2ae8362bfe1e144b7865e8c2e3.webp",
+      "bytes": 46994,
+      "sha256": "19399ebfee86ef0d993cb8ba880ecb469cd8ee2ae8362bfe1e144b7865e8c2e3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/1a03d2b12ead5b9b4cc1d69b3e77bfebe08f66f8efefede92d667785f0ca2094.webp",
+      "bytes": 16250,
+      "sha256": "1a03d2b12ead5b9b4cc1d69b3e77bfebe08f66f8efefede92d667785f0ca2094",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/1b81bbaaec514958a3fff97d644751e9ba723742d55606ab1a1683da42cdf8ae.webp",
+      "bytes": 43210,
+      "sha256": "1b81bbaaec514958a3fff97d644751e9ba723742d55606ab1a1683da42cdf8ae",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/1c2d0cbca83137bc077127ebb54529e54591b5147647cb807b25250f0e08e94b.webp",
+      "bytes": 28708,
+      "sha256": "1c2d0cbca83137bc077127ebb54529e54591b5147647cb807b25250f0e08e94b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/1c5f6c32d614dd6ed3f341d58f47a122e87b5f1ebf0001542bbe06bb17fc1cf8.webp",
+      "bytes": 67312,
+      "sha256": "1c5f6c32d614dd6ed3f341d58f47a122e87b5f1ebf0001542bbe06bb17fc1cf8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/1ed8bf76ad867324481575b0eaa625a07297a9d381409fca863094d5db21a999.webp",
+      "bytes": 22058,
+      "sha256": "1ed8bf76ad867324481575b0eaa625a07297a9d381409fca863094d5db21a999",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/21f7e942ef84ba8a11cac94e74f857eb33114c3abb763bb219c0a089a2f21c98.webp",
+      "bytes": 49662,
+      "sha256": "21f7e942ef84ba8a11cac94e74f857eb33114c3abb763bb219c0a089a2f21c98",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2253b691a06bbe0715fff1a07bc6dfb15344ad655416e8ec817bb42a301861da.webp",
+      "bytes": 34396,
+      "sha256": "2253b691a06bbe0715fff1a07bc6dfb15344ad655416e8ec817bb42a301861da",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/24ccefcb01d4fe9e28a628bb2864d383021e9f2ad1f2fbe7bb515977ec1ec1b5.webp",
+      "bytes": 46744,
+      "sha256": "24ccefcb01d4fe9e28a628bb2864d383021e9f2ad1f2fbe7bb515977ec1ec1b5",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/24d21f14c930c3ff8222ebd72a7a7bf348edf1c9318cb3e47096adecb8862ee8.webp",
+      "bytes": 18938,
+      "sha256": "24d21f14c930c3ff8222ebd72a7a7bf348edf1c9318cb3e47096adecb8862ee8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/25948e45c482166a7395c48d5262fd37a242914bafca929fb415d7d3257db571.webp",
+      "bytes": 45668,
+      "sha256": "25948e45c482166a7395c48d5262fd37a242914bafca929fb415d7d3257db571",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/26c7a233e4565bc22d9100dd4a08423b0e2bca564a256ad6fe0dc7bb4ff343e8.webp",
+      "bytes": 52762,
+      "sha256": "26c7a233e4565bc22d9100dd4a08423b0e2bca564a256ad6fe0dc7bb4ff343e8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/28bee975f72743390b60ec94d0be71ca6b2901aa1e6cc9e30e754c78317f801b.webp",
+      "bytes": 41144,
+      "sha256": "28bee975f72743390b60ec94d0be71ca6b2901aa1e6cc9e30e754c78317f801b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2948d16e12349d3c94073efa9d35e5f1fca714fcc262cffce2bbd35ba5764187.webp",
+      "bytes": 48744,
+      "sha256": "2948d16e12349d3c94073efa9d35e5f1fca714fcc262cffce2bbd35ba5764187",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/29fba012516e9889209d6c1ea44201ab586472bb5b290363036b2753c9064310.webp",
+      "bytes": 55588,
+      "sha256": "29fba012516e9889209d6c1ea44201ab586472bb5b290363036b2753c9064310",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2b2583fecb58bd81e9c895c9c0e268f2dac51b00a25042a7b8fb2b241a3010a6.webp",
+      "bytes": 24166,
+      "sha256": "2b2583fecb58bd81e9c895c9c0e268f2dac51b00a25042a7b8fb2b241a3010a6",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2b95ba962c1efc7974e4e2a62135ff4d4a9172d1be82162eec712fbf36ff53e0.webp",
+      "bytes": 20026,
+      "sha256": "2b95ba962c1efc7974e4e2a62135ff4d4a9172d1be82162eec712fbf36ff53e0",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2c49b79e5e8166e46a6b12f3246caabae8747a55791e131d135b2f6f9a1904db.webp",
+      "bytes": 40864,
+      "sha256": "2c49b79e5e8166e46a6b12f3246caabae8747a55791e131d135b2f6f9a1904db",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2dbddbe2a38c95c54eff45bd76faaa35b6a834a83623fbb8622516038dde0a9e.webp",
+      "bytes": 43628,
+      "sha256": "2dbddbe2a38c95c54eff45bd76faaa35b6a834a83623fbb8622516038dde0a9e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2dc76d7ba87ad00d8a1da9328a40cad635ba490b65ec2e6dd5a39d101e810c05.webp",
+      "bytes": 9208,
+      "sha256": "2dc76d7ba87ad00d8a1da9328a40cad635ba490b65ec2e6dd5a39d101e810c05",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2e857b111b171a78906e623486617a4c7f40c7baa73faa7953f6382728221dc6.webp",
+      "bytes": 54506,
+      "sha256": "2e857b111b171a78906e623486617a4c7f40c7baa73faa7953f6382728221dc6",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2ea40c3d251575ef6b09b213b168b0ca1d691fd4927f0d6845966ff1f318005f.webp",
+      "bytes": 40264,
+      "sha256": "2ea40c3d251575ef6b09b213b168b0ca1d691fd4927f0d6845966ff1f318005f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/2ec78a2b3fa73fe7cb4aaff3c6ee2080c871c845460708b6102bed87c798f928.webp",
+      "bytes": 40678,
+      "sha256": "2ec78a2b3fa73fe7cb4aaff3c6ee2080c871c845460708b6102bed87c798f928",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/30b8ce452aae4224d16060c471142180634db80162d4b9e4b5428a7bf881884f.webp",
+      "bytes": 45150,
+      "sha256": "30b8ce452aae4224d16060c471142180634db80162d4b9e4b5428a7bf881884f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/34c60cae1b4db7b1a86690cfc95e9cd7572f68c1f4b88688099ed6f06fe52a41.webp",
+      "bytes": 33940,
+      "sha256": "34c60cae1b4db7b1a86690cfc95e9cd7572f68c1f4b88688099ed6f06fe52a41",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/37f50918a9f1b4c445710c11b1d0fa4a4da158ac306d78cb6c4b53fa072e2475.webp",
+      "bytes": 24292,
+      "sha256": "37f50918a9f1b4c445710c11b1d0fa4a4da158ac306d78cb6c4b53fa072e2475",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/383d8c949337269edb139dee366f963423fd8892b150251f0271472765b07ef8.webp",
+      "bytes": 61620,
+      "sha256": "383d8c949337269edb139dee366f963423fd8892b150251f0271472765b07ef8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/38ad7b2d02b2f976b62a6a45448869a3bc7fc116218993620c866e930a3b1128.webp",
+      "bytes": 52332,
+      "sha256": "38ad7b2d02b2f976b62a6a45448869a3bc7fc116218993620c866e930a3b1128",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/39410bcd7cc4604453b043b111a3d6dd0eb7d48c1630f809fdbf10ee17ec37e0.webp",
+      "bytes": 71236,
+      "sha256": "39410bcd7cc4604453b043b111a3d6dd0eb7d48c1630f809fdbf10ee17ec37e0",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/39f31debdf32e2cf2cb22f0f61ed75f076f78a46d72d463323b1556a62686d7b.webp",
+      "bytes": 46950,
+      "sha256": "39f31debdf32e2cf2cb22f0f61ed75f076f78a46d72d463323b1556a62686d7b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/3aa436f2639029cbb7a24dd631a22c2a0e77a6c9e50c4f82a0c1611042eb0be3.webp",
+      "bytes": 38524,
+      "sha256": "3aa436f2639029cbb7a24dd631a22c2a0e77a6c9e50c4f82a0c1611042eb0be3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/3b2553c85b149fe5d14cf087827b4cf9ee3abd3c0ebad8f83502fc0e0fb82672.webp",
+      "bytes": 38424,
+      "sha256": "3b2553c85b149fe5d14cf087827b4cf9ee3abd3c0ebad8f83502fc0e0fb82672",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/3b4de16425fba16f2124b9b89aa7ff52416617ac5dac8afc8a29134dd2547e53.webp",
+      "bytes": 40378,
+      "sha256": "3b4de16425fba16f2124b9b89aa7ff52416617ac5dac8afc8a29134dd2547e53",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/3b687ef49a5db24e9c752362a2555ae5229393ecacc10e085c59e5f021876f13.webp",
+      "bytes": 25022,
+      "sha256": "3b687ef49a5db24e9c752362a2555ae5229393ecacc10e085c59e5f021876f13",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/3f4d716578f6a970af5025647b383b2a6ae35a7f5cd0dacba2aa1f5fe2d11e0a.webp",
+      "bytes": 49652,
+      "sha256": "3f4d716578f6a970af5025647b383b2a6ae35a7f5cd0dacba2aa1f5fe2d11e0a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/3f7ce1aec577b4f05c786c9f230aa4af33f473ed528a168eb6b5184f42c6faea.webp",
+      "bytes": 55248,
+      "sha256": "3f7ce1aec577b4f05c786c9f230aa4af33f473ed528a168eb6b5184f42c6faea",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/420d61040cb6074277631e28243c8832ddd61459d10c13d19c2da1ae5c37e80b.webp",
+      "bytes": 28240,
+      "sha256": "420d61040cb6074277631e28243c8832ddd61459d10c13d19c2da1ae5c37e80b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/42767384a4a65eabb4aa63dc9ee9fdc55ade902b94b55f79256b455d87869ea9.webp",
+      "bytes": 53116,
+      "sha256": "42767384a4a65eabb4aa63dc9ee9fdc55ade902b94b55f79256b455d87869ea9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/43a683a78f806fab38d7a083c8195de27c6e9f5a0202824334142792e04287b9.webp",
+      "bytes": 27508,
+      "sha256": "43a683a78f806fab38d7a083c8195de27c6e9f5a0202824334142792e04287b9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/45d28b857957479eeb292d289e40c6ed0d34e982d80e27915e00c9090afceb24.webp",
+      "bytes": 30598,
+      "sha256": "45d28b857957479eeb292d289e40c6ed0d34e982d80e27915e00c9090afceb24",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/46c9dbb7d95facdad3e0d8970b47ca7cc7849e4d846dae8cdb50cb18c36a436d.webp",
+      "bytes": 55354,
+      "sha256": "46c9dbb7d95facdad3e0d8970b47ca7cc7849e4d846dae8cdb50cb18c36a436d",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/47254e6faa950d5a7cf0e642ba5d483d7060f92b0209f98242ed3831d373e21c.webp",
+      "bytes": 39842,
+      "sha256": "47254e6faa950d5a7cf0e642ba5d483d7060f92b0209f98242ed3831d373e21c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4756cb057ae4f3714f7468afdbb80af9c4aa79776b72eea5bdd04bf211d88e12.webp",
+      "bytes": 55766,
+      "sha256": "4756cb057ae4f3714f7468afdbb80af9c4aa79776b72eea5bdd04bf211d88e12",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/497ca2414af9094000b900b01169ce919f91982289ee3102391dc81ba9140789.webp",
+      "bytes": 86564,
+      "sha256": "497ca2414af9094000b900b01169ce919f91982289ee3102391dc81ba9140789",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4a38d442e780893ce4b0afe764b817e901638c0e82cacce72d5150835a9a309e.webp",
+      "bytes": 42292,
+      "sha256": "4a38d442e780893ce4b0afe764b817e901638c0e82cacce72d5150835a9a309e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4a9b72bc454f8611c3445279641bc48316f557922cdf0e7ad6c346eee6cdfa18.webp",
+      "bytes": 49094,
+      "sha256": "4a9b72bc454f8611c3445279641bc48316f557922cdf0e7ad6c346eee6cdfa18",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4ae55d0c9d057152ad228f513a5daba3ec43d44a65d422b9f9dea4540b02facd.webp",
+      "bytes": 19822,
+      "sha256": "4ae55d0c9d057152ad228f513a5daba3ec43d44a65d422b9f9dea4540b02facd",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4ba8f08d50114e6398b2751ccc38af8811ec5217d764e14c1f36ec74e1ff5844.webp",
+      "bytes": 42950,
+      "sha256": "4ba8f08d50114e6398b2751ccc38af8811ec5217d764e14c1f36ec74e1ff5844",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4c77009a61e95e9e7d2ed95494b81c33cb0af3378837b6a90d146b3f3b36648a.webp",
+      "bytes": 39862,
+      "sha256": "4c77009a61e95e9e7d2ed95494b81c33cb0af3378837b6a90d146b3f3b36648a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4ea19c1b241b2ab72cf7d6f1f6e04c27914a63f4a9edf9cf59bd14eddecb4b2f.webp",
+      "bytes": 55746,
+      "sha256": "4ea19c1b241b2ab72cf7d6f1f6e04c27914a63f4a9edf9cf59bd14eddecb4b2f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4ebf24f65ab53f4d0f10feb985e0adedc5a126161288ebe3bfd3eee2385b5d27.webp",
+      "bytes": 48742,
+      "sha256": "4ebf24f65ab53f4d0f10feb985e0adedc5a126161288ebe3bfd3eee2385b5d27",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4f1dba836543a20bd3072f2a62e9d93aff4f80a2c650e234a5ba7573a69ecd0a.webp",
+      "bytes": 41996,
+      "sha256": "4f1dba836543a20bd3072f2a62e9d93aff4f80a2c650e234a5ba7573a69ecd0a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/4fe85748e075d1ebafe50306e780efd4d045ce1d8bf95de60e15ba40f9446700.webp",
+      "bytes": 44840,
+      "sha256": "4fe85748e075d1ebafe50306e780efd4d045ce1d8bf95de60e15ba40f9446700",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/503217835658b27e7762ab0ba531208c81a58335d7f3ad54f31336a07d68722f.webp",
+      "bytes": 44010,
+      "sha256": "503217835658b27e7762ab0ba531208c81a58335d7f3ad54f31336a07d68722f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/50c35dbbd299e3b87d5f22c3d5a4b3b26a3f29dd6acf911f4f968d8f0614f908.webp",
+      "bytes": 36306,
+      "sha256": "50c35dbbd299e3b87d5f22c3d5a4b3b26a3f29dd6acf911f4f968d8f0614f908",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/52456a60a7f9c6f00f1b00881f20cf90ccda203f9e0005723f32423a42d213f8.webp",
+      "bytes": 25642,
+      "sha256": "52456a60a7f9c6f00f1b00881f20cf90ccda203f9e0005723f32423a42d213f8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5301491a567e141bfff1addd66d05bad57896dde53da74fea7adf53edb643aa4.webp",
+      "bytes": 38996,
+      "sha256": "5301491a567e141bfff1addd66d05bad57896dde53da74fea7adf53edb643aa4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5341e559cebd89723d47b6e6e1b10a50a3ac3d776b6df0d8b9b57b9be2b55581.webp",
+      "bytes": 33476,
+      "sha256": "5341e559cebd89723d47b6e6e1b10a50a3ac3d776b6df0d8b9b57b9be2b55581",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/544a31be055a2c33517874d1b6b6d0d72e7e60aae05ae69a006634363b3fa8e6.webp",
+      "bytes": 61684,
+      "sha256": "544a31be055a2c33517874d1b6b6d0d72e7e60aae05ae69a006634363b3fa8e6",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/54a2fc698d1ce39fca81fb68b359fb7761506b1c0311d0e604724b870c924dab.webp",
+      "bytes": 57156,
+      "sha256": "54a2fc698d1ce39fca81fb68b359fb7761506b1c0311d0e604724b870c924dab",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/54b18ce195be411008a46f9e2ed3362e2fcbe3c0a8a10243ae1df919adde3e4e.webp",
+      "bytes": 50480,
+      "sha256": "54b18ce195be411008a46f9e2ed3362e2fcbe3c0a8a10243ae1df919adde3e4e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/558422143fcd7213a8e70ebae750568c9938efbded2ecfe8ebed2fbfcfcfe751.webp",
+      "bytes": 48506,
+      "sha256": "558422143fcd7213a8e70ebae750568c9938efbded2ecfe8ebed2fbfcfcfe751",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5694b9f1064894ab53644ca8699231cfe4db5cb3c2cd3bfc210d8ad93cc0fa69.webp",
+      "bytes": 44218,
+      "sha256": "5694b9f1064894ab53644ca8699231cfe4db5cb3c2cd3bfc210d8ad93cc0fa69",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5724ee65875fbf40e88aed83c5746e28d58830ef0f7762733c406ee6a81a2312.webp",
+      "bytes": 46892,
+      "sha256": "5724ee65875fbf40e88aed83c5746e28d58830ef0f7762733c406ee6a81a2312",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/57f0fbc0aa8ca0ca4fd5489884781a4aee3495292e99b5eb5d936df193ad2979.webp",
+      "bytes": 17784,
+      "sha256": "57f0fbc0aa8ca0ca4fd5489884781a4aee3495292e99b5eb5d936df193ad2979",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5882d120641e5e72f320676d35b2a704b13c2f7c0f51b7a29eb281bedd0fe0f3.webp",
+      "bytes": 69654,
+      "sha256": "5882d120641e5e72f320676d35b2a704b13c2f7c0f51b7a29eb281bedd0fe0f3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/588f3a4c3cc893ca8f60f8cf3ce08f1c38f68fb7db2743a1b167dcb0feb01a7b.webp",
+      "bytes": 46458,
+      "sha256": "588f3a4c3cc893ca8f60f8cf3ce08f1c38f68fb7db2743a1b167dcb0feb01a7b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/58ab7c5c7ce9a9509f5b0ab4979cc9f9d82820309e2ffa681b46ac66e5737a1c.webp",
+      "bytes": 32868,
+      "sha256": "58ab7c5c7ce9a9509f5b0ab4979cc9f9d82820309e2ffa681b46ac66e5737a1c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/594efaa0474bdc7b47123909012d39b87d7cb360105e0d0dc5a0696b80e7b406.webp",
+      "bytes": 63562,
+      "sha256": "594efaa0474bdc7b47123909012d39b87d7cb360105e0d0dc5a0696b80e7b406",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/59b75e92d62c752ea4fb0ed8462e7b54dcc6cd0477218d1741ac3f9bd279d249.webp",
+      "bytes": 42890,
+      "sha256": "59b75e92d62c752ea4fb0ed8462e7b54dcc6cd0477218d1741ac3f9bd279d249",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5a1a8fb048a0c28e7db1ec8f632df1f5cb97d69b1781fb05c063772a333adbe2.webp",
+      "bytes": 20700,
+      "sha256": "5a1a8fb048a0c28e7db1ec8f632df1f5cb97d69b1781fb05c063772a333adbe2",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5a8b9f32423a7274f5438f0f236f99c71f2d6851f11dd5c6d7d325c8a609b550.webp",
+      "bytes": 42598,
+      "sha256": "5a8b9f32423a7274f5438f0f236f99c71f2d6851f11dd5c6d7d325c8a609b550",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5b22f2c3c4e6701c0f1be5e4e4a85d485992e7cfd1c1d3d2e22eaf2e4e68c1c3.webp",
+      "bytes": 19392,
+      "sha256": "5b22f2c3c4e6701c0f1be5e4e4a85d485992e7cfd1c1d3d2e22eaf2e4e68c1c3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5b77d664103973d0ecab562b4a28a1f63c80c1683300ec779ecf2fa60d75b963.webp",
+      "bytes": 46414,
+      "sha256": "5b77d664103973d0ecab562b4a28a1f63c80c1683300ec779ecf2fa60d75b963",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5b96fef1832966d8a036957d4b9f2f1eae8f57e679828b753e7cb7f84969c442.webp",
+      "bytes": 24148,
+      "sha256": "5b96fef1832966d8a036957d4b9f2f1eae8f57e679828b753e7cb7f84969c442",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5c87c50edaced7ef82e2e8b97a38188cd7c853c973c1feaaca8b1db759012a4c.webp",
+      "bytes": 42936,
+      "sha256": "5c87c50edaced7ef82e2e8b97a38188cd7c853c973c1feaaca8b1db759012a4c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5cc101e043902ff3deb3bf05eb6928935bb641ebce481d89295f4d96e245325b.webp",
+      "bytes": 51282,
+      "sha256": "5cc101e043902ff3deb3bf05eb6928935bb641ebce481d89295f4d96e245325b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5d59aac7128585abde0af903f0034f017ac013bf734d615f4557e613b4697014.webp",
+      "bytes": 51352,
+      "sha256": "5d59aac7128585abde0af903f0034f017ac013bf734d615f4557e613b4697014",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5d8a32d374788a21df2d784ea59e151f3faeabc6f72e48812753a07bee1fe3c4.webp",
+      "bytes": 15430,
+      "sha256": "5d8a32d374788a21df2d784ea59e151f3faeabc6f72e48812753a07bee1fe3c4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/5f24d19c362fa921641f75c801914d4be62b40c1c2bf321cba6101acb90da03e.webp",
+      "bytes": 54558,
+      "sha256": "5f24d19c362fa921641f75c801914d4be62b40c1c2bf321cba6101acb90da03e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/60a8028a93eb9fec21069f54a8ae626eeb14c0b49c839b9bc463b97547a3f816.webp",
+      "bytes": 49370,
+      "sha256": "60a8028a93eb9fec21069f54a8ae626eeb14c0b49c839b9bc463b97547a3f816",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/64f719583b9ee8616ed1cca862c5622305991ff9c16cc9f1b1b0e68065a0d40e.webp",
+      "bytes": 43722,
+      "sha256": "64f719583b9ee8616ed1cca862c5622305991ff9c16cc9f1b1b0e68065a0d40e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/673fc971b6d77451c5b01867fa911e62b2e440437d8e4731ec9c04da8d0a00e1.webp",
+      "bytes": 47146,
+      "sha256": "673fc971b6d77451c5b01867fa911e62b2e440437d8e4731ec9c04da8d0a00e1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/677160f1708a6b5615b2b9792153e649b56a4125e4bceb263810b62ed86c4028.webp",
+      "bytes": 37986,
+      "sha256": "677160f1708a6b5615b2b9792153e649b56a4125e4bceb263810b62ed86c4028",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/67ebffd7fa91f4a570485f4176cd920ee2be440cf4baa3242d0640a1e924c0e9.webp",
+      "bytes": 63546,
+      "sha256": "67ebffd7fa91f4a570485f4176cd920ee2be440cf4baa3242d0640a1e924c0e9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6849b94bf63700c20d57a726967a05d39f972b12c5cfdfba86c0274d23be7e8b.webp",
+      "bytes": 50286,
+      "sha256": "6849b94bf63700c20d57a726967a05d39f972b12c5cfdfba86c0274d23be7e8b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/69d7e9c850a674179e3f24f9d1101ffdc1611d4c96bc93d42604064cf28e688c.webp",
+      "bytes": 45462,
+      "sha256": "69d7e9c850a674179e3f24f9d1101ffdc1611d4c96bc93d42604064cf28e688c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6a092b93b2caf89089039eea3faef86871f9c6e9816a8a8b212a705eb302e87e.webp",
+      "bytes": 51448,
+      "sha256": "6a092b93b2caf89089039eea3faef86871f9c6e9816a8a8b212a705eb302e87e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6b5712d53b4eacc313175bcbec4347f0592f87d719c341a9ef8287ae5318bc87.webp",
+      "bytes": 46868,
+      "sha256": "6b5712d53b4eacc313175bcbec4347f0592f87d719c341a9ef8287ae5318bc87",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6baf06684a52a21fec71e0ef8f541a274e2f696fff9d6895c60b4055e43ae723.webp",
+      "bytes": 64690,
+      "sha256": "6baf06684a52a21fec71e0ef8f541a274e2f696fff9d6895c60b4055e43ae723",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6c04f53c6e6cd27dcd5455a3d19300e22925bbe2120c79d45341d592c1571113.webp",
+      "bytes": 21854,
+      "sha256": "6c04f53c6e6cd27dcd5455a3d19300e22925bbe2120c79d45341d592c1571113",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6c44ee9bfd309fc3ddc0931c73b1bb29508f2dc4a6184dbf109670707daefee5.webp",
+      "bytes": 19346,
+      "sha256": "6c44ee9bfd309fc3ddc0931c73b1bb29508f2dc4a6184dbf109670707daefee5",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6c85c0274a547c4a56b1c1ed034692feb90caaf4eda745d5e63f80d933fdefe8.webp",
+      "bytes": 44192,
+      "sha256": "6c85c0274a547c4a56b1c1ed034692feb90caaf4eda745d5e63f80d933fdefe8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6d3096460bb4c95cafea543e0bb79ac2bd53bb78e111443d7d4c87b80a7702ce.webp",
+      "bytes": 44284,
+      "sha256": "6d3096460bb4c95cafea543e0bb79ac2bd53bb78e111443d7d4c87b80a7702ce",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/6d9920ca57358334a2ef44897e810f8f11cb5e7f272cf750627a3471d9f5a802.webp",
+      "bytes": 38348,
+      "sha256": "6d9920ca57358334a2ef44897e810f8f11cb5e7f272cf750627a3471d9f5a802",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7150d24cf5fde0326fda6eaea9d0979299d9c0cac065ddc4ffe744954bed3c40.webp",
+      "bytes": 66534,
+      "sha256": "7150d24cf5fde0326fda6eaea9d0979299d9c0cac065ddc4ffe744954bed3c40",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7233e815f49670e44a79021198bb37c543227f5cc7686bb24bf62120fbf91310.webp",
+      "bytes": 32716,
+      "sha256": "7233e815f49670e44a79021198bb37c543227f5cc7686bb24bf62120fbf91310",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/726a38243b72228382b76e9f3fbb99aa8d760480063bd00047f0642cbca74282.webp",
+      "bytes": 21790,
+      "sha256": "726a38243b72228382b76e9f3fbb99aa8d760480063bd00047f0642cbca74282",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/735c95d3a547c2759ce879567143e8ced7f762e8444c4d2fd7bc624d2edcf5b1.webp",
+      "bytes": 28034,
+      "sha256": "735c95d3a547c2759ce879567143e8ced7f762e8444c4d2fd7bc624d2edcf5b1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7426be1605c8a048a50e6324a339a8267f6f9a7d358c39c794593f3dd6254978.webp",
+      "bytes": 37786,
+      "sha256": "7426be1605c8a048a50e6324a339a8267f6f9a7d358c39c794593f3dd6254978",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/746b4e08cdfa52755397ece4bd305edc992088af4d445d9859968b282c59e679.webp",
+      "bytes": 10948,
+      "sha256": "746b4e08cdfa52755397ece4bd305edc992088af4d445d9859968b282c59e679",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/74eb2eaf1d01e0f318dba5fdf25428c0fd9e6f6a930d6b164d0235d2ee958965.webp",
+      "bytes": 27448,
+      "sha256": "74eb2eaf1d01e0f318dba5fdf25428c0fd9e6f6a930d6b164d0235d2ee958965",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/75d61e2b2692e50cf796b1805daf668c76f087e0a2ef6205fb7777a3ac5a5a61.webp",
+      "bytes": 89838,
+      "sha256": "75d61e2b2692e50cf796b1805daf668c76f087e0a2ef6205fb7777a3ac5a5a61",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/76f733967c706c94a8f4b96f5de04f6b64e70b35c85121302412c1cd029aea42.webp",
+      "bytes": 39042,
+      "sha256": "76f733967c706c94a8f4b96f5de04f6b64e70b35c85121302412c1cd029aea42",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/771e94891879729b9abeed1dabb71b79684f809c49d6312d0672fcac395a40dd.webp",
+      "bytes": 49264,
+      "sha256": "771e94891879729b9abeed1dabb71b79684f809c49d6312d0672fcac395a40dd",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/77509f2ce2a5789207e7320ae066db515113b1a3e1d15b59e0c25b67657c9481.webp",
+      "bytes": 53184,
+      "sha256": "77509f2ce2a5789207e7320ae066db515113b1a3e1d15b59e0c25b67657c9481",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/78fbe4bbcb93ef93955d06807e3c1d776e3b1d1bb58107a600873aa3b28f7943.webp",
+      "bytes": 46982,
+      "sha256": "78fbe4bbcb93ef93955d06807e3c1d776e3b1d1bb58107a600873aa3b28f7943",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7b43d1e42461aa49573d05e8539751eaabc86bf3a81480044e8a49a93a652e8b.webp",
+      "bytes": 54888,
+      "sha256": "7b43d1e42461aa49573d05e8539751eaabc86bf3a81480044e8a49a93a652e8b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7be523d74f1f8d69f53f18c7c1501e44d370e883e13d1489fabfd46477456511.webp",
+      "bytes": 38096,
+      "sha256": "7be523d74f1f8d69f53f18c7c1501e44d370e883e13d1489fabfd46477456511",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7c29592e180f3bfa39e7d11ebe81ca010086ae885f2790cd94f3bb18aaa8fa09.webp",
+      "bytes": 44740,
+      "sha256": "7c29592e180f3bfa39e7d11ebe81ca010086ae885f2790cd94f3bb18aaa8fa09",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7c7dc285e08d190d7f4b2e0f90e4c346832a65e7619546d28964c236a825aec6.webp",
+      "bytes": 22422,
+      "sha256": "7c7dc285e08d190d7f4b2e0f90e4c346832a65e7619546d28964c236a825aec6",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7cd26d3087da4d723bad7a0bdeff27c9ab54ec91ae20d35deb3d84d30fa854b3.webp",
+      "bytes": 46468,
+      "sha256": "7cd26d3087da4d723bad7a0bdeff27c9ab54ec91ae20d35deb3d84d30fa854b3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7d5da50731da48d6ba7b7cc48f15463625fc4337e3357f235db32e84616f3538.webp",
+      "bytes": 45668,
+      "sha256": "7d5da50731da48d6ba7b7cc48f15463625fc4337e3357f235db32e84616f3538",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7dd430ead9dd07ef9cebceeb5520c49c73e0d904e4408b5bc0d3341795e1b7e1.webp",
+      "bytes": 45644,
+      "sha256": "7dd430ead9dd07ef9cebceeb5520c49c73e0d904e4408b5bc0d3341795e1b7e1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7ebadbe1df63fd452b2ad1a052f3c28c1c8e39c7d3a3240d3520c760a5801596.webp",
+      "bytes": 43018,
+      "sha256": "7ebadbe1df63fd452b2ad1a052f3c28c1c8e39c7d3a3240d3520c760a5801596",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/7eef54d1881c95536bdd72b868995186c5249d38d2aa5669875e4e41c04b61d8.webp",
+      "bytes": 56682,
+      "sha256": "7eef54d1881c95536bdd72b868995186c5249d38d2aa5669875e4e41c04b61d8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8013e7c3df603d46c7c8a5dbadf4b0b942bf5a131335e576e5585b3878c64283.webp",
+      "bytes": 43120,
+      "sha256": "8013e7c3df603d46c7c8a5dbadf4b0b942bf5a131335e576e5585b3878c64283",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/843431a3e7ade8a1c40eee27871f778b99a249668c617e62d737ea0da7a3c8d7.webp",
+      "bytes": 52674,
+      "sha256": "843431a3e7ade8a1c40eee27871f778b99a249668c617e62d737ea0da7a3c8d7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8468779fdfa12b52cea437c75a7edb2b192728f594ecfeaaed79ffe38ee7394c.webp",
+      "bytes": 63400,
+      "sha256": "8468779fdfa12b52cea437c75a7edb2b192728f594ecfeaaed79ffe38ee7394c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/849fb20ee94fc55b0bf031d94ce5935e702341a916bacab7c1a00ac61a2a6989.webp",
+      "bytes": 47202,
+      "sha256": "849fb20ee94fc55b0bf031d94ce5935e702341a916bacab7c1a00ac61a2a6989",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/85176777a2359a3a6fe0977ee0dd7bd5f2602744520a6e8bf7a9bf11bda90414.webp",
+      "bytes": 52268,
+      "sha256": "85176777a2359a3a6fe0977ee0dd7bd5f2602744520a6e8bf7a9bf11bda90414",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8559185ce185f027b5c6c37c772e76086ef1699f4d1e3b0301fdd7456de400d8.webp",
+      "bytes": 40314,
+      "sha256": "8559185ce185f027b5c6c37c772e76086ef1699f4d1e3b0301fdd7456de400d8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/857cde8dd35ecaf45a948bfff78aefbf050f7d0977b794d077343980c898478e.webp",
+      "bytes": 43016,
+      "sha256": "857cde8dd35ecaf45a948bfff78aefbf050f7d0977b794d077343980c898478e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8600eb566d20d498ec34b55362a699db45f0f3876332edf282d0babb8b8bb7a9.webp",
+      "bytes": 42968,
+      "sha256": "8600eb566d20d498ec34b55362a699db45f0f3876332edf282d0babb8b8bb7a9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/869f5f89a4e2b50dd3a89b9926bd69e05af9df9b5ae5b788bdfb04898c2e8988.webp",
+      "bytes": 36970,
+      "sha256": "869f5f89a4e2b50dd3a89b9926bd69e05af9df9b5ae5b788bdfb04898c2e8988",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/87578e9672961bd71285de366480f11e0a12f17770685b6659b6d6f3681ebbff.webp",
+      "bytes": 20604,
+      "sha256": "87578e9672961bd71285de366480f11e0a12f17770685b6659b6d6f3681ebbff",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/88161e1bbfebf8041b0207fd6988ad1a3a9c184126f518a43dfeb47d7952a121.webp",
+      "bytes": 18912,
+      "sha256": "88161e1bbfebf8041b0207fd6988ad1a3a9c184126f518a43dfeb47d7952a121",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8934b3df3b349f66390390d043a645c6453215a2cdb9105af4507e8420b908b1.webp",
+      "bytes": 41624,
+      "sha256": "8934b3df3b349f66390390d043a645c6453215a2cdb9105af4507e8420b908b1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/89900e6354da1a15895dfceff3a274fe042047f23bdaaa6eb9fadd37af7fca3f.webp",
+      "bytes": 56360,
+      "sha256": "89900e6354da1a15895dfceff3a274fe042047f23bdaaa6eb9fadd37af7fca3f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8a5ecd186d96faab3b0b2091dea775218f2bf2d6c94143c696e5db579f9a6a71.webp",
+      "bytes": 40000,
+      "sha256": "8a5ecd186d96faab3b0b2091dea775218f2bf2d6c94143c696e5db579f9a6a71",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8c12c337283fcfbaa350d2ea186b4162fc0aa0aaa255dd0bc8a61f789278fc2f.webp",
+      "bytes": 122566,
+      "sha256": "8c12c337283fcfbaa350d2ea186b4162fc0aa0aaa255dd0bc8a61f789278fc2f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8c5b6c28246dcdf238adfba990d4ab9e734e7cd2938dbfe7624ac3f44387b755.webp",
+      "bytes": 22116,
+      "sha256": "8c5b6c28246dcdf238adfba990d4ab9e734e7cd2938dbfe7624ac3f44387b755",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8d89a66c543ab4d9ceb353bcc21866398f1a92c98f2083b08cab54edf6b7bfa7.webp",
+      "bytes": 19330,
+      "sha256": "8d89a66c543ab4d9ceb353bcc21866398f1a92c98f2083b08cab54edf6b7bfa7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8e379a67ac3f759cc9843fa7548ddb947d4ebce2b32cfb3ef243338e29ae355b.webp",
+      "bytes": 44978,
+      "sha256": "8e379a67ac3f759cc9843fa7548ddb947d4ebce2b32cfb3ef243338e29ae355b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8ea4eda57c54d8277fc506f237062b834d82316486e26868fd26bf6e98646bbb.webp",
+      "bytes": 62304,
+      "sha256": "8ea4eda57c54d8277fc506f237062b834d82316486e26868fd26bf6e98646bbb",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/8ee31a1bb5d8b41a8dbf111a759e2b6aaba8b7021b83352f52b54f878dffded2.webp",
+      "bytes": 40720,
+      "sha256": "8ee31a1bb5d8b41a8dbf111a759e2b6aaba8b7021b83352f52b54f878dffded2",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/901861defeb7dfef14c0685725526aa4fb1a920c8877938f695a2aaf0516c5c7.webp",
+      "bytes": 25820,
+      "sha256": "901861defeb7dfef14c0685725526aa4fb1a920c8877938f695a2aaf0516c5c7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/902ce8fa878bd88770c0b1b44c2d3e0ea550cfd9debf6c3a1cf5e4c2e9426d76.webp",
+      "bytes": 26960,
+      "sha256": "902ce8fa878bd88770c0b1b44c2d3e0ea550cfd9debf6c3a1cf5e4c2e9426d76",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/904b27a87da0c9d73cad2e2c5f683cefe2530a94d14a724b1280d6fd72b4087a.webp",
+      "bytes": 61414,
+      "sha256": "904b27a87da0c9d73cad2e2c5f683cefe2530a94d14a724b1280d6fd72b4087a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9110f99e25209948cb29febc5dfe6fb5b40b9bfaa7007b5a0610bdcb58a3ffef.webp",
+      "bytes": 20330,
+      "sha256": "9110f99e25209948cb29febc5dfe6fb5b40b9bfaa7007b5a0610bdcb58a3ffef",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/91805be6c769a4e5b54cc07c889444421abeb1f0fd515aa32bb189388360bbaa.webp",
+      "bytes": 30164,
+      "sha256": "91805be6c769a4e5b54cc07c889444421abeb1f0fd515aa32bb189388360bbaa",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/91fc41eb315de11d2c7cdb7e9c91d24a2b3b323775ab75770c85612b1e1f94d5.webp",
+      "bytes": 53284,
+      "sha256": "91fc41eb315de11d2c7cdb7e9c91d24a2b3b323775ab75770c85612b1e1f94d5",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/92b4a7f08efd8e65857c1952ca32cf1fd9dd67731a4f0f5ee984484755180557.webp",
+      "bytes": 51480,
+      "sha256": "92b4a7f08efd8e65857c1952ca32cf1fd9dd67731a4f0f5ee984484755180557",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/93ac55aec2c55fdd63e31b29ee947bda8160b0abac87182c86add7decdeed04f.webp",
+      "bytes": 48084,
+      "sha256": "93ac55aec2c55fdd63e31b29ee947bda8160b0abac87182c86add7decdeed04f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/948ea762420130b53ac97c25b158daa3ad9d67bfbe82c19796b609afbcf5d156.webp",
+      "bytes": 53594,
+      "sha256": "948ea762420130b53ac97c25b158daa3ad9d67bfbe82c19796b609afbcf5d156",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/94df169a3be89660faf36c128e1188452e67add50b50fe3374408819dd2f9327.webp",
+      "bytes": 37596,
+      "sha256": "94df169a3be89660faf36c128e1188452e67add50b50fe3374408819dd2f9327",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9574221727fb7bc40998d34ca90684e0952eaa46f847b645a82e9511b522a9b4.webp",
+      "bytes": 75572,
+      "sha256": "9574221727fb7bc40998d34ca90684e0952eaa46f847b645a82e9511b522a9b4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/98e08639881dfa5f9ea487a20d430cc9db466857d1813e9524a5b182c9584a82.webp",
+      "bytes": 61174,
+      "sha256": "98e08639881dfa5f9ea487a20d430cc9db466857d1813e9524a5b182c9584a82",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9907a94c5da6cb23af8ee42b69bb994ea59a770bc823633658430e6b3cb298c2.webp",
+      "bytes": 42018,
+      "sha256": "9907a94c5da6cb23af8ee42b69bb994ea59a770bc823633658430e6b3cb298c2",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/996a9aa61686fa37b4f85e95beb957c48cc970cf3f33ffe07e31ff7098501187.webp",
+      "bytes": 54940,
+      "sha256": "996a9aa61686fa37b4f85e95beb957c48cc970cf3f33ffe07e31ff7098501187",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9a71347bc17bfe1a882e12b5851715dd366ca9ee04cabdc84ea0a2b4c5b5cc1c.webp",
+      "bytes": 42444,
+      "sha256": "9a71347bc17bfe1a882e12b5851715dd366ca9ee04cabdc84ea0a2b4c5b5cc1c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9aa20901ca236c36176868d27f62c7aab29ba5a7578623851c18eba8c15856d2.webp",
+      "bytes": 20412,
+      "sha256": "9aa20901ca236c36176868d27f62c7aab29ba5a7578623851c18eba8c15856d2",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9aafbc77f5ec396b7644a6fc7cacf1ae1cfadfd4d9c094e94bf18c02bfbf196b.webp",
+      "bytes": 16410,
+      "sha256": "9aafbc77f5ec396b7644a6fc7cacf1ae1cfadfd4d9c094e94bf18c02bfbf196b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9b54cc0395ba3375757772c4271efc921e3eb6d86bffd635ebce3cf036e729b9.webp",
+      "bytes": 70512,
+      "sha256": "9b54cc0395ba3375757772c4271efc921e3eb6d86bffd635ebce3cf036e729b9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9cd4bb73048b3aebc2d81d22c07f69ba4f0381d2b72aa3a0b5e6825aa3317998.webp",
+      "bytes": 47622,
+      "sha256": "9cd4bb73048b3aebc2d81d22c07f69ba4f0381d2b72aa3a0b5e6825aa3317998",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9cf6324268d5fb808874e5c774e48ac01787e1eec9396b87efaf76da45deb8db.webp",
+      "bytes": 46892,
+      "sha256": "9cf6324268d5fb808874e5c774e48ac01787e1eec9396b87efaf76da45deb8db",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9cfe43e625f858403befb3b8b0ae462845bde34128e708425ba87d4bc5faa2f9.webp",
+      "bytes": 20072,
+      "sha256": "9cfe43e625f858403befb3b8b0ae462845bde34128e708425ba87d4bc5faa2f9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9d1fd894c7807018eb4f0805452e691eb3a035c9af01c4636d721e562dea4f5f.webp",
+      "bytes": 19662,
+      "sha256": "9d1fd894c7807018eb4f0805452e691eb3a035c9af01c4636d721e562dea4f5f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/9dc8986530be638e27f12c18cfaacc90318057485b726f84af732732d6ae28c7.webp",
+      "bytes": 23912,
+      "sha256": "9dc8986530be638e27f12c18cfaacc90318057485b726f84af732732d6ae28c7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a14f1e281d8f373defee1af878e4c96de57c4fb7884a12dfc2d6fb7318606a57.webp",
+      "bytes": 44730,
+      "sha256": "a14f1e281d8f373defee1af878e4c96de57c4fb7884a12dfc2d6fb7318606a57",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a1caa362f7d8b5cd103174d9cb99065feb77710f6da103f4aa28490edaf2b3ed.webp",
+      "bytes": 46252,
+      "sha256": "a1caa362f7d8b5cd103174d9cb99065feb77710f6da103f4aa28490edaf2b3ed",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a3e4e7d2fd9f024e62867d7c93cdf1f60f1a2f55a9022d43933a596c35bb8102.webp",
+      "bytes": 21838,
+      "sha256": "a3e4e7d2fd9f024e62867d7c93cdf1f60f1a2f55a9022d43933a596c35bb8102",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a4e1e2fe7a1001e8728deb9e3dc3c62be77ce3273db8c1f4f4a51307f435bf6a.webp",
+      "bytes": 25590,
+      "sha256": "a4e1e2fe7a1001e8728deb9e3dc3c62be77ce3273db8c1f4f4a51307f435bf6a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a5436719b0b3495f649cde0428c9818b4233c6afe48a6e6f61e388eff9453e49.webp",
+      "bytes": 49262,
+      "sha256": "a5436719b0b3495f649cde0428c9818b4233c6afe48a6e6f61e388eff9453e49",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a5f17ea73139accb6bb89cf33ca8c8c021cfb2d5274b0cce565ca6ca23f8be5c.webp",
+      "bytes": 22068,
+      "sha256": "a5f17ea73139accb6bb89cf33ca8c8c021cfb2d5274b0cce565ca6ca23f8be5c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a604367a310fc84e892439ed777e14ed307b89c1567f607a8de64705934d1e06.webp",
+      "bytes": 36902,
+      "sha256": "a604367a310fc84e892439ed777e14ed307b89c1567f607a8de64705934d1e06",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a66643c7cdccb380658d25b52f985716d0ee81bc52a657df2a3ab42284426343.webp",
+      "bytes": 25396,
+      "sha256": "a66643c7cdccb380658d25b52f985716d0ee81bc52a657df2a3ab42284426343",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a66f0075ce40030096eac13667dd76f3f3229016a16614525246acfa72005e88.webp",
+      "bytes": 38750,
+      "sha256": "a66f0075ce40030096eac13667dd76f3f3229016a16614525246acfa72005e88",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a682b933a6b052391a3a2939d2c3f2279e00a1d1459d549420f172bf07a4730b.webp",
+      "bytes": 43162,
+      "sha256": "a682b933a6b052391a3a2939d2c3f2279e00a1d1459d549420f172bf07a4730b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a6f486d27965ce2e5981317ae6b38f9c1cd13f30d78ea4e7d126eaa877964be3.webp",
+      "bytes": 51640,
+      "sha256": "a6f486d27965ce2e5981317ae6b38f9c1cd13f30d78ea4e7d126eaa877964be3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a7ad03a9a3dbb937f005c85441c0f9273ee5b3dad246f7a6bc62cfdcd875634d.webp",
+      "bytes": 67298,
+      "sha256": "a7ad03a9a3dbb937f005c85441c0f9273ee5b3dad246f7a6bc62cfdcd875634d",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a7b5571dbc37b27c8fa291462766290c500576118ea862f2c65e8a511f66b182.webp",
+      "bytes": 27910,
+      "sha256": "a7b5571dbc37b27c8fa291462766290c500576118ea862f2c65e8a511f66b182",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a7fe9d287d57751e4ffee1de79fac58297d9bab7a157529cd747330ab10cb3ee.webp",
+      "bytes": 51462,
+      "sha256": "a7fe9d287d57751e4ffee1de79fac58297d9bab7a157529cd747330ab10cb3ee",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a85eb947b9c3685cdab1c2e5abec731924763fb2030fc54202b9520168e4bf29.webp",
+      "bytes": 54960,
+      "sha256": "a85eb947b9c3685cdab1c2e5abec731924763fb2030fc54202b9520168e4bf29",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/a98ec289920187f325cba02e27364c20d6744c47f9b70cee688934246dd9b2ef.webp",
+      "bytes": 17592,
+      "sha256": "a98ec289920187f325cba02e27364c20d6744c47f9b70cee688934246dd9b2ef",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/aa0a0e011771ecfdd356c807c86624cfbca779dc8f0b1e2bcbd7ee4b55827166.webp",
+      "bytes": 43486,
+      "sha256": "aa0a0e011771ecfdd356c807c86624cfbca779dc8f0b1e2bcbd7ee4b55827166",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/aa84c1a0b461119d4d4548ff5336594182bf151b4e879533adb2742926e1a9c7.webp",
+      "bytes": 41552,
+      "sha256": "aa84c1a0b461119d4d4548ff5336594182bf151b4e879533adb2742926e1a9c7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/aac0cbf8660d7e66b446c606af748716e49dd9d7d2797500f558f909ebfc0381.webp",
+      "bytes": 30130,
+      "sha256": "aac0cbf8660d7e66b446c606af748716e49dd9d7d2797500f558f909ebfc0381",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ae17959698863716eba1e38a84af1c738eb4a41969bc78759493a127bdbde988.webp",
+      "bytes": 36864,
+      "sha256": "ae17959698863716eba1e38a84af1c738eb4a41969bc78759493a127bdbde988",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/af029037612aab0592bad999c6d94b8ca1baa702b05fcb34a99156e0fdbc2de1.webp",
+      "bytes": 58710,
+      "sha256": "af029037612aab0592bad999c6d94b8ca1baa702b05fcb34a99156e0fdbc2de1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b17748d9718aa766111b893eb65414555ab89e1cd6d7326f003dc71915be307e.webp",
+      "bytes": 45072,
+      "sha256": "b17748d9718aa766111b893eb65414555ab89e1cd6d7326f003dc71915be307e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b18ab16afd74fe656a8f006309f66ac03421bd1d49fc29f87d2804795162b5ce.webp",
+      "bytes": 58046,
+      "sha256": "b18ab16afd74fe656a8f006309f66ac03421bd1d49fc29f87d2804795162b5ce",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b2139bcee62db49ddab3900732bdbe0d53c9edca12b9250b4726c17fab3fa158.webp",
+      "bytes": 55372,
+      "sha256": "b2139bcee62db49ddab3900732bdbe0d53c9edca12b9250b4726c17fab3fa158",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b2d4f1771e4a4192374cc8ddfcbc766ff5ea7d03ed2cbaa7f2dba843fe5c3143.webp",
+      "bytes": 47158,
+      "sha256": "b2d4f1771e4a4192374cc8ddfcbc766ff5ea7d03ed2cbaa7f2dba843fe5c3143",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b30a9dfb2019bf2a0850fce398ec96d2d45d9f81101b356e56889eef8f3d497f.webp",
+      "bytes": 18876,
+      "sha256": "b30a9dfb2019bf2a0850fce398ec96d2d45d9f81101b356e56889eef8f3d497f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b328071b60a1806db088dd9cc0ebfbb28c3c56e1b9de8ccb9386274bc129fc82.webp",
+      "bytes": 50356,
+      "sha256": "b328071b60a1806db088dd9cc0ebfbb28c3c56e1b9de8ccb9386274bc129fc82",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b43ac1aab94855f2f027da703024f2c959b26f1b0976dc49dd3237884b265c87.webp",
+      "bytes": 49394,
+      "sha256": "b43ac1aab94855f2f027da703024f2c959b26f1b0976dc49dd3237884b265c87",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b4e16acd5ef52aad73a8b6bc4e951e80916435c80a6547f4e710e79ca491df4e.webp",
+      "bytes": 50814,
+      "sha256": "b4e16acd5ef52aad73a8b6bc4e951e80916435c80a6547f4e710e79ca491df4e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b57e734dc89ff683ee05890411dce5ec60ad584e27bae1f645c454aeab06fb6b.webp",
+      "bytes": 49938,
+      "sha256": "b57e734dc89ff683ee05890411dce5ec60ad584e27bae1f645c454aeab06fb6b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b6058d8c0d93261340cba4eae10df05b275c76cc83eaee3948bdf0ac6a8035a5.webp",
+      "bytes": 21464,
+      "sha256": "b6058d8c0d93261340cba4eae10df05b275c76cc83eaee3948bdf0ac6a8035a5",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b644282ce2daa71bc03d6685c3653d2e89acc6cf0a60a026abcd620d5ea8df1f.webp",
+      "bytes": 42200,
+      "sha256": "b644282ce2daa71bc03d6685c3653d2e89acc6cf0a60a026abcd620d5ea8df1f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b784ae0d04f53e8ab0fc5d95f5c2d5491e56a4930a6ab42c0c0456375936c177.webp",
+      "bytes": 74254,
+      "sha256": "b784ae0d04f53e8ab0fc5d95f5c2d5491e56a4930a6ab42c0c0456375936c177",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b7f5545d93697f22ee4c0b96a60a0ece12effb4f9e5611eabeda885e97a709a7.webp",
+      "bytes": 45526,
+      "sha256": "b7f5545d93697f22ee4c0b96a60a0ece12effb4f9e5611eabeda885e97a709a7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/b8089315f9041f83cdc4cbc795f74236ceb3f7003d77568fc772f145beb44e82.webp",
+      "bytes": 66962,
+      "sha256": "b8089315f9041f83cdc4cbc795f74236ceb3f7003d77568fc772f145beb44e82",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ba33ae15e7a2b1ad0aef8e9ea44abe3c651d5f5dffe2ed4a4dc2b1bc41104990.webp",
+      "bytes": 53012,
+      "sha256": "ba33ae15e7a2b1ad0aef8e9ea44abe3c651d5f5dffe2ed4a4dc2b1bc41104990",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/bcdb9b6c237e513cb0bd87527446fa18178918f578634391874b4f5317248974.webp",
+      "bytes": 44940,
+      "sha256": "bcdb9b6c237e513cb0bd87527446fa18178918f578634391874b4f5317248974",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/bd874215017b99acbf9c4916b66491191f32b8a3e207e017f1e5c4dacce985f9.webp",
+      "bytes": 47582,
+      "sha256": "bd874215017b99acbf9c4916b66491191f32b8a3e207e017f1e5c4dacce985f9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/bdbec10c1abb612e0b9887b451aac1c6cd4edf2ec131c04214512b4f100888d4.webp",
+      "bytes": 68612,
+      "sha256": "bdbec10c1abb612e0b9887b451aac1c6cd4edf2ec131c04214512b4f100888d4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/bf1699a5ac5f4f6253edf10847cb7ab973359460f6d31744a30f0fb00f1e2bc9.webp",
+      "bytes": 48750,
+      "sha256": "bf1699a5ac5f4f6253edf10847cb7ab973359460f6d31744a30f0fb00f1e2bc9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c008257fa4d9575c04792bee1e90e644b7d38ae67e9b0e4ef5c2d0265f1d7887.webp",
+      "bytes": 49574,
+      "sha256": "c008257fa4d9575c04792bee1e90e644b7d38ae67e9b0e4ef5c2d0265f1d7887",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c15a893d83aa227b557869bd7a01b377501f734a4696dad978985b0db5fb5841.webp",
+      "bytes": 64116,
+      "sha256": "c15a893d83aa227b557869bd7a01b377501f734a4696dad978985b0db5fb5841",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c291defe61d02c53f5934ce6d3f648ab14b8720fee8c9f2f8b10bc95c152c9ce.webp",
+      "bytes": 55374,
+      "sha256": "c291defe61d02c53f5934ce6d3f648ab14b8720fee8c9f2f8b10bc95c152c9ce",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c3e256d7a395ad8df399ea51fe6deb1d0e5a2c1e174bafa2b2f6134ad245b54f.webp",
+      "bytes": 49470,
+      "sha256": "c3e256d7a395ad8df399ea51fe6deb1d0e5a2c1e174bafa2b2f6134ad245b54f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c4de37bea595e1f24d854702ef85c9d44bf23a982d933a2232caafccf5a7f333.webp",
+      "bytes": 53696,
+      "sha256": "c4de37bea595e1f24d854702ef85c9d44bf23a982d933a2232caafccf5a7f333",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c6970e1884fc37e3b1192489e5fd4f2c16ba73429757f000d94621f733fdc17a.webp",
+      "bytes": 52380,
+      "sha256": "c6970e1884fc37e3b1192489e5fd4f2c16ba73429757f000d94621f733fdc17a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c7f2002dc66b2da42e7873225bfea13cdde8467812d20d387a25fbe27669d60e.webp",
+      "bytes": 44262,
+      "sha256": "c7f2002dc66b2da42e7873225bfea13cdde8467812d20d387a25fbe27669d60e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/c8770d0a381dba208ef2d3633761baa153fb3b375ffad43a8b454a85a2dd80d4.webp",
+      "bytes": 41054,
+      "sha256": "c8770d0a381dba208ef2d3633761baa153fb3b375ffad43a8b454a85a2dd80d4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ca72d6140dcef6ce332e3e935e121b50766e47569a3e01e7d75b1f2970e7e2e3.webp",
+      "bytes": 45258,
+      "sha256": "ca72d6140dcef6ce332e3e935e121b50766e47569a3e01e7d75b1f2970e7e2e3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cbb7f351df67be8254b26c00485f455c904080d3f0c4b000b4ced0fee8687a6a.webp",
+      "bytes": 34734,
+      "sha256": "cbb7f351df67be8254b26c00485f455c904080d3f0c4b000b4ced0fee8687a6a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cbc92202005a04a0d1c1bb0a2da554897a00d750e296adb4368a11382b3e0729.webp",
+      "bytes": 53562,
+      "sha256": "cbc92202005a04a0d1c1bb0a2da554897a00d750e296adb4368a11382b3e0729",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cbfa184919d91177f8e54b6a3c5e3c9e8d347b5275ec36371235914da64514fc.webp",
+      "bytes": 47630,
+      "sha256": "cbfa184919d91177f8e54b6a3c5e3c9e8d347b5275ec36371235914da64514fc",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cc30d0db182c6892816375c126d10555593ab7bda51b1d96262d92947fea2700.webp",
+      "bytes": 44238,
+      "sha256": "cc30d0db182c6892816375c126d10555593ab7bda51b1d96262d92947fea2700",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cc83c9798727a0f7b2a3efb64aefc6d74a420e3d0ef48d69b625f6da636931fa.webp",
+      "bytes": 89168,
+      "sha256": "cc83c9798727a0f7b2a3efb64aefc6d74a420e3d0ef48d69b625f6da636931fa",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ccce98bbad6b149c032941ec1eea05bd98d360c96cd2153fd26975f6de4cc2e5.webp",
+      "bytes": 38350,
+      "sha256": "ccce98bbad6b149c032941ec1eea05bd98d360c96cd2153fd26975f6de4cc2e5",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cdc41b16b5014ff35c4728ffce78b5faba3b473ba004c6d92db8a20dbb228ded.webp",
+      "bytes": 21676,
+      "sha256": "cdc41b16b5014ff35c4728ffce78b5faba3b473ba004c6d92db8a20dbb228ded",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/cde5290ecccfc3ca7682d5b92cc3d7fd8822228094e29477a421982a405ea70f.webp",
+      "bytes": 33376,
+      "sha256": "cde5290ecccfc3ca7682d5b92cc3d7fd8822228094e29477a421982a405ea70f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ce262c8555268ac4b39a0e5f689bb4b62161413bf3c1886f365e7360f5cdd2a1.webp",
+      "bytes": 25180,
+      "sha256": "ce262c8555268ac4b39a0e5f689bb4b62161413bf3c1886f365e7360f5cdd2a1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ceebba7ac9baaaa87d3dafcdc7f81dcb58292eccfc6a4d6c6ab4dc8e574e3aaf.webp",
+      "bytes": 40768,
+      "sha256": "ceebba7ac9baaaa87d3dafcdc7f81dcb58292eccfc6a4d6c6ab4dc8e574e3aaf",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d1a1d57a7355410181eb266a7e34c612a05c152ae70b3a909e656688d445e1a8.webp",
+      "bytes": 48818,
+      "sha256": "d1a1d57a7355410181eb266a7e34c612a05c152ae70b3a909e656688d445e1a8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d1e9691f2b21f215ed798c47f4821295162158e871da1d5109f3bd7ece1af660.webp",
+      "bytes": 67092,
+      "sha256": "d1e9691f2b21f215ed798c47f4821295162158e871da1d5109f3bd7ece1af660",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d1f159dcfa31fec8c7d2e26931a7baa6eb203a500656d262d55f92b146e48621.webp",
+      "bytes": 47516,
+      "sha256": "d1f159dcfa31fec8c7d2e26931a7baa6eb203a500656d262d55f92b146e48621",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d2d1d0df0504aece2cdac498c87fb3aa59745e048dae28ee2049076c2b0aae7c.webp",
+      "bytes": 47960,
+      "sha256": "d2d1d0df0504aece2cdac498c87fb3aa59745e048dae28ee2049076c2b0aae7c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d2d61356718460ecde5293bfe29f5654a66ce0b60428b8a1d0e1f7da83e01bbc.webp",
+      "bytes": 46626,
+      "sha256": "d2d61356718460ecde5293bfe29f5654a66ce0b60428b8a1d0e1f7da83e01bbc",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d36737b736ddd5422ab7b959fb35dcab78985e88a6b89aec16b81a325ed0a7c0.webp",
+      "bytes": 42270,
+      "sha256": "d36737b736ddd5422ab7b959fb35dcab78985e88a6b89aec16b81a325ed0a7c0",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d4523f39e3d4aab2df4c78fd7117d8a54e428e816e15b23028ec1e993b445b76.webp",
+      "bytes": 44014,
+      "sha256": "d4523f39e3d4aab2df4c78fd7117d8a54e428e816e15b23028ec1e993b445b76",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d4fb99e96f5e812d618cd93105319cfab8a1cc80eaf1d9465cf04fe6161deec7.webp",
+      "bytes": 50728,
+      "sha256": "d4fb99e96f5e812d618cd93105319cfab8a1cc80eaf1d9465cf04fe6161deec7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d6860b8abecd09192fb46b7ba44a95748fc6f95cebe943f1386c8e94ec3d5855.webp",
+      "bytes": 18478,
+      "sha256": "d6860b8abecd09192fb46b7ba44a95748fc6f95cebe943f1386c8e94ec3d5855",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d7e44f4071a7b313734af733017dcca390a16a07a78e227d5d4414c90c0cf4e4.webp",
+      "bytes": 22200,
+      "sha256": "d7e44f4071a7b313734af733017dcca390a16a07a78e227d5d4414c90c0cf4e4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d7f899773262009a25a36de1d4ac1127593d78a0f27fe418a393af02d517e2ca.webp",
+      "bytes": 37300,
+      "sha256": "d7f899773262009a25a36de1d4ac1127593d78a0f27fe418a393af02d517e2ca",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d89393371795bd9f2066d2aeea139dc16249061614d55ca7970a2ba9253e3d8e.webp",
+      "bytes": 61672,
+      "sha256": "d89393371795bd9f2066d2aeea139dc16249061614d55ca7970a2ba9253e3d8e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d9205c817c8ddf21f74239ffc6f4f20bd4f894811842ccfd51e8595b9aa84d98.webp",
+      "bytes": 50662,
+      "sha256": "d9205c817c8ddf21f74239ffc6f4f20bd4f894811842ccfd51e8595b9aa84d98",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/d96ad705e81f24565d18177e96099f6316a3fb4fdd8f03b7dba91cef52245c0f.webp",
+      "bytes": 36254,
+      "sha256": "d96ad705e81f24565d18177e96099f6316a3fb4fdd8f03b7dba91cef52245c0f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/daeeb1c6b364492f11fe5818fc36049b0b7cfa2b2b6c70a794c5f78a93b56daa.webp",
+      "bytes": 42786,
+      "sha256": "daeeb1c6b364492f11fe5818fc36049b0b7cfa2b2b6c70a794c5f78a93b56daa",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/dd007efceb0fb7dcae452cf4b012d65dcede06668c37525f9bf4723bb22ce52b.webp",
+      "bytes": 23390,
+      "sha256": "dd007efceb0fb7dcae452cf4b012d65dcede06668c37525f9bf4723bb22ce52b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/de9132d5d912bd86dab0666fd58bb3b25e4d13a210ac00827d77e2e3175cdfec.webp",
+      "bytes": 61034,
+      "sha256": "de9132d5d912bd86dab0666fd58bb3b25e4d13a210ac00827d77e2e3175cdfec",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/dff2733bb39a5e556e193a351f5302314ac1b92d4211e182c8cfc091356aadf3.webp",
+      "bytes": 30070,
+      "sha256": "dff2733bb39a5e556e193a351f5302314ac1b92d4211e182c8cfc091356aadf3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e0c4c15eacee2aba0d2356af0c4d9d2a08e528f170e86f642246730daca97f52.webp",
+      "bytes": 31276,
+      "sha256": "e0c4c15eacee2aba0d2356af0c4d9d2a08e528f170e86f642246730daca97f52",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e1f79dc407dcdb2e6cd3c122aa825282f22d811d0fe3ebcf247f6daf259fb8d9.webp",
+      "bytes": 43200,
+      "sha256": "e1f79dc407dcdb2e6cd3c122aa825282f22d811d0fe3ebcf247f6daf259fb8d9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e2272d0d2aa8d372005f600476bccb4e05e6ecd379b66bfbcbc02387ea73999d.webp",
+      "bytes": 38616,
+      "sha256": "e2272d0d2aa8d372005f600476bccb4e05e6ecd379b66bfbcbc02387ea73999d",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e286cb55498751b2e9152a8d5cf071db00c80d1762549e467c0c573d50531c30.webp",
+      "bytes": 47196,
+      "sha256": "e286cb55498751b2e9152a8d5cf071db00c80d1762549e467c0c573d50531c30",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e37a9dc16801e487faec764ec438cae758eade6c0025255f5cfd538565f51401.webp",
+      "bytes": 47132,
+      "sha256": "e37a9dc16801e487faec764ec438cae758eade6c0025255f5cfd538565f51401",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e4398b24b11430eb60eda825772eb24dceae277d67c0ec236828ae224630baa6.webp",
+      "bytes": 49272,
+      "sha256": "e4398b24b11430eb60eda825772eb24dceae277d67c0ec236828ae224630baa6",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e52d2d3f7810e69d8bd78944ead68b5f189fde79a07365c501a08f3c634233e1.webp",
+      "bytes": 48436,
+      "sha256": "e52d2d3f7810e69d8bd78944ead68b5f189fde79a07365c501a08f3c634233e1",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e599758fdd24b8374310b260461b3a7e950d92974c79b345a7c070c0fec1c244.webp",
+      "bytes": 50548,
+      "sha256": "e599758fdd24b8374310b260461b3a7e950d92974c79b345a7c070c0fec1c244",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e7333a5f0df9b0b73e4aa56b1da6b4d1f048dc3ef7e93bc695370d74b0aa3bfd.webp",
+      "bytes": 57294,
+      "sha256": "e7333a5f0df9b0b73e4aa56b1da6b4d1f048dc3ef7e93bc695370d74b0aa3bfd",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e8681dcfcc904a6cf0462a5810f71239bc04e0f96e0cd3fa05edb28938cd794c.webp",
+      "bytes": 48804,
+      "sha256": "e8681dcfcc904a6cf0462a5810f71239bc04e0f96e0cd3fa05edb28938cd794c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e86a5e094431511de57824628579584b2eca16314e41a618efe55270d1275cbf.webp",
+      "bytes": 18986,
+      "sha256": "e86a5e094431511de57824628579584b2eca16314e41a618efe55270d1275cbf",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e88d090393256b92529443dffc60f15c509e044e2761568af7a5263657ad74b4.webp",
+      "bytes": 46698,
+      "sha256": "e88d090393256b92529443dffc60f15c509e044e2761568af7a5263657ad74b4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e8db426092c22fc05b80a9c04d60f7b8900c795d6c07a49f04284bffabd9d0d3.webp",
+      "bytes": 21574,
+      "sha256": "e8db426092c22fc05b80a9c04d60f7b8900c795d6c07a49f04284bffabd9d0d3",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/e8fb99e1c9136a5ebfaaff235f902847ded4f8f10f1ff8e7d32f046ae26199fe.webp",
+      "bytes": 63528,
+      "sha256": "e8fb99e1c9136a5ebfaaff235f902847ded4f8f10f1ff8e7d32f046ae26199fe",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/eae9a4c58b729270dd1b719d3efd0f404d186105fa0c92945e2da824d3c7d48d.webp",
+      "bytes": 61920,
+      "sha256": "eae9a4c58b729270dd1b719d3efd0f404d186105fa0c92945e2da824d3c7d48d",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/eb9d8585ae819b8d9b22039470aec7e4d36a592d3519de6f10507f7b192253cb.webp",
+      "bytes": 42908,
+      "sha256": "eb9d8585ae819b8d9b22039470aec7e4d36a592d3519de6f10507f7b192253cb",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ebaa4bff9319d03714b0bff511e8bf53982d93d3882e170544392f7d095fcf3e.webp",
+      "bytes": 49178,
+      "sha256": "ebaa4bff9319d03714b0bff511e8bf53982d93d3882e170544392f7d095fcf3e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ebc96ecf1f4ff777af9cff50899b2530be12ba72c5f80112ac4fd684b6269c99.webp",
+      "bytes": 38934,
+      "sha256": "ebc96ecf1f4ff777af9cff50899b2530be12ba72c5f80112ac4fd684b6269c99",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ebe5128de69e266e639ab83ada36ddd5705179b4c40fd5a31e5b74b92bf21f5b.webp",
+      "bytes": 42864,
+      "sha256": "ebe5128de69e266e639ab83ada36ddd5705179b4c40fd5a31e5b74b92bf21f5b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ec4f70ef608ba9febd0ae3f2ef0a831b5d32ff246cc000b61cd487e6cceb9734.webp",
+      "bytes": 43894,
+      "sha256": "ec4f70ef608ba9febd0ae3f2ef0a831b5d32ff246cc000b61cd487e6cceb9734",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ed62f897fc7b9069e5309eefbb84de9a69f914659893e862f6c5538809a1413b.webp",
+      "bytes": 35366,
+      "sha256": "ed62f897fc7b9069e5309eefbb84de9a69f914659893e862f6c5538809a1413b",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/edb25e916d61ff3eeea0a9b0210d37952b1308ec50c40e77bb2d6c78117d7289.webp",
+      "bytes": 48114,
+      "sha256": "edb25e916d61ff3eeea0a9b0210d37952b1308ec50c40e77bb2d6c78117d7289",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ee3440cbbb95e3d670503b2d51f2786c8cf181904b072cc8230eab781083ddb4.webp",
+      "bytes": 54718,
+      "sha256": "ee3440cbbb95e3d670503b2d51f2786c8cf181904b072cc8230eab781083ddb4",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ef185e683d80c75d5fb73809144593564f33eef8fa51e3d0d9a2c2e5924589e7.webp",
+      "bytes": 57578,
+      "sha256": "ef185e683d80c75d5fb73809144593564f33eef8fa51e3d0d9a2c2e5924589e7",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/ef1a78d929b52427d428591d4987c0606d790c6c3bbcd395a0b637b2d5b4d814.webp",
+      "bytes": 58374,
+      "sha256": "ef1a78d929b52427d428591d4987c0606d790c6c3bbcd395a0b637b2d5b4d814",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f0185afbff974f2a139632d559ac5a19189d4d1121e5fcc2cf4137e5232134a8.webp",
+      "bytes": 41676,
+      "sha256": "f0185afbff974f2a139632d559ac5a19189d4d1121e5fcc2cf4137e5232134a8",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f02dc573e974c9c7458c4b5f648a8b513c94c2c05ebd71d883176bdead62164c.webp",
+      "bytes": 57436,
+      "sha256": "f02dc573e974c9c7458c4b5f648a8b513c94c2c05ebd71d883176bdead62164c",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f06d5ade9cd20dc0b539c469e9f1b7c3b19a4b562ac3dd2ec310c7d8cfd9f1ac.webp",
+      "bytes": 20060,
+      "sha256": "f06d5ade9cd20dc0b539c469e9f1b7c3b19a4b562ac3dd2ec310c7d8cfd9f1ac",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f5042ae807de13872d5658ccc69aea7640aeaf9b4188c21b1bb53acd18451e85.webp",
+      "bytes": 30544,
+      "sha256": "f5042ae807de13872d5658ccc69aea7640aeaf9b4188c21b1bb53acd18451e85",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f5b9d0b59b9662b46e82ca4403419bf14966226a7717019a5f142e6f5e63a912.webp",
+      "bytes": 87888,
+      "sha256": "f5b9d0b59b9662b46e82ca4403419bf14966226a7717019a5f142e6f5e63a912",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f69a60fcc44abca746868b5877fd403dd745602a7d8145fabe9f54b65c975d5e.webp",
+      "bytes": 269932,
+      "sha256": "f69a60fcc44abca746868b5877fd403dd745602a7d8145fabe9f54b65c975d5e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f744181ca5c4a710aa32bfb4afd588f7dac49cf11fed6a8ef250e49d4db85394.webp",
+      "bytes": 35550,
+      "sha256": "f744181ca5c4a710aa32bfb4afd588f7dac49cf11fed6a8ef250e49d4db85394",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f7d70ba8f95633ae571d6f6b35581c8206976a5540cfdef4d5a22d748ff97137.webp",
+      "bytes": 61204,
+      "sha256": "f7d70ba8f95633ae571d6f6b35581c8206976a5540cfdef4d5a22d748ff97137",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/f977719afee36ba692623538e33b33b27d41f562686a9a7d21392fca42d6bbdf.webp",
+      "bytes": 43544,
+      "sha256": "f977719afee36ba692623538e33b33b27d41f562686a9a7d21392fca42d6bbdf",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fa8f95f7af520941fbbcf9915218034ea559e9dd835a87abca3d640148fc5f17.webp",
+      "bytes": 47088,
+      "sha256": "fa8f95f7af520941fbbcf9915218034ea559e9dd835a87abca3d640148fc5f17",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fb2b96a7d712bea7c8384abab789036db79c30ce19b268223220c7896c55d88a.webp",
+      "bytes": 43334,
+      "sha256": "fb2b96a7d712bea7c8384abab789036db79c30ce19b268223220c7896c55d88a",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fbbc3a575da83587a8adfa80b54688a8de3607683bd7f3f742070916f74c6ae2.webp",
+      "bytes": 49758,
+      "sha256": "fbbc3a575da83587a8adfa80b54688a8de3607683bd7f3f742070916f74c6ae2",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fc2930becfd292fc70d470332a2852409b18180b2a58269bd4a9a5c9128ff831.webp",
+      "bytes": 47100,
+      "sha256": "fc2930becfd292fc70d470332a2852409b18180b2a58269bd4a9a5c9128ff831",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fd548104e7a62fee98aaa30c7dbf6c73cd2de81e7a239063b2bc68046d328ea0.webp",
+      "bytes": 48072,
+      "sha256": "fd548104e7a62fee98aaa30c7dbf6c73cd2de81e7a239063b2bc68046d328ea0",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fff710418d0d02f6672aba74b4763b351d1adb3844a5e8ca40a771df938d7413.webp",
+      "bytes": 44844,
+      "sha256": "fff710418d0d02f6672aba74b4763b351d1adb3844a5e8ca40a771df938d7413",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/images/fffadfdd59b57f555aa35cb00b6e33bc262b3c95345d089f40a0596b428c14a9.webp",
+      "bytes": 65920,
+      "sha256": "fffadfdd59b57f555aa35cb00b6e33bc262b3c95345d089f40a0596b428c14a9",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_picture_data/manifest.json",
+      "bytes": 516671,
+      "sha256": "3983e0c365daef3e15e3352323e1b5ec19d7be42de924744094c20567477cd10",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_pictures.py",
+      "bytes": 4512,
+      "sha256": "819122247a6a0ed25c1662f94038b434e659880e4e6a9691e97cf5dbecbdc591",
       "mode": 420
     },
     {
       "file": "deeptutor/services/student_learning/question_source_exclusions.json",
-      "bytes": 4823,
-      "sha256": "27f4db7e981a4d13e6c4fcb5a2cf77b686dfcb32f5a4fefbc73ea9a967546a4f",
+      "bytes": 5285,
+      "sha256": "d83de01f607be564213c007a6613ca81b3adea2821ef1de83147a298d3f71522",
       "mode": 420
     },
     {
       "file": "deeptutor/services/student_learning/question_sources.py",
-      "bytes": 20542,
-      "sha256": "3215bae83b833ff9977b25fdae168ed84875a87d50b8b644018b849852382d06",
+      "bytes": 23428,
+      "sha256": "b8e8bb3b2b6cee08d00de3f5967e1478f6cbc4fed5cccb4e7a7d421005ad95b3",
       "mode": 420
     },
     {
@@ -8059,8 +9835,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 8913,
-      "sha256": "ecea39847119c2a9d74548d02ef86b5df5370efe4c15c202ae466fab9c614428",
+      "bytes": 9789,
+      "sha256": "abe1801550bb79c90c62954b70883cda767b124fc8005c97b5076db6a669c157",
       "mode": 420
     },
     {
@@ -10125,6 +11901,18 @@
       "file": "scripts/prepare_web_package.py",
       "bytes": 2214,
       "sha256": "b306fcea315592a40dd21cb6b078a62cecb120e689eeea5de03c8042dbd15c2f",
+      "mode": 420
+    },
+    {
+      "file": "scripts/qa/build_question_pictures.mjs",
+      "bytes": 11039,
+      "sha256": "b35907a96f08baa190c985ca47010e5949cf1f5829906acfb306d5bb61dafa05",
+      "mode": 420
+    },
+    {
+      "file": "scripts/qa/build_question_pictures.py",
+      "bytes": 33184,
+      "sha256": "cd6d2fa7d5690d7bcd08e71b049267e2988db74bf5d523b36b4ba2226470c81f",
       "mode": 420
     },
     {

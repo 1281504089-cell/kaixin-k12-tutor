@@ -1,0 +1,610 @@
+{
+  "schema_version": 1,
+  "status": "local_deterministic_and_controlled_model_checks_passed_release_gates_pending",
+  "recorded_at_utc": "2026-11-16T23:55:00.173797+00:00",
+  "identity": {
+    "final_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+    "published_export_sha256": "f5f25cbc43a74efc134f8b4d6fcf623c7ec3d8c3ddf043ae16ee824dcfb979b0",
+    "candidate_release_tag": "student-20261117-k12-2",
+    "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+    "picture_manifest_sha256": "3983e0c365daef3e15e3352323e1b5ec19d7be42de924744094c20567477cd10"
+  },
+  "scope": [
+    "Conservative natural-language topic and choice-format selection guards; no broad semantic expansion.",
+    "Precomputed complete question pictures tied to immutable question bodies and original assets.",
+    "Adopted-prose-only picture cards, readable zoom, revision-bound pale-blue local source navigation, retained picture-source history and complete-original fallback."
+  ],
+  "picture_pack": {
+    "pictures": 294,
+    "original_sources": 26,
+    "distinct_original_assets": 82,
+    "picture_bytes": 13062612,
+    "manifest_bytes": 516671,
+    "total_pack_bytes": 13579283,
+    "kind": "complete_question_source_layout_not_original_pdf_page",
+    "all_source_text_and_options_verified": true,
+    "all_original_asset_hashes_verified": true,
+    "lossless_webp_decoded_pixels_equal_png": true,
+    "all_docx_visual_transforms_audited": true,
+    "native_doc_formula_samples": 2,
+    "teacher_evidence_included": false,
+    "all_answers_independently_solved": false,
+    "student_runtime_screenshot_or_new_browser_process": false
+  },
+  "deterministic_checks": {
+    "final_frozen_pytest": {
+      "passed": 216,
+      "seconds": 3.92,
+      "final_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
+      "evidence": "qa/payload-exclusion-proof/FINAL-RECEIPT.json",
+      "native_result_implied": false
+    },
+    "related_frontend_vitest": {
+      "files": 4,
+      "passed": 78
+    },
+    "existing_trace_memory_node_tests": {
+      "passed": 9
+    },
+    "full_web_typecheck": {
+      "exit_code": 0
+    },
+    "source_and_pixel_audit": {
+      "passed": true,
+      "pictures_checked": 294,
+      "model_seed_and_message_identity_cases": 5,
+      "permission_revoked_old_picture_url_denied": true,
+      "actual_quarantined_question_denied": true,
+      "invalid_visual_transform_rejections": 14,
+      "api_sample_ms": [
+        15.646660001948476,
+        5.726061994209886,
+        4.888330004177988,
+        4.4731240486726165,
+        4.562007961794734
+      ],
+      "api_sample_boundary": "In-process local API, not network/provider or native packaged application.",
+      "final_source_no_network_payload_proof": {
+        "model_calls": 0,
+        "network_connections": 0,
+        "physics_and_math_seed_and_full_question_byte_identical": true,
+        "text_case_original_image_messages": "Both controlled original questions are text-only; their empty raw-image messages remain empty.",
+        "multi_image_seed_and_all_raw_image_identity_cases": 2,
+        "evidence": "qa/payload-exclusion-proof/FINAL-RECEIPT.json"
+      },
+      "sampled_nonisolated_model_seed_and_raw_original_image_messages_unchanged": true,
+      "identity_scope": "Unchanged non-isolated examples only. The one contradictory payload is intentionally denied on all read surfaces, not claimed to retain an available seed."
+    },
+    "isolated_real_chrome_ui": {
+      "passed": 12,
+      "actual_candidate_webp_bytes": true,
+      "viewports": [
+        {
+          "width": 390,
+          "height": 844
+        },
+        {
+          "width": 1024,
+          "height": 768
+        },
+        {
+          "width": 1680,
+          "height": 1050
+        }
+      ],
+      "fresh_context_404_falls_back_to_complete_original_html_and_all_assets": true,
+      "picture_proportion_no_page_overflow_zoom_and_origin_transition_verified": true,
+      "adopted_picture_survives_220_event_preview_and_saved_history": true,
+      "source_citation_ready_while_image_request_held": true,
+      "first_body_visible_while_image_held_ms_range": [
+        39.47338300000047,
+        46.448866999999154
+      ],
+      "next_body_visible_while_image_held_ms_range": [
+        16.06082200000128,
+        42.910743000000366
+      ],
+      "timing_boundary": "From already-delivered test text to browser presentation, not model response time or added latency versus a baseline."
+    }
+  },
+  "controlled_models": {
+    "model": "deepseek-flash",
+    "reasoning_effort": "high",
+    "output_budget": 65536,
+    "teacher_full_question_history_and_sampling_preserved_within_each_pair": true,
+    "control_contract": "Only the frozen reference slot differs within the same case; normalized wire hashes agree. Physics and math are separate cases, not cross-case controls.",
+    "provider_post_attempts_total": 9,
+    "prior_closed_diagnostic_attempts": 1,
+    "new_shared_batch_attempts": 8,
+    "complete_outputs_content_review_passed": 7,
+    "reference_hit_outputs_faithful_to_original": 4,
+    "diagnostic_stops_excluded": 2,
+    "diagnostic_stops_do_not_establish_product_failure": true,
+    "ask_user_tool_stopped_by_no_followup_diagnostic_guard": true,
+    "automatic_retry": false,
+    "new_batch_rows": [
+      {
+        "turn": "01-physics-A",
+        "case": "physics",
+        "arm": "A",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 9.722157931071706,
+        "full_answer_end_s": 10.606741421041079,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "98d1eff671eadf6777cd582a7ffcbe8cbc9f6f6560c9fea7cee1ac483b6cd336",
+        "public_answer_sha256": "ba9b222bc9a1c170a9cf2ea208871ef3140aca92f16fe585ebaeabd847e5f741",
+        "usage": {
+          "completion_tokens": 1413,
+          "prompt_tokens": 24669,
+          "total_tokens": 26082,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 1173,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 22400
+          },
+          "prompt_cache_hit_tokens": 22400,
+          "prompt_cache_miss_tokens": 2269
+        }
+      },
+      {
+        "turn": "02-physics-H",
+        "case": "physics",
+        "arm": "H",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 2.799543956061825,
+        "full_answer_end_s": 3.526562032988295,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "98d1eff671eadf6777cd582a7ffcbe8cbc9f6f6560c9fea7cee1ac483b6cd336",
+        "public_answer_sha256": "135b05a517c7d748ad4472eb7531f3d1f327e70521eadb422ec298c81f2ec7bf",
+        "usage": {
+          "completion_tokens": 521,
+          "prompt_tokens": 24980,
+          "total_tokens": 25501,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 346,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 1408
+          },
+          "prompt_cache_hit_tokens": 1408,
+          "prompt_cache_miss_tokens": 23572
+        }
+      },
+      {
+        "turn": "03-physics-H",
+        "case": "physics",
+        "arm": "H",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 1.7805650829104707,
+        "full_answer_end_s": 2.4088846079539508,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "98d1eff671eadf6777cd582a7ffcbe8cbc9f6f6560c9fea7cee1ac483b6cd336",
+        "public_answer_sha256": "30cab95074477090973c46afb857dde79b02881057a9e6a4101016f06aec296a",
+        "usage": {
+          "completion_tokens": 316,
+          "prompt_tokens": 24980,
+          "total_tokens": 25296,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 145,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 24832
+          },
+          "prompt_cache_hit_tokens": 24832,
+          "prompt_cache_miss_tokens": 148
+        }
+      },
+      {
+        "turn": "04-physics-A",
+        "case": "physics",
+        "arm": "A",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 8.589065790059976,
+        "full_answer_end_s": 9.282645359053276,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "98d1eff671eadf6777cd582a7ffcbe8cbc9f6f6560c9fea7cee1ac483b6cd336",
+        "public_answer_sha256": "5800d375f445e665d7c1ca310c840acffb07418b6ca9559d1a8044901c4da33d",
+        "usage": {
+          "completion_tokens": 1552,
+          "prompt_tokens": 24669,
+          "total_tokens": 26221,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 1353,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 24448
+          },
+          "prompt_cache_hit_tokens": 24448,
+          "prompt_cache_miss_tokens": 221
+        }
+      },
+      {
+        "turn": "05-math-explicit-A",
+        "case": "math-explicit",
+        "arm": "A",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 3.3656014520674944,
+        "full_answer_end_s": 3.819831650122069,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "85684a38a714a6205d3752f453550764e18283dfa32a6ed4c9a13ff6dd77d65b",
+        "public_answer_sha256": "4551d4a25394589aefdbcba0d64769113f70f9eb0d88e4ed6cbf954ab9ae39a9",
+        "usage": {
+          "completion_tokens": 456,
+          "prompt_tokens": 23489,
+          "total_tokens": 23945,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 355,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 3200
+          },
+          "prompt_cache_hit_tokens": 3200,
+          "prompt_cache_miss_tokens": 20289
+        }
+      },
+      {
+        "turn": "06-math-explicit-H",
+        "case": "math-explicit",
+        "arm": "H",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 4.80473392107524,
+        "full_answer_end_s": 5.431373635074124,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "85684a38a714a6205d3752f453550764e18283dfa32a6ed4c9a13ff6dd77d65b",
+        "public_answer_sha256": "5643a263815837089eb87d81f4a36640642799a3d6c6ba9334552d8af55118d5",
+        "usage": {
+          "completion_tokens": 861,
+          "prompt_tokens": 23796,
+          "total_tokens": 24657,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 702,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 1536
+          },
+          "prompt_cache_hit_tokens": 1536,
+          "prompt_cache_miss_tokens": 22260
+        }
+      },
+      {
+        "turn": "07-math-explicit-H",
+        "case": "math-explicit",
+        "arm": "H",
+        "complete_question_eligible": true,
+        "status": "completed_needs_quality_review",
+        "first_public_content_s": 2.9260192719521,
+        "full_answer_end_s": 3.513123118900694,
+        "diagnostic_stop_s": null,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "85684a38a714a6205d3752f453550764e18283dfa32a6ed4c9a13ff6dd77d65b",
+        "public_answer_sha256": "ea718d46a4759a0301690ea4d63bab0e4ab33778292e0e3f1d05edca69cfe760",
+        "usage": {
+          "completion_tokens": 505,
+          "prompt_tokens": 23796,
+          "total_tokens": 24301,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 362,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 23552
+          },
+          "prompt_cache_hit_tokens": 23552,
+          "prompt_cache_miss_tokens": 244
+        }
+      },
+      {
+        "turn": "08-math-explicit-A",
+        "case": "math-explicit",
+        "arm": "A",
+        "complete_question_eligible": false,
+        "status": "failed_diagnostic_budget",
+        "first_public_content_s": 11.868849942926317,
+        "full_answer_end_s": null,
+        "diagnostic_stop_s": 12.568747756886296,
+        "first_public_content_may_be_heading": true,
+        "normalized_wire_sha256": "85684a38a714a6205d3752f453550764e18283dfa32a6ed4c9a13ff6dd77d65b",
+        "public_answer_sha256": "fe48f7fdb6c8c04e99d27fe857e14a90415cb7b815d055012fbafaf6cf6f553f",
+        "usage": {
+          "completion_tokens": 2201,
+          "prompt_tokens": 23489,
+          "total_tokens": 25690,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 1988,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 23296
+          },
+          "prompt_cache_hit_tokens": 23296,
+          "prompt_cache_miss_tokens": 193
+        }
+      }
+    ],
+    "usage_sum_including_two_diagnostic_stops": {
+      "prompt_tokens": 218512,
+      "completion_tokens": 8634,
+      "total_tokens": 227146,
+      "prompt_cache_hit_tokens": 126080,
+      "prompt_cache_miss_tokens": 92432
+    },
+    "quality_plan_note": "Frozen PLAN has stale worker-profit criteria for the math case. Actual hash-bound reference and reviewed outputs use the five-number median question. Original PLAN and evidence were preserved; the independent review explicitly documents this conflict.",
+    "raw_fixed_placeholder_citation_note": "One faithful hit used the fixed deeptutor.local/library placeholder URL. Final frontend canonicalizes only this exact allowed origin/path to a local revision-bound question hash; other origins/paths are not promoted.",
+    "historical_live_plan_source_commit": "5d566fe74294fb8dbad328e9ace0726645ebddfb",
+    "historical_presentation_source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
+    "final_source_additional_paid_calls": 0,
+    "reuse_basis": "The paid calls remain historical. Fresh local zero-network checks show unchanged physical/mathematical seed and complete original-image messages for unaffected questions; no claim of nine new live calls on this final source."
+  },
+  "speed_interpretation": {
+    "physics": {
+      "completed_design": "A-H-H-A, two complete observations per arm",
+      "baseline_first_public_content_s": [
+        9.722157931071706,
+        8.589065790059976
+      ],
+      "hit_first_public_content_s": [
+        2.799543956061825,
+        1.7805650829104707
+      ],
+      "baseline_full_question_end_s": [
+        10.606741421041079,
+        9.282645359053276
+      ],
+      "hit_full_question_end_s": [
+        3.526562032988295,
+        2.4088846079539508
+      ],
+      "lookup_seconds_separate": 0.34592327498830855,
+      "observation": "No added first-public-content or complete-question waiting was observed in these two hit samples; not a broad speed guarantee."
+    },
+    "math": {
+      "completed_design": "One baseline, two hits; second baseline ended at a diagnostic tool guard. Not balanced ABBA.",
+      "baseline_first_public_content_s": [
+        3.3656014520674944
+      ],
+      "hit_first_public_content_s": [
+        4.80473392107524,
+        2.9260192719521
+      ],
+      "baseline_full_question_end_s": [
+        3.819831650122069
+      ],
+      "hit_full_question_end_s": [
+        5.431373635074124,
+        3.513123118900694
+      ],
+      "lookup_seconds_separate": 0.011570127913728356,
+      "largest_observed_complete_hit_delta_vs_single_baseline_s": 1.611541984952055,
+      "observation": "The two complete hit samples did not exceed the preferred +5s added-wait target against the single completed baseline. No balanced aggregate or population claim is made."
+    },
+    "precomputed_picture_effect": "Picture generation is offline. Runtime presentation adds no picture-generation model call, no screenshot in the model prompt and no replacement of original visual evidence. Five exact message/seed identity cases were audited.",
+    "whole_application_or_native_latency_verified_here": false,
+    "no_overall_mean_speedup_claim": true,
+    "does_not_claim_8_or_9_complete_successful_model_trials": true,
+    "final_source_validation_note": "Historical model timings remain historical; final source changes were checked locally with zero network and unchanged question seed/raw-image evidence. These local timings do not establish new provider speed measurements.",
+    "final_zero_network_lookup_observations": {
+      "process_cold_prepare_ms": {
+        "before": 325.07343497127295,
+        "after": 294.4820420816541,
+        "scope": "new process with bank integrity verification, not a cold physical disk"
+      },
+      "warm_grounding_timings": {
+        "physics": {
+          "before_ms": [
+            55.065921042114496,
+            10.349913034588099,
+            11.027688044123352
+          ],
+          "after_ms": [
+            29.358561034314334,
+            4.731752094812691,
+            4.2990370420739055
+          ],
+          "before_mean_ms": 25.481174040275317,
+          "after_mean_ms": 12.796450057066977,
+          "mean_delta_ms": -12.68472398320834
+        },
+        "math-explicit": {
+          "before_ms": [
+            15.444768941961229,
+            11.839431012049317,
+            11.239021085202694
+          ],
+          "after_ms": [
+            7.59955495595932,
+            8.78375698812306,
+            7.4938490288332105
+          ],
+          "before_mean_ms": 12.841073679737747,
+          "after_mean_ms": 7.95905365763853,
+          "mean_delta_ms": -4.8820200220992165
+        }
+      },
+      "model_calls": 0,
+      "network_connections": 0,
+      "not_new_provider_latency": true
+    }
+  },
+  "not_enabled_or_not_claimed": [
+    "Broad OR and embedding reranking remain isolated after relevance and one-second failures; natural-language wrappers are a narrow deterministic guard fix.",
+    "Automatic optional lookup still excludes visual-only candidates; this batch does not switch normal requests to a new vision model.",
+    "Prepared pictures cover 294 qualified source units, not the entire question corpus and not 294 independently solved standard answers.",
+    "No teacher-only answers, full private request bodies, API credentials or personal learning data are included in this public summary."
+  ],
+  "evidence": {
+    "frontend_verification": {
+      "local_evidence_relative_path": "qa/picture-ui/FRONTEND-VERIFICATION.json",
+      "sha256": "4a8afa245f1978985ca93e5090aafde80dc92d48108d6653698f140653f34e75"
+    },
+    "actual_chrome_picture_ui": {
+      "local_evidence_relative_path": "qa/picture-ui/run-006-real-pack/RESULT.json",
+      "sha256": "116f0ec27bef457e6806db37d886c6a0a5d14837e4cee342faca66aa9f9647c4"
+    },
+    "controlled_model_quality": {
+      "local_evidence_relative_path": "qa/controlled-topic-v2/INDEPENDENT-QUALITY.json",
+      "sha256": "04fd83b35b11df5c5fa0eae57dcff3540782bfb3134af359292778965b5f08e9"
+    },
+    "controlled_model_metrics": {
+      "local_evidence_relative_path": "qa/controlled-topic-v2/live-001/METRICS.json",
+      "sha256": "93b9381b9694cddc018551ae63199b0baf5d6703f88420a7bdd834bc6dc175d6"
+    },
+    "controlled_model_plan": {
+      "local_evidence_relative_path": "qa/controlled-topic-v2/PLAN.json",
+      "sha256": "6defe6200bbcfadc2422ed6b185c3c1c0be78726f0a5543fc2b9b23bdc402944"
+    },
+    "controlled_model_budget": {
+      "local_evidence_relative_path": "qa/controlled-topic-v2/GLOBAL-LIVE-BUDGET.json",
+      "sha256": "f8a948f9d030e46eec00f83c90ef38c6ae32dc41b0afb8c38e3308fe81ee0261"
+    },
+    "prior_closed_diagnostic_budget": {
+      "local_evidence_relative_path": "qa/controlled-topic-picture/GLOBAL-LIVE-BUDGET.json",
+      "sha256": "e496d5641e524fafad9014f300f98e0cdf7e986173aa71e43262566a0ceb1c0d"
+    },
+    "guarded_topic_review": {
+      "local_evidence_relative_path": "qa/independent-diff-review/GUARDED-FINAL-REVIEW.json",
+      "sha256": "20c4864ade3334b183f5e0d449631255fe2b526a5e44fc93dd7b4d3e8477c822"
+    },
+    "published_source_manifest": {
+      "local_evidence_relative_path": "release-20261117/recipe/runtime-source-manifest.json",
+      "sha256": "d0bd315cfeabcf7e3e5b42d4e538a47081c6af1ccad197fa92f140b8185d0cf7"
+    },
+    "historical_picture_pack_295": {
+      "local_evidence_relative_path": "qa/picture-pack/FINAL-RECEIPT.json",
+      "sha256": "f9f9e7ab065c45cc6e75906834c7e28e915e7a67834b80a4b5e305bc21712b54"
+    },
+    "historical_full_picture_audit_295": {
+      "local_evidence_relative_path": "qa/picture-delivery/FINAL-AUDIT.json",
+      "sha256": "d99bc51b2e6eca2b91b1ba70905a5b4a01665d0d717dd543dda93f4fe917dd4d"
+    },
+    "picture_pack": {
+      "local_evidence_relative_path": "qa/picture-pack/context-isolation-294/FINAL-SUBSET-AUDIT-294.json",
+      "sha256": "95463537a553dc01f2f9eb7f2f0d0d0acb53fb690ca715c7c49be63272b9d629"
+    },
+    "independent_full_picture_audit": {
+      "local_evidence_relative_path": "qa/picture-delivery/FINAL-AUDIT-294.json",
+      "sha256": "9e3f1cf6af4f843f0d126666b893eff2616d4097b1dab455c7253306c1c4fd2b"
+    },
+    "final_exact_payload_exclusion_and_zero_network_proof": {
+      "local_evidence_relative_path": "qa/payload-exclusion-proof/FINAL-RECEIPT.json",
+      "sha256": "aed6ca91ed7312c27d38e17234411aea071a64333edfff6d603fd24bb3eb7691"
+    }
+  },
+  "release_gates": {
+    "release_owner_only": "This final-source local prepublication handoff supersedes the earlier candidate scope. Later signed final-source publication receipts and CURRENT determine actual availability.",
+    "core_build": {
+      "run_id": null,
+      "state_at_handoff": "final_frozen_source_rebuild_pending",
+      "acceptance_claimed": false,
+      "discarded_previous_core_run": {
+        "run_id": 43979958228,
+        "result": "passed",
+        "published": false,
+        "counts_as_final_gate": false
+      }
+    },
+    "windows_x64": {
+      "native_acceptance_verified": false,
+      "state": "pending"
+    },
+    "macos_x64": {
+      "native_acceptance_verified": false,
+      "state": "pending"
+    },
+    "macos_arm64": {
+      "native_acceptance_verified": false,
+      "state": "pending"
+    },
+    "actual_local_desktop_check_update": {
+      "verified": false,
+      "record_and_setting_preservation_verified_for_this_batch": false,
+      "state": "pending"
+    },
+    "github_stable_publication": {
+      "published": false,
+      "signed_feeds_and_anonymous_archive_readback_verified": false
+    },
+    "usb_updated_by_this_handoff": false
+  },
+  "precise_source_quality_isolation": {
+    "exact_question_id": "new-five:q_cc0971c5b93f4e187667d965_b00032_7",
+    "payload_sha256": "d4214db38a04cf0968dfaccddbab76a4a78fba95b2b7c0c5724c0526dce15d4d",
+    "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+    "reason": "The original source itself uses 6 cm and 6 m for incompatible conditions. The question is isolated; no guessed correction is applied.",
+    "original_index_and_source_file_unchanged": true,
+    "runtime_isolated_count": 17,
+    "prior_bad_png_asset_rules_unchanged_count": 16,
+    "additional_conflicting_original_payload_count": 1,
+    "effective_readable_units": 20845,
+    "effective_structural_exercise_candidates": 18890,
+    "all_read_surfaces_deny_this_exact_payload": true,
+    "other_questions_of_same_source_not_blanket_blocked": true,
+    "remaining_images_byte_identical": true,
+    "remaining_entries_byte_equivalent": true,
+    "remaining_webp_pixels_equal_validated_png": true,
+    "no_new_claim_of_all_294_academic_answers_reviewed": true
+  },
+  "evidence_reuse": {
+    "historical_presentation_source_commit": "e8c571ebdb6ded10a2af87c61f089d5df3a5cbf8",
+    "historical_picture_count": 295,
+    "historical_manifest_sha256": "4eb484103be8c8f2d1be04102caa3fff9a8c262689c4b5dd4cac8f003ff5dc44",
+    "historical_receipts_preserved": true,
+    "current_294_is_verified_unchanged_subset_after_one_exact_payload_isolation": true,
+    "frontend_file_bytes_identical_to_historical_freeze": true,
+    "frontend_vitest_78_trace_9_typecheck_browser_12_and_404_reused_for_unchanged_files": true,
+    "removed_question_not_in_the_four_browser_fixture_questions": true,
+    "final_subset_and_payload_isolation_have_fresh_local_zero_network_evidence": true,
+    "new_paid_model_calls_for_final_source": 0,
+    "does_not_turn_historical_live_calls_into_fresh_final_source_calls": true
+  }
+}

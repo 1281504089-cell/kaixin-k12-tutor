@@ -1,6 +1,7 @@
 """Installed candidate API checks against its own immutable student pack; no model."""
 import argparse
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
 import sqlite3
@@ -18,14 +19,15 @@ def run(frontend, core):
     with (pack / "index.sqlite3").open("rb") as file:
         assert hashlib.file_digest(file, "sha256").hexdigest() == manifest["index_sha256"]
 
-    def get(path, expected=200, raw=False):
+    def get(path, expected=200, raw=False, headers=False):
         assert path.startswith("/") and not path.startswith("//")
         try:
             with urlopen(urljoin(frontend, path), timeout=30) as response:
                 assert urlparse(response.geturl()).hostname in {"127.0.0.1", "localhost", "::1"}
                 assert response.status == expected
                 body = response.read()
-                return body if raw else json.loads(body)
+                result = body if raw else json.loads(body)
+                return (result, response.headers) if headers else result
         except HTTPError as error:
             assert error.code == expected, (path, error.code, expected)
             return None
@@ -37,8 +39,7 @@ def run(frontend, core):
     assert first["bank_revision"] == second["bank_revision"] == revision
     assert catalog["physical_readable_count"] == manifest["question_count"]
     assert first["total"] == catalog["effective_readable_count"] and first["content_read"] is False
-    assert catalog["physical_readable_count"] - catalog["effective_readable_count"] == catalog["runtime_isolated_count"] == 16
-    assert catalog["effective_exercise_candidate_count"] == manifest["exercise_candidate_count"] - 16
+    assert catalog["physical_readable_count"] - catalog["effective_readable_count"] == catalog["runtime_isolated_count"]
     assert set(row["qualified_id"] for row in first["questions"]).isdisjoint(row["qualified_id"] for row in second["questions"])
     for subject in catalog["subjects"]:
         if not subject["id"]:
@@ -54,11 +55,24 @@ def run(frontend, core):
     try:
         ledger = json.loads((core / "deeptutor/services/student_learning/question_source_exclusions.json").read_text())
         excluded = {}
+        excluded_kinds = {"bad_asset_sha256": 0, "bad_payload_sha256": 0}
+        removed_readable = removed_exercise = 0
         for identity, rule in ledger["exclusions"].items():
-            row = database.execute("SELECT d.body_json FROM questions q JOIN documents d ON d.payload_sha=q.payload_sha WHERE q.qualified_id=?", (identity,)).fetchone()
-            if row and rule["bad_asset_sha256"] in {asset["id"] for asset in json.loads(row[0])["assets"]}:
-                excluded[identity] = rule["bad_asset_sha256"]
-        assert len(excluded) == catalog["runtime_isolated_count"] == 16
+            row = database.execute("SELECT d.body_json,q.payload_sha,q.usable,q.exercise FROM questions q JOIN documents d ON d.payload_sha=q.payload_sha WHERE q.qualified_id=?", (identity,)).fetchone()
+            if row is None:
+                continue
+            assert hashlib.sha256(row[0].encode()).hexdigest() == row[1]
+            body = json.loads(row[0])
+            asset_bad = rule.get("bad_asset_sha256") in {asset["id"] for asset in body["assets"]}
+            payload_bad = rule.get("bad_payload_sha256") == row[1]
+            if asset_bad or payload_bad:
+                excluded[identity] = {"assets": body["assets"], "kind": "bad_asset_sha256" if asset_bad else "bad_payload_sha256"}
+                excluded_kinds[excluded[identity]["kind"]] += 1
+                removed_readable += int(bool(row[2]))
+                removed_exercise += int(bool(row[3]))
+        assert len(excluded) == catalog["runtime_isolated_count"]
+        assert catalog["effective_readable_count"] == manifest["question_count"] - removed_readable
+        assert catalog["effective_exercise_candidate_count"] == manifest["exercise_candidate_count"] - removed_exercise
         for listed in [*first["questions"], *second["questions"], *fts["questions"]]:
             packed = json.loads(database.execute("SELECT d.body_json FROM questions q JOIN documents d ON d.payload_sha=q.payload_sha WHERE q.qualified_id=?", (listed["qualified_id"],)).fetchone()[0])
             assert type(listed["can_select_original"]) is bool and listed["can_select_original"] is packed["can_select_original"]
@@ -83,14 +97,55 @@ def run(frontend, core):
                 row = database.execute("SELECT bytes,sha256 FROM assets WHERE asset_id=?", (asset["id"],)).fetchone()
                 raw = get(asset["url"], raw=True)
                 assert len(raw) == row[0] and hashlib.sha256(raw).hexdigest() == row[1]
+        picture_root = core / "deeptutor/services/student_learning/question_picture_data"
+        pictures = json.loads((picture_root / "manifest.json").read_text())
+        assert pictures["schema_version"] == 1 and pictures["bank_revision"] == revision
+        assert pictures["teacher_evidence_included"] is False and pictures["items"], "Required prepared question display pack is absent"
+        bindings = []
+        for identity, item in pictures["items"].items():
+            row = database.execute("SELECT q.payload_sha,d.body_json FROM questions q JOIN documents d USING(payload_sha) WHERE q.qualified_id=?", (identity,)).fetchone()
+            assert row and hashlib.sha256(row[1].encode()).hexdigest() == row[0] == item["source_payload_sha256"]
+            expected = json.loads(row[1])
+            assert identity not in excluded and expected["source_hash"] == item["source_hash"]
+            assert item["asset_sha256"] == [asset["id"] for asset in expected["assets"]]
+            assert item["file"] == "images/" + item["sha256"] + ".webp"
+            file = picture_root / item["file"]
+            assert not file.is_symlink() and not (picture_root / "images").is_symlink()
+            assert file.resolve().is_relative_to(picture_root.resolve())
+            raw = file.read_bytes()
+            assert len(raw) == item["bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"]
+            bindings.append(identity)
+        selections = list(dict.fromkeys([bindings[0], bindings[len(bindings) // 2], bindings[-1], max(bindings, key=lambda identity: len(pictures["items"][identity]["asset_sha256"]))]))
+        picture_checks = []
+        from PIL import Image
+        for identity in selections:
+            item = pictures["items"][identity]
+            detail = get("/api/student/question-bank/questions/" + quote(identity, safe="") + "?revision=" + revision)
+            expected_picture = {"url": "/api/student/question-bank/pictures/" + quote(identity, safe="") + "?revision=" + revision,
+                **{key: item[key] for key in ("sha256", "bytes", "width", "height")}}
+            assert detail["source"]["picture"] == expected_picture
+            raw, headers = get(expected_picture["url"], raw=True, headers=True)
+            assert headers["Cache-Control"] == "private, no-store" and headers["Content-Type"] == "image/webp"
+            assert headers["X-Content-Type-Options"] == "nosniff"
+            assert len(raw) == item["bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"]
+            with Image.open(BytesIO(raw)) as image:
+                image.load()
+                assert image.format == "WEBP" and image.size == (item["width"], item["height"])
+            get(expected_picture["url"].replace(revision, "0" * 64), 404)
+            picture_checks.append({"qualified_id": identity, "sha256": item["sha256"], "bytes": len(raw), "width": item["width"], "height": item["height"], "source_payload_bound": True, "all_original_assets_bound": True, "decoded_native_webp": True, "private_no_store": True})
+        get("/api/student/question-bank/pictures/" + quote(selections[0], safe="") + "?revision=", 422)
+        get("/api/student/question-bank/pictures/qa-no-such-question?revision=" + revision, 404)
         get("/api/student/question-bank/questions/qa-no-such-question?revision=" + revision, 404)
         get("/api/student/question-bank/questions/" + quote(ids[0], safe="") + "?revision=" + "0" * 64, 404)
-        blocked_id, blocked_sha = next(iter(excluded.items()))
-        get("/api/student/question-bank/questions/" + quote(blocked_id, safe="") + "?revision=" + revision, 404)
-        get("/api/student/question-bank/assets/" + blocked_sha + "?question_id=" + quote(blocked_id, safe="") + "&revision=" + revision, 404)
+        for kind in [key for key, count in excluded_kinds.items() if count]:
+            blocked_id, blocked = next((identity, item) for identity, item in excluded.items() if item["kind"] == kind)
+            get("/api/student/question-bank/questions/" + quote(blocked_id, safe="") + "?revision=" + revision, 404)
+            get("/api/student/question-bank/pictures/" + quote(blocked_id, safe="") + "?revision=" + revision, 404)
+            for asset in blocked["assets"]:
+                get("/api/student/question-bank/assets/" + asset["id"] + "?question_id=" + quote(blocked_id, safe="") + "&revision=" + revision, 404)
     finally:
         database.close()
-    return {"passed": True, "bank_revision": revision, "physical_readable_count": manifest["question_count"], "effective_readable_count": catalog["effective_readable_count"], "runtime_isolated_count": catalog["runtime_isolated_count"], "effective_exercise_candidate_count": catalog["effective_exercise_candidate_count"], "source_count": catalog["total"], "complete_source_unit_compared_to_pack": True, "image_question_checked": bool(image), "pagination_disjoint": True, "subject_filters": True, "fts_search_passed": True, "fts_empty_query_passed": True, "item_quality_metadata_matched": True, "wrong_revision_rejected": True, "unknown_question_rejected": True, "teacher_fields_absent": True, "teacher_fields_check_scope": "JSON sidecar fields only; body compared to frozen student pack, not an exhaustive embedded-answer review", "model_calls": 0, "formal_data_used": False}
+    return {"passed": True, "bank_revision": revision, "prepared_picture_bindings": len(bindings), "prepared_picture_manifest_sha256": hashlib.sha256((picture_root / "manifest.json").read_bytes()).hexdigest(), "prepared_picture_api": picture_checks, "physical_readable_count": manifest["question_count"], "effective_readable_count": catalog["effective_readable_count"], "runtime_isolated_count": catalog["runtime_isolated_count"], "runtime_exclusion_kinds": excluded_kinds, "runtime_exclusion_ledger_sha256": hashlib.sha256((core / "deeptutor/services/student_learning/question_source_exclusions.json").read_bytes()).hexdigest(), "effective_exercise_candidate_count": catalog["effective_exercise_candidate_count"], "source_count": catalog["total"], "complete_source_unit_compared_to_pack": True, "image_question_checked": bool(image), "pagination_disjoint": True, "subject_filters": True, "fts_search_passed": True, "fts_empty_query_passed": True, "item_quality_metadata_matched": True, "wrong_revision_rejected": True, "unknown_question_rejected": True, "teacher_fields_absent": True, "teacher_fields_check_scope": "JSON sidecar fields only; body compared to frozen student pack, not an exhaustive embedded-answer review", "model_calls": 0, "formal_data_used": False}
 
 
 if __name__ == "__main__":

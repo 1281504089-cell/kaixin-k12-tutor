@@ -44,8 +44,8 @@ function inspectTarget(spec, token, scroll = false) {
 
 module.exports = async function verifyK12Library(view, evidence, seed, options = {}) {
   const requestedEntry = options.entry ?? 'current';
-  assert(['current','oldest','update-entry','oldest-update-entry'].includes(requestedEntry));
-  const entry = requestedEntry.includes('oldest') ? 'oldest' : 'current';
+  assert(['current','oldest','update-entry','oldest-update-entry','fresh'].includes(requestedEntry));
+  const entry = requestedEntry.includes('oldest') ? 'oldest' : requestedEntry === 'fresh' ? 'fresh' : 'current';
   const run = `${Date.now()}-${process.pid}-${++runSequence}`;
   const js = (fn, ...args) => view.executeJavaScript(`(${fn.toString()})(...${JSON.stringify(args)})`, true);
   const frames = () => js(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -53,6 +53,11 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   assert(['127.0.0.1','localhost','[::1]'].includes(new URL(origin).hostname));
   assert.equal(seed.model_calls, 0);
   assert(Number.isInteger(seed.images) && seed.images >= 0);
+  const pictured = seed.picture_fixture;
+  assert(pictured?.session && pictured.bank_revision === seed.bank_revision && pictured.picture?.sha256 && pictured.images > 0, 'A prepared-image history fixture is required');
+  const preparedURL = new URL(pictured.picture.url,origin);
+  preparedURL.searchParams.set('dt_workspace','');
+  const preparedHref = preparedURL.href;
   const markers = bodyMarkers(seed.question);
   const debug = view.debugger, views = [], network = [], requestURLs = new Map();
   assert(!debug.isAttached());
@@ -137,6 +142,64 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     view.sendInputEvent({ type:'mouseUp', button:'left', clickCount:1, ...current.point });
     await wait(token => window.__k12Driver.events.some(event => event.type === 'click' && event.trusted && event.action === token),[token],'The native mouse did not hit its chosen target');
   }
+  async function preparedPictureHistory() {
+    phase='prepared-picture-history-delayed';
+    const paused=[];
+    const listener=(_event,method,params)=>{
+      if(method==='Fetch.requestPaused') paused.push({id:params.requestId,url:params.request.url,at:Date.now()});
+    };
+    debug.on('message',listener);
+    let navigation, before, heldMs;
+    try {
+      await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:true});
+      await debug.sendCommand('Fetch.enable',{patterns:[{urlPattern:'*question-bank/pictures/*',requestStage:'Request'}]});
+      navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);
+      navigation.catch(()=>{});
+      await wait(marker=>document.body.innerText.includes(marker)&&!!document.querySelector('[aria-label="题库原题图"] img'),[pictured.answer_marker],'Saved image source/assistant body did not restore before image bytes');
+      await js(()=>document.querySelector('[aria-label="题库原题图"] img').scrollIntoView({block:'center',behavior:'instant'}));
+      const heldUntil=Date.now()+30000;
+      while(!paused.length){assert(Date.now()<heldUntil,'Native renderer did not request the prepared image');await pause(50);}
+      await pause(1000);
+      before=await js((marker,url)=>{
+        const image=[...document.querySelectorAll('[aria-label="题库原题图"] img')].find(node=>new URL(node.currentSrc||node.src,location.origin).pathname===new URL(url,location.origin).pathname);
+        const caption=document.querySelector('[aria-label="题库原题图"] a span');
+        return {bodyRendered:document.body.innerText.includes(marker),imageRequested:!!image,imageComplete:image?.complete,naturalWidth:image?.naturalWidth,decoding:image?.decoding,captionColor:caption?getComputedStyle(caption).color:null,overflow:document.documentElement.scrollWidth>innerWidth+1};
+      },pictured.answer_marker,preparedHref);
+      assert(before.bodyRendered&&before.imageRequested&&!before.imageComplete&&before.naturalWidth===0&&before.decoding==='async'&&!before.overflow,'Image response is blocking the saved assistant body or the wrong image was held');
+      const colors=before.captionColor.match(/[\d.]+/g).map(Number);
+      assert(colors[2]>colors[0]&&colors[2]>=colors[1],'Prepared image source caption is not blue');
+      assert(paused.every(item=>new URL(item.url).origin===origin&&new URL(item.url).pathname===new URL(pictured.picture.url,origin).pathname&&new URL(item.url).searchParams.get('revision')===pictured.bank_revision),'Wrong prepared image/revision was requested');
+      heldMs=Date.now()-paused[0].at;
+      for(const item of paused) await debug.sendCommand('Fetch.continueRequest',{requestId:item.id});
+    } finally {
+      try { await debug.sendCommand('Fetch.disable'); } finally {
+        debug.removeListener('message',listener);
+        await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:false});
+      }
+    }
+    await navigation;
+    await wait((url,w,h)=>[...document.querySelectorAll('[aria-label="题库原题图"] img')].some(image=>image.src===new URL(url,location.origin).href&&image.complete&&image.naturalWidth===w&&image.naturalHeight===h),[preparedHref,pictured.picture.width,pictured.picture.height],'Prepared image failed native decode or changed dimensions');
+    const reply=network.findLast(item=>item.type==='response'&&item.status===200&&item.url===preparedHref);
+    assert(reply,'The prepared image has no successful native HTTP response');
+    const responseBody=await debug.sendCommand('Network.getResponseBody',{requestId:reply.id});
+    const raw=Buffer.from(responseBody.body,responseBody.base64Encoded?'base64':'utf8');
+    assert.equal(raw.length,pictured.picture.bytes);
+    assert.equal(require('node:crypto').createHash('sha256').update(raw).digest('hex'),pictured.picture.sha256,'Native image response changed from the frozen display');
+    await click({selector:'[aria-label="题库原题图"] a'});
+    await wait((id,revision,w,h)=>{
+      const body=document.querySelector('[data-testid="question-source-preview"]'),images=body?[...body.querySelectorAll('img')]:[];
+      return body?.dataset.questionId===id&&body.dataset.bankRevision===revision&&body.dataset.sourceRenderer==='prepared-picture'&&body.dataset.sourceReady==='true'&&images.length===1&&images[0].complete&&images[0].naturalWidth===w&&images[0].naturalHeight===h;
+    },[pictured.qualified_id,pictured.bank_revision,pictured.picture.width,pictured.picture.height],'Prepared card opened wrong source/revision, fallback or incomplete image');
+    const modal=await js(()=>{const node=document.querySelector('[role="dialog"]'),r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:document.documentElement.scrollWidth>innerWidth+1};});
+    assert(modal.left>=-1&&modal.right<=width+1&&modal.top>=-1&&modal.bottom<=height+1&&!modal.overflow,'Prepared-image dialog escapes viewport');
+    writeFileSync(file('prepared-source','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
+    await click('button[aria-label="关闭题源"]');
+    await wait(()=>!document.querySelector('[role="dialog"]'),[],'Prepared image preview did not close');
+    // Reload the persisted history again: a live event alone is insufficient.
+    await view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);
+    await wait((marker,url)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] img')].some(image=>image.src===new URL(url,location.origin).href),[pictured.answer_marker,preparedHref],'Prepared image did not survive a second history load');
+    return {qualified_id:pictured.qualified_id,bank_revision:pictured.bank_revision,sha256:pictured.picture.sha256,width:pictured.picture.width,height:pictured.picture.height,body_dom_before_image_response:true,held_response_ms:heldMs,async_decode:true,native_http_image_sha_verified:true,source_caption_blue:true,correct_source_opened:true,dialog_within_viewport:true,second_history_restore:true,body_probe:before};
+  }
   const networkListener = (_event, method, params) => {
     if (method === 'Network.requestWillBeSent' && params.request.url.includes('/api/student/question-bank/')) {
       requestURLs.set(params.requestId,params.request.url);
@@ -201,7 +264,8 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       writeFileSync(file('source','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
       await click('button[aria-label="关闭题源"]');
       await wait(()=>!document.querySelector('[role="dialog"]'),[],'History source did not close');
-      views.push({width,height,twoLibraryEntries:true,separateUploads:true,sourceCardOpened:true,restoredCitationBlue:true,exactQuestionAndRevision:true,allOriginalImagesLoaded:true,originalBodyStartEnd:true,dialogWithinViewport:true,closeReturned:true});
+      const preparedPicture = await preparedPictureHistory();
+      views.push({width,height,twoLibraryEntries:true,separateUploads:true,sourceCardOpened:true,restoredCitationBlue:true,exactQuestionAndRevision:true,allOriginalImagesLoaded:true,originalBodyStartEnd:true,dialogWithinViewport:true,closeReturned:true,preparedPicture});
     }
     const result={passed:true,actualNativeRenderer:true,bank_revision:seed.bank_revision,views,model_calls:0,formal_data_used:false,diagnostic_entry:entry,evidence_run:run};
     save(join(evidence,`k12-library-${entry}-${run}.json`),result);

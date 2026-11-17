@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-1', 'Owner must prepare the exact final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-2', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -44,7 +44,7 @@ for target,proof in batch['native_runs'].items():
  assert run['status']=='completed' and run['head_sha']==proof['workflow_commit']
  jobs=api('actions/runs/'+str(proof['run_id'])+'/jobs')['jobs']
  assert any(j['conclusion']=='success' and j['name'].startswith('native ('+target+',') for j in jobs)
-assert api('actions/runs/'+str(batch['core_run']))['conclusion']=='success'
+core_run=api('actions/runs/'+str(batch['core_run']));assert core_run['status']=='completed' and core_run['conclusion']=='success' and core_run['head_sha']==batch['core_workflow_commit']
 assert api('releases/latest')['id']==batch['expected_latest_release_id']
 candidate=api('releases/tags/'+batch['tag']);assert candidate['prerelease'] and not candidate['draft']
 assets={a['name']:a for a in candidate['assets']};proofs={};full_files=[]
@@ -56,9 +56,17 @@ for target in targets:
  assert report['native_install']=='passed' and not report['real_keys_used'] and not report['real_learning_records_modified']
  assert report['network']['proxy_connections']>0 and report['network']['api_fallback_download']=='passed'
  smoke=report['native_smoke'];assert smoke['current_core_included'] and smoke['pdf']['pdf_files']==136
+ assert smoke['k12_api']['prepared_picture_bindings']==batch['picture_count']
+ assert smoke['k12_api']['prepared_picture_manifest_sha256']==batch['picture_manifest_sha256']
+ fresh=report['fresh_picture_ui'];assert fresh['passed'] and fresh['production_launcher_source_byte_identical'] and fresh['qa_code_only_in_disposable_copy']
+ for ui in [fresh['k12_library'],*[report[key]['k12_library'] for key in ['update_entry','oldest_launcher_entry']]]:
+  assert ui['passed'] and ui['actualNativeRenderer'] and len(ui['views'])==4
+  for view in ui['views']:
+   assert all(view['preparedPicture'][key] for key in ['native_http_image_sha_verified','body_dom_before_image_response','second_history_restore'])
  assert smoke['k12_api']['passed'] and smoke['k12_api']['model_calls']==0 and smoke['k12_api']['teacher_fields_absent']
  assert all(smoke['k12_api'][key] for key in ['fts_search_passed','fts_empty_query_passed','item_quality_metadata_matched'])
- assert smoke['k12_api']['runtime_isolated_count']==16 and smoke['k12_api']['physical_readable_count']-smoke['k12_api']['effective_readable_count']==16
+ assert smoke['k12_api']['runtime_isolated_count']==batch['runtime_exclusion_count'] and smoke['k12_api']['physical_readable_count']-smoke['k12_api']['effective_readable_count']==batch['runtime_exclusion_count']
+ assert smoke['k12_api']['runtime_exclusion_kinds']==batch['runtime_exclusion_kinds'] and smoke['k12_api']['runtime_exclusion_ledger_sha256']==batch['runtime_exclusion_ledger_sha256']
  for field in ['update_entry','oldest_launcher_entry']:
   k12=report[field]['k12_library'];assert k12['passed'] and k12['actualNativeRenderer'] and k12['model_calls']==0 and len(k12['views'])==4
   assert k12['bank_revision']==smoke['k12_api']['bank_revision']
