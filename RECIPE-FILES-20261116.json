@@ -1,18 +1,23 @@
 [
   {
     "file": ".github/workflows/attachment-core.yml",
-    "bytes": 2458,
-    "sha256": "5038feba169088f06e17c238dea8ef391c592005c324fb34c532ef15ed91a9c5"
+    "bytes": 2604,
+    "sha256": "58fb8991556d80c24a7ea93593b4c8d3764e0c2d79b12f1ee18ba3264d5394cf"
   },
   {
     "file": ".github/workflows/attachment-native.yml",
-    "bytes": 2466,
-    "sha256": "0ae2ebb3ef111fd6b254b74931a524f9ab2ecf2e26fb8b4b063efc9e4f25b09e"
+    "bytes": 2877,
+    "sha256": "c15b0517d6e7232cc7e28be07b7463f6fc9d1085d4234e66912fd32728ca65fd"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 1564,
-    "sha256": "934d5005376bd30b677d3a461c605f9924db53d0f50e06480ee6fe36274d9785"
+    "bytes": 1879,
+    "sha256": "9ce157305a907bc3d3e42adec21c55038aaa6c4367964bc28708d417257a4d2b"
+  },
+  {
+    "file": ".github/workflows/k12-existing5-reverify.yml",
+    "bytes": 1531,
+    "sha256": "f3db1f28d81ea22e7bc30ab9803bdf896da0c9309989384d751ffcbaa0c8d90f"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
@@ -36,13 +41,13 @@
   },
   {
     "file": "CURRENT-DESKTOP-RELEASE.json",
-    "bytes": 53442,
-    "sha256": "db14563df0d55afaf77da10b0c527f3f2725d3e60b24e6b3c5b08219ae023344"
+    "bytes": 53755,
+    "sha256": "cc172ed8d1f59c7571ca5d9df93fdeeeb579c072b98e3648ade5aad9a4a11311"
   },
   {
     "file": "INSTALLATION.txt",
-    "bytes": 4102,
-    "sha256": "ba66ad6b951c9870e3f7b0431200108149b2d3dc61d0d24826ea2f76203d6b49"
+    "bytes": 5065,
+    "sha256": "355ef122f0df712a63dd34e89f7bed12267d8fa30b68abddbcff2e76607346b0"
   },
   {
     "file": "LOCAL-ACTUAL-UPDATE-20261117.json",
@@ -71,8 +76,8 @@
   },
   {
     "file": "RELEASE-NOTES.md",
-    "bytes": 1684,
-    "sha256": "38bbf846a6219c52afcfd42abfd685e1f112b3ac6e6b239b788a1222eaed3d16"
+    "bytes": 1446,
+    "sha256": "ed24c9e4b59b58878b10846934eaca0bf6be47b8b51c1a312d6fc7a3aa802583"
   },
   {
     "file": "SOURCE-TEST-HANDOFF.json",
@@ -91,8 +96,8 @@
   },
   {
     "file": "attachment-batch.json",
-    "bytes": 7274,
-    "sha256": "14c41127ed26ac35cc22435d34fc521ba8f6dc2381c8278d08cf02c2beb3a9dd"
+    "bytes": 6666,
+    "sha256": "a4c975bdfd288f4042ddf51514e9f818c124b02dafaac86350c2c96a406ec729"
   },
   {
     "file": "attachment-publication.json",
@@ -101,13 +106,13 @@
   },
   {
     "file": "attachment-release.json",
-    "bytes": 2921,
-    "sha256": "b7559e60314410291ec0730b85d77ac78a1e2d6bb270e2d276cf3260e55b0033"
+    "bytes": 3901,
+    "sha256": "fb379b34c027c0fad0c2bb82a1d90a1d386252d4d8094fc399e09ad3d63e378b"
   },
   {
     "file": "bootstrap_source.py",
-    "bytes": 2759,
-    "sha256": "87e0dfa910d6699f5e25dc1d301abed67fe416914f12781b0f5b77050d75a24f"
+    "bytes": 2774,
+    "sha256": "743d6a95b359c5506452412a25e77fe0c9ce0c518e584c7f6cb84baab959c10b"
   },
   {
     "file": "ci-attachment-core.py",
@@ -116,8 +121,8 @@
   },
   {
     "file": "ci-fresh-install.py",
-    "bytes": 8265,
-    "sha256": "6ef3e89274467910a61bb7a1b0a5db152a8710f06dd19627617807967e32d851"
+    "bytes": 10705,
+    "sha256": "a5190f280fee10f45f92674daa4099c00be205dff23458afe1af307a9e2ba8f3"
   },
   {
     "file": "ci-fresh-smoke.mjs",
@@ -136,13 +141,23 @@
   },
   {
     "file": "ci-k12-library-ui.cjs",
-    "bytes": 28658,
-    "sha256": "04eaa417441aaf342950ba22c63cbad09773eeccd92efdca5aaa7797b0a1a43e"
+    "bytes": 48507,
+    "sha256": "17918de6d70f2ec25292d0c9d94719ba478eb580dde10e75ed6c701248c529ea"
+  },
+  {
+    "file": "ci-k12-library-ui.click-baseline.cjs",
+    "bytes": 47432,
+    "sha256": "e2ebe8c9da52291db9c273527059a22ae55bef4e40fcf5fcef81e580cea5a03b"
+  },
+  {
+    "file": "ci-k12-library-ui.visibility-baseline.cjs",
+    "bytes": 45437,
+    "sha256": "c9a87d17b9d35b50e1caf7726a17fbd3e5e34be5a1e4134e5d638edba7bbd033"
   },
   {
     "file": "ci-mac-reuse.py",
-    "bytes": 22426,
-    "sha256": "1ed66de9e46e3f7b3c747acc38b026f91a733d3283786bdc1104132a744e5f0d"
+    "bytes": 24463,
+    "sha256": "88ced77d425305031efb071017fb336ffd24d6571b58f93ab23e5c831d58c600"
   },
   {
     "file": "ci-picture-fresh.cjs",
@@ -151,8 +166,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 17550,
-    "sha256": "c1c089ebe2a497cd581b37ad484ef9dd70eaef39cebbf40a9f0cd51cad0539ae"
+    "bytes": 18886,
+    "sha256": "d68595c48ae740d107ce3af62ef03655a90e82f7038813fb9782535e3588b4c7"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -176,13 +191,13 @@
   },
   {
     "file": "ci_picture_fresh.py",
-    "bytes": 3784,
-    "sha256": "770278a15fc515aa715ba3d0c525f1771a6a3d81a3edb2dc8efdb93a00f891bb"
+    "bytes": 5832,
+    "sha256": "1d1eeeabce878947d88d9e61e473b672a77f5df03e71bf3b105c5252b991eedc"
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 8346,
-    "sha256": "516bc14f57f5abcafdd2c243cd106ff770bcbcdb4192ab4cea7abfa690d5501f"
+    "bytes": 11721,
+    "sha256": "22d4802b6b845c2a26ad85c079f31238df8aaebbf05567fbd61ba519b32f4ced"
   },
   {
     "file": "ci_update_probe.py",
@@ -291,8 +306,13 @@
   },
   {
     "file": "fresh-install-lock.json",
-    "bytes": 3829,
-    "sha256": "fa450e1a8e251d59205bd1272be6ede894583bce7618c116331f59150801e4b7"
+    "bytes": 13769,
+    "sha256": "a21f29c36ce5a3c97dbf62f065a875ea43df33fc25d4ee8859945650d80f581d"
+  },
+  {
+    "file": "frozen-k12-4-manifests.json",
+    "bytes": 40111,
+    "sha256": "4feedfad84343983983b3738f678799d272a96a0c7b4789b566e23951a928c18"
   },
   {
     "file": "intel-k12-4-reuse-lock.json",
@@ -300,9 +320,19 @@
     "sha256": "61a2d5b05a2499919a38fab58c65cd692f762d9d282db1a79942bf323d37c0ef"
   },
   {
+    "file": "intel-k12-5-reuse-lock.json",
+    "bytes": 53994,
+    "sha256": "36d851b7865fbdbb86355764198351cb69c72647f4842e5fcd9ca1c7087cf0d9"
+  },
+  {
     "file": "intel-reuse-lock.json",
     "bytes": 17844,
     "sha256": "e7cdebe0cfafcb26370044e6cf5d3e1ca2bd02b134e9fe05dff5aedf1c852faa"
+  },
+  {
+    "file": "launcher-changes-20261117.json",
+    "bytes": 3,
+    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -405,14 +435,29 @@
     "sha256": "396935beedd7b6c0040b8c72717867e6dc09024acb9238f51d93b8043fe155d2"
   },
   {
+    "file": "native-click-followup-selfcheck.cjs",
+    "bytes": 3633,
+    "sha256": "eb23d6325e253ed4548d0e4adefd5d872ac2bd9da594ecea8ea528a2a855d76b"
+  },
+  {
     "file": "native-k12-api-smoke.py",
-    "bytes": 12752,
-    "sha256": "61e87c5387f1f0a6208b5889aca788156fba42dca433aee6a3b92f9ca3997895"
+    "bytes": 16208,
+    "sha256": "47f56a233bf36c07c67c4b57614a9a73181ecc139c92472f9255ec1934bb887c"
   },
   {
     "file": "native-k12-fixture.py",
-    "bytes": 4696,
-    "sha256": "d4cdf272a994258ff9f5a29eb9174b0bbbeab64648680935800e147d9122d71b"
+    "bytes": 6170,
+    "sha256": "f8aef9741cac1fa5bf438fa25713a14f445e72e4a25a32266215db5caec84ae8"
+  },
+  {
+    "file": "native-response-followup-selfcheck.cjs",
+    "bytes": 6467,
+    "sha256": "41e49dfc541630e8e5745834fb78889d4dbcc0e47476784e1b1ec5756ab83cad"
+  },
+  {
+    "file": "native-visibility-selfcheck.cjs",
+    "bytes": 6037,
+    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
   },
   {
     "file": "prepare-bank-payload.py",
@@ -430,6 +475,11 @@
     "sha256": "2a0c45e7949ceb8972927861cb26465f23bc890ff1966fa019c9c07732d3bbb2"
   },
   {
+    "file": "prior-launcher-fingerprint.json",
+    "bytes": 2697,
+    "sha256": "1ec1b69726c30657293ae663c4f7f337b3be1089420bd5d572029666c97a7fbc"
+  },
+  {
     "file": "publication_transaction.py",
     "bytes": 7803,
     "sha256": "9e47a5b03f4cc40b14ed39b0bd39dc6bfb960ca381b67695f95948d7757c3a3f"
@@ -441,8 +491,8 @@
   },
   {
     "file": "release_source.py",
-    "bytes": 7680,
-    "sha256": "90ef54ebd8ade0e8d9478cfc69be8f068191d2600b6e4aaf6e3d84242f3b2210"
+    "bytes": 8271,
+    "sha256": "eee2e3ab58bb52be2409d14a49fe84fd89832420c672ebd95f69f8e3c0a582b2"
   },
   {
     "file": "test-connector-upload.cjs",
@@ -450,14 +500,24 @@
     "sha256": "4e9c50fc1f4c1d5274de1c5c06b33686ea04a1b5feec13cdbeb839220dbaad9f"
   },
   {
+    "file": "test_installer_segments.py",
+    "bytes": 1492,
+    "sha256": "cd2a94f259afcfc5ed63b5d90a6a59e2fc0231f33259aaac9cb91bc71360bdee"
+  },
+  {
     "file": "test_intel_reuse.py",
     "bytes": 5543,
     "sha256": "f56b6700945340d48daa794b43b1a5be053d72cff703dc1041a42733f246f5ca"
   },
   {
+    "file": "test_k12_5_reuse.py",
+    "bytes": 3818,
+    "sha256": "0786a8c47fced46b390e3d695e183fd9622d63cbcc9912ad2d70d8a85d444c7e"
+  },
+  {
     "file": "test_mac_reuse.py",
-    "bytes": 6087,
-    "sha256": "7293ecdf5efe6dfa178e73f5fd27b9a43287493225845707cd1edf25c7f79ef7"
+    "bytes": 6173,
+    "sha256": "3260ccc1a82cc657894fa59221399f440dd64e8f08bc6af3cfd329c666dd6ebe"
   },
   {
     "file": "test_materials_upgrade.py",
@@ -471,13 +531,38 @@
   },
   {
     "file": "test_native_k12_api.py",
-    "bytes": 10902,
-    "sha256": "8793c4536e4f9bf098bef01b87d6ed4ff5e0bcd8cf1104c9b5266b8c64e1946e"
+    "bytes": 14357,
+    "sha256": "b76cf5c3b87e4cc1a6c633dab1a86eaf04fc7c0e46c08e9eb213fd58ba08591d"
+  },
+  {
+    "file": "test_native_pages_proof.py",
+    "bytes": 3482,
+    "sha256": "00689aabd43f2902cf5ce57e103f4cec96693c58b5b576e2976fe975d8cdbd4a"
+  },
+  {
+    "file": "test_native_recheck_lock.py",
+    "bytes": 1300,
+    "sha256": "8716e10e36a6e87c1963837ba4eb7a11a52925a14eec9cdaa6c8db466de40b7b"
+  },
+  {
+    "file": "test_native_reuse_inputs.py",
+    "bytes": 3733,
+    "sha256": "78d234f1288b9728a35c7c75fff359dbbec64d235f3aa089521e3e96a3d3f7c9"
+  },
+  {
+    "file": "test_native_reuse_metadata.py",
+    "bytes": 2507,
+    "sha256": "55112ffed965f0e7c16f3ecd616405a3b6cbe957596ee47be03f5d5fb496c4b4"
+  },
+  {
+    "file": "test_native_stage_binding.py",
+    "bytes": 1660,
+    "sha256": "112da93321dc1c101b9ed6e6ca652cdbf9dbe0fcec4cb51b2bb7d3d28203000d"
   },
   {
     "file": "test_publication_transaction.py",
     "bytes": 11450,
-    "sha256": "4f8057387ecba510bb8cffcc4b8e19a7ffa9170bfba00792aa864646de9a7061"
+    "sha256": "ff3b122251e799ee08e28d69c0105f48411272eab5b38e092d3e4c07dc9aaf9c"
   },
   {
     "file": "test_recovery_publication_gate.py",
@@ -491,8 +576,8 @@
   },
   {
     "file": "test_release_source.py",
-    "bytes": 6211,
-    "sha256": "0fe33973d9f40087281d7352414ef8e029d7e519e2d8c319f9413528f58c1224"
+    "bytes": 8275,
+    "sha256": "a875579780c0e5a9b6bc4d6d75f641247aa9afa361f1aaf14c69c716b10ac4d9"
   },
   {
     "file": "windows-k12-4-reuse-lock.json",
