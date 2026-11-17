@@ -187,10 +187,10 @@
   ],
   "sourceOverlay": {
     "manifest": "source-inventory-20261116.json",
-    "manifest_sha256": "88f320ee98e0131cbb05e22f21a8d3524ef02edb6cc1b4169f5a79c04d7be37b",
-    "source_commit": "15232bdb54d10ff4cb05b45318a088ad9a418d27",
-    "source_files_sha256": "fc6cd1b6c99a1dbbecab07ad33639938f9540cef1b775440a46ed5993ae1c034",
-    "archive_sha256": "d2c7db76162f3789210b59ed130f46914cb48faafcceafc132f8ce62912c1999",
+    "manifest_sha256": "0bf4ac8ee0743e01014ecb78ee73fc364512b4b7e811893bb945c07c16226e64",
+    "source_commit": "9328240380d13ef75435434a8c901028ea4470dc",
+    "source_files_sha256": "d41f2264e086cc508fe16886a09cdb0966aa45381a5a5664a27a9a024c33392d",
+    "archive_sha256": "3f1aa98a6a86c5a4a291abffe8484b2182d86994e901a82532246b328d506533",
     "parts": [
       {
         "file": "source-overlay.001",
@@ -3020,19 +3020,19 @@
       {
         "file": "source-overlay.566",
         "bytes": 524288,
-        "sha256": "0f0d7781ca624e8687c24c200f2ba13c0a8b47800aad5609800b755f872b6e24"
+        "sha256": "d42d3b69b2da4b913d808154ba21cbf20df4d2184a298c63c3678987fbd410c0"
       },
       {
         "file": "source-overlay.567",
-        "bytes": 15761,
-        "sha256": "65f46401b0c8c1d4ec39a824f55ea6395e185bb398eace6646a8a0d0e8416d35"
+        "bytes": 15776,
+        "sha256": "1f5927ddbaec409b453cde93df155d5cd0e4cf5d1935c924e23859819c5442ac"
       }
     ],
     "remote_archive": {
       "file": "source-overlay-20261117-k12-5.tar.gz",
       "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-5/source-overlay-20261117-k12-5.tar.gz",
-      "bytes": 296762769,
-      "sha256": "d2c7db76162f3789210b59ed130f46914cb48faafcceafc132f8ce62912c1999"
+      "bytes": 296762784,
+      "sha256": "3f1aa98a6a86c5a4a291abffe8484b2182d86994e901a82532246b328d506533"
     }
   }
 }
