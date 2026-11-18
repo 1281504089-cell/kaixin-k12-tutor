@@ -1,11 +1,11 @@
 {
-  "tag": "student-20261117-k12-7",
-  "source_commit": "fbb301fd21cf2169f834e0b548d56d201cc98365",
+  "tag": "student-20261117-k12-8",
+  "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
   "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
-  "archive": "kaixin-core-20261117-k12-7.tar.gz",
+  "archive": "kaixin-core-20261117-k12-8.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261117-k12-4.tar.gz",
-    "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f"
+    "archive": "kaixin-core-20261117-k12-7.tar.gz",
+    "sha256": "4c37b944c868861ebaee446d86c94d7d045c3d81224dcee5eeb3b8876deff892"
   },
   "web_tests": [
     "tests/pending-material.spec.ts",
@@ -55,13 +55,23 @@
     "tests/question-picture-cards.spec.tsx",
     "tests/question-bank-display.spec.ts",
     "tests/question-native-cards.spec.tsx",
-    "tests/image-preview.spec.tsx"
+    "tests/image-preview.spec.tsx",
+    "tests/app-navigation-runtime.spec.tsx",
+    "tests/catalog-reference-i18n.spec.tsx",
+    "tests/catalog-reference-message.spec.tsx",
+    "tests/catalog-references.spec.ts",
+    "tests/chat-composer-empty-kb.spec.tsx",
+    "tests/chat/ChatWorkspace.smoke.spec.tsx",
+    "tests/installed-build.spec.tsx",
+    "tests/restore-default-preferences.spec.tsx",
+    "tests/restore-defaults-i18n.spec.tsx",
+    "tests/task-link-composer-status.spec.tsx"
   ],
-  "source_files_sha256": "7b654dcb913aa8eb9e0ed446289c4798cff224b1fe46ebb456f16a4a04cf6fbe",
+  "source_files_sha256": "cba8b13579c620d2fd373b120b926f086f206a9deed0d52834a48b135408fdd1",
   "prepared": true,
   "source_scope": "published_export",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
-  "runtime_manifest_sha256": "1a729b367cced58f79ad311a0f432d30257bf958688f2866fc6471b23d16cb7c",
+  "runtime_manifest_sha256": "88325b2a5ed92921f3cf032525d61e41189ede5b16492a875b35168272c20f4c",
   "bank_manifest_sha256": "6743986468d69c720dfb5b59bb2ab07c69d515243406db86ebacfaef35643606",
   "bank_payload_manifest_sha256": "fe3acc9a3e671075d67f6cf3ba33a80440af7bf5581810bb2dff311d8759b179",
   "native_pages": {

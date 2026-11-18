@@ -4,6 +4,21 @@ const { join } = require('node:path');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 let runSequence = 0;
 
+// Student controls have one shared, exclusive three-shelf group. The legacy
+// twoLibraryEntries receipt remains a subset assertion, not the full new UI.
+function inspectMaterialShelves() {
+  const groups=[...document.querySelectorAll('[role="group"][aria-label="资料类型"]')];
+  const buttons=groups.length===1?[...groups[0].querySelectorAll('button')]:[];
+  return {groups:groups.length,labels:buttons.map(node=>node.textContent.trim()),
+    visible:buttons.every(node=>node.offsetHeight>0),selected:buttons.filter(node=>node.getAttribute('aria-pressed')==='true').map(node=>node.textContent.trim()),
+    uploadInput:!!document.querySelector('input[aria-label="选择要长期保存的资料"]'),
+    uploadAction:[...document.querySelectorAll('button')].some(node=>node.offsetHeight>0&&node.textContent.trim()==='批量上传资料'),
+    overflow:document.documentElement.scrollWidth>innerWidth+1};
+}
+function assertMaterialShelves(probe, selected, uploads) {
+  assert.deepEqual(probe,{groups:1,labels:['教材库','题库','长期资料'],visible:true,selected:[selected],uploadInput:uploads,uploadAction:uploads,overflow:false});
+}
+
 const normalize = text => String(text).normalize('NFKC').replace(/\s+/g, '');
 function bodyMarkers(text) {
   const lines = String(text).replace(/\[图片:[^\]]+\]/g, '').split(/\n+/).map(normalize).filter(line => /[\p{L}\p{N}]/u.test(line));
@@ -491,9 +506,11 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       await debug.sendCommand('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
       phase='library-navigation';
       await view.loadURL(`${origin}/space?dt_workspace=`);
-      await wait(()=>[...document.querySelectorAll('button')].some(node=>node.textContent.trim()==='题库'),[],'Two library entries did not render');
-      const shelf = await js(()=>{const buttons=[...document.querySelectorAll('button')],main=buttons.filter(node=>['教材库','题库'].includes(node.textContent.trim()));return {count:main.length,selected:main.filter(node=>node.getAttribute('aria-pressed')==='true').length,uploadSeparate:buttons.some(node=>node.getAttribute('aria-expanded')!==null&&/我的上传资料/.test(node.textContent)),overflow:document.documentElement.scrollWidth>innerWidth+1};});
-      assert.deepEqual(shelf,{count:2,selected:1,uploadSeparate:true,overflow:false});
+      await wait(()=>!!document.querySelector('[role="group"][aria-label="资料类型"]'),[],'Three material shelves did not render');
+      const shelf=await js(inspectMaterialShelves);assertMaterialShelves(shelf,'教材库',false);
+      await click({text:'长期资料'});
+      await wait(()=>!!document.querySelector('input[aria-label="选择要长期保存的资料"]'),[],'Long-term shelf did not expose the real original-file uploader');
+      const longtermShelf=await js(inspectMaterialShelves);assertMaterialShelves(longtermShelf,'长期资料',true);
       await click({text:'题库'});
       await wait(()=>!!document.querySelector('[aria-label="按学科筛选题库"] button[aria-pressed="true"]')&&!!document.querySelector('button[aria-label^="查看题源："]'),[],'Real question-pack catalog did not render');
       await click('button[aria-label^="查看题源："]');
@@ -546,7 +563,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       const preparedPicture = await preparedPictureHistory();
       await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
       const nativePages = await nativePageHistory();
-      views.push({width,height,twoLibraryEntries:true,separateUploads:true,sourceCardOpened:true,restoredCitationBlue:true,exactQuestionAndRevision:true,allOriginalImagesLoaded:historySource.allOriginalImagesLoaded??null,originalBodyStartEnd:historySource.originalBodyStartEnd??null,dialogWithinViewport:true,closeReturned:true,historySource,preparedPicture,nativePages});
+      views.push({width,height,twoLibraryEntries:true,separateUploads:true,threeMaterialEntries:true,materialShelves:{initial:shelf,longterm:longtermShelf},sourceCardOpened:true,restoredCitationBlue:true,exactQuestionAndRevision:true,allOriginalImagesLoaded:historySource.allOriginalImagesLoaded??null,originalBodyStartEnd:historySource.originalBodyStartEnd??null,dialogWithinViewport:true,closeReturned:true,historySource,preparedPicture,nativePages});
     }
     const result={schema_version:2,passed:true,actualNativeRenderer:true,bank_revision:seed.bank_revision,views,model_calls:0,formal_data_used:false,diagnostic_entry:entry,evidence_run:run};
     save(join(evidence,`k12-library-${entry}-${run}.json`),result);
@@ -561,4 +578,4 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     if(debug.isAttached())debug.detach();
   }
 };
-module.exports._test = { normalize, bodyMarkers, sameGeometry, sameClickGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest, shortError, recordNavigation, sessionNetworkEvent, runtimeException, probeSessionReadOnly };
+module.exports._test = { inspectMaterialShelves, assertMaterialShelves, normalize, bodyMarkers, sameGeometry, sameClickGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest, shortError, recordNavigation, sessionNetworkEvent, runtimeException, probeSessionReadOnly };

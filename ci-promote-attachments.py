@@ -8,7 +8,8 @@ from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-7', 'Owner must prepare the exact final three-native-tested publication batch'
+release_config=json.loads((root/'attachment-release.json').read_text())
+assert batch.get('prepared') is True and release_config.get('prepared') is True and batch['tag']==release_config['tag'] and batch['core_commit']==release_config['source_commit'] and batch['tag'].startswith('student-20261117-'), 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))

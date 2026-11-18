@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "fbb301fd21cf2169f834e0b548d56d201cc98365",
+  "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "excluded_files": [
     "deeptutor/services/student_learning/semantic-reference-bge-windowedCLS-v1.npz",
@@ -2020,14 +2020,14 @@
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
-      "bytes": 6636,
-      "sha256": "2af819c9723a1a4d012b1048e4223aa90d060ab50f2b1c494421c0fb514d657b",
+      "bytes": 7177,
+      "sha256": "20a9c263382bf50330c0fa4ca2c5a0b545d22e0a499f59dd61f31d9f0d881512",
       "mode": 420
     },
     {
       "file": "deeptutor/agents/chat/app_actions.py",
-      "bytes": 15461,
-      "sha256": "f67bd2a2654345d3d7ccdfce75fa844b18fff4aadc38fa5627a900d1349f8f3c",
+      "bytes": 15539,
+      "sha256": "b08ea27a6e6c97b50c336ccd4ee469f88a42388d071348260030e1cc539be759",
       "mode": 420
     },
     {
@@ -2128,8 +2128,8 @@
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
-      "bytes": 100792,
-      "sha256": "41576f188d780eef451c632cca3499600461b185d523265e45878a9e4040a32b",
+      "bytes": 101165,
+      "sha256": "3645e1ab6283024bda4c105bbd79fca9dd5d7fbb2703632324ae231c9043baa5",
       "mode": 420
     },
     {
@@ -2878,8 +2878,8 @@
     },
     {
       "file": "deeptutor/api/routers/desktop_update.py",
-      "bytes": 1004,
-      "sha256": "513b8a4114bc105ef718426b8ba289bde370d6cd1d27f7763285afb019c4fe10",
+      "bytes": 1162,
+      "sha256": "15df95244d7c2eba96738da9a3a9b5d997ddd11c40d9ab5beb27a2e1edf8346f",
       "mode": 420
     },
     {
@@ -3034,8 +3034,8 @@
     },
     {
       "file": "deeptutor/api/routers/settings.py",
-      "bytes": 98906,
-      "sha256": "4e073372cccb191ade1dd4327368745bf629e774a80ad036a6b2af520daa5f9b",
+      "bytes": 99293,
+      "sha256": "e5ab4ac41e18e65d0c234b4796dd5877b0e60358ac322336d0bcd7a4fde08673",
       "mode": 420
     },
     {
@@ -3082,8 +3082,8 @@
     },
     {
       "file": "deeptutor/api/routers/student_uploads.py",
-      "bytes": 7484,
-      "sha256": "fac062e97667ca5e4994898f57cf2b5e7853e7a67b7e2e8d2d43e4269743c62b",
+      "bytes": 7996,
+      "sha256": "86bf35c33c6ecd0bd4b3012593536036dceddc2e27435925c48a97ef1e4541d6",
       "mode": 420
     },
     {
@@ -3760,8 +3760,8 @@
     },
     {
       "file": "deeptutor/capabilities/explore_context/capability.py",
-      "bytes": 10840,
-      "sha256": "73e25a68d3027708256775c76ddcddf2e8f29a6364eaeb37aff23faf81e7bc08",
+      "bytes": 11350,
+      "sha256": "72a48286a34447ce1efd3168add7b3dea998b6809496279312f656d22284e3e3",
       "mode": 420
     },
     {
@@ -4156,8 +4156,8 @@
     },
     {
       "file": "deeptutor/capabilities/reading/capability.py",
-      "bytes": 21072,
-      "sha256": "943ee0d568a2e3985ad95857b33b34a31cd0ca5df820b8c73b5d1c15a635f1e0",
+      "bytes": 21435,
+      "sha256": "57361435eb06b198aba648e8d07c13bb93eedf2caf5000a9445d71031bbad802",
       "mode": 420
     },
     {
@@ -8812,8 +8812,8 @@
     },
     {
       "file": "deeptutor/services/session/source_inventory.py",
-      "bytes": 50176,
-      "sha256": "4245067172b78aa6e9a821f16f951b57ce5f31d2a88eb15d994acb3fddf83fc8",
+      "bytes": 51171,
+      "sha256": "25e8fb8dcbedace73ac69afdd555317a5608df33b3aafbaeba6ec462766cb926",
       "mode": 420
     },
     {
@@ -8848,8 +8848,8 @@
     },
     {
       "file": "deeptutor/services/session/turns/executor.py",
-      "bytes": 80388,
-      "sha256": "6b16df7839500ce134897a32c522c2e0c4d6b219dab8c1246c21084976e21388",
+      "bytes": 80994,
+      "sha256": "51f9d5f9e119f5806d054bcd135fcdac8b5cb87a484789ed6034ebfc80109f74",
       "mode": 420
     },
     {
@@ -8920,8 +8920,8 @@
     },
     {
       "file": "deeptutor/services/settings/interface_settings.py",
-      "bytes": 13826,
-      "sha256": "800a5aaf8c25dc7d36d69037d490a9dbb82e6d0ed4fe1066318199423de6434d",
+      "bytes": 15394,
+      "sha256": "2e76c3c93ca7a0b60221c05e5223b43572b4d40e2e8f9e380630fa1729db8486",
       "mode": 420
     },
     {
@@ -9069,9 +9069,15 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/student_learning/catalog_references.py",
+      "bytes": 8557,
+      "sha256": "e7f75dc60ae38a3eefc549deabecc846a4183bc07a09fa113866257684949286",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/student_learning/desktop_update.py",
-      "bytes": 4830,
-      "sha256": "c7aa57f3a85de6b11f016e850d6be56a840ce1f8c9053fc3207b8d2245913d3c",
+      "bytes": 6311,
+      "sha256": "1b2195f76b18373e15b066885087ffbfd7cd92724a2194731a26a8da1598081e",
       "mode": 420
     },
     {
@@ -9238,8 +9244,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 8308,
-      "sha256": "e9fb397f3393af1f710a0708162567a32a99cf3ffca212be27223dc6591e6c09",
+      "bytes": 9797,
+      "sha256": "17bee31b59206c8d07cbe8abb53e995486c4924fdbc0576b06f7f6f79b44bad4",
       "mode": 420
     },
     {
@@ -15250,8 +15256,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 9820,
-      "sha256": "edd2c0010de6a9fbc13501fc0f32875e73d071a6779f97faec3313c21a6b50b8",
+      "bytes": 10104,
+      "sha256": "56b61c63a00db78a700b449e7c9ca45eb498e9732c649894ef24c9c635e495d3",
       "mode": 420
     },
     {
@@ -15964,8 +15970,8 @@
     },
     {
       "file": "deeptutor/tools/builtin/__init__.py",
-      "bytes": 106844,
-      "sha256": "a6d5b776b2453ba177239f09bcf84d1300447440051d701c8f4ec4a9b981ed11",
+      "bytes": 107709,
+      "sha256": "be9555d17119c0fa39ba3381ba9ca00cb155d63726846c3cbd83803938f6aaa8",
       "mode": 420
     },
     {
@@ -16510,8 +16516,8 @@
     },
     {
       "file": "deeptutor/tools/study_navigation.py",
-      "bytes": 9696,
-      "sha256": "6a13325c6055ccde3e4ee66c01a02a825d31fb1e4782b325b6bb331c4485df1a",
+      "bytes": 9920,
+      "sha256": "123129db8bf9bd61feda744acbd2fc3b8c9f699031bdcfccfaf5e1714fa9261c",
       "mode": 420
     },
     {
@@ -20506,8 +20512,8 @@
     },
     {
       "file": "tests/multi_user/test_app_actions.py",
-      "bytes": 26047,
-      "sha256": "8a582deb51c750bb138eb5a5d9e13f6c231d066a0771e9b790c6ee5371c3719e",
+      "bytes": 26123,
+      "sha256": "6b2988544d30e5ec64ce9209c41709b1300025f0455badda35ca7cf5fe4fa2e0",
       "mode": 420
     },
     {
@@ -23421,6 +23427,12 @@
       "mode": 420
     },
     {
+      "file": "tests/services/test_catalog_references.py",
+      "bytes": 16278,
+      "sha256": "b01c4647cb06d4e5245fccdacf9d9fedbd714f6ba3a764ddf822a14369aaa2e6",
+      "mode": 420
+    },
+    {
       "file": "tests/services/test_chat_hints.py",
       "bytes": 5216,
       "sha256": "19b0ced75993b0af884acc713058db4ebe9bbf0efb58dfc96d45a62c4e4370b0",
@@ -23679,6 +23691,12 @@
       "mode": 420
     },
     {
+      "file": "tests/services/test_reading_question_bank_route.py",
+      "bytes": 8119,
+      "sha256": "1ec75f5de3dc67b6c57ebdc704945bae94fe41472dc9e17f349dc9d09ba2f9d9",
+      "mode": 420
+    },
+    {
       "file": "tests/services/test_reference_task_policy.py",
       "bytes": 12483,
       "sha256": "48eeab3a23ab2e35d2150b0a999234ec25987577823d1f5c7492789d84b1bf07",
@@ -23688,6 +23706,12 @@
       "file": "tests/services/test_related_materials.py",
       "bytes": 8230,
       "sha256": "3bf2c9a8f56e6eda9563fc4666d2b330bba9f961f8f7c323422d0f63a7f71882",
+      "mode": 420
+    },
+    {
+      "file": "tests/services/test_restore_ui_preferences.py",
+      "bytes": 5888,
+      "sha256": "7a45b4453193eae0355017d49a1e995de00e9e67804ad8361a79479dfc76c67d",
       "mode": 420
     },
     {
@@ -24994,8 +25018,8 @@
     },
     {
       "file": "web/app/(workspace)/student-library/page.tsx",
-      "bytes": 144,
-      "sha256": "6372cd07080388ba6d67a4ac5d98e425b99bf71209c84d4ecb065cacc2afda78",
+      "bytes": 320,
+      "sha256": "7dca51fbffeeb7a45177e58b5df6f4ca52eb8bfaa491f0148a0cb9c49cae5e85",
       "mode": 420
     },
     {
@@ -25222,8 +25246,8 @@
     },
     {
       "file": "web/components/chat/LibraryMaterialPicker.tsx",
-      "bytes": 5028,
-      "sha256": "a522d26f23e34c5d07b7ba02140945c5fa9042f4028e8a7585dbe6aa2934c7cc",
+      "bytes": 8197,
+      "sha256": "0693309d51077ae95aa4ac0975bfa13a8e43a9f9c082294528a274f1cb4c87be",
       "mode": 420
     },
     {
@@ -25288,8 +25312,8 @@
     },
     {
       "file": "web/components/chat/home/ChatComposer.tsx",
-      "bytes": 74410,
-      "sha256": "809729e2f7cc068816822c3a88470a71b15fc169921977bcc5e1021e27f03bdd",
+      "bytes": 75667,
+      "sha256": "cfc44d289d3b117418a618a3db4f5a993e6383df0a905595dd25fe6e26ee8e3a",
       "mode": 420
     },
     {
@@ -25300,8 +25324,8 @@
     },
     {
       "file": "web/components/chat/home/ChatReadingTab.tsx",
-      "bytes": 15155,
-      "sha256": "27c0bfea2bd7824eb87a6812e071404c0744954bbbcc11a996a882f177384adb",
+      "bytes": 16984,
+      "sha256": "55546dce05e2d73de960e94d2c5fc7b9f6e78e95e6d1aa7de28eb0fa8b12d836",
       "mode": 420
     },
     {
@@ -25366,8 +25390,8 @@
     },
     {
       "file": "web/components/chat/home/ContextReferenceTree.tsx",
-      "bytes": 7346,
-      "sha256": "22aef3efb82f8e6afcb547df10db509166ee6e2a0875993f09177508d9586b6a",
+      "bytes": 7578,
+      "sha256": "30e707aa7a2481a93523415785f344dbff199365f6186bc8e8da54047631ed90",
       "mode": 420
     },
     {
@@ -25456,8 +25480,8 @@
     },
     {
       "file": "web/components/chat/home/SelectedResources.tsx",
-      "bytes": 4970,
-      "sha256": "0193b5674e88a8b0a7c3aeeba29b8a9682cce8048d078194ed9bbeca7250400c",
+      "bytes": 4904,
+      "sha256": "6464a98ad78ad313fc18c1e23ac48c528389e9474c93ac6817d1379c56e22fd4",
       "mode": 420
     },
     {
@@ -25690,8 +25714,8 @@
     },
     {
       "file": "web/components/chat/space/ChatSpaceMenu.tsx",
-      "bytes": 11246,
-      "sha256": "12b9b3b2b2bcb2dfcb87264a7befd778887bb9f764ce7a7a95c8e855d57ed926",
+      "bytes": 11264,
+      "sha256": "cb1ef2b78b32ae7f1c1310eb8019738c87f923f8dc569a46b418e78b08f1ea05",
       "mode": 420
     },
     {
@@ -26949,6 +26973,12 @@
       "mode": 420
     },
     {
+      "file": "web/components/settings/InstalledBuild.tsx",
+      "bytes": 2683,
+      "sha256": "6328b568441d9d46e029f6fbe3cb188e014638ec50dce09b0b6cfe4bdebfbe3b",
+      "mode": 420
+    },
+    {
       "file": "web/components/settings/MemoryUsageItem.tsx",
       "bytes": 6075,
       "sha256": "a5e4b8032114cb7a17983866b0abd9a5ca36381f6c35afc5ae86b9dc4ea5d635",
@@ -27015,6 +27045,18 @@
       "mode": 420
     },
     {
+      "file": "web/components/settings/RestoreDefaultsSetting.module.css",
+      "bytes": 474,
+      "sha256": "413df433b2e912ca7960e8a74b60cbe8ccd9b240f6317085c40868eb780d40bc",
+      "mode": 420
+    },
+    {
+      "file": "web/components/settings/RestoreDefaultsSetting.tsx",
+      "bytes": 3774,
+      "sha256": "7795760ce3f3adcb5354cb34df5263101f7b7aad01af5c640466162fc708ebd0",
+      "mode": 420
+    },
+    {
       "file": "web/components/settings/ServiceConfigEditor.tsx",
       "bytes": 83956,
       "sha256": "9a34cfd734f930d93ecc737b5eab55ade1f9c6687cc3db863bcbfff5a11f3c50",
@@ -27046,8 +27088,8 @@
     },
     {
       "file": "web/components/settings/SettingsOverview.tsx",
-      "bytes": 7720,
-      "sha256": "06a19d5095456fab35781165d71728d16732ca93b8494d638550996b125971c6",
+      "bytes": 7816,
+      "sha256": "28b9d62fd5fb1fb551eb44bf9119ccb74824a6daee1f0e3e048a1f7515811f30",
       "mode": 420
     },
     {
@@ -27197,13 +27239,13 @@
     {
       "file": "web/components/sidebar/CategoryNavigation.tsx",
       "bytes": 10960,
-      "sha256": "0118ebb0d6f7fd52184997e84ad5084ba62d9b739ae36fba36070636ebe1d364",
+      "sha256": "80c6f989accc3abeb64d870fee93ddf828ed603fac09b4ab614658d0a863a430",
       "mode": 420
     },
     {
       "file": "web/components/sidebar/CommandPalette.tsx",
       "bytes": 10701,
-      "sha256": "39f66aaf783aec1b5964796bf23bc8c67cef72e3ea10214cf36b40b83647c70f",
+      "sha256": "2a7a78ddc91f1226322a6db59d944b36f1811fc55e4c9124263c9c58e6849f5d",
       "mode": 420
     },
     {
@@ -27244,8 +27286,8 @@
     },
     {
       "file": "web/components/sidebar/ResourcesNavigation.tsx",
-      "bytes": 2248,
-      "sha256": "9bce5b17acf4248457d379cc54a061eaad8b5c3772ea5f12c189e6c66a65fc34",
+      "bytes": 2223,
+      "sha256": "085f5a013ce103f048ef81e1d1b0274c44a98ab071e865d03b11af6d0f54815f",
       "mode": 420
     },
     {
@@ -27317,13 +27359,13 @@
     {
       "file": "web/components/sidebar/nav-entries.ts",
       "bytes": 3919,
-      "sha256": "d5a98711b651b06c61e381ed6e8091979c9fb92af0f6e0acf8d356dbfa589780",
+      "sha256": "bb705d8213f3e58285384f2df71d01c83eb6f6346c0c1c9e83c829be14e2d0c1",
       "mode": 420
     },
     {
       "file": "web/components/sidebar/page-sections.ts",
       "bytes": 6616,
-      "sha256": "b94299f00b20e4d23baac436955beeffc497e16d71f81ce72a7527baa00df71a",
+      "sha256": "dc243bfc3052fb5fbecd84a945720a02e6425360a92d4e1125be947987198939",
       "mode": 420
     },
     {
@@ -27657,6 +27699,12 @@
       "mode": 420
     },
     {
+      "file": "web/components/student/MaterialTypeTabs.tsx",
+      "bytes": 971,
+      "sha256": "f147b7950ab9b58dfd6f547f89bfe742d147c361f253c6083d58eb6e4623a0bd",
+      "mode": 420
+    },
+    {
       "file": "web/components/student/MistakeNotebook.tsx",
       "bytes": 14516,
       "sha256": "5813edb530b3a8a3ddbcea6c7d82ac75b7bab1897bc0615356ae12e219b7bbe9",
@@ -27664,8 +27712,8 @@
     },
     {
       "file": "web/components/student/QuestionSourceLibrary.tsx",
-      "bytes": 8415,
-      "sha256": "646e6f7747a9c5583026a3aaf4212749728addb697b5bce0c2b983f7a14b2d33",
+      "bytes": 9277,
+      "sha256": "82ff047144e60caead51b8911854252d3400ffdfc841fdfe1a2ad3450b7a0b09",
       "mode": 420
     },
     {
@@ -27688,20 +27736,20 @@
     },
     {
       "file": "web/components/student/StudentLearning.module.css",
-      "bytes": 13567,
-      "sha256": "899329b0cf80ced4455f80f70e22959c9bf205331e8c68bb4b407d4de5b5c5a3",
+      "bytes": 13672,
+      "sha256": "8d62b36ddf441cbbdae15d9755f7b1eac29872f729f4214dba4700d9eb4d221b",
       "mode": 420
     },
     {
       "file": "web/components/student/StudentMaterials.tsx",
-      "bytes": 17269,
-      "sha256": "2c277e4df5242f53b427e4179ca640100706d9aa615c5a2e5d5953abb0e2df20",
+      "bytes": 17709,
+      "sha256": "dbf97cf107991f48de7ba18f0bdcb9d98cfbd8ea27384b1cdd6dc36a1f38bc2c",
       "mode": 420
     },
     {
       "file": "web/components/student/TextbookLibrary.tsx",
-      "bytes": 5055,
-      "sha256": "378a03d3675469c4b28c9f7b118ce5f3d2759d38f16d40a8301eaf9eee7642dc",
+      "bytes": 6702,
+      "sha256": "3e220f7db3450934b1918044ca7f8649ddc493117e3b545de44b8783ef9d624c",
       "mode": 420
     },
     {
@@ -27718,8 +27766,8 @@
     },
     {
       "file": "web/components/tasks/TaskLinkSelector.tsx",
-      "bytes": 3382,
-      "sha256": "2064806ac9b66da09c692091b701df7d0acd7b3e619bf5ec1de9ae85714a1e27",
+      "bytes": 3722,
+      "sha256": "a68501fc023502d334f1c067bda75a95c6e38eb7412d4d646663c563ee3566e3",
       "mode": 420
     },
     {
@@ -28114,8 +28162,8 @@
     },
     {
       "file": "web/features/chat/components/AppNavigationRuntime.tsx",
-      "bytes": 5706,
-      "sha256": "e7b6746467c53a82950d62f4bdb25871d1fa9e442700e428f06c80eba6536ff8",
+      "bytes": 6312,
+      "sha256": "d5c8152ee83184fc7b41cc892805e19201f83e0f91e7f16a402fc5338d293c5f",
       "mode": 420
     },
     {
@@ -28144,8 +28192,8 @@
     },
     {
       "file": "web/features/chat/components/ChatWorkspace.tsx",
-      "bytes": 138506,
-      "sha256": "aa8df7226b5c486669266cfc4ef969d956c588448341fad5f282d6d2faf17ccc",
+      "bytes": 139211,
+      "sha256": "686006ce957fa1d79b2cb526b51415c055208b785e6246a04fc2e5c872d896ca",
       "mode": 420
     },
     {
@@ -28252,8 +28300,8 @@
     },
     {
       "file": "web/features/chat/messages/ChatMessageList.tsx",
-      "bytes": 118445,
-      "sha256": "993f02be77273280f211cf33c04b7fca47db9a1759af665d881a8dd19952791e",
+      "bytes": 118732,
+      "sha256": "e63934601b3e724a4999bac72268a723a7157bb002d4fee50a69b9a8b2467110",
       "mode": 420
     },
     {
@@ -28930,8 +28978,8 @@
     },
     {
       "file": "web/features/settings/sections/AboutSettingsSection.tsx",
-      "bytes": 17452,
-      "sha256": "e513cd629458096c8471a65b544b9e72364d427d84f9a733413b2d2e9d3d919c",
+      "bytes": 17546,
+      "sha256": "d1a5770f86d7214adaafffadc5221b47adbdf19a91d038375a9857969715080e",
       "mode": 420
     },
     {
@@ -29134,8 +29182,8 @@
     },
     {
       "file": "web/features/settings/store/SettingsStore.tsx",
-      "bytes": 91306,
-      "sha256": "232f65095d2d6bced6800ba82859d0e1820bc6eb2410338a7e545f61ed4bfd5e",
+      "bytes": 92459,
+      "sha256": "a27012ef5bb2764f79c9d4443096971f7bb84b1761adf4c4a4d2da6fa06d1006",
       "mode": 420
     },
     {
@@ -29566,8 +29614,8 @@
     },
     {
       "file": "web/lib/app-navigation.ts",
-      "bytes": 1929,
-      "sha256": "72f518aeeba2e06c94c40a4c39b16c9a4e10b9a60d0f557e45d51908ae1ef444",
+      "bytes": 2006,
+      "sha256": "cb76c064cff2cf89c4eb57fb384c46de151ca4b1cc6d27dec4cbdecb95bf15a0",
       "mode": 420
     },
     {
@@ -29694,6 +29742,12 @@
       "file": "web/lib/capability-routes.ts",
       "bytes": 1771,
       "sha256": "04c82848d399b933ccd710ac1596d3661f882e0f586d8468541a1cf811af1524",
+      "mode": 420
+    },
+    {
+      "file": "web/lib/catalog-references.ts",
+      "bytes": 3613,
+      "sha256": "79a437cfb81397cb61b584dbb57459e01bb43cb07d003b15db8f6febf164c143",
       "mode": 420
     },
     {
@@ -30352,8 +30406,8 @@
     },
     {
       "file": "web/lib/question-bank-display.ts",
-      "bytes": 1729,
-      "sha256": "be25cf26a6677c917b0126c7cc0fe77800f940348f4bd90437ef1d233b738977",
+      "bytes": 1807,
+      "sha256": "907c6c286d86970687a4e13b6e7ee0c5702e3b9cb6247f8db504d36c9e64d7c0",
       "mode": 420
     },
     {
@@ -30546,6 +30600,12 @@
       "file": "web/lib/research-types.ts",
       "bytes": 3095,
       "sha256": "cd68c6d17070cf7ad6fc2157b9749aa2a0c80d0c9f71cd1dccc7160550f708fd",
+      "mode": 420
+    },
+    {
+      "file": "web/lib/reset-preferences.ts",
+      "bytes": 1975,
+      "sha256": "cba7ef2f050fd6731ecaf6860b8ba10faade42e4b37a77d0588ea9f7043caaf6",
       "mode": 420
     },
     {
@@ -30982,8 +31042,8 @@
     },
     {
       "file": "web/locales/de/app.json",
-      "bytes": 514364,
-      "sha256": "f0128318692ee6e9dd8fe22aa214b60758aaa622889b4ab344cb2386d2c8daaa",
+      "bytes": 519758,
+      "sha256": "35992d73b5c9dbebad8ab5f2b8c9d55d983ada9953f72848d90de105f674441d",
       "mode": 420
     },
     {
@@ -30994,8 +31054,8 @@
     },
     {
       "file": "web/locales/en/app.json",
-      "bytes": 478248,
-      "sha256": "c9b996fdb8d64db6c990d36a08056b47cd021011c323a78c9cba929b7ad38f4d",
+      "bytes": 482717,
+      "sha256": "a8d3dfbc4d22897ece863d4e281030bb1f0b07c8478fb2763b50d6590d7d2505",
       "mode": 420
     },
     {
@@ -31006,8 +31066,8 @@
     },
     {
       "file": "web/locales/fr/app.json",
-      "bytes": 617778,
-      "sha256": "4d0ad8edf75301496d498935d65157ffac5858150ea1e343689d1eec558e3935",
+      "bytes": 623174,
+      "sha256": "94972240863783ec5d5bde30683ebee0e0c020c042aea1eeb9855fa165a55c99",
       "mode": 420
     },
     {
@@ -31018,26 +31078,26 @@
     },
     {
       "file": "web/locales/ja/app.json",
-      "bytes": 581195,
-      "sha256": "8ba3e5cb39821530c0aeac1200eaf7c1f2fb8d7e154a4570966fac34bc65e970",
+      "bytes": 586986,
+      "sha256": "c602369ea9da4f6c95c133c52cd9a6316ca2fefb0ee994ff7c961290d23f514d",
       "mode": 420
     },
     {
       "file": "web/locales/pl/app.json",
-      "bytes": 516692,
-      "sha256": "53f2d2a17396caf0ba8fd669b62541616a947f334a28318c68aa154548cb882b",
+      "bytes": 521853,
+      "sha256": "7bd41761394b76ebcbbc7c0f761296edb630d9618c9c2ecb0db787f03242476e",
       "mode": 420
     },
     {
       "file": "web/locales/pt/app.json",
-      "bytes": 519223,
-      "sha256": "5781bc1bbc2be9aff9658daa0f3e5ec182fd2841cf8a7637ed5a206dc80fe08b",
+      "bytes": 524486,
+      "sha256": "230941ab509a73a3ab17ab824f09bf0832b394ec9c5d4c535d2ffba0eb701096",
       "mode": 420
     },
     {
       "file": "web/locales/tr/app.json",
-      "bytes": 511203,
-      "sha256": "597c12b14b9e59bfccf3cc6a3cb56d86cc8bea3f046c81b46b07e171cfb233de",
+      "bytes": 516270,
+      "sha256": "a991c6302e362354115cd7ee6a61192196ad413a3e8778b300470a5009a6e759",
       "mode": 420
     },
     {
@@ -31048,14 +31108,14 @@
     },
     {
       "file": "web/locales/uk/app.json",
-      "bytes": 678455,
-      "sha256": "2b3a77ff033db2c35a751fd0e55bb58337e93bc38a374cb71e0f22933c6c4e9e",
+      "bytes": 685963,
+      "sha256": "129ab098e2049cebedfe232c5de87ff7dc142a565a9b642e37a5d5689e3253ba",
       "mode": 420
     },
     {
       "file": "web/locales/vi/app.json",
-      "bytes": 562830,
-      "sha256": "ece3218ae842816ed434ec05de214ec697bcec0411e3c126808148ffc978d292",
+      "bytes": 568519,
+      "sha256": "97f09b765cb513537609d8add987e8b7fb07a2c0febb4358bda58806c8189925",
       "mode": 420
     },
     {
@@ -31066,8 +31126,8 @@
     },
     {
       "file": "web/locales/zh/app.json",
-      "bytes": 470429,
-      "sha256": "8308622c45bccad74ecc30c3e8d6f2223d5d8419a9f44bf045e33c45d927abe4",
+      "bytes": 474562,
+      "sha256": "2bd5741bbf6e065f88968d3f8bcf69b62154be4809b6f6da1bae42cdaf7203bd",
       "mode": 420
     },
     {
@@ -32416,8 +32476,8 @@
     },
     {
       "file": "web/tests/app-navigation-runtime.spec.tsx",
-      "bytes": 10913,
-      "sha256": "3133bfbb1a586477eb746b06cffae7010e7728677d99d99a1bb993c69ee39f04",
+      "bytes": 12897,
+      "sha256": "44ac0ab9e44d4711595401065f5e7727b084e2a1e3251ad48d672104c46e48a4",
       "mode": 420
     },
     {
@@ -32655,6 +32715,24 @@
       "mode": 420
     },
     {
+      "file": "web/tests/catalog-reference-i18n.spec.tsx",
+      "bytes": 10061,
+      "sha256": "c80bf6d6eef7dd1345ca04977ab7f79294ebda1f29a371ff8c536331a28194cd",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/catalog-reference-message.spec.tsx",
+      "bytes": 1075,
+      "sha256": "1c5b191149a7f6ea65b80d7bbf3c32883f94d1bcbf928cefc0331f56719fe71a",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/catalog-references.spec.ts",
+      "bytes": 2906,
+      "sha256": "e58185dbb1656fef704c44fe3a489973681ca153d15dd8958a1fcedd41a2290f",
+      "mode": 420
+    },
+    {
       "file": "web/tests/chat-autoscroll-layout.spec.tsx",
       "bytes": 5484,
       "sha256": "bd7b7d7d9c1483d057e8dc8b38ff780c554e79141351fa69f4290488df222b46",
@@ -32668,8 +32746,8 @@
     },
     {
       "file": "web/tests/chat-composer-empty-kb.spec.tsx",
-      "bytes": 6777,
-      "sha256": "e5353854c2a7732787b91a1d1b9a40a2b78e3acc05fc417daa87bd9aead5608a",
+      "bytes": 8223,
+      "sha256": "1243d37ddcfd8d7477b5b773f4f2715eaf79d85b5bf21104517b9d78a7df2ef1",
       "mode": 420
     },
     {
@@ -32758,8 +32836,8 @@
     },
     {
       "file": "web/tests/chat-reading-navigation.spec.tsx",
-      "bytes": 6820,
-      "sha256": "5a78f6209e4f8bee2bbcf0baec99cf2f0b982c3cdce9f8f1e7be2463a74faf2c",
+      "bytes": 8510,
+      "sha256": "b509d2b2c5ad41a9540044d9bb5442a34dc6e0c74ac72ae89fd54651cc9b41a2",
       "mode": 420
     },
     {
@@ -32830,8 +32908,8 @@
     },
     {
       "file": "web/tests/chat/ChatWorkspace.smoke.spec.tsx",
-      "bytes": 21044,
-      "sha256": "5c4ff44e842fba87a32a49b570ef007c32d06e06d43b9f5a73a2394562daba81",
+      "bytes": 22006,
+      "sha256": "f86bcc713d406b16b7ed6cefd17ca5f590cdb7b07b022e657218eb467ea9ec42",
       "mode": 420
     },
     {
@@ -33207,6 +33285,12 @@
       "mode": 420
     },
     {
+      "file": "web/tests/fixtures/task-link-composer.tsx",
+      "bytes": 3856,
+      "sha256": "03a02ef3a533ede1b60ab6628ff305fb8f3304da07442213ee7e31081ebfdb26",
+      "mode": 420
+    },
+    {
       "file": "web/tests/fixtures/turn-lifecycle.json",
       "bytes": 3229,
       "sha256": "43548063e4b4364bdd8b6646ad62ef737b41e873e4b71fbe70aa00b6466acd57",
@@ -33324,6 +33408,12 @@
       "file": "web/tests/imports-api.spec.ts",
       "bytes": 2303,
       "sha256": "6bdde4c92b047ce5ef36eb845cca8ae6f9ad875a18ea2edc0b7f6497770fe5dd",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/installed-build.spec.tsx",
+      "bytes": 3088,
+      "sha256": "fc3af4d105a57a70127affef823a907d59fb4218a7ac89fcb3ff90c0562cefea",
       "mode": 420
     },
     {
@@ -33586,8 +33676,8 @@
     },
     {
       "file": "web/tests/library-material-picker.spec.tsx",
-      "bytes": 3217,
-      "sha256": "96bc064a7ca30ac3d9b37d743055a3629c4bd098d6ddae1ec48b38abe9641309",
+      "bytes": 7536,
+      "sha256": "dfc38a65134e57335663034a15409e0f3a34178f0b56418fd43c5531de077582",
       "mode": 420
     },
     {
@@ -34276,8 +34366,8 @@
     },
     {
       "file": "web/tests/question-bank-display.spec.ts",
-      "bytes": 1417,
-      "sha256": "c1abaf0286790469f784ab0f442474eb706aa337612c0c9e616c98645acad0df",
+      "bytes": 1652,
+      "sha256": "fc59120fac6608eb48e45f970f0a280899d91693f49d39806cebc9c9c7761f8e",
       "mode": 420
     },
     {
@@ -34318,8 +34408,8 @@
     },
     {
       "file": "web/tests/question-source-preview.spec.tsx",
-      "bytes": 12373,
-      "sha256": "2744003c75e3164e590f7bfe4cac6a042ba87d56de2c8c9e2fa891b0fed2da94",
+      "bytes": 13374,
+      "sha256": "297da002d9d3e45e2c197762d8d32ddd7b451d52dbf580786d8e7c390c19405c",
       "mode": 420
     },
     {
@@ -34650,6 +34740,18 @@
       "file": "web/tests/resource-routes.test.ts",
       "bytes": 1403,
       "sha256": "e8c3a7e5b10be4672f5ab4a0f5b63fac731ac761babf2973548d2b0ffbf39d75",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/restore-default-preferences.spec.tsx",
+      "bytes": 8616,
+      "sha256": "82322b478550469ca914b1eacb17953cb2dd7fb26e5603e1d6cf03b8b4d2e12d",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/restore-defaults-i18n.spec.tsx",
+      "bytes": 3113,
+      "sha256": "a56de830b4586f21c62d2ea39b1d13e7c3c475f285a04b9a094aac307ab1aa7c",
       "mode": 420
     },
     {
@@ -35032,8 +35134,8 @@
     },
     {
       "file": "web/tests/student-materials.spec.tsx",
-      "bytes": 15482,
-      "sha256": "c35ec7e8efe4fcd0b09a32d82ed774ec9ee47107b40249d14b6699bb9a600ab7",
+      "bytes": 17891,
+      "sha256": "da92db8d416bf363fb5bfbb955785b62a3d3410690ebdf956e9dcc2342b84303",
       "mode": 420
     },
     {
@@ -35062,8 +35164,8 @@
     },
     {
       "file": "web/tests/student-source-library.spec.tsx",
-      "bytes": 7628,
-      "sha256": "1e7b277301669374442f9f043185f03c253bf88f2d0e8130fe9acfdfefe05a10",
+      "bytes": 7782,
+      "sha256": "188bf945ca7d1e0771083e87ab2ec77e412e2be8b3a6048cb3f175f994bc9471",
       "mode": 420
     },
     {
@@ -35124,6 +35226,12 @@
       "file": "web/tests/task-board.spec.tsx",
       "bytes": 6503,
       "sha256": "c8c8d106167b35028a2eaa053072ca8a3250d3066d5af5fb2c76d512f41be80b",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/task-link-composer-status.spec.tsx",
+      "bytes": 6934,
+      "sha256": "f87e8c19cc19410ba8a2d4ce00db46623c66c8afadde4fe12dcb11794a3e221b",
       "mode": 420
     },
     {
@@ -35688,14 +35796,14 @@
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
-      "bytes": 6636,
-      "sha256": "2af819c9723a1a4d012b1048e4223aa90d060ab50f2b1c494421c0fb514d657b",
+      "bytes": 7177,
+      "sha256": "20a9c263382bf50330c0fa4ca2c5a0b545d22e0a499f59dd61f31d9f0d881512",
       "mode": 420
     },
     {
       "file": "deeptutor/agents/chat/app_actions.py",
-      "bytes": 15461,
-      "sha256": "f67bd2a2654345d3d7ccdfce75fa844b18fff4aadc38fa5627a900d1349f8f3c",
+      "bytes": 15539,
+      "sha256": "b08ea27a6e6c97b50c336ccd4ee469f88a42388d071348260030e1cc539be759",
       "mode": 420
     },
     {
@@ -35748,8 +35856,8 @@
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
-      "bytes": 100792,
-      "sha256": "41576f188d780eef451c632cca3499600461b185d523265e45878a9e4040a32b",
+      "bytes": 101165,
+      "sha256": "3645e1ab6283024bda4c105bbd79fca9dd5d7fbb2703632324ae231c9043baa5",
       "mode": 420
     },
     {
@@ -35771,6 +35879,18 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/api/routers/desktop_update.py",
+      "bytes": 1162,
+      "sha256": "15df95244d7c2eba96738da9a3a9b5d997ddd11c40d9ab5beb27a2e1edf8346f",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/api/routers/settings.py",
+      "bytes": 99293,
+      "sha256": "e5ab4ac41e18e65d0c234b4796dd5877b0e60358ac322336d0bcd7a4fde08673",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/api/routers/student_learning.py",
       "bytes": 11562,
       "sha256": "25bb8bb1105a41ea452efc22b87fe28456564bf8169566ab0d06bcd8db07722d",
@@ -35783,9 +35903,15 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/api/routers/student_uploads.py",
+      "bytes": 7996,
+      "sha256": "86bf35c33c6ecd0bd4b3012593536036dceddc2e27435925c48a97ef1e4541d6",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/capabilities/explore_context/capability.py",
-      "bytes": 10840,
-      "sha256": "73e25a68d3027708256775c76ddcddf2e8f29a6364eaeb37aff23faf81e7bc08",
+      "bytes": 11350,
+      "sha256": "72a48286a34447ce1efd3168add7b3dea998b6809496279312f656d22284e3e3",
       "mode": 420
     },
     {
@@ -35802,8 +35928,8 @@
     },
     {
       "file": "deeptutor/capabilities/reading/capability.py",
-      "bytes": 21072,
-      "sha256": "943ee0d568a2e3985ad95857b33b34a31cd0ca5df820b8c73b5d1c15a635f1e0",
+      "bytes": 21435,
+      "sha256": "57361435eb06b198aba648e8d07c13bb93eedf2caf5000a9445d71031bbad802",
       "mode": 420
     },
     {
@@ -35988,8 +36114,8 @@
     },
     {
       "file": "deeptutor/services/session/source_inventory.py",
-      "bytes": 50176,
-      "sha256": "4245067172b78aa6e9a821f16f951b57ce5f31d2a88eb15d994acb3fddf83fc8",
+      "bytes": 51171,
+      "sha256": "25e8fb8dcbedace73ac69afdd555317a5608df33b3aafbaeba6ec462766cb926",
       "mode": 420
     },
     {
@@ -36000,8 +36126,14 @@
     },
     {
       "file": "deeptutor/services/session/turns/executor.py",
-      "bytes": 80388,
-      "sha256": "6b16df7839500ce134897a32c522c2e0c4d6b219dab8c1246c21084976e21388",
+      "bytes": 80994,
+      "sha256": "51f9d5f9e119f5806d054bcd135fcdac8b5cb87a484789ed6034ebfc80109f74",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/settings/interface_settings.py",
+      "bytes": 15394,
+      "sha256": "2e76c3c93ca7a0b60221c05e5223b43572b4d40e2e8f9e380630fa1729db8486",
       "mode": 420
     },
     {
@@ -36023,6 +36155,18 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/student_learning/catalog_references.py",
+      "bytes": 8557,
+      "sha256": "e7f75dc60ae38a3eefc549deabecc846a4183bc07a09fa113866257684949286",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/desktop_update.py",
+      "bytes": 6311,
+      "sha256": "1b2195f76b18373e15b066885087ffbfd7cd92724a2194731a26a8da1598081e",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/student_learning/library_grounding.py",
       "bytes": 9247,
       "sha256": "0b729b2cbea411a7b9244c5f2c895e3542af491b300ddb8b73a075492a468aeb",
@@ -36036,8 +36180,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 8308,
-      "sha256": "e9fb397f3393af1f710a0708162567a32a99cf3ffca212be27223dc6591e6c09",
+      "bytes": 9797,
+      "sha256": "17bee31b59206c8d07cbe8abb53e995486c4924fdbc0576b06f7f6f79b44bad4",
       "mode": 420
     },
     {
@@ -42042,8 +42186,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 9820,
-      "sha256": "edd2c0010de6a9fbc13501fc0f32875e73d071a6779f97faec3313c21a6b50b8",
+      "bytes": 10104,
+      "sha256": "56b61c63a00db78a700b449e7c9ca45eb498e9732c649894ef24c9c635e495d3",
       "mode": 420
     },
     {
@@ -42114,8 +42258,8 @@
     },
     {
       "file": "deeptutor/tools/builtin/__init__.py",
-      "bytes": 106844,
-      "sha256": "a6d5b776b2453ba177239f09bcf84d1300447440051d701c8f4ec4a9b981ed11",
+      "bytes": 107709,
+      "sha256": "be9555d17119c0fa39ba3381ba9ca00cb155d63726846c3cbd83803938f6aaa8",
       "mode": 420
     },
     {
@@ -42150,8 +42294,8 @@
     },
     {
       "file": "deeptutor/tools/study_navigation.py",
-      "bytes": 9696,
-      "sha256": "6a13325c6055ccde3e4ee66c01a02a825d31fb1e4782b325b6bb331c4485df1a",
+      "bytes": 9920,
+      "sha256": "123129db8bf9bd61feda744acbd2fc3b8c9f699031bdcfccfaf5e1714fa9261c",
       "mode": 420
     },
     {
@@ -42564,8 +42708,8 @@
     },
     {
       "file": "tests/multi_user/test_app_actions.py",
-      "bytes": 26047,
-      "sha256": "8a582deb51c750bb138eb5a5d9e13f6c231d066a0771e9b790c6ee5371c3719e",
+      "bytes": 26123,
+      "sha256": "6b2988544d30e5ec64ce9209c41709b1300025f0455badda35ca7cf5fe4fa2e0",
       "mode": 420
     },
     {
@@ -42653,6 +42797,12 @@
       "mode": 420
     },
     {
+      "file": "tests/services/test_catalog_references.py",
+      "bytes": 16278,
+      "sha256": "b01c4647cb06d4e5245fccdacf9d9fedbd714f6ba3a764ddf822a14369aaa2e6",
+      "mode": 420
+    },
+    {
       "file": "tests/services/test_material_discovery.py",
       "bytes": 11736,
       "sha256": "7297a026c1f4e942fc0d520ca47bf136cbf622db73ea78907e8e03483b3e9d9d",
@@ -42671,6 +42821,12 @@
       "mode": 420
     },
     {
+      "file": "tests/services/test_reading_question_bank_route.py",
+      "bytes": 8119,
+      "sha256": "1ec75f5de3dc67b6c57ebdc704945bae94fe41472dc9e17f349dc9d09ba2f9d9",
+      "mode": 420
+    },
+    {
       "file": "tests/services/test_reference_task_policy.py",
       "bytes": 12483,
       "sha256": "48eeab3a23ab2e35d2150b0a999234ec25987577823d1f5c7492789d84b1bf07",
@@ -42680,6 +42836,12 @@
       "file": "tests/services/test_related_materials.py",
       "bytes": 8230,
       "sha256": "3bf2c9a8f56e6eda9563fc4666d2b330bba9f961f8f7c323422d0f63a7f71882",
+      "mode": 420
+    },
+    {
+      "file": "tests/services/test_restore_ui_preferences.py",
+      "bytes": 5888,
+      "sha256": "7a45b4453193eae0355017d49a1e995de00e9e67804ad8361a79479dfc76c67d",
       "mode": 420
     },
     {
@@ -42737,15 +42899,45 @@
       "mode": 420
     },
     {
+      "file": "web/app/(workspace)/student-library/page.tsx",
+      "bytes": 320,
+      "sha256": "7dca51fbffeeb7a45177e58b5df6f4ca52eb8bfaa491f0148a0cb9c49cae5e85",
+      "mode": 420
+    },
+    {
       "file": "web/app/globals.css",
       "bytes": 44223,
       "sha256": "5877d5a007dfe7058b01e1abdb63161d9488b15ea66800e4208b677b315afe79",
       "mode": 420
     },
     {
+      "file": "web/components/chat/LibraryMaterialPicker.tsx",
+      "bytes": 8197,
+      "sha256": "0693309d51077ae95aa4ac0975bfa13a8e43a9f9c082294528a274f1cb4c87be",
+      "mode": 420
+    },
+    {
+      "file": "web/components/chat/home/ChatComposer.tsx",
+      "bytes": 75667,
+      "sha256": "cfc44d289d3b117418a618a3db4f5a993e6383df0a905595dd25fe6e26ee8e3a",
+      "mode": 420
+    },
+    {
       "file": "web/components/chat/home/ChatReadingTab.tsx",
-      "bytes": 15155,
-      "sha256": "27c0bfea2bd7824eb87a6812e071404c0744954bbbcc11a996a882f177384adb",
+      "bytes": 16984,
+      "sha256": "55546dce05e2d73de960e94d2c5fc7b9f6e78e95e6d1aa7de28eb0fa8b12d836",
+      "mode": 420
+    },
+    {
+      "file": "web/components/chat/home/ContextReferenceTree.tsx",
+      "bytes": 7578,
+      "sha256": "30e707aa7a2481a93523415785f344dbff199365f6186bc8e8da54047631ed90",
+      "mode": 420
+    },
+    {
+      "file": "web/components/chat/home/SelectedResources.tsx",
+      "bytes": 4904,
+      "sha256": "6464a98ad78ad313fc18c1e23ac48c528389e9474c93ac6817d1379c56e22fd4",
       "mode": 420
     },
     {
@@ -42770,6 +42962,12 @@
       "file": "web/components/chat/preview/previewers/PdfPreview.tsx",
       "bytes": 4707,
       "sha256": "e7b48043c1edb9922cfa90773cd1498cbf2f9d2e5c816304f00f235a922f3925",
+      "mode": 420
+    },
+    {
+      "file": "web/components/chat/space/ChatSpaceMenu.tsx",
+      "bytes": 11264,
+      "sha256": "cb1ef2b78b32ae7f1c1310eb8019738c87f923f8dc569a46b418e78b08f1ea05",
       "mode": 420
     },
     {
@@ -42827,9 +43025,69 @@
       "mode": 420
     },
     {
+      "file": "web/components/settings/InstalledBuild.tsx",
+      "bytes": 2683,
+      "sha256": "6328b568441d9d46e029f6fbe3cb188e014638ec50dce09b0b6cfe4bdebfbe3b",
+      "mode": 420
+    },
+    {
+      "file": "web/components/settings/RestoreDefaultsSetting.module.css",
+      "bytes": 474,
+      "sha256": "413df433b2e912ca7960e8a74b60cbe8ccd9b240f6317085c40868eb780d40bc",
+      "mode": 420
+    },
+    {
+      "file": "web/components/settings/RestoreDefaultsSetting.tsx",
+      "bytes": 3774,
+      "sha256": "7795760ce3f3adcb5354cb34df5263101f7b7aad01af5c640466162fc708ebd0",
+      "mode": 420
+    },
+    {
+      "file": "web/components/settings/SettingsOverview.tsx",
+      "bytes": 7816,
+      "sha256": "28b9d62fd5fb1fb551eb44bf9119ccb74824a6daee1f0e3e048a1f7515811f30",
+      "mode": 420
+    },
+    {
+      "file": "web/components/sidebar/CategoryNavigation.tsx",
+      "bytes": 10960,
+      "sha256": "80c6f989accc3abeb64d870fee93ddf828ed603fac09b4ab614658d0a863a430",
+      "mode": 420
+    },
+    {
+      "file": "web/components/sidebar/CommandPalette.tsx",
+      "bytes": 10701,
+      "sha256": "2a7a78ddc91f1226322a6db59d944b36f1811fc55e4c9124263c9c58e6849f5d",
+      "mode": 420
+    },
+    {
+      "file": "web/components/sidebar/ResourcesNavigation.tsx",
+      "bytes": 2223,
+      "sha256": "085f5a013ce103f048ef81e1d1b0274c44a98ab071e865d03b11af6d0f54815f",
+      "mode": 420
+    },
+    {
+      "file": "web/components/sidebar/nav-entries.ts",
+      "bytes": 3919,
+      "sha256": "bb705d8213f3e58285384f2df71d01c83eb6f6346c0c1c9e83c829be14e2d0c1",
+      "mode": 420
+    },
+    {
+      "file": "web/components/sidebar/page-sections.ts",
+      "bytes": 6616,
+      "sha256": "dc243bfc3052fb5fbecd84a945720a02e6425360a92d4e1125be947987198939",
+      "mode": 420
+    },
+    {
+      "file": "web/components/student/MaterialTypeTabs.tsx",
+      "bytes": 971,
+      "sha256": "f147b7950ab9b58dfd6f547f89bfe742d147c361f253c6083d58eb6e4623a0bd",
+      "mode": 420
+    },
+    {
       "file": "web/components/student/QuestionSourceLibrary.tsx",
-      "bytes": 8415,
-      "sha256": "646e6f7747a9c5583026a3aaf4212749728addb697b5bce0c2b983f7a14b2d33",
+      "bytes": 9277,
+      "sha256": "82ff047144e60caead51b8911854252d3400ffdfc841fdfe1a2ad3450b7a0b09",
       "mode": 420
     },
     {
@@ -42840,14 +43098,26 @@
     },
     {
       "file": "web/components/student/StudentLearning.module.css",
-      "bytes": 13567,
-      "sha256": "899329b0cf80ced4455f80f70e22959c9bf205331e8c68bb4b407d4de5b5c5a3",
+      "bytes": 13672,
+      "sha256": "8d62b36ddf441cbbdae15d9755f7b1eac29872f729f4214dba4700d9eb4d221b",
       "mode": 420
     },
     {
       "file": "web/components/student/StudentMaterials.tsx",
-      "bytes": 17269,
-      "sha256": "2c277e4df5242f53b427e4179ca640100706d9aa615c5a2e5d5953abb0e2df20",
+      "bytes": 17709,
+      "sha256": "dbf97cf107991f48de7ba18f0bdcb9d98cfbd8ea27384b1cdd6dc36a1f38bc2c",
+      "mode": 420
+    },
+    {
+      "file": "web/components/student/TextbookLibrary.tsx",
+      "bytes": 6702,
+      "sha256": "3e220f7db3450934b1918044ca7f8649ddc493117e3b545de44b8783ef9d624c",
+      "mode": 420
+    },
+    {
+      "file": "web/components/tasks/TaskLinkSelector.tsx",
+      "bytes": 3722,
+      "sha256": "a68501fc023502d334f1c067bda75a95c6e38eb7412d4d646663c563ee3566e3",
       "mode": 420
     },
     {
@@ -42858,20 +43128,20 @@
     },
     {
       "file": "web/features/chat/components/AppNavigationRuntime.tsx",
-      "bytes": 5706,
-      "sha256": "e7b6746467c53a82950d62f4bdb25871d1fa9e442700e428f06c80eba6536ff8",
+      "bytes": 6312,
+      "sha256": "d5c8152ee83184fc7b41cc892805e19201f83e0f91e7f16a402fc5338d293c5f",
       "mode": 420
     },
     {
       "file": "web/features/chat/components/ChatWorkspace.tsx",
-      "bytes": 138506,
-      "sha256": "aa8df7226b5c486669266cfc4ef969d956c588448341fad5f282d6d2faf17ccc",
+      "bytes": 139211,
+      "sha256": "686006ce957fa1d79b2cb526b51415c055208b785e6246a04fc2e5c872d896ca",
       "mode": 420
     },
     {
       "file": "web/features/chat/messages/ChatMessageList.tsx",
-      "bytes": 118445,
-      "sha256": "993f02be77273280f211cf33c04b7fca47db9a1759af665d881a8dd19952791e",
+      "bytes": 118732,
+      "sha256": "e63934601b3e724a4999bac72268a723a7157bb002d4fee50a69b9a8b2467110",
       "mode": 420
     },
     {
@@ -42899,15 +43169,33 @@
       "mode": 420
     },
     {
+      "file": "web/features/settings/sections/AboutSettingsSection.tsx",
+      "bytes": 17546,
+      "sha256": "d1a5770f86d7214adaafffadc5221b47adbdf19a91d038375a9857969715080e",
+      "mode": 420
+    },
+    {
+      "file": "web/features/settings/store/SettingsStore.tsx",
+      "bytes": 92459,
+      "sha256": "a27012ef5bb2764f79c9d4443096971f7bb84b1761adf4c4a4d2da6fa06d1006",
+      "mode": 420
+    },
+    {
       "file": "web/lib/app-navigation.ts",
-      "bytes": 1929,
-      "sha256": "72f518aeeba2e06c94c40a4c39b16c9a4e10b9a60d0f557e45d51908ae1ef444",
+      "bytes": 2006,
+      "sha256": "cb76c064cff2cf89c4eb57fb384c46de151ca4b1cc6d27dec4cbdecb95bf15a0",
       "mode": 420
     },
     {
       "file": "web/lib/attachment-viewport.ts",
       "bytes": 1022,
       "sha256": "0338efa0003e36dcbe66367c302d58ce947c0b671884ed8a21e73925583efe25",
+      "mode": 420
+    },
+    {
+      "file": "web/lib/catalog-references.ts",
+      "bytes": 3613,
+      "sha256": "79a437cfb81397cb61b584dbb57459e01bb43cb07d003b15db8f6febf164c143",
       "mode": 420
     },
     {
@@ -42918,14 +43206,20 @@
     },
     {
       "file": "web/lib/question-bank-display.ts",
-      "bytes": 1729,
-      "sha256": "be25cf26a6677c917b0126c7cc0fe77800f940348f4bd90437ef1d233b738977",
+      "bytes": 1807,
+      "sha256": "907c6c286d86970687a4e13b6e7ee0c5702e3b9cb6247f8db504d36c9e64d7c0",
       "mode": 420
     },
     {
       "file": "web/lib/reading-citations.ts",
       "bytes": 18173,
       "sha256": "73ebe253299caa23622627def68ec25eacdd0766133f96e04c4ff1b63b0d2993",
+      "mode": 420
+    },
+    {
+      "file": "web/lib/reset-preferences.ts",
+      "bytes": 1975,
+      "sha256": "cba7ef2f050fd6731ecaf6860b8ba10faade42e4b37a77d0588ea9f7043caaf6",
       "mode": 420
     },
     {
@@ -42942,74 +43236,98 @@
     },
     {
       "file": "web/locales/de/app.json",
-      "bytes": 514364,
-      "sha256": "f0128318692ee6e9dd8fe22aa214b60758aaa622889b4ab344cb2386d2c8daaa",
+      "bytes": 519758,
+      "sha256": "35992d73b5c9dbebad8ab5f2b8c9d55d983ada9953f72848d90de105f674441d",
       "mode": 420
     },
     {
       "file": "web/locales/en/app.json",
-      "bytes": 478248,
-      "sha256": "c9b996fdb8d64db6c990d36a08056b47cd021011c323a78c9cba929b7ad38f4d",
+      "bytes": 482717,
+      "sha256": "a8d3dfbc4d22897ece863d4e281030bb1f0b07c8478fb2763b50d6590d7d2505",
       "mode": 420
     },
     {
       "file": "web/locales/fr/app.json",
-      "bytes": 617778,
-      "sha256": "4d0ad8edf75301496d498935d65157ffac5858150ea1e343689d1eec558e3935",
+      "bytes": 623174,
+      "sha256": "94972240863783ec5d5bde30683ebee0e0c020c042aea1eeb9855fa165a55c99",
       "mode": 420
     },
     {
       "file": "web/locales/ja/app.json",
-      "bytes": 581195,
-      "sha256": "8ba3e5cb39821530c0aeac1200eaf7c1f2fb8d7e154a4570966fac34bc65e970",
+      "bytes": 586986,
+      "sha256": "c602369ea9da4f6c95c133c52cd9a6316ca2fefb0ee994ff7c961290d23f514d",
       "mode": 420
     },
     {
       "file": "web/locales/pl/app.json",
-      "bytes": 516692,
-      "sha256": "53f2d2a17396caf0ba8fd669b62541616a947f334a28318c68aa154548cb882b",
+      "bytes": 521853,
+      "sha256": "7bd41761394b76ebcbbc7c0f761296edb630d9618c9c2ecb0db787f03242476e",
       "mode": 420
     },
     {
       "file": "web/locales/pt/app.json",
-      "bytes": 519223,
-      "sha256": "5781bc1bbc2be9aff9658daa0f3e5ec182fd2841cf8a7637ed5a206dc80fe08b",
+      "bytes": 524486,
+      "sha256": "230941ab509a73a3ab17ab824f09bf0832b394ec9c5d4c535d2ffba0eb701096",
       "mode": 420
     },
     {
       "file": "web/locales/tr/app.json",
-      "bytes": 511203,
-      "sha256": "597c12b14b9e59bfccf3cc6a3cb56d86cc8bea3f046c81b46b07e171cfb233de",
+      "bytes": 516270,
+      "sha256": "a991c6302e362354115cd7ee6a61192196ad413a3e8778b300470a5009a6e759",
       "mode": 420
     },
     {
       "file": "web/locales/uk/app.json",
-      "bytes": 678455,
-      "sha256": "2b3a77ff033db2c35a751fd0e55bb58337e93bc38a374cb71e0f22933c6c4e9e",
+      "bytes": 685963,
+      "sha256": "129ab098e2049cebedfe232c5de87ff7dc142a565a9b642e37a5d5689e3253ba",
       "mode": 420
     },
     {
       "file": "web/locales/vi/app.json",
-      "bytes": 562830,
-      "sha256": "ece3218ae842816ed434ec05de214ec697bcec0411e3c126808148ffc978d292",
+      "bytes": 568519,
+      "sha256": "97f09b765cb513537609d8add987e8b7fb07a2c0febb4358bda58806c8189925",
       "mode": 420
     },
     {
       "file": "web/locales/zh/app.json",
-      "bytes": 470429,
-      "sha256": "8308622c45bccad74ecc30c3e8d6f2223d5d8419a9f44bf045e33c45d927abe4",
+      "bytes": 474562,
+      "sha256": "2bd5741bbf6e065f88968d3f8bcf69b62154be4809b6f6da1bae42cdaf7203bd",
       "mode": 420
     },
     {
       "file": "web/tests/app-navigation-runtime.spec.tsx",
-      "bytes": 10913,
-      "sha256": "3133bfbb1a586477eb746b06cffae7010e7728677d99d99a1bb993c69ee39f04",
+      "bytes": 12897,
+      "sha256": "44ac0ab9e44d4711595401065f5e7727b084e2a1e3251ad48d672104c46e48a4",
       "mode": 420
     },
     {
       "file": "web/tests/attachment-citation-viewport.spec.tsx",
       "bytes": 981,
       "sha256": "25f08c1998918d7d68e8b04ff3eb905b36f6552b5ed8931df332d0dff8c49477",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/catalog-reference-i18n.spec.tsx",
+      "bytes": 10061,
+      "sha256": "c80bf6d6eef7dd1345ca04977ab7f79294ebda1f29a371ff8c536331a28194cd",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/catalog-reference-message.spec.tsx",
+      "bytes": 1075,
+      "sha256": "1c5b191149a7f6ea65b80d7bbf3c32883f94d1bcbf928cefc0331f56719fe71a",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/catalog-references.spec.ts",
+      "bytes": 2906,
+      "sha256": "e58185dbb1656fef704c44fe3a489973681ca153d15dd8958a1fcedd41a2290f",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/chat-composer-empty-kb.spec.tsx",
+      "bytes": 8223,
+      "sha256": "1243d37ddcfd8d7477b5b773f4f2715eaf79d85b5bf21104517b9d78a7df2ef1",
       "mode": 420
     },
     {
@@ -43020,8 +43338,14 @@
     },
     {
       "file": "web/tests/chat-reading-navigation.spec.tsx",
-      "bytes": 6820,
-      "sha256": "5a78f6209e4f8bee2bbcf0baec99cf2f0b982c3cdce9f8f1e7be2463a74faf2c",
+      "bytes": 8510,
+      "sha256": "b509d2b2c5ad41a9540044d9bb5442a34dc6e0c74ac72ae89fd54651cc9b41a2",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/chat/ChatWorkspace.smoke.spec.tsx",
+      "bytes": 22006,
+      "sha256": "f86bcc713d406b16b7ed6cefd17ca5f590cdb7b07b022e657218eb467ea9ec42",
       "mode": 420
     },
     {
@@ -43031,15 +43355,33 @@
       "mode": 420
     },
     {
+      "file": "web/tests/fixtures/task-link-composer.tsx",
+      "bytes": 3856,
+      "sha256": "03a02ef3a533ede1b60ab6628ff305fb8f3304da07442213ee7e31081ebfdb26",
+      "mode": 420
+    },
+    {
       "file": "web/tests/image-preview.spec.tsx",
       "bytes": 939,
       "sha256": "3203bcc4d4dbf8d084c9203aa83ed1f83e0ebe5545e5c0872bd8fc554b2be47e",
       "mode": 420
     },
     {
+      "file": "web/tests/installed-build.spec.tsx",
+      "bytes": 3088,
+      "sha256": "fc3af4d105a57a70127affef823a907d59fb4218a7ac89fcb3ff90c0562cefea",
+      "mode": 420
+    },
+    {
       "file": "web/tests/kb-indexing-run.spec.tsx",
       "bytes": 6235,
       "sha256": "c58f8db025f72e5c3592f503b77319b1b7588e915374c86eb13c3655e76ffa2d",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/library-material-picker.spec.tsx",
+      "bytes": 7536,
+      "sha256": "dfc38a65134e57335663034a15409e0f3a34178f0b56418fd43c5531de077582",
       "mode": 420
     },
     {
@@ -43062,8 +43404,8 @@
     },
     {
       "file": "web/tests/question-bank-display.spec.ts",
-      "bytes": 1417,
-      "sha256": "c1abaf0286790469f784ab0f442474eb706aa337612c0c9e616c98645acad0df",
+      "bytes": 1652,
+      "sha256": "fc59120fac6608eb48e45f970f0a280899d91693f49d39806cebc9c9c7761f8e",
       "mode": 420
     },
     {
@@ -43080,8 +43422,8 @@
     },
     {
       "file": "web/tests/question-source-preview.spec.tsx",
-      "bytes": 12373,
-      "sha256": "2744003c75e3164e590f7bfe4cac6a042ba87d56de2c8c9e2fa891b0fed2da94",
+      "bytes": 13374,
+      "sha256": "297da002d9d3e45e2c197762d8d32ddd7b451d52dbf580786d8e7c390c19405c",
       "mode": 420
     },
     {
@@ -43109,6 +43451,18 @@
       "mode": 420
     },
     {
+      "file": "web/tests/restore-default-preferences.spec.tsx",
+      "bytes": 8616,
+      "sha256": "82322b478550469ca914b1eacb17953cb2dd7fb26e5603e1d6cf03b8b4d2e12d",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/restore-defaults-i18n.spec.tsx",
+      "bytes": 3113,
+      "sha256": "a56de830b4586f21c62d2ea39b1d13e7c3c475f285a04b9a094aac307ab1aa7c",
+      "mode": 420
+    },
+    {
       "file": "web/tests/source-citation-links.spec.tsx",
       "bytes": 8457,
       "sha256": "7cdde6d31b863b6e5babe55ee1f6e48341d5f0592b2c2d35cc236e48843543c8",
@@ -43116,14 +43470,20 @@
     },
     {
       "file": "web/tests/student-materials.spec.tsx",
-      "bytes": 15482,
-      "sha256": "c35ec7e8efe4fcd0b09a32d82ed774ec9ee47107b40249d14b6699bb9a600ab7",
+      "bytes": 17891,
+      "sha256": "da92db8d416bf363fb5bfbb955785b62a3d3410690ebdf956e9dcc2342b84303",
       "mode": 420
     },
     {
       "file": "web/tests/student-source-library.spec.tsx",
-      "bytes": 7628,
-      "sha256": "1e7b277301669374442f9f043185f03c253bf88f2d0e8130fe9acfdfefe05a10",
+      "bytes": 7782,
+      "sha256": "188bf945ca7d1e0771083e87ab2ec77e412e2be8b3a6048cb3f175f994bc9471",
+      "mode": 420
+    },
+    {
+      "file": "web/tests/task-link-composer-status.spec.tsx",
+      "bytes": 6934,
+      "sha256": "f87e8c19cc19410ba8a2d4ce00db46623c66c8afadde4fe12dcb11794a3e221b",
       "mode": 420
     },
     {

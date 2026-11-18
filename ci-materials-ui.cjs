@@ -132,10 +132,13 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   }
   async function library() {
     await click('资料');
-    await click('资料库 · 教材与长期资料');
-    await wait('location.pathname === "/space" && Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))', 'Library navigation failed');
+    await click('资料库');
+    await wait('location.pathname === "/space" && Boolean(document.querySelector(\'[role="group"][aria-label="资料类型"]\'))', 'Library navigation failed');
+    await click('长期资料');
+    await wait('Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))', 'Long-term upload navigation failed');
   }
   await loadInitialLibrary(view, evidence);
+  await click('长期资料');
   await wait('Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))', 'Updated library did not expose bulk upload');
   const originals = Array.from({ length: 20 }, (_, index) => ({ name: `native-background-${index.toString().padStart(2, '0')}.txt`, text: `SYNTHETIC NATIVE ORIGINAL ${index}\n切换页面后继续保存。` }));
   originals.push({ name: 'native-listening.html', text: '<!DOCTYPE html><html><body><h1>Synthetic listening</h1><div class="row"><span class="text">Hello student.</span><button onclick="speakOne(0)">Play one</button></div><script>window.attachmentExecuted=true</script><a href="https://example.com">external</a></body></html>' });
@@ -243,8 +246,12 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   await wait('!document.querySelector(\'button[aria-label="关闭原件预览"]\')', 'Preview did not close');
   await chat();
   await js(() => { document.querySelector('button[aria-label="资源"]').click(); });
-  await wait('document.body.innerText.includes("从资料库选择")', 'Composer library action missing');
-  await js(() => [...document.querySelectorAll('button')].find(node => node.offsetHeight && node.textContent.includes('从资料库选择')).click());
+  await wait('document.body.innerText.includes("引用资料")', 'Composer library action missing');
+  await js(() => [...document.querySelectorAll('button')].find(node => node.offsetHeight && node.textContent.includes('引用资料')).click());
+  await wait('Boolean(document.querySelector(\'[role="dialog"] [role="group"][aria-label="资料类型"]\'))', 'Shared reference shelves did not open in this chat');
+  const referenceShelves=await js(()=>{const group=document.querySelector('[role="dialog"] [role="group"][aria-label="资料类型"]');return [...group.querySelectorAll('button')].map(node=>({label:node.textContent.trim(),selected:node.getAttribute('aria-pressed')==='true',visible:node.offsetHeight>0}));});
+  assert.deepEqual(referenceShelves,[{label:'教材库',selected:true,visible:true},{label:'题库',selected:false,visible:true},{label:'长期资料',selected:false,visible:true}]);
+  await click('长期资料');
   await wait('Boolean(document.querySelector(\'[aria-label="搜索资料库"]\')) && [...document.querySelectorAll(\'[role="dialog"] button\')].some(node => node.textContent.includes("native-background-00.txt"))', 'Library picker did not list original');
   const postsBefore = await js(() => window.__materialsPosts.length);
   await js(() => [...document.querySelectorAll('[role="dialog"] button')].find(node => node.textContent.includes('native-background-00.txt')).click());
@@ -282,7 +289,7 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   }
   const report = { multiple: true, saved_files: 21, library_retention: true, originals_byte_identical: true, original_preview_opened: true,
     held_real_chunk: true, chat_and_settings_navigation: true, appended_while_active: true, completed_in_chat: true,
-    document_not_reloaded: true, draft_preserved: true, picker_reference_byte_identical: true, no_duplicate_upload_or_new_chat: true,
+    document_not_reloaded: true, draft_preserved: true, three_reference_shelves: referenceShelves, picker_reference_byte_identical: true, no_duplicate_upload_or_new_chat: true,
     html_safe_preview: true, source_toggle: true, device_speech: speech, native_math_display: Boolean(mathFixture), real_model_calls: 0 };
   await writeFile(path.join(evidence, 'library-bulk.json'), JSON.stringify(report, null, 2));
   return report;

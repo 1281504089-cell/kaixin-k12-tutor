@@ -22,7 +22,7 @@ if __name__ == "__main__":
     source = json.loads((root / "source-manifest.json").read_text())["sourceOverlay"]
     bank = json.loads((root / "bank-payload-manifest.json").read_text())
     names = {row["file"] for row in json.loads((root / "RECIPE-FILES-20261116.json").read_text())}
-    names.update(["source-manifest.json", "source-inventory-20261116.json", "runtime-source-manifest.json", "bank-payload-manifest.json", "isolation-ledger.json", "launcher-manifest.json"])
+    names.update(["RECIPE-FILES-20261116.json", "source-manifest.json", "source-inventory-20261116.json", "runtime-source-manifest.json", "bank-payload-manifest.json", "isolation-ledger.json", "launcher-manifest.json"])
     names.update(row["file"] for row in [*source["parts"], *bank["parts"]])
     rows = []
     for name in sorted(names, key=lambda name: (name.startswith("bank-payload.") and not name.endswith(".json"), name)):

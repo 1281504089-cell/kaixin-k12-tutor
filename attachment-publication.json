@@ -1,5 +1,5 @@
 {
-  "prepared": true,
+  "prepared": false,
   "native_pages": {
     "manifest_sha256": "91631719fe6e228a0b580d469a15943bb5ba80828f5114ea10e731dcd598da0a",
     "records": 6915,
@@ -1024,5 +1024,6 @@
       "finalization_lock_file": "intel7-finalization-lock.json",
       "finalization_lock_sha256": "4f8e75b1202f605ec751da506dfbb32aac537ea5b32c0b2d9efe433127bd4926"
     }
-  }
+  },
+  "pending_reason": "Batch8 source/core/three native acceptance and signatures not yet frozen; old7 historical fixture is not publication input"
 }
