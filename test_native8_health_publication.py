@@ -133,7 +133,7 @@ execFileSync('python3',['recipe/native8_health_publication.py','--batch','recipe
             (root/'recipe/attachment-batch.json').write_text(json.dumps(self.batch))
             proof = stage/'verification-macos-arm64.json'; proof.write_text(json.dumps(self.report))
             (stage/'attachments-macos-arm64.json').write_text(json.dumps(self.attachment))
-            command = ['/Users/Admin1/.local/bin/node', '--input-type=module', '-e', script]
+            command = ['node', '--input-type=module', '-e', script]
             result = subprocess.run(command, cwd=root, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             bad = copy.deepcopy(self.report); bad['original_failed_native']['conclusion'] = 'success'
