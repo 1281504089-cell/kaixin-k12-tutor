@@ -7,7 +7,7 @@ function fixture(cardTop){
   const root=node(box(272,52,572,138));root.style.overflowY='auto';root.clientHeight=138;root.clientWidth=572;root.scrollHeight=667;root.scrollTop=72;
   const prose=node(box(547,172.5,84,26),{href}),card=node(box(307,cardTop,502,311)),foreign=node(box(307,80,502,311));card.parentElement=root;foreign.parentElement=root;prose.parentElement=root;
   const caption=node(box(320,cardTop+285,232,16),{href});caption.parentElement=card;card.querySelectorAll=()=>[caption];foreign.querySelectorAll=()=>[node(box(0,0,5,5),{href:href+'-other'})];
-  const document={documentElement:{},querySelectorAll:selector=>selector==='[aria-label="题库原题图"] figure'?[foreign,card]:[prose,caption],elementFromPoint:()=>cardTop<190?card:prose};
+  const document={documentElement:{},querySelectorAll:selector=>selector==='[aria-label="题库原题"] figure'?[foreign,card]:[prose,caption],elementFromPoint:()=>cardTop<190?card:prose};
   const probe=spec=>vm.runInNewContext(`(${t.inspectTarget.toString()})(spec,'visibility',false)`,{document,spec,getComputedStyle:n=>n.style,innerWidth:844,innerHeight:390});
   return {probe,card,root};
 }
@@ -16,7 +16,7 @@ check('native reveal selects only the figure for the exact citation identity',()
 check('a visible prose citation cannot qualify an offscreen original card',()=>{const f=fixture(211);assert(f.probe({href}).clickable);assert.equal(f.probe({cardHref:href}).clickable,false)});
 check('wrong question identity cannot select a different native figure',()=>assert.equal(fixture(70).probe({cardHref:href+'-wrong'}).found,false));
 check('native figure reveal calibrates against the outer chat scroll root',()=>{const f=fixture(70),p=f.probe({cardHref:href});assert.equal(p.root.clientHeight,138);assert.equal(p.root.scrollTop,72);assert.equal(f.root.attrs['data-k12-scroll-id'],'visibility')});
-check('all PDF readiness, original-byte and private-header gates stay unchanged',()=>{for(const name of ['waitReady','inspectNativePages','assertNativeResponse','captureNativeResponse','nativeWheelDelta','wheelFeedback','calibratedWheelDelta'])assert.equal(t[name].toString(),baseline[name].toString(),name)});
+check('all PDF readiness, original-byte and private-header gates stay unchanged',()=>{for(const name of ['waitReady','inspectNativePages','assertNativeResponse','captureNativeResponse','nativeWheelDelta','wheelFeedback','calibratedWheelDelta'])assert.equal(t[name].toString(),baseline[name].toString().replaceAll('[aria-label="题库原题图"]','[aria-label="题库原题"]'),name)});
 const expectedURL='http://127.0.0.1/api/student/question-bank/native/original',item={id:'held-original',network_id:'network-original',url:expectedURL};
 const requests=()=>[{type:'request',id:item.network_id,url:expectedURL}];
 const aborted=()=>({type:'failed',id:item.network_id,error:'net::ERR_ABORTED'});

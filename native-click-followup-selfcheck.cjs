@@ -4,6 +4,17 @@ const a={rect:{left:370,top:726,width:114,height:32},clip:{left:308,top:60,right
 const checks=[];function check(name,fn){fn();checks.push(name);console.log('PASS',name)}
 check('stable target includes the same hit point and ancestor clipping',()=>{assert(t.sameClickGeometry(a,structuredClone(a)));assert(!t.sameClickGeometry(a,{...a,clip:{...a.clip,bottom:900}}));assert(!t.sameClickGeometry(a,{...a,point:{x:427,y:870}}));assert(!t.sameClickGeometry(undefined,a))});
 check('a 128px late reflow invalidates previously stable coordinates',()=>assert(!t.sameClickGeometry(a,{...a,rect:{...a.rect,top:854},point:{x:427,y:870}})));
+check('only an inert native click after a proven library link reflow can be retried',()=>{
+  const before={...a,hit:{href:'#original'}};
+  const after={sameLocation:true,dialogOpen:false,target:{found:true,rect:{...a.rect,top:854}}};
+  const miss={trusted:true,type:'click',tag:'P',interactive:false,x:a.point.x,y:a.point.y};
+  assert(t.inertLibraryClickAfterReflow(miss,before,after,'#original'));
+  for(const patch of [{trusted:false},{action:'clicked-original'},{href:'#another'},{interactive:true},{x:611}])
+    assert(!t.inertLibraryClickAfterReflow({...miss,...patch},before,after,'#original'));
+  for(const patch of [{sameLocation:false},{dialogOpen:true},{target:{found:true,rect:a.rect}},{target:{found:false}}])
+    assert(!t.inertLibraryClickAfterReflow(miss,before,{...after,...patch},'#original'));
+  assert(!t.inertLibraryClickAfterReflow(miss,before,after,'#another'));
+});
 function probe({fonts='loaded',animation}={}){
   const rect={left:370,top:726,right:484,bottom:758,width:114,height:32};
   const node={parentElement:null,innerText:'查看完整原题',textContent:'查看完整原题',getBoundingClientRect:()=>rect,getClientRects:()=>[rect],getAttribute:key=>key==='href'?'#original':null,setAttribute(){},contains:other=>other===node,closest:()=>node,getAnimations:()=>animation?[animation]:[]};
@@ -15,7 +26,7 @@ check('a running finite target animation prevents committing a click',()=>assert
 check('a pending finite animation also prevents committing a click',()=>assert(probe({animation:{pending:true,playState:'idle',effect:{getTiming:()=>({iterations:1})}}}).layoutPending));
 check('an infinite decoration does not block the target forever',()=>assert.equal(probe({animation:{playState:'running',effect:{getTiming:()=>({iterations:Infinity})}}}).layoutPending,false));
 check('settled geometry remains actionable',()=>{const p=probe();assert(p.clickable&&!p.layoutPending)});
-check('original PDF, identity, private-header, cancellation and wheel gates are unchanged',()=>{for(const name of ['nativeSpec','inspectNativePages','assertNativeResponse','captureNativeResponse','continueNativeRequest','waitReady','nativeWheelDelta','wheelFeedback','calibratedWheelDelta'])assert.equal(t[name].toString(),baseline[name].toString(),name)});
+check('original PDF, identity, private-header, cancellation and wheel gates are unchanged',()=>{for(const name of ['nativeSpec','inspectNativePages','assertNativeResponse','captureNativeResponse','continueNativeRequest','waitReady','nativeWheelDelta','wheelFeedback','calibratedWheelDelta'])assert.equal(t[name].toString(),baseline[name].toString().replaceAll('[aria-label="题库原题图"]','[aria-label="题库原题"]'),name)});
 check('trusted click and prepared IMG gates remain unchanged apart from exact navigation diagnostics',()=>{
   const before=fs.readFileSync(__dirname+'/ci-k12-library-ui.click-baseline.cjs','utf8'),after=fs.readFileSync(__dirname+'/ci-k12-library-ui.cjs','utf8');
   const gate=source=>source.slice(source.indexOf("    await wait(token => window.__k12Driver.events.some"),source.indexOf('  async function preparedPictureHistory('));assert.equal(gate(after),gate(before));
@@ -23,6 +34,6 @@ check('trusted click and prepared IMG gates remain unchanged apart from exact na
   const current=prepared(after),diagnostic="    pictureDiagnostic={paused,navigation:{target_url:`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`,state:'pending'}};",observed='      navigation=recordNavigation(view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`),pictureDiagnostic.navigation);';
   assert.equal(current.split(diagnostic).length,2);assert.equal(current.split(observed).length,2);
   const stripped=current.replace(diagnostic,'    pictureDiagnostic={paused};').replace(observed,'      navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);\n      navigation.catch(()=>{});');
-  assert.equal(stripped,prepared(before));assert(!/\.click\s*\(/.test(after));
+  assert.equal(stripped,prepared(before).replaceAll('[aria-label="题库原题图"]','[aria-label="题库原题"]'));assert(!/\.click\s*\(/.test(after));
 });
 fs.writeFileSync(__dirname+'/NATIVE-CLICK-SELFCHECK.json',JSON.stringify({passed:true,checks:checks.length,names:checks,network_calls:0,browser_calls:0,model_calls:0},null,2)+'\n');
