@@ -6,13 +6,13 @@
   },
   {
     "file": ".github/workflows/attachment-native.yml",
-    "bytes": 3016,
-    "sha256": "0b8dfe92f2125cb098f79f4e76dd3f130abb4287ba3d3860dea4ce68c449fc1a"
+    "bytes": 3192,
+    "sha256": "d347b2194057703d2839873e55ec1dfed8f4b25e2e55f2aab2274de08f975bfa"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
     "bytes": 2047,
-    "sha256": "5607867a495f17ae3a46ac683898290236a6156e24859dcc99a96909d01bbf2a"
+    "sha256": "70ad0f8e4172f7b603f594d3fc9d652bc7718eee115d4f6eccb4b54e8e1a4eeb"
   },
   {
     "file": ".github/workflows/k12-existing5-reverify.yml",
@@ -107,7 +107,7 @@
   {
     "file": "attachment-release.json",
     "bytes": 3901,
-    "sha256": "697ba1ea27aa832788902eb76bee7757cfdd106edc048a24c126d872cad1c876"
+    "sha256": "76678e0807090b1050d771efaed4a42236dcd376712ad5a525df78914365b270"
   },
   {
     "file": "bootstrap_source.py",
@@ -146,8 +146,8 @@
   },
   {
     "file": "ci-mac-reuse.py",
-    "bytes": 25641,
-    "sha256": "dd7be5c47d36c932088004ab0dc3873959173ee3d965864a1cc99d167433c9a6"
+    "bytes": 33894,
+    "sha256": "6b2f176d0c631a6896a355f9e9337988405f36f76402847ae733fa49db118304"
   },
   {
     "file": "ci-picture-fresh.cjs",
@@ -156,8 +156,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 20207,
-    "sha256": "16741842ac5c7f18ccab714d82800ce35746dcbe90d810aa9e24e005ea3f85d5"
+    "bytes": 21050,
+    "sha256": "581f48142cb2ebbfd5f67289235eee77ad6592cb3ffde3382d48bb6ec5db5476"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -181,8 +181,8 @@
   },
   {
     "file": "ci-update-flow.cjs",
-    "bytes": 29734,
-    "sha256": "d2dbeecce7c35a0314fc8eef70a4607ecddb30ff1c4c10a949fd358e51684364"
+    "bytes": 32468,
+    "sha256": "e0018a8d015b467fcc2b0d96147b9b971b185f95b35d6d4f1cf85ce2aa7e52a3"
   },
   {
     "file": "ci-update-flow.disposal-baseline.cjs",
@@ -202,7 +202,7 @@
   {
     "file": "ci_repackage.py",
     "bytes": 11810,
-    "sha256": "97b8c3a8c35597e94307f21af531dadcb93270d9ae3c6fbaabebb459663fa7d1"
+    "sha256": "fa3562a9b33416bf3b5f565373cb84f90a8c7839864ebd7e5f6496764168089d"
   },
   {
     "file": "ci_update_probe.py",
@@ -238,6 +238,11 @@
     "file": "fetchfix-tests/macos-runtime-signing.test.mjs",
     "bytes": 1526,
     "sha256": "79fc7f4ef0b00031eaff80cc8774c5cea1649312301283052aa99983b6e427d2"
+  },
+  {
+    "file": "fetchfix-tests/main-lifecycle.test.mjs",
+    "bytes": 2769,
+    "sha256": "e7b52183aa6f5c409b9e9a4cb517e83aa469e56ac455c00f529a6994f1b8d30d"
   },
   {
     "file": "fetchfix-tests/media-permissions.test.mjs",
@@ -326,8 +331,8 @@
   },
   {
     "file": "launcher-changes-20261117.json",
-    "bytes": 198,
-    "sha256": "c140c8ee7eeeb19cba7192e7a5434967f4da8a868caa9a277a4b8b17b4a45b8f"
+    "bytes": 385,
+    "sha256": "56f69d72746d2b7e7d5da36b22a8d542f970d5ede529d70943a5df6d3648902c"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -430,6 +435,16 @@
     "sha256": "396935beedd7b6c0040b8c72717867e6dc09024acb9238f51d93b8043fe155d2"
   },
   {
+    "file": "math-baseline-selfcheck.cjs",
+    "bytes": 2408,
+    "sha256": "5e89e65b0c30f04726def28856db94578758b9e97d22a1711e1d98e8ea1a56de"
+  },
+  {
+    "file": "native-click-followup-selfcheck.cjs",
+    "bytes": 3633,
+    "sha256": "eb23d6325e253ed4548d0e4adefd5d872ac2bd9da594ecea8ea528a2a855d76b"
+  },
+  {
     "file": "native-k12-api-smoke.py",
     "bytes": 16208,
     "sha256": "47f56a233bf36c07c67c4b57614a9a73181ecc139c92472f9255ec1934bb887c"
@@ -443,6 +458,11 @@
     "file": "native-response-followup-selfcheck.cjs",
     "bytes": 6467,
     "sha256": "41e49dfc541630e8e5745834fb78889d4dbcc0e47476784e1b1ec5756ab83cad"
+  },
+  {
+    "file": "native-visibility-selfcheck.cjs",
+    "bytes": 6037,
+    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
   },
   {
     "file": "partial-entry-fixtures/oldest-update-entry.json",
@@ -476,8 +496,8 @@
   },
   {
     "file": "prepare-candidate.py",
-    "bytes": 7118,
-    "sha256": "5a06cd494a6200a419c15e5053505785ee005e24236e889daaba363e63119e6c"
+    "bytes": 7119,
+    "sha256": "cf8c7e15d9a6e838970fd571b74a4a92ea7db735be54d3a91adddd0e915a55ce"
   },
   {
     "file": "prepare-connector-upload.py",
@@ -488,6 +508,11 @@
     "file": "prior-launcher-fingerprint.json",
     "bytes": 2697,
     "sha256": "1ec1b69726c30657293ae663c4f7f337b3be1089420bd5d572029666c97a7fbc"
+  },
+  {
+    "file": "progress-read-selfcheck.cjs",
+    "bytes": 2199,
+    "sha256": "eb7cea6a7d63249492294ca30622041971a4f517b2ca3a1e76bc69c8887c8ceb"
   },
   {
     "file": "publication_transaction.py",
@@ -562,7 +587,7 @@
   {
     "file": "test_publication_transaction.py",
     "bytes": 11450,
-    "sha256": "a4faddf7cfdf86351134f9fc334dd1318dec8d9f21c31ed0d224ecffdf9f3a6c"
+    "sha256": "a18296f7d4551f379e036fdba4187089d86826aace3c64ec43e9903cf3ab26d6"
   },
   {
     "file": "test_recovery_publication_gate.py",
@@ -598,15 +623,5 @@
     "file": "windows-k12-4-reuse-lock.json",
     "bytes": 49564,
     "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
-  },
-  {
-    "file": "native-visibility-selfcheck.cjs",
-    "bytes": 6037,
-    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
-  },
-  {
-    "file": "native-click-followup-selfcheck.cjs",
-    "bytes": 3633,
-    "sha256": "eb23d6325e253ed4548d0e4adefd5d872ac2bd9da594ecea8ea528a2a855d76b"
   }
 ]

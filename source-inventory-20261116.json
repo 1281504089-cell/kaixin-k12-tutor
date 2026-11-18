@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2",
+  "source_commit": "fbb301fd21cf2169f834e0b548d56d201cc98365",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "excluded_files": [
     "deeptutor/services/student_learning/semantic-reference-bge-windowedCLS-v1.npz",
@@ -556,8 +556,8 @@
     },
     {
       "file": "apps/desktop/src/main.mjs",
-      "bytes": 33673,
-      "sha256": "b8997d6a524fbe2ce1d0aa9e586a6105c589a27decddeb03f89f8a13478f71b0",
+      "bytes": 33705,
+      "sha256": "787bb264257ca604e282e27c4712c50502f19e86a8e3f3d120d18f60338ad90c",
       "mode": 420
     },
     {
@@ -696,6 +696,12 @@
       "file": "apps/desktop/test/macos-runtime-signing.test.mjs",
       "bytes": 1526,
       "sha256": "79fc7f4ef0b00031eaff80cc8774c5cea1649312301283052aa99983b6e427d2",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/test/main-lifecycle.test.mjs",
+      "bytes": 2769,
+      "sha256": "e7b52183aa6f5c409b9e9a4cb517e83aa469e56ac455c00f529a6994f1b8d30d",
       "mode": 420
     },
     {
@@ -35634,8 +35640,8 @@
     },
     {
       "file": "apps/desktop/src/main.mjs",
-      "bytes": 33673,
-      "sha256": "b8997d6a524fbe2ce1d0aa9e586a6105c589a27decddeb03f89f8a13478f71b0",
+      "bytes": 33705,
+      "sha256": "787bb264257ca604e282e27c4712c50502f19e86a8e3f3d120d18f60338ad90c",
       "mode": 420
     },
     {
@@ -35648,6 +35654,12 @@
       "file": "apps/desktop/src/shell-update.mjs",
       "bytes": 8975,
       "sha256": "62a91d46a7bb53411768579d9e10ccac7f7acd004cba0bb2990b02cf3613c605",
+      "mode": 420
+    },
+    {
+      "file": "apps/desktop/test/main-lifecycle.test.mjs",
+      "bytes": 2769,
+      "sha256": "e7b52183aa6f5c409b9e9a4cb517e83aa469e56ac455c00f529a6994f1b8d30d",
       "mode": 420
     },
     {

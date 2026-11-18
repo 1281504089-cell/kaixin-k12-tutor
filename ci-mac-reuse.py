@@ -33,7 +33,60 @@ def gh(*args):
 def api(path):
     return json.loads(gh('api', 'repos/' + REPO + '/' + path))
 
+
+# Batch6 is a Windows-only recheck of existing bytes, isolated from legacy4/5 contracts.
+def validate_windows6_lock(lock, frozen_raw):
+    if sys.flags.optimize:raise RuntimeError('Windows6 QA assertions must remain enabled')
+    assert lock.get('execution_frozen') is True, 'Windows6 QA recipe not yet owner-frozen; do not execute'
+    assert lock['target']=='windows-x64' and lock['candidate_tag']=='student-20261117-k12-6'
+    assert lock['candidate_release_id']==449332202 and lock['baseline_latest_id']==448283800 and lock['baseline_latest_tag']=='student-20261117-k12-4'
+    assert lock['source_commit']=='4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2' and lock['launcher_build']=='20261118-updater-3'
+    assert lock['original_native_run']==44202602948 and lock['original_native_workflow_commit']=='a61f75e11a4d8a7f99cda009e3eb76e6654eb5a0'
+    assert lock['original_failed_job']==134460266527 and lock['stage_delivery_commit']=='ca2b5e1ce71a75e4673b9d68319c44d1c6be80d0'
+    assert not any(key in lock for key in ['resume_artifact','reused_complete_entries','reused_fresh_picture_ui']), 'Batch6 must rerun fresh and all four complete update paths'
+    assert lock['frozen_stage']=={'bytes':43033,'sha256':'b27fe66424ff3ff3475d03d199a626b4d3667f56e2ccc6fd0f51f7b394b40c89','manifests':45}
+    assert len(frozen_raw)==43033 and hashlib.sha256(frozen_raw).hexdigest()==lock['frozen_stage']['sha256']
+    frozen=json.loads(frozen_raw)
+    assert frozen['core_commit']==lock['source_commit'] and len(frozen['manifests'])==45
+    anchors={'candidate_files': '5964b29f756b60b526c7e14649fb56a42693874dbb99243074719e376627c823', 'immutable_existing_assets': '44a1cdd9001f45412baad7d4d0602bed85e6e99b8e35065d63653f750b02a8f1', 'prior_manifest': '7658b18daa9af86fdac8c11692059bc648d65c484102693999ddfdce354ec915', 'prior_manifest_asset': '08104b20095c4d7ee5db79d5e8895e34d1f881f7383ece7ca7c94854696c5fe5', 'prior_core_asset': '206b7d4543633c0937028bcbe63b4c05da5ebf8e132b110cd6fb2633a2cec272', 'baseline_feeds': '46c637d6a2c397c56c0267a5795258f086e49f87f4577f270065bab141d1d5f8', 'native_pages': 'de5098675fbb005ff4d3207a4a7da9b218819f894bb9329e10ddaf085267f884'}
+    for key,expected in anchors.items():
+        actual=hashlib.sha256(json.dumps(lock[key],sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        assert actual==expected, 'Batch6 immutable identity changed: '+key
+    assert lock['locked_existing_assets_count']==76
+    immutable={row['name']:row for row in lock['immutable_existing_assets']}
+    assert len(immutable)==76 and len({r['id'] for r in immutable.values()})==76
+    assert len(lock['candidate_files'])==5 and len(lock['signed_runtime_assets'])==45
+    assert {r['name'] for r in lock['signed_runtime_assets']}==set(frozen['manifests'])
+    assert len({r['id'] for r in lock['signed_runtime_assets']})==45
+    assert lock['core_asset']=={'name':'kaixin-core-20261117-k12-6.tar.gz','id':761097765,'bytes':837565345,'sha256':'97c3a9e50a3a0e1be88ed6855abab381cfe5689b9580b70ec287f7b6827867e6','url':'https://github.com/'+REPO+'/releases/download/student-20261117-k12-6/kaixin-core-20261117-k12-6.tar.gz'}
+    assert lock['bridge']=={'name':'kaixin-bridge-20261117-k12-6-windows-x64.tar.gz','id':761194073,'bytes':1958627156,'sha256':'c52bc767964938fabf14436d88029be38b0c800a13d79557408bd0da31abebcb','url':'https://github.com/'+REPO+'/releases/download/student-20261117-k12-6/kaixin-bridge-20261117-k12-6-windows-x64.tar.gz'}
+    for row in [*lock['candidate_files'],lock['core_asset'],lock['bridge'],*lock['signed_runtime_assets']]:
+        assert row==immutable[row['name']] and Path(row['name']).name==row['name']
+        assert row['url']=='https://github.com/'+REPO+'/releases/download/student-20261117-k12-6/'+row['name']
+        assert re.fullmatch(r'[a-f0-9]{64}',row['sha256']) and row['bytes']>0
+    assert all(m['commit']==lock['source_commit'] and m['corePayloadSha256']==lock['core_asset']['sha256'] for m in frozen['manifests'].values())
+    assert lock['included_manifest']==frozen['manifests']['runtime-windows-x64-20261117-k12-6-20261112.json']
+    included,prior=lock['included_manifest'],lock['prior_manifest']
+    assert included['platform']=='win32' and included['arch']=='x64' and included['sha256']==lock['core_asset']['sha256']
+    assert prior['baseRuntimeId']==included['baseRuntimeId']=='1.7.1-04276f68a-x64'
+    assert prior['archive']==lock['prior_core_asset']['name'] and prior['sha256']==lock['prior_core_asset']['sha256']
+    bridge=frozen['manifests']['runtime-windows-x64.json']
+    assert bridge['archive']==lock['bridge']['name'] and bridge['sha256']==lock['bridge']['sha256'] and bridge.get('baseRuntimeId') is None
+    assert lock['public_key_sha256']=='aed6f122112b2dcd78e98e9811c48dcaa779d0ab7a9150acadca36255603e062'
+    assert lock['picture_count']==294 and lock['picture_manifest_sha256']=='3983e0c365daef3e15e3352323e1b5ec19d7be42de924744094c20567477cd10'
+    assert lock['runtime_exclusion_count']==17 and lock['runtime_exclusion_kinds']=={'bad_asset_sha256':16,'bad_payload_sha256':1}
+    assert lock['runtime_exclusion_ledger_sha256']=='d83de01f607be564213c007a6613ca81b3adea2821ef1de83147a298d3f71522'
+    assert lock['bank_revision']=='26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee'
+    assert lock['launcher_tests']=={'tests':82,'pass':78,'fail':0,'skipped':4}
+    required={'ci-materials-ui.cjs','native-materials-fixture.py','attachment-final-manifests.json','ci-mac-reuse.py','ci_update_probe.py','ci-update-flow.cjs','ci-k12-library-ui.cjs','ci_picture_fresh.py','ci-picture-fresh.cjs','native-k12-fixture.py','ci-fresh-smoke.mjs','ci-proxy-smoke.cjs','source-manifest.json','bootstrap_source.py','release_source.py','launcher-manifest.json','attachment-batch.json','materials-upgrade-lock.json','oldest-launcher-fingerprint.json'}
+    assert required.issubset(lock['recipe_inputs_sha256'])
+    for name,digest in lock['recipe_inputs_sha256'].items():
+        assert not Path(name).is_absolute() and '..' not in Path(name).parts and '\\' not in name
+        assert isinstance(digest,str) and re.fullmatch(r'[a-f0-9]{64}',digest), 'Owner must freeze final QA input: '+name
+    return frozen
+
 def validate_lock(lock, frozen_raw):
+    if lock.get('candidate_tag')=='student-20261117-k12-6':return validate_windows6_lock(lock,frozen_raw)
     assert lock['target'] in TARGETS and lock['candidate_tag'] in {'student-20261117-k12-4','student-20261117-k12-5'}
     newer=lock['candidate_tag']=='student-20261117-k12-5'
     if newer:
@@ -97,6 +150,7 @@ def verify_metadata(lock):
     assert api('releases/latest')['id'] == lock['baseline_latest_id'], 'Latest changed during frozen Mac revalidation'
     release = api('releases/tags/' + lock['candidate_tag'])
     assert release['id'] == lock['candidate_release_id'] and release['prerelease'] and not release['draft']
+    if lock['candidate_tag']=='student-20261117-k12-6':assert release['tag_name']==lock['candidate_tag']
     assets = {a['name']: a for a in release['assets']}
     expected = lock['immutable_existing_assets']
     for row in expected:
@@ -133,7 +187,7 @@ def verify_signatures(root, resources, lock, signed_downloads):
     key = resources / 'app/assets/runtime-public.pem'
     assert sha(key) == lock['public_key_sha256']
     code = """import{readFile}from'node:fs/promises';import{pathToFileURL}from'node:url';import path from'node:path';import assert from'node:assert/strict';const{verifyManifest}=await import(pathToFileURL(process.argv[1]));const key=await readFile(process.argv[2]);const lock=JSON.parse(await readFile(process.argv[3]));const f=JSON.parse(await readFile(process.argv[4]));for(const m of [lock.included_manifest,lock.prior_manifest,...Object.values(f.manifests)])verifyManifest(m,key,m.arch,m.platform);for(const row of lock.signed_runtime_assets){const actual=JSON.parse(await readFile(path.join(process.argv[5],row.name)));assert.deepEqual(actual,f.manifests[row.name]);}console.log('PASS: installed public key verified included/prior/all immutable downloaded stage manifests');"""
-    run(['node','--input-type=module','-e',code,resources/'app/src/bundles.mjs',key,root/('intel-k12-5-reuse-lock.json' if lock['candidate_tag']=='student-20261117-k12-5' else TARGETS[lock['target']]['lock']),root/'attachment-final-manifests.json',signed_downloads])
+    run(['node','--input-type=module','-e',code,resources/'app/src/bundles.mjs',key,root/('windows-k12-6-reuse-lock.json' if lock['candidate_tag']=='student-20261117-k12-6' else 'intel-k12-5-reuse-lock.json' if lock['candidate_tag']=='student-20261117-k12-5' else TARGETS[lock['target']]['lock']),root/'attachment-final-manifests.json',signed_downloads])
 
 def verify_proxy(root, resources, evidence, target):
     mac=target.startswith('macos')
@@ -157,7 +211,8 @@ def verify_proxy(root, resources, evidence, target):
         shutil.rmtree(qa_home)
 
 def upload_new(tag, path, target):
-    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5'}
+    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6'}
+    if tag=='student-20261117-k12-6':assert target=='windows-x64'
     if tag=='student-20261117-k12-5':assert target=='macos-x64'
     assert path.name == 'verification-'+target+'.json' or re.fullmatch(r'native-reverify-run-'+re.escape(target)+r'-[0-9]+\.json', path.name), 'Only this Mac target\'s new evidence may be uploaded'
     before = api('releases/tags/' + tag)
@@ -171,6 +226,10 @@ def upload_new(tag, path, target):
     assert actual and actual['digest'] == 'sha256:' + sha(path) and actual['size'] == path.stat().st_size, str(error)
 
 def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, materials_oldest):
+    if lock['candidate_tag']=='student-20261117-k12-6':
+        for entry in [current,oldest,materials,materials_oldest]:
+            assert entry['actual_download_install_backup_restart']=='passed' and entry['check_again_current'] is True and entry['to_launcher']=='20261118-updater-3'
+            assert all(entry[k] is True for k in ['chat_preserved','task_preserved','saved_key_preserved'])
     api_proof = smoke['k12_api']
     for field, expected in [('prepared_picture_bindings',lock['picture_count']),('prepared_picture_manifest_sha256',lock['picture_manifest_sha256']),('runtime_isolated_count',lock['runtime_exclusion_count']),('runtime_exclusion_kinds',lock['runtime_exclusion_kinds']),('runtime_exclusion_ledger_sha256',lock['runtime_exclusion_ledger_sha256']),('bank_revision',lock['bank_revision']),('model_calls',0)]:
         assert api_proof[field] == expected, field
@@ -190,20 +249,30 @@ def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, mater
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', required=True, choices=tuple(TARGETS))
-    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5'),default='student-20261117-k12-4')
+    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6'),default='student-20261117-k12-4')
     args=parser.parse_args();target=args.target
+    six=args.release_tag=='student-20261117-k12-6'
+    if six:assert target=='windows-x64' and not sys.flags.optimize, 'Only normal nonoptimized Windows6 QA is allowed'
     if args.release_tag=='student-20261117-k12-5':assert target=='macos-x64'
     spec = TARGETS[target]
     assert sys.platform == spec['platform'] and platform.machine() == spec['machine'], 'The selected platform must be tested on its actual native runner'
     mac=target.startswith('macos')
     root = Path.cwd()
-    lock_file = root/('intel-k12-5-reuse-lock.json' if args.release_tag=='student-20261117-k12-5' else spec['lock'])
+    lock_file = root/('windows-k12-6-reuse-lock.json' if six else 'intel-k12-5-reuse-lock.json' if args.release_tag=='student-20261117-k12-5' else spec['lock'])
     lock = json.loads(lock_file.read_text())
     assert lock['target'] == target
     frozen = validate_lock(lock, (root/'attachment-final-manifests.json').read_bytes())
+    if six:
+        assert re.fullmatch(r'[a-f0-9]{64}',os.environ.get('KX_REUSE_LOCK_SHA256','')) and sha(lock_file)==os.environ['KX_REUSE_LOCK_SHA256'], 'Owner-frozen raw lock SHA required'
+        assert os.environ.get('GITHUB_REF_NAME','').startswith('codex/k12-windows6-reverify-20261118-')
+        assert int(os.environ['GITHUB_RUN_ID'])!=lock['original_native_run'] and re.fullmatch(r'[a-f0-9]{40}',os.environ['GITHUB_SHA'])
+        assert all(not (root/name).exists() for name in ['windows-x64-reuse-work','prior-update','materials-baseline','student-source','launcher-tests-windows-x64']), 'Use a new disposable synthesis directory; never resume accepted requests'
     batch = json.loads((root/'attachment-batch.json').read_text())
     for name,digest in lock['recipe_inputs_sha256'].items(): assert sha(root/name) == digest, 'Frozen recipe input changed: ' + name
     assert batch['manifests'][target] == lock['included_manifest']
+    if six:
+        assert batch['tag']==lock['candidate_tag'] and batch['core_commit']==lock['source_commit'] and batch['launcher_build']==lock['launcher_build']
+        assert json.loads((root/'launcher-manifest.json').read_text())['buildId']==lock['launcher_build']
     release = verify_metadata(lock)
     assert not any(a['name'] == 'verification-'+target+'.json' for a in release['assets']), 'Verification already exists; do not replace it'
     completed = None
@@ -283,6 +352,7 @@ def main():
     tests.check_returncode()
     counts = {key: int(re.search(r'^# ' + key + r' (\d+)$', tests.stdout, re.M).group(1)) for key in ['tests','pass','fail','skipped']}
     assert counts['tests'] >= 81 and counts['fail'] == 0
+    if six:assert counts==lock['launcher_tests'], 'Windows6 exact launcher test counts changed'
     (evidence / 'launcher-tests.json').write_text(json.dumps({'passed':True,'native_target':target,**counts},indent=2))
     environment = {**os.environ,'KX_EXPECTED_PLATFORM':spec['platform'],'KX_EXPECTED_ARCH':spec['arch']}
     home = work/'全新学习目录'

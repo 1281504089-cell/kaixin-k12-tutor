@@ -17,6 +17,7 @@ let stage=phase, downloadStarted=saved?.download_started??false, initialUpgrade,
 let shellTranslate, applyingEvidence, nativeFailure, applyPhases={},lastShellStatus=saved?.last_shell_status??null;
 let selectedCandidate='',candidateEvidence;
 const backupDiagnostics=saved?.backup_diagnostics??[];
+const progressReads=saved?.progress_reads??[];
 const phaseBudgets={updating:60000,checking:70000,preparingUi:240000,startingCore:190000,openingSpace:250000,ready:60000};
 const watchedShells=new WeakSet(), rendererDisposals=saved?.renderer_disposal_waits??[];
 const needsRestart=process.env.KX_EXPECT_SHELL_RESTART==='1';
@@ -25,6 +26,31 @@ let fromPid=process.pid;
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 function optionalRead(name) {
   try { return readFileSync(path.join(home,name),'utf8'); } catch(error) { if(error.code==='ENOENT')return null;throw error; }
+}
+async function captureMathBaseline(view) {
+  const fixture = JSON.parse(readFileSync(path.join(home, 'attachment-fixture.json')));
+  assert.ok(typeof fixture.mistake === 'string' && fixture.mistake_title?.includes(fixture.mistake), 'Missing unique math fixture identity');
+  const receipt = await view.executeJavaScript(`(${(async function(record) {
+    const url = new URL('/api/student/mistakes?practice=' + encodeURIComponent(record) + '&dt_workspace=', location.href).href;
+    const result = { kind: 'pre-update read-only practice GET', url, requested_record: record };
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5000);
+    try {
+      const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
+      result.status = response.status; result.ok = response.ok;
+      if (response.ok) {
+        const data = await response.json();
+        result.target = { title: data.title, question: data.question, student_work: data.student_work,
+          image_count: Array.isArray(data.images) ? data.images.length : null };
+      }
+    } catch (error) { result.error = String(error); }
+    finally { clearTimeout(timer); }
+    return result;
+  }).toString()})(${JSON.stringify(fixture.mistake)})`);
+  writeFileSync(output + '.math-before.json', JSON.stringify({ ...receipt, accepted, expected_title: fixture.mistake_title }));
+  assert.equal(accepted, 0, 'Math fixture baseline must precede update acceptance');
+  assert.equal(receipt.ok, true, 'Math fixture is unreadable before updating: ' + JSON.stringify(receipt));
+  assert.equal(receipt.target?.title, fixture.mistake_title, 'Math fixture identity differs before updating');
+  assert.ok(receipt.target.question && receipt.target.student_work, 'Math fixture content is missing before updating');
 }
 function connectionTimeout(error) {
   const chain=[];for(let item=error;item&&chain.length<5;item=item.cause)chain.push(item);
@@ -44,7 +70,7 @@ async function checkedFetch(fetch,url,options) {
   catch(error){if(tracked)lastTransportError={attempt:checkAttempts,url:new URL(url).origin+new URL(url).pathname,error};throw error;}
 }
 function flowState() {
-  return {check_attempts:checkAttempts,current_check_attempts:currentCheckAttempts,read_only_retry_reasons:readOnlyRetries,download_started:downloadStarted,download_progress_visible:progressVisible,downloaded_bytes_visible:progressWithBytes,renderer_disposal_waits:rendererDisposals,last_shell_status:lastShellStatus,native_error:nativeFailure?String(nativeFailure.stack||nativeFailure):null,backup_diagnostics:backupDiagnostics};
+  return {check_attempts:checkAttempts,current_check_attempts:currentCheckAttempts,read_only_retry_reasons:readOnlyRetries,download_started:downloadStarted,download_progress_visible:progressVisible,downloaded_bytes_visible:progressWithBytes,renderer_disposal_waits:rendererDisposals,last_shell_status:lastShellStatus,native_error:nativeFailure?String(nativeFailure.stack||nativeFailure):null,backup_diagnostics:backupDiagnostics,progress_reads:progressReads};
 }
 function watchShell(view) {
   if(typeof view?.send==='function'&&!watchedShells.has(view)) {
@@ -174,10 +200,25 @@ function fail(error, failedStage=stage) {
   finally {clearTimeout(timer);app.exit(1);}
 }
 async function collectProgress() {
-  for(const win of BrowserWindow.getAllWindows())if(win.webContents.getURL().endsWith('/update-progress.html')) {
+  for(const win of BrowserWindow.getAllWindows()) {
+    if(win.isDestroyed?.())continue;
+    const contents=win.webContents;
+    if(!contents || contents.isDestroyed?.() || !contents.getURL().endsWith('/update-progress.html'))continue;
     progressVisible=true;downloadStarted=true;
-    const text=await win.webContents.executeJavaScript('document.body.innerText').catch(()=> '');
-    if(/\d+\.\d+ MB/.test(text))progressWithBytes=true;
+    let timer;
+    const outcome=await Promise.race([
+      Promise.resolve().then(()=>contents.executeJavaScript('document.body.innerText')).then(text=>({text}),error=>({error})),
+      new Promise(resolve=>{timer=setTimeout(()=>resolve({timed_out:true}),5000);}),
+    ]);
+    clearTimeout(timer);
+    // Electron can leave a page-read promise pending when the completed update destroys its window.
+    if(win.isDestroyed?.() || contents.isDestroyed?.()) {
+      progressReads.push({check_attempt:checkAttempts,outcome:'window-destroyed-during-read'});
+      continue;
+    }
+    if(outcome.error)throw outcome.error;
+    assert(!outcome.timed_out,'QA progress text read stalled on a still-live window');
+    if(/\d+\.\d+ MB/.test(outcome.text))progressWithBytes=true;
   }
 }
 async function runCheck(view, expectCurrent=false) {
@@ -295,6 +336,8 @@ async function content() {
     if (phase === 'old-launcher') {
       await pause(1000);
       initialUpgrade=optionalRead('upgrade.json');
+      stage='math-before-update';
+      await captureMathBaseline(view);
       await runCheck(view);
       stage='validate-installed';
       const updated = JSON.parse(readFileSync(path.join(home, 'active.json')));

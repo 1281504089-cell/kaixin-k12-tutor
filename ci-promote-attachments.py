@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-6', 'Owner must prepare the exact final three-native-tested publication batch'
+assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-7', 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -42,7 +42,7 @@ def download_public_archive(asset,destination):
 
 def verify_update_recovery(report,batch,target):
  tests=report['launcher_tests'];skipped=4 if target=='windows-x64' else 0
- assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':82,'pass':82-skipped,'fail':0,'skipped':skipped}
+ assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':83,'pass':83-skipped,'fail':0,'skipped':skipped}
  transport=report['network']['interrupted_transport_fixture']
  assert transport['faults']==2 and transport['recoveries']==1 and transport['verified_complete']
  mixed=report['network']['interrupted_direct_denied_api_fixture']
@@ -80,6 +80,12 @@ def stage_run_for_target(batch,target):
 def recheck_lock_for_target(batch,target):
  old={'windows-x64':'windows-k12-4-reuse-lock.json','macos-x64':'intel-k12-4-reuse-lock.json','macos-arm64':'arm-k12-4-reuse-lock.json'}[target]
  selected=batch.get('native_rechecks',{}).get(target,{}).get('lock_file',old)
+ if batch['tag']=='student-20261117-k12-6':
+  assert target=='windows-x64' and selected=='windows-k12-6-reuse-lock.json'
+  assert batch['core_commit']=='4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2'
+  staged=batch.get('native_staging_runs',{}).get(target) if batch.get('native_staging_runs') else {'run_id':batch['native_staging_run'],'workflow_commit':batch['native_staging_workflow_commit']}
+  assert staged=={'run_id':44202602948,'workflow_commit':'a61f75e11a4d8a7f99cda009e3eb76e6654eb5a0'}
+  return selected
  assert selected==old or batch['tag']=='student-20261117-k12-5' and target=='macos-x64' and selected=='intel-k12-5-reuse-lock.json'
  return selected
 
@@ -104,6 +110,10 @@ for target in targets:
   assert target in {'macos-arm64','macos-x64','windows-x64'}
   lock_name=recheck_lock_for_target(batch,target)
   lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
+  if batch['tag']=='student-20261117-k12-6':
+   import importlib.util
+   spec=importlib.util.spec_from_file_location('frozen_windows6_recheck',root/'ci-mac-reuse.py');guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
+   guard.validate_windows6_lock(lock,(root/'attachment-final-manifests.json').read_bytes())
   accepted=batch['native_rechecks'][target];p=report['provenance']
   assert hashlib.sha256(lock_raw).hexdigest()==accepted['lock_sha256']==p['reuse_lock_sha256']
   assert p['reuse_lock_file']==lock_name

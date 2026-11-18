@@ -57,7 +57,7 @@ def main():
                 add_file(package, row["file"], stream, row["bytes"], row["mode"])
     parts = []
     with archive.open("rb") as stream:
-        while block := stream.read(512 * 1024):
+        while block := stream.read(1536 * 1024):
             file = root / f"source-overlay.{len(parts) + 1:03d}"
             file.write_bytes(block)
             parts.append({"file": file.name, "bytes": len(block), "sha256": sha(file)})
