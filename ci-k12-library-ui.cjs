@@ -29,6 +29,12 @@ function bodyMarkers(text) {
 }
 const sameGeometry = (a, b) => !!a && !!b && ['left', 'top', 'width', 'height'].every(key => Math.abs(a[key] - b[key]) < 1);
 const sameClickGeometry = (a, b) => sameGeometry(a?.rect,b?.rect) && ['left','top','right','bottom'].every(key=>Math.abs(a.clip[key]-b.clip[key])<1) && a.point.x===b.point.x && a.point.y===b.point.y;
+function inertLibraryClickAfterReflow(event, before, after, href) {
+  return event?.trusted && event.type === 'click' && event.tag === 'P' && event.interactive === false
+    && !event.action && !event.href && event.x === before.point.x && event.y === before.point.y
+    && before.hit.href === href && after.target.found && !sameGeometry(before.rect, after.target.rect)
+    && after.sameLocation && !after.dialogOpen;
+}
 const nativeWheelDelta = (platform, arch) => platform === 'darwin' && arch === 'x64' ? 160 : null;
 const wheelFeedback = (before, after, event) => !!event?.trusted && event.deltaY < 0 && (before <= 0 || after < before - 1);
 const calibratedWheelDelta = (delta, event) => !event?.trusted || !Number.isFinite(event.deltaY) || event.deltaY === 0 ? null : event.deltaY < 0 ? delta : -delta;
@@ -170,7 +176,7 @@ function inspectNativePages(spec, dialog=false) {
 function inspectTarget(spec, token, scroll = false) {
   const rect = node => { const r = node.getBoundingClientRect(); return { left:r.left, top:r.top, right:r.right, bottom:r.bottom, width:r.width, height:r.height }; };
   const candidates = spec.cardHref ? [...document.querySelectorAll('[aria-label="题库原题"] figure')].filter(figure => [...figure.querySelectorAll('a[href]')].some(a => a.getAttribute('href') === spec.cardHref))
-    : spec.href ? [...document.querySelectorAll('a[href]')].filter(node => node.getAttribute('href') === spec.href)
+    : spec.href ? [...document.querySelectorAll(spec.library ? 'section[aria-label="题库"] a[href]' : 'a[href]')].filter(node => node.getAttribute('href') === spec.href)
     : spec.text ? [...document.querySelectorAll('button')].filter(node => node.textContent.trim() === spec.text)
       : [...document.querySelectorAll(spec.selector)];
   const visible = node => { const style = getComputedStyle(node); return [...node.getClientRects()].some(r => r.width > 0 && r.height > 0) && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0' && !node.disabled && node.getAttribute('aria-disabled') !== 'true'; };
@@ -254,6 +260,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
         const target = event.target;
         window.__k12Driver.events.push({ sequence:++window.__k12Driver.sequence, type, trusted:event.isTrusted, at:performance.now(), deltaY:event.deltaY, x:event.clientX, y:event.clientY,
           tag:target?.tagName, text:target?.innerText?.slice(0,120), href:target?.closest?.('a[href]')?.getAttribute('href'),
+          interactive:!!target?.closest?.('a,button,input,select,textarea,label,[role="button"],[role="link"],[contenteditable="true"]'),
           action:target?.closest?.('[data-k12-click-id]')?.getAttribute('data-k12-click-id'),
           root:target?.closest?.('[data-k12-scroll-id]')?.getAttribute('data-k12-scroll-id'),
           src:target instanceof HTMLImageElement ? target.currentSrc || target.src : undefined });
@@ -261,7 +268,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       }, true);
     });
   }
-  async function click(spec, { activate = true } = {}) {
+  async function click(spec, { activate = true, recoveredLayout = false } = {}) {
     if (typeof spec === 'string') spec = { selector:spec };
     await monitor();
     const token = `k12-${++actionSequence}`;
@@ -330,8 +337,23 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     }
     if (!activate) { lastAction.revealed=current; return current; }
     lastAction.dispatched = current;
+    const layoutRecovery = spec.library && !recoveredLayout;
+    const before = layoutRecovery ? await js(() => ({sequence:window.__k12Driver.sequence,url:location.href})) : null;
     view.sendInputEvent({ type:'mouseDown', button:'left', clickCount:1, ...current.point });
     view.sendInputEvent({ type:'mouseUp', button:'left', clickCount:1, ...current.point });
+    if (layoutRecovery) {
+      await wait(sequence => window.__k12Driver.events.some(event=>event.type==='click'&&event.trusted&&event.sequence>sequence),
+        [before.sequence],'The native library click produced no trusted event');
+      const event = await js(sequence=>window.__k12Driver.events.find(event=>event.type==='click'&&event.trusted&&event.sequence>sequence),before.sequence);
+      if (event.action !== token) {
+        const layout = await js(url=>({sameLocation:location.href===url,dialogOpen:!!document.querySelector('[role="dialog"]')}),before.url);
+        const after = { ...layout, target:await js(inspectTarget,spec,token) };
+        if (inertLibraryClickAfterReflow(event,current,after,spec.href)) {
+          save(file('library-layout-reflow','json'),{event,before:current,after});
+          return click(spec,{recoveredLayout:true});
+        }
+      }
+    }
     await wait(token => window.__k12Driver.events.some(event => event.type === 'click' && event.trusted && event.action === token),[token],'The native mouse did not hit its chosen target');
   }
   async function preparedPictureHistory() {
@@ -519,7 +541,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       const librarySource=await liveSource(libraryHref);
       if(librarySource.native){const spec=nativeSpec(librarySource,origin);nativeSpecifications.set(spec.url,spec);}
       const libraryStart=network.length;
-      await click('section[aria-label="题库"] a[href^="#dt-question-"]');
+      await click({href:libraryHref,library:true});
       assert.equal(lastAction.dispatched.hit.href,libraryHref,'The native click opened a different library source');
       if(librarySource.native) {
         const spec=nativeSpec(librarySource,origin);await nativePreview(spec);await nativeHTTP(spec,libraryStart);
@@ -578,4 +600,4 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     if(debug.isAttached())debug.detach();
   }
 };
-module.exports._test = { inspectMaterialShelves, assertMaterialShelves, normalize, bodyMarkers, sameGeometry, sameClickGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest, shortError, recordNavigation, sessionNetworkEvent, runtimeException, probeSessionReadOnly };
+module.exports._test = { inspectMaterialShelves, assertMaterialShelves, normalize, bodyMarkers, sameGeometry, sameClickGeometry, inertLibraryClickAfterReflow, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest, shortError, recordNavigation, sessionNetworkEvent, runtimeException, probeSessionReadOnly };

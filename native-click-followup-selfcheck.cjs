@@ -4,6 +4,17 @@ const a={rect:{left:370,top:726,width:114,height:32},clip:{left:308,top:60,right
 const checks=[];function check(name,fn){fn();checks.push(name);console.log('PASS',name)}
 check('stable target includes the same hit point and ancestor clipping',()=>{assert(t.sameClickGeometry(a,structuredClone(a)));assert(!t.sameClickGeometry(a,{...a,clip:{...a.clip,bottom:900}}));assert(!t.sameClickGeometry(a,{...a,point:{x:427,y:870}}));assert(!t.sameClickGeometry(undefined,a))});
 check('a 128px late reflow invalidates previously stable coordinates',()=>assert(!t.sameClickGeometry(a,{...a,rect:{...a.rect,top:854},point:{x:427,y:870}})));
+check('only an inert native click after a proven library link reflow can be retried',()=>{
+  const before={...a,hit:{href:'#original'}};
+  const after={sameLocation:true,dialogOpen:false,target:{found:true,rect:{...a.rect,top:854}}};
+  const miss={trusted:true,type:'click',tag:'P',interactive:false,x:a.point.x,y:a.point.y};
+  assert(t.inertLibraryClickAfterReflow(miss,before,after,'#original'));
+  for(const patch of [{trusted:false},{action:'clicked-original'},{href:'#another'},{interactive:true},{x:611}])
+    assert(!t.inertLibraryClickAfterReflow({...miss,...patch},before,after,'#original'));
+  for(const patch of [{sameLocation:false},{dialogOpen:true},{target:{found:true,rect:a.rect}},{target:{found:false}}])
+    assert(!t.inertLibraryClickAfterReflow(miss,before,{...after,...patch},'#original'));
+  assert(!t.inertLibraryClickAfterReflow(miss,before,after,'#another'));
+});
 function probe({fonts='loaded',animation}={}){
   const rect={left:370,top:726,right:484,bottom:758,width:114,height:32};
   const node={parentElement:null,innerText:'查看完整原题',textContent:'查看完整原题',getBoundingClientRect:()=>rect,getClientRects:()=>[rect],getAttribute:key=>key==='href'?'#original':null,setAttribute(){},contains:other=>other===node,closest:()=>node,getAnimations:()=>animation?[animation]:[]};
