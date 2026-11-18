@@ -183,7 +183,7 @@ class PublicationTransactionTest(unittest.TestCase):
         text = source.read_text()
         first = text.split('- name: Record publication run', 1)[1].split('- name:', 1)[0]
         self.assertIn('b.get("prepared") is True', first)
-        self.assertIn('b["tag"]=="student-20261117-k12-5"', first)
+        self.assertIn('b["tag"]=="student-20261117-k12-7"', first)
         self.assertNotIn('gh release', first)
         self.assertNotIn('codex/k12-publish-20261116', text)
 

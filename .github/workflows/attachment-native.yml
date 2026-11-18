@@ -57,6 +57,10 @@ jobs:
       - name: Prepare Windows packaging tool
         if: runner.os == 'Windows'
         run: choco install nsis --yes --no-progress
+      - name: Verify bounded progress and same-account math fixture checks
+        run: |
+          node progress-read-selfcheck.cjs
+          node math-baseline-selfcheck.cjs
       - name: Verify fresh install, background indexing, bridge, and real update IPC
         run: python ci-fresh-install.py --target ${{ matrix.target }}
       - name: Retain native evidence
