@@ -14,6 +14,8 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 REPO = '1281504089-cell/kaixin-k12-tutor'
+INTEL11_TAG = 'student-20261117-k12-11'
+INTEL11_LOCK = 'intel-k12-11-reuse-lock.json'
 TARGETS = {
     'windows-x64': {'lock':'windows-k12-4-reuse-lock.json','arch':'x64','failed_job':133889530356,'platform':'win32','machine':'AMD64'},
     'macos-arm64': {'lock':'arm-k12-4-reuse-lock.json','arch':'arm64','brand':'Apple-Silicon','failed_job':133889530428,'platform':'darwin','machine':'arm64'},
@@ -85,7 +87,53 @@ def validate_windows6_lock(lock, frozen_raw):
         assert isinstance(digest,str) and re.fullmatch(r'[a-f0-9]{64}',digest), 'Owner must freeze final QA input: '+name
     return frozen
 
+def validate_intel11_lock(lock, frozen_raw):
+    assert not sys.flags.optimize and lock['execution_frozen'] is True
+    assert (lock['candidate_tag'], lock['target'], lock['candidate_release_id']) == (INTEL11_TAG, 'macos-x64', 450336530)
+    assert (lock['baseline_latest_tag'], lock['baseline_latest_id']) == ('student-20261117-k12-8', 449810016)
+    assert (lock['original_native_run'], lock['original_failed_job']) == (44362174807, 135006233250)
+    assert lock['original_native_workflow_commit'] == 'a7dadd1f1c9e803ab1aa7a6f3a111a60c63fdd30'
+    assert lock['stage_delivery_commit'] == '676f502d9c3da19d5c4246b481b59689e89b897b'
+    assert lock['source_commit'] == '04fb2adc0c36e964d3a43fc4a4c9c45a877a67c0' and lock['launcher_build'] == '20261118-updater-5'
+    stage = lock['frozen_stage']
+    assert stage == dict(bytes=49075, sha256='f6bbffd362ca1d4167f556dd0ff24714ee530e2d82b3147a9394eda1d2a52034', manifests=51)
+    assert len(frozen_raw) == stage['bytes'] and hashlib.sha256(frozen_raw).hexdigest() == stage['sha256']
+    frozen = json.loads(frozen_raw)
+    manifests = frozen['manifests']
+    assert frozen['core_commit'] == lock['source_commit'] and len(manifests) == stage['manifests']
+    installer = 'Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-11-part'
+    assert {r['name'] for r in lock['candidate_files']} == {installer+'.dmg', *(installer+f'.{i:03d}.dmgpart' for i in range(2, 6))}
+    assert len(lock['candidate_files']) == 5
+    assert {r['name'] for r in lock['signed_runtime_assets']} == set(manifests)
+    assert len(lock['signed_runtime_assets']) == len(manifests)
+    rows = lock['immutable_existing_assets']
+    fixed = {r['name']: r for r in rows}
+    assert len(rows) == len(fixed) == len({r['id'] for r in rows}) == lock['locked_existing_assets_count']
+    for r in rows:
+        assert Path(r['name']).name == r['name'] and re.fullmatch(r'[a-f0-9]{64}', r['sha256'])
+        assert r['bytes'] > 0 and r['id'] > 0
+        assert r['url'] == f'https://github.com/{REPO}/releases/download/{INTEL11_TAG}/' + r['name']
+    for r in [*lock['candidate_files'], *lock['signed_runtime_assets'], lock['core_asset'], lock['bridge']]:
+        assert r == fixed[r['name']]
+    assert lock['core_asset']['sha256'] == '3551a16d47170f54f98e78cb1e0544fd3ecbc090e35217d543e7ebd0942ef21d'
+    assert all(m['commit'] == lock['source_commit'] and m['corePayloadSha256'] == lock['core_asset']['sha256'] for m in manifests.values())
+    bridge = manifests['runtime-macos-x64.json']
+    assert (bridge['archive'], bridge['sha256']) == (lock['bridge']['name'], lock['bridge']['sha256']) and not bridge.get('baseRuntimeId')
+    included = lock['included_manifest']
+    assert included == manifests['runtime-macos-x64-20261117-k12-11-20261112.json']
+    prior = lock['prior_manifest']
+    assert prior['commit'] == '9102686f43bff7162d3724abb86957ec6d644294' and prior['baseRuntimeId'] == included['baseRuntimeId']
+    assert (prior['archive'], prior['sha256']) == (lock['prior_core_asset']['name'], lock['prior_core_asset']['sha256'])
+    from k12_11_intel_evidence import ARTIFACT, COMPLETED
+    assert lock['resume_artifact']==ARTIFACT and set(lock['reused_complete_entries'])==set(COMPLETED)
+    assert 'k12_11_intel_evidence.py' in lock['recipe_inputs_sha256']
+    assert lock['launcher_tests'] == {'tests':84, 'pass':84, 'fail':0, 'skipped':0}
+    return frozen
+
+
 def validate_lock(lock, frozen_raw):
+    if lock.get('candidate_tag') == INTEL11_TAG:
+        return validate_intel11_lock(lock, frozen_raw)
     if lock.get('candidate_tag')=='student-20261117-k12-7':
         from batch7_recheck import validate_intel7_lock
         return validate_intel7_lock(lock,frozen_raw)
@@ -187,6 +235,9 @@ def download(row, directory):
     raise RuntimeError('Both anonymous routes failed: ' + row['name'] + ': ' + '; '.join(errors))
 
 def lock_name(tag, target):
+    if tag == INTEL11_TAG:
+        assert target == 'macos-x64'
+        return INTEL11_LOCK
     if tag=='student-20261117-k12-7':
         assert target=='macos-x64'
         return 'intel-k12-7-reuse-lock.json'
@@ -220,9 +271,9 @@ def verify_proxy(root, resources, evidence, target):
         shutil.rmtree(qa_home)
 
 def upload_new(tag, path, target):
-    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6','student-20261117-k12-7'}
+    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6','student-20261117-k12-7',INTEL11_TAG}
     if tag=='student-20261117-k12-6':assert target=='windows-x64'
-    if tag in {'student-20261117-k12-5','student-20261117-k12-7'}:assert target=='macos-x64'
+    if tag in {'student-20261117-k12-5','student-20261117-k12-7',INTEL11_TAG}:assert target=='macos-x64'
     assert path.name == 'verification-'+target+'.json' or re.fullmatch(r'native-reverify-run-'+re.escape(target)+r'-[0-9]+\.json', path.name), 'Only this Mac target\'s new evidence may be uploaded'
     before = api('releases/tags/' + tag)
     assert not any(a['name'] == path.name for a in before['assets']), 'Refuse to overwrite existing evidence: ' + path.name
@@ -246,7 +297,7 @@ def validate_intel7_launcher_transitions(current, oldest, materials, materials_o
             assert entry['signed_launcher_restarted'] is True and entry['old_pid']!=entry['restarted_pid'], role+' launcher migration must really restart'
 
 def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, materials_oldest):
-    if lock['candidate_tag'] in {'student-20261117-k12-6','student-20261117-k12-7'}:
+    if lock['candidate_tag'] in {'student-20261117-k12-6','student-20261117-k12-7',INTEL11_TAG}:
         for entry in [current,oldest,materials,materials_oldest]:
             assert entry['actual_download_install_backup_restart']=='passed' and entry['check_again_current'] is True and entry['to_launcher']==lock['launcher_build']
             assert all(entry[k] is True for k in ['chat_preserved','task_preserved','saved_key_preserved'])
@@ -271,12 +322,13 @@ def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, mater
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', required=True, choices=tuple(TARGETS))
-    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6','student-20261117-k12-7'),default='student-20261117-k12-4')
+    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6','student-20261117-k12-7',INTEL11_TAG),default='student-20261117-k12-4')
     args=parser.parse_args();target=args.target
     six=args.release_tag=='student-20261117-k12-6'
     seven=args.release_tag=='student-20261117-k12-7'
+    eleven=args.release_tag==INTEL11_TAG
     if six:assert target=='windows-x64' and not sys.flags.optimize, 'Only normal nonoptimized Windows6 QA is allowed'
-    if args.release_tag in {'student-20261117-k12-5','student-20261117-k12-7'}:assert target=='macos-x64'
+    if args.release_tag in {'student-20261117-k12-5','student-20261117-k12-7',INTEL11_TAG}:assert target=='macos-x64'
     spec = TARGETS[target]
     assert sys.platform == spec['platform'] and platform.machine() == spec['machine'], 'The selected platform must be tested on its actual native runner'
     mac=target.startswith('macos')
@@ -285,6 +337,12 @@ def main():
     lock = json.loads(lock_file.read_text())
     assert lock['target'] == target
     frozen = validate_lock(lock, (root/'attachment-final-manifests.json').read_bytes())
+    if eleven:
+        assert os.environ['GITHUB_REF_NAME'].startswith('codex/k12-intel-reverify-20261117-11')
+        assert int(os.environ['GITHUB_RUN_ID']) != lock['original_native_run']
+        original = api('actions/jobs/' + str(lock['original_failed_job']))
+        assert original['run_id'] == lock['original_native_run'] and original['conclusion'] == 'cancelled'
+        assert original['head_sha'] == lock['original_native_workflow_commit']
     if seven:
         from batch7_recheck import validate_intel7_execution
         validate_intel7_execution(root,lock_file.read_bytes())
@@ -296,13 +354,16 @@ def main():
     batch = json.loads((root/'attachment-batch.json').read_text())
     for name,digest in lock['recipe_inputs_sha256'].items(): assert sha(root/name) == digest, 'Frozen recipe input changed: ' + name
     assert batch['manifests'][target] == lock['included_manifest']
-    if six or seven:
+    if six or seven or eleven:
         assert batch['tag']==lock['candidate_tag'] and batch['core_commit']==lock['source_commit'] and batch['launcher_build']==lock['launcher_build']
         assert json.loads((root/'launcher-manifest.json').read_text())['buildId']==lock['launcher_build']
     release = verify_metadata(lock)
     assert not any(a['name'] == 'verification-'+target+'.json' for a in release['assets']), 'Verification already exists; do not replace it'
     completed = None
-    if 'resume_artifact' in lock:
+    if eleven:
+        from k12_11_intel_evidence import fetch_partial_archive
+        completed = fetch_partial_archive(lock, api, gh)
+    elif 'resume_artifact' in lock:
         from partial_native_evidence import fetch_partial_archive
         completed = fetch_partial_archive(lock, api, gh)
     evidence = root/'fresh-evidence'/target;evidence.mkdir(parents=True)
@@ -380,6 +441,7 @@ def main():
     assert counts['tests'] >= 81 and counts['fail'] == 0
     if six:assert counts==lock['launcher_tests'], 'Windows6 exact launcher test counts changed'
     if seven:assert counts==lock['launcher_tests'], 'Intel7 exact launcher test counts changed'
+    if eleven:assert counts==lock['launcher_tests'], 'Intel11 exact launcher test counts changed'
     (evidence / 'launcher-tests.json').write_text(json.dumps({'passed':True,'native_target':target,**counts},indent=2))
     environment = {**os.environ,'KX_EXPECTED_PLATFORM':spec['platform'],'KX_EXPECTED_ARCH':spec['arch']}
     home = work/'全新学习目录'
@@ -390,7 +452,8 @@ def main():
     from ci_update_probe import verify_update_entry
     oldest = completed['entries']['oldest_launcher_entry'] if completed else verify_update_entry(root,target,install,resources,home,evidence,legacy=True)
     current = completed['entries']['update_entry'] if completed else verify_update_entry(root,target,install,resources,home,evidence)
-    materials=verify_update_entry(root,target,install,resources,home,evidence,materials=True)
+    materials = (completed['entries']['materials_launcher_entry'] if eleven
+                 else verify_update_entry(root,target,install,resources,home,evidence,materials=True))
     materials_oldest=verify_update_entry(root,target,install,resources,home,evidence,materials=True,legacy=True)
     smoke=json.loads((evidence/'app.json').read_text())
     validate_native_proofs(smoke,fresh_picture_ui,current,oldest,lock,materials,materials_oldest)
@@ -413,8 +476,9 @@ def main():
                         original_stage_run=lock['original_native_run'],original_stage_workflow_commit=lock['original_native_workflow_commit'],
                         frozen_stage_sha256=lock['frozen_stage']['sha256'],bridge_rebuilt=False,installers_repackaged=False,
                         existing_assets_overwritten=False,fresh_smoke_rerun=True,proxy_smoke_rerun=True,oldest_and_current_ipc_rerun=not bool(completed),
-                        fresh_picture_ui_rerun=not reused_fresh,materials_both_variants_rerun=True,production_launcher_byte_identical=True,reuse_lock_file=lock_file.name,reuse_lock_sha256=sha(lock_file),existing_asset_metadata_before_after_unchanged=True))
+                        fresh_picture_ui_rerun=not reused_fresh,materials_both_variants_rerun=not eleven,production_launcher_byte_identical=True,reuse_lock_file=lock_file.name,reuse_lock_sha256=sha(lock_file),existing_asset_metadata_before_after_unchanged=True))
     if completed:report['provenance'].update(completed_entry_receipts_reused=lock['reused_complete_entries'],partial_artifact_sha256=lock['resume_artifact']['sha256'],partial_artifact_source_verified=True)
+    if eleven:report['provenance']['materials_oldest_variant_rerun']=True
     if reused_fresh:report['provenance']['completed_fresh_picture_ui_reused']=lock['reused_fresh_picture_ui']
     (evidence/'verified.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     public = evidence/('verification-'+target+'.json');public.write_text(json.dumps(report,ensure_ascii=False,indent=2))
