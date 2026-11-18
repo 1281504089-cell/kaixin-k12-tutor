@@ -133,7 +133,8 @@ file_manifest = {"source_commit": CONFIG["source_commit"], "files": sorted(files
 report = {"source_commit": CONFIG["source_commit"], "backend_source_commit": CONFIG["source_commit"], "source_scope": "published_export", "source_files_sha256": CONFIG["source_files_sha256"], "isolation_ledger_sha256": CONFIG["isolation_ledger_sha256"], "isolated_assets": isolation["excluded_files"], "frontend_build": (WEB / ".next/BUILD_ID").read_text().strip(), "archive": archive.name, "sha256": sha(archive), "bytes": archive.stat().st_size, "files": len(files), "runtime_source_files": len(runtime["files"]), "generated_word_sha256": sha(generated_word), "generated_word_bytes": generated_word.stat().st_size, "generated_word_archive_readback": files["core/deeptutor/services/student_learning/word-runtime.cjs"]["sha256"] == sha(generated_word), "bank_payload_manifest_sha256": sha(payload_file), "file_manifest_sha256": sha(OUT / "core-file-manifest.json"), "archive_full_readback": True, "static_bundle_audit": audit, "real_keys_used": False, "personal_records_included": False}
 (OUT / "attachment-core.json").write_text(json.dumps(report, indent=2) + "\n")
 print(json.dumps(report))
-overlay_descriptor = json.loads((ROOT / "source-manifest.json").read_text())["sourceOverlay"]
+source_manifest = json.loads((ROOT / "source-manifest.json").read_text())
+overlay_descriptor = ([source_manifest["sourceOverlay"], *source_manifest.get("additionalSourceOverlays", [])])[-1]
 source_asset = OUT / safe_name(overlay_descriptor["remote_archive"]["file"])
 join_source_overlay(ROOT, source_asset, overlay_descriptor)
 subprocess.run(["gh", "release", "upload", CONFIG["tag"], str(archive), str(source_asset), str(OUT / "attachment-core.json"), str(OUT / "core-file-manifest.json"), "--clobber"], check=True)

@@ -1144,5 +1144,37 @@
       "bytes": 296923808,
       "sha256": "05b1be1327e293feb5b0b7df5b8ca007488d4af872b2941c8999f0e925eaf419"
     }
-  }
+  },
+  "additionalSourceOverlays": [
+    {
+      "manifest": "source-inventory-k12-9.json",
+      "manifest_sha256": "ca6845be54d2107a554ffa03d1ee3d6ab5a875e024f4f922bfac7c52900ebd1d",
+      "source_commit": "e622661ffbe2ffcf71f2fe868a64c8357827a824",
+      "source_files_sha256": "06201374b251a36f68e6437dec64732afd5530e46a177c824a28fc363cf5dda5",
+      "archive_sha256": "9c31eb0dc36306e4d7c2e81c7de931365a75393f5fc6bb94ceecf625adfb6e9b",
+      "parts": [
+        {
+          "file": "source-delta-k12-9.001",
+          "bytes": 524288,
+          "sha256": "1ee035a5384e618e2098619b241bb9efde1e8c6199de21e114e61407763a8b13"
+        },
+        {
+          "file": "source-delta-k12-9.002",
+          "bytes": 524288,
+          "sha256": "f02d973cf747412fe7cac9b7a4361495fdeabf4adf428e06f96479078f40debf"
+        },
+        {
+          "file": "source-delta-k12-9.003",
+          "bytes": 129799,
+          "sha256": "03fa5cfed60927e3d7d125c305351429ed143320e40a2f994b05ac9c1cf54343"
+        }
+      ],
+      "remote_archive": {
+        "file": "source-overlay-20261117-k12-9.tar.gz",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-9/source-overlay-20261117-k12-9.tar.gz",
+        "bytes": 1178375,
+        "sha256": "9c31eb0dc36306e4d7c2e81c7de931365a75393f5fc6bb94ceecf625adfb6e9b"
+      }
+    }
+  ]
 }
