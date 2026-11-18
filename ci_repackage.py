@@ -25,6 +25,9 @@ def validate_installer_files(files, target, tag):
 
 
 def validate_reuse_lock(lock, batch, release, target):
+    if lock.get('tag') == 'student-20261117-k12-8':
+        from ci_native8_health_acceptance import validate_reuse
+        return validate_reuse(lock,batch,release,target)
     reuse = lock['reuse_existing_native']
     assert lock['tag'] == batch['tag'] == release['tag_name'] == 'student-20261117-k12-5'
     assert lock['core_commit'] == batch['core_commit'] == '9328240380d13ef75435434a8c901028ea4470dc'

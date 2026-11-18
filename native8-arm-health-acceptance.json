@@ -1,0 +1,76 @@
+{
+  "recorded_at_utc": "2026-11-18T10:49:45.659123+00:00",
+  "run_id": 44285382021,
+  "job_id": 134736575809,
+  "workflow_commit": "daaa73733855075857e89e833712d5568a459ddb",
+  "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
+  "core_sha256": "ad637c748061b639e9c984437e3439a3d82b8e0ecb0d86ac33ad002e11443728",
+  "job_conclusion": "failure",
+  "early_stop_reason": "ci-attachment-native.py max(samples)<5; observed5.248s",
+  "scope_of_metric": "One backend /health/ready request during concurrent library indexing; not model teaching first content",
+  "original_log_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/44285382021/job/134736575809",
+  "artifact": {
+    "id": 14419846998,
+    "bytes": 10539,
+    "sha256": "6e662271d641b1766a00812b279490977a7a628e01bc134b7cad7231aa5acb39",
+    "zip_crc_valid": true,
+    "members": [
+      {
+        "path": "downloads.json",
+        "bytes": 1078,
+        "sha256": "82bd8f73734f4668bcb6aea4fc6111471ceb202930b396ca0f4716fc154de730"
+      },
+      {
+        "path": "k12-api.json",
+        "bytes": 4493,
+        "sha256": "62f21ae05a5361f1645699d9ccf88b7b8acab5138462c5ae029c8ef5c292af9f"
+      },
+      {
+        "path": "launcher-tests.json",
+        "bytes": 112,
+        "sha256": "b673a0fdcb21f02ec4eb471da95e0fbc480a8b1e36b71e1c044068bfb90465de"
+      },
+      {
+        "path": "launcher-tests.tap",
+        "bytes": 17916,
+        "sha256": "a2a6f6ea86e92843a1d516d1e6a4bd955e262a36e503dea06da501d4104e2a01"
+      },
+      {
+        "path": "network.json",
+        "bytes": 891,
+        "sha256": "52169ffebbb7b34650799178cbab5a714232943e867ee386ed6b9fbb20f8b0f7"
+      },
+      {
+        "path": "runtime.log",
+        "bytes": 28141,
+        "sha256": "7ccbfa1d89659cd9f966158acf91d04adab5445055b79cc2917557b419067b80"
+      }
+    ]
+  },
+  "reported_metrics": {
+    "raw_originals_verified": true,
+    "temporary_excluded_from_library": true,
+    "short_pdf_pages": 2,
+    "concurrent_library_uploads_saved": true,
+    "scanned_pdf_retrievable": true,
+    "sources": 3,
+    "interactive_page_ready_while_indexing_seconds": 3.869,
+    "temporary_raw_seconds": 2.259,
+    "library_raw_seconds": [
+      0.199,
+      1.904
+    ],
+    "background_and_retrieval_seconds": 28.936,
+    "health_max_seconds": 5.248,
+    "real_api_key_used": false,
+    "cloud_models_used": false
+  },
+  "user_acceptance": {
+    "explicit_user_message": "健康检查五点二四八秒没问题的，不要因为这些小细节去阻碍进度。",
+    "accepted_only_observed_health_sample": true,
+    "date": "2026-11-18",
+    "new_model_wait_limit": false
+  },
+  "remaining_native_checks_completed": false,
+  "publication_allowed_by_this_receipt_alone": false
+}

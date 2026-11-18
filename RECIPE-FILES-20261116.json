@@ -5,6 +5,11 @@
     "sha256": "58fb8991556d80c24a7ea93593b4c8d3764e0c2d79b12f1ee18ba3264d5394cf"
   },
   {
+    "file": ".github/workflows/attachment-native-arm8-continue.yml",
+    "bytes": 4273,
+    "sha256": "59c567419691d3e328993838850151abab75b2cd66fdfb32461d306b8ae3017b"
+  },
+  {
     "file": ".github/workflows/attachment-native.yml",
     "bytes": 3361,
     "sha256": "aec28dc1b0205862b185a962e9203069739b752151ad0f8f3e4d81e9b1e88143"
@@ -53,6 +58,11 @@
     "file": "LOCAL-ACTUAL-UPDATE-20261117.json",
     "bytes": 1677,
     "sha256": "8fa1b73d1508db92a4396561801103515ad62f72312eff151dade8a4180fa83f"
+  },
+  {
+    "file": "LOCAL-ACTUAL-UPDATE-20261118.json",
+    "bytes": 3687,
+    "sha256": "1dcb1a07f87b9b721baeea3a31d1284168c17e74af0eb492f10994e47f87a2e5"
   },
   {
     "file": "PICTURE-QUESTION-20261117.md",
@@ -121,13 +131,13 @@
   },
   {
     "file": "ci-fresh-install.py",
-    "bytes": 10705,
-    "sha256": "a5190f280fee10f45f92674daa4099c00be205dff23458afe1af307a9e2ba8f3"
+    "bytes": 11293,
+    "sha256": "2d6f3c7eb773f53e9cd0e7662b8db13a7f8c919caae0ba6fdd5cc4662ee90fe9"
   },
   {
     "file": "ci-fresh-smoke.mjs",
-    "bytes": 12126,
-    "sha256": "b79b3d45f6d5a05c813d7d34cc42d3384d4fa2f4996feead67ad2701f740b835"
+    "bytes": 12793,
+    "sha256": "9d599aca83b59f3ffd62315a9c2fe729abd628cc9f7cdfb8e6735ef006fecc9c"
   },
   {
     "file": "ci-intel-reuse.py",
@@ -145,9 +155,19 @@
     "sha256": "49f48e5bf6572abda8254220fc19cb270e138224290608f87f4632acec119ad9"
   },
   {
+    "file": "ci-k12-session-diagnostics-selfcheck.cjs",
+    "bytes": 8030,
+    "sha256": "36a124106827cc7b682670a7246d774cb4b89319ad1786181a48c7d3782b8de7"
+  },
+  {
     "file": "ci-mac-reuse.py",
     "bytes": 35767,
     "sha256": "e9c3f3b7e3e8ad1f35398b838ba5f50971d023662a204341a27faa19b3fbafdb"
+  },
+  {
+    "file": "ci-materials-navigation-selfcheck.cjs",
+    "bytes": 2998,
+    "sha256": "610ff9854e07e2519d2dfd02841c5bcf8746b68016733517c15dccd5253b2e26"
   },
   {
     "file": "ci-materials-ui.cjs",
@@ -175,6 +195,11 @@
     "sha256": "c6bd2a142e9c4867b97a61b29a6e43360d7f1ac069ccb2a8c0b896a7b82e68ca"
   },
   {
+    "file": "ci-student-controls-navigation-selfcheck.cjs",
+    "bytes": 5134,
+    "sha256": "a852351152c967d2f714ea7677f2cdd8918d6b099d70250459e84ee87449aad8"
+  },
+  {
     "file": "ci-update-flow.backup-baseline.cjs",
     "bytes": 20885,
     "sha256": "2ddf5e3fc81baa72e89ef2d983f7a8ef3250a1309b79d179f45e5b1f25b0084e"
@@ -200,14 +225,19 @@
     "sha256": "eda4482da18de622396e55166ce1a00138cb4cac7d9f842d318e4552056efbff"
   },
   {
+    "file": "ci_native8_health_acceptance.py",
+    "bytes": 7765,
+    "sha256": "a33409331d2e8f0e0ab0b7dd9c5edcb407c27eb2a15495dd27111ab33788eb29"
+  },
+  {
     "file": "ci_picture_fresh.py",
     "bytes": 5832,
     "sha256": "1d1eeeabce878947d88d9e61e473b672a77f5df03e71bf3b105c5252b991eedc"
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 11810,
-    "sha256": "fa3562a9b33416bf3b5f565373cb84f90a8c7839864ebd7e5f6496764168089d"
+    "bytes": 11983,
+    "sha256": "c182279b806dec8993d063a9e84f8eb349402e18ca41f677a33895011442a4ab"
   },
   {
     "file": "ci_update_probe.py",
@@ -320,6 +350,11 @@
     "sha256": "9400692a569514b88c222eac282086b8096f94e8d7fea6d4967959556f147bab"
   },
   {
+    "file": "fresh-install-lock-arm8-health.json",
+    "bytes": 5479,
+    "sha256": "878587bf6228f3cfff85816591f279e07a65e4cf2e8832e61c24acd4aa19ef51"
+  },
+  {
     "file": "fresh-install-lock.json",
     "bytes": 4058,
     "sha256": "543a48a8ecbe402775081bcd14619585c9f9ec48fbec3da67b51bebf22320ac9"
@@ -333,6 +368,11 @@
     "file": "intel-reuse-lock.json",
     "bytes": 17844,
     "sha256": "e7cdebe0cfafcb26370044e6cf5d3e1ca2bd02b134e9fe05dff5aedf1c852faa"
+  },
+  {
+    "file": "intel7-complete-source-inputs.json",
+    "bytes": 7240701,
+    "sha256": "77b8762d96c8e787a8ea73aeaf253475f2d25510cb90d8d2e0959bc7fbf9b119"
   },
   {
     "file": "launcher-changes-20261117.json",
@@ -475,6 +515,21 @@
     "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
   },
   {
+    "file": "native8-arm-candidate-files.json",
+    "bytes": 2355,
+    "sha256": "c5c0dddc9fd472c6c7a3287ca3fc64d33cf39ebb34a32921d9ba84ed2623c82a"
+  },
+  {
+    "file": "native8-arm-health-acceptance.json",
+    "bytes": 2732,
+    "sha256": "5b8c3e0b6195b7c93e28f6e221431f2eb21995971c370c48bb2c7e6fe889b2e4"
+  },
+  {
+    "file": "native8-arm-health-original.zip",
+    "bytes": 10539,
+    "sha256": "6e662271d641b1766a00812b279490977a7a628e01bc134b7cad7231aa5acb39"
+  },
+  {
     "file": "partial-entry-fixtures/oldest-update-entry.json",
     "bytes": 95767,
     "sha256": "694a7e8d525ff7c6a4d665d6ce65318d25d0512e8c95e5ca339b823c508c17f6"
@@ -550,6 +605,11 @@
     "sha256": "cd2a94f259afcfc5ed63b5d90a6a59e2fc0231f33259aaac9cb91bc71360bdee"
   },
   {
+    "file": "test_intel7_finalization.py",
+    "bytes": 23708,
+    "sha256": "aa9d422a4957e2bd95f303e023bc4437bf3b17217536e7463bfc0204d8999073"
+  },
+  {
     "file": "test_intel_reuse.py",
     "bytes": 5543,
     "sha256": "f56b6700945340d48daa794b43b1a5be053d72cff703dc1041a42733f246f5ca"
@@ -563,6 +623,11 @@
     "file": "test_materials_upgrade.py",
     "bytes": 2245,
     "sha256": "6bab1a60dae908fbbafb80aba6bc1bbec1cc5505b03ad2fcbf4ed27879053719"
+  },
+  {
+    "file": "test_native8_health_acceptance.py",
+    "bytes": 4984,
+    "sha256": "fe15875196a8a54ef8f057e52e12b646c614922f7769c9c283ce06e09a61dfc3"
   },
   {
     "file": "test_native_entry_artifacts.py",
@@ -595,9 +660,14 @@
     "sha256": "ce6ceafa874db0fe20a2a2e2f9c043c569f6bbafad69d55f6b0e3e2ad3b20d48"
   },
   {
+    "file": "test_publication_source_binding.py",
+    "bytes": 3333,
+    "sha256": "0bbac92016c213dc64816a748dc301f049dd5f2c253b2eae2c8f26726ea0028f"
+  },
+  {
     "file": "test_publication_transaction.py",
-    "bytes": 11450,
-    "sha256": "a18296f7d4551f379e036fdba4187089d86826aace3c64ec43e9903cf3ab26d6"
+    "bytes": 11750,
+    "sha256": "0cea463a012b9a8c426131171bf60a0e9552800fd7ff06d7b91bc93c571b6856"
   },
   {
     "file": "test_recovery_publication_gate.py",
@@ -633,30 +703,5 @@
     "file": "windows-k12-4-reuse-lock.json",
     "bytes": 49564,
     "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
-  },
-  {
-    "file": "LOCAL-ACTUAL-UPDATE-20261118.json",
-    "bytes": 3687,
-    "sha256": "1dcb1a07f87b9b721baeea3a31d1284168c17e74af0eb492f10994e47f87a2e5"
-  },
-  {
-    "file": "ci-student-controls-navigation-selfcheck.cjs",
-    "bytes": 5134,
-    "sha256": "a852351152c967d2f714ea7677f2cdd8918d6b099d70250459e84ee87449aad8"
-  },
-  {
-    "file": "test_publication_source_binding.py",
-    "bytes": 3333,
-    "sha256": "0bbac92016c213dc64816a748dc301f049dd5f2c253b2eae2c8f26726ea0028f"
-  },
-  {
-    "file": "ci-k12-session-diagnostics-selfcheck.cjs",
-    "bytes": 8030,
-    "sha256": "36a124106827cc7b682670a7246d774cb4b89319ad1786181a48c7d3782b8de7"
-  },
-  {
-    "file": "ci-materials-navigation-selfcheck.cjs",
-    "bytes": 2998,
-    "sha256": "610ff9854e07e2519d2dfd02841c5bcf8746b68016733517c15dccd5253b2e26"
   }
 ]

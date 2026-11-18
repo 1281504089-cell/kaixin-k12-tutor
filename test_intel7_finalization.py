@@ -18,17 +18,47 @@ ROOT = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('intel7_finalization', ROOT/'ci-finalize-intel7.py')
 finalize = importlib.util.module_from_spec(spec); spec.loader.exec_module(finalize)
 
+SOURCE_FIXTURE = 'intel7-complete-source-inputs.json'
+SOURCE_FIXTURE_SHA256 = '77b8762d96c8e787a8ea73aeaf253475f2d25510cb90d8d2e0959bc7fbf9b119'
+SOURCE_ALLOWED_CHANGES = ['ci-mac-reuse.py', 'test_intel7_reuse.py', 'ci-promote-attachments.py']
+
+
+def validate_source_fixture(bundle, original):
+    """Materialize only exact public source-phase bytes, never current release metadata."""
+    assert set(bundle) == {'schema_version', 'source_lock_sha256', 'files', 'frozen_stage'}
+    assert bundle['schema_version'] == 1 and bundle['source_lock_sha256'] == finalize.SOURCE_LOCK_SHA
+    assert finalize.ALLOWED_CHANGES == SOURCE_ALLOWED_CHANGES, 'Historical allowed changes expanded'
+    expected = set(original['recipe_inputs_sha256']) - set(SOURCE_ALLOWED_CHANGES)
+    assert len(expected) == 142 and set(bundle['files']) == expected, 'Historical source input set changed'
+    files = {}
+    for name, text in bundle['files'].items():
+        assert isinstance(text, str), 'Historical input must preserve UTF-8 bytes: '+name
+        raw = text.encode('utf-8')
+        assert hashlib.sha256(raw).hexdigest() == original['recipe_inputs_sha256'][name], 'Historical source input SHA changed: '+name
+        files[name] = raw
+    stage = bundle['frozen_stage'].encode('utf-8')
+    assert hashlib.sha256(stage).hexdigest() == original['frozen_stage']['sha256'], 'Historical stage SHA changed'
+    assert len(stage) == original['frozen_stage']['bytes'] and len(json.loads(stage)['manifests']) == 45
+    return files, stage
+
+
+def load_source_fixture(original, raw=None):
+    raw = (ROOT/SOURCE_FIXTURE).read_bytes() if raw is None else raw
+    assert hashlib.sha256(raw).hexdigest() == SOURCE_FIXTURE_SHA256, 'Historical fixture raw SHA changed'
+    return validate_source_fixture(json.loads(raw), original)
+
 
 class IntelSevenFinalizationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.original = json.loads((ROOT/finalize.SOURCE_LOCK).read_bytes())
-        cls.inputs = {name:finalize.sha(ROOT/name) for name in set(cls.original['recipe_inputs_sha256']) | finalize.NEW_INPUTS}
-        # Publication metadata advances after native checks; retain the exact source-phase fixture.
-        cls.source_publication = (ROOT/'intel7-complete-source-publication.json').read_bytes()
-        expected = cls.original['recipe_inputs_sha256']['attachment-publication.json']
-        assert hashlib.sha256(cls.source_publication).hexdigest() == expected
-        cls.inputs['attachment-publication.json'] = expected
+        source_raw = (ROOT/finalize.SOURCE_LOCK).read_bytes()
+        assert hashlib.sha256(source_raw).hexdigest() == finalize.SOURCE_LOCK_SHA
+        cls.original = json.loads(source_raw)
+        cls.historical, cls.stage = load_source_fixture(cls.original)
+        # Only the three explicitly reviewed helpers and new postflight code use current bytes.
+        current = (set(cls.original['recipe_inputs_sha256']) | finalize.NEW_INPUTS | {SOURCE_FIXTURE}) - set(cls.historical)
+        cls.inputs = {name:finalize.sha(ROOT/name) for name in current}
+        cls.inputs.update({name:hashlib.sha256(raw).hexdigest() for name, raw in cls.historical.items()})
         cls.final = dict(schema_version=1, frozen=True, target='macos-x64', candidate_tag=cls.original['candidate_tag'],
                          source_commit=cls.original['source_commit'], launcher_build=cls.original['launcher_build'],
                          source_lock_file=finalize.SOURCE_LOCK, source_lock_sha256=finalize.SOURCE_LOCK_SHA,
@@ -42,8 +72,11 @@ class IntelSevenFinalizationTest(unittest.TestCase):
         self.root = Path(self.temporary.name)
         for name in set(self.inputs) | {finalize.SOURCE_LOCK}:
             destination = self.root/name; destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(ROOT/name, destination)
-        (self.root/'attachment-publication.json').write_bytes(self.source_publication)
+            if name in self.historical:
+                destination.write_bytes(self.historical[name])
+            else:
+                shutil.copyfile(ROOT/name, destination)
+        (self.root/'attachment-final-manifests.json').write_bytes(self.stage)
         self.final = copy.deepcopy(type(self).final)
         self.env = dict(GITHUB_RUN_ID='44260000001', GITHUB_SHA='a'*40,
                         GITHUB_REF_NAME=finalize.BRANCH_PREFIX+'unit-test')
@@ -102,6 +135,37 @@ class IntelSevenFinalizationTest(unittest.TestCase):
         path.write_text(json.dumps({'prepared':True, 'tag':'student-20261117-k12-7'}))
         self.reject(lambda d:d['postflight_inputs_sha256'].update({'attachment-publication.json':finalize.sha(path)}))
 
+    def test_historical_bundle_raw_sha_must_match(self):
+        raw = (ROOT/SOURCE_FIXTURE).read_bytes()
+        with self.assertRaisesRegex(AssertionError, 'Historical fixture raw SHA'):
+            load_source_fixture(self.original, raw+b' ')
+
+    def test_historical_bundle_requires_every_original_input_and_no_extra_paths(self):
+        for change in [lambda d:d['files'].pop('CURRENT-DESKTOP-RELEASE.json'),
+                       lambda d:d['files'].update({'../untrusted':'not an original input'})]:
+            bundle = json.loads((ROOT/SOURCE_FIXTURE).read_bytes()); change(bundle)
+            with self.subTest(change=change), self.assertRaisesRegex(AssertionError, 'Historical source input set'):
+                validate_source_fixture(bundle, self.original)
+
+    def test_historical_bundle_rejects_changed_original_input_bytes(self):
+        bundle = json.loads((ROOT/SOURCE_FIXTURE).read_bytes())
+        bundle['files']['attachment-batch.json'] += '\n'
+        with self.assertRaisesRegex(AssertionError, 'Historical source input SHA'):
+            validate_source_fixture(bundle, self.original)
+
+    def test_historical_bundle_rejects_stage8_substitution(self):
+        bundle = json.loads((ROOT/SOURCE_FIXTURE).read_bytes())
+        bundle['frozen_stage'] = json.dumps({'_synthetic_audit_only':True, 'core_commit':'9102686f43bff7162d3724abb86957ec6d644294',
+                                           'manifests':{f'fake-{i}':{'signature':'NOT_A_REAL_SIGNATURE'} for i in range(48)}})
+        with self.assertRaisesRegex(AssertionError, 'Historical stage SHA'):
+            validate_source_fixture(bundle, self.original)
+
+    def test_historical_bundle_cannot_expand_the_three_allowed_source_changes(self):
+        bundle = json.loads((ROOT/SOURCE_FIXTURE).read_bytes())
+        with patch.object(finalize, 'ALLOWED_CHANGES', SOURCE_ALLOWED_CHANGES+['ci-update-flow.cjs']), \
+             self.assertRaisesRegex(AssertionError, 'Historical allowed changes expanded'):
+            validate_source_fixture(bundle, self.original)
+
     def test_unsafe_input_paths_and_hash_cycles_are_rejected(self):
         for name in ['../escape','/tmp/escape','x\\escape',finalize.FINALIZATION_LOCK,finalize.SOURCE_LOCK,'.github/workflows/test.yml']:
             with self.subTest(name=name): self.reject(lambda d:d['postflight_inputs_sha256'].update({name:'a'*64}))
@@ -139,7 +203,7 @@ class IntelSevenFinalizationTest(unittest.TestCase):
         release=dict(id=self.original['candidate_release_id'],assets=assets)
         reuse.verify_metadata.return_value=release
         reuse.download.side_effect=lambda row,directory:{**row,'anonymous_download':True,'sha256_verified':True}
-        batch=json.loads((ROOT/'attachment-batch.json').read_bytes())
+        batch=json.loads(self.historical['attachment-batch.json'])
         batch['shell_files']={f'src/test-{index}.mjs':{'sha256':hashlib.sha256(str(index).encode()).hexdigest()} for index in range(24)}
         def installed(work,downloads,module):
             app=work/'installed/开心动力超级学霸.app'
