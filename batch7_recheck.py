@@ -24,6 +24,13 @@ REQUIRED_INPUTS = {
     'native-response-followup-selfcheck.cjs','native-visibility-selfcheck.cjs','native-click-followup-selfcheck.cjs',
     'update-flow-selfcheck.cjs','update-flow-disposal-selfcheck.cjs','update-flow-backup-selfcheck.cjs',
     'ci-k12-session-diagnostics-selfcheck.cjs',
+    'test_mac_reuse.py','test_k12_5_reuse.py','partial_native_evidence.py',
+    'frozen-k12-4-manifests.json','frozen-k12-5-manifests.json',
+    'windows-k12-4-reuse-lock.json','arm-k12-4-reuse-lock.json','intel-k12-4-reuse-lock.json',
+    'intel-k12-5-reuse-lock.json','ci-k12-library-ui.visibility-baseline.cjs',
+    'ci-k12-library-ui.click-baseline.cjs','ci-update-flow.baseline.cjs',
+    'ci-update-flow.disposal-baseline.cjs','ci-update-flow.backup-baseline.cjs',
+    'materials-launcher-src/i18n.mjs',
 }
 ANCHORS = {
     'candidate_files':'59d1b1bbcbe9d3a944d77283faca574118d92b4dbb67c16453ce5385ba5afe33',

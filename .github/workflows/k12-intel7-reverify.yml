@@ -15,7 +15,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       PYTHONUTF8: '1'
       PYTHONIOENCODING: utf-8
-      KX_REUSE_LOCK_SHA256: 0c7d4bc1a981f3db251ba49ee899436efe465f6846965a4346c2fd865c194f79
+      KX_REUSE_LOCK_SHA256: a56baad9f856577d6ed107650fa492b7a3c38d95905c6a87371f47e0e2ad0e0d
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4

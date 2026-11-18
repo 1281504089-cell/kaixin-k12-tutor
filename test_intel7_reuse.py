@@ -71,6 +71,20 @@ class IntelSevenReuseTest(unittest.TestCase):
         for key in ['resume_artifact','reused_complete_entries','reused_fresh_picture_ui']:
             with self.subTest(key=key):self.reject(lambda d:d.update({key:{}}))
 
+    def test_preflight_callers_and_their_original_fixtures_must_be_bound(self):
+        callers_and_fixtures={
+            'test_mac_reuse.py','test_k12_5_reuse.py','partial_native_evidence.py',
+            'frozen-k12-4-manifests.json','frozen-k12-5-manifests.json',
+            'windows-k12-4-reuse-lock.json','arm-k12-4-reuse-lock.json','intel-k12-4-reuse-lock.json',
+            'intel-k12-5-reuse-lock.json','ci-k12-library-ui.visibility-baseline.cjs',
+            'ci-k12-library-ui.click-baseline.cjs','ci-update-flow.baseline.cjs',
+            'ci-update-flow.disposal-baseline.cjs','ci-update-flow.backup-baseline.cjs',
+            'materials-launcher-src/i18n.mjs',
+        }
+        self.assertTrue(callers_and_fixtures <= REQUIRED_INPUTS)
+        for name in callers_and_fixtures:
+            with self.subTest(name=name):self.reject(lambda d:d['recipe_inputs_sha256'].pop(name))
+
     def test_execution_needs_raw_sha_expected_branch_new_run_and_clean_directory(self):
         raw=json.dumps(self.lock).encode();env={'KX_REUSE_LOCK_SHA256':hashlib.sha256(raw).hexdigest(),'GITHUB_REF_NAME':'codex/k12-intel7-reverify-20261118-test','GITHUB_RUN_ID':'44240000000','GITHUB_SHA':'a'*40}
         with tempfile.TemporaryDirectory() as directory:
