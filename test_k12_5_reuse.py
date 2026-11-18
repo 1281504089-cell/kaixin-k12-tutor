@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location('reuse5',ROOT/'ci-mac-reuse.py');reuse=importlib.util.module_from_spec(spec);spec.loader.exec_module(reuse)
 class IntelFiveReuseTest(unittest.TestCase):
  def setUp(self):
-  self.lock=json.loads((ROOT/'intel-k12-5-reuse-lock.json').read_text());self.raw=(ROOT/'attachment-final-manifests.json').read_bytes()
+  self.lock=json.loads((ROOT/'intel-k12-5-reuse-lock.json').read_text());self.raw=(ROOT/'frozen-k12-5-manifests.json').read_bytes()
  def test_exact_current_stage_without_network_or_execution(self):
   with patch.object(reuse,'api',side_effect=AssertionError('no network')),patch.object(reuse,'run',side_effect=AssertionError('no execution')):self.assertEqual(len(reuse.validate_lock(self.lock,self.raw)['manifests']),45)
  def test_wrong_source_stage_platform_or_signed_bytes_rejected(self):

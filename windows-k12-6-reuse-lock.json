@@ -1,0 +1,1109 @@
+{
+  "schema_version": 1,
+  "target": "windows-x64",
+  "candidate_tag": "student-20261117-k12-6",
+  "candidate_release_id": 449332202,
+  "source_commit": "4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2",
+  "baseline_latest_id": 448283800,
+  "baseline_latest_tag": "student-20261117-k12-4",
+  "original_native_run": 44202602948,
+  "original_native_workflow_commit": "a61f75e11a4d8a7f99cda009e3eb76e6654eb5a0",
+  "original_failed_job": 134460266527,
+  "stage_delivery_commit": "ca2b5e1ce71a75e4673b9d68319c44d1c6be80d0",
+  "candidate_files": [
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+      "id": 761140113,
+      "bytes": 1992294400,
+      "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+      "id": 761140115,
+      "bytes": 1992294400,
+      "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+      "id": 761140106,
+      "bytes": 1992294400,
+      "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+      "id": 761140105,
+      "bytes": 1005564586,
+      "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+      "id": 761140111,
+      "bytes": 996819526,
+      "sha256": "586321b8ec5bbc0659ae8719920b3236ecc9be9bcd2f0881b5a93f4b2b3590fa",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe"
+    }
+  ],
+  "included_manifest": {
+    "formatVersion": 1,
+    "protocolVersion": 1,
+    "platform": "win32",
+    "arch": "x64",
+    "coreVersion": "1.7.1",
+    "runtimeId": "1.7.1-kaixin-20261117-k12-6-windows-x64-20261112",
+    "baseRuntimeId": "1.7.1-04276f68a-x64",
+    "commit": "4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2",
+    "builtAt": 1794959171975,
+    "archive": "kaixin-core-20261117-k12-6.tar.gz",
+    "sha256": "97c3a9e50a3a0e1be88ed6855abab381cfe5689b9580b70ec287f7b6827867e6",
+    "corePayloadSha256": "97c3a9e50a3a0e1be88ed6855abab381cfe5689b9580b70ec287f7b6827867e6",
+    "signature": "WU/IUtPRh3NgfGg4SNZgoRRXVJ1XXkTM2kfUzFC15AxLGhlURuqZ/dJJh4LKDpUJFZ4NN58adfvc1O2AlQW/CA=="
+  },
+  "core_asset": {
+    "name": "kaixin-core-20261117-k12-6.tar.gz",
+    "id": 761097765,
+    "bytes": 837565345,
+    "sha256": "97c3a9e50a3a0e1be88ed6855abab381cfe5689b9580b70ec287f7b6827867e6",
+    "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/kaixin-core-20261117-k12-6.tar.gz"
+  },
+  "frozen_stage": {
+    "bytes": 43033,
+    "sha256": "b27fe66424ff3ff3475d03d199a626b4d3667f56e2ccc6fd0f51f7b394b40c89",
+    "manifests": 45
+  },
+  "bridge": {
+    "name": "kaixin-bridge-20261117-k12-6-windows-x64.tar.gz",
+    "id": 761194073,
+    "bytes": 1958627156,
+    "sha256": "c52bc767964938fabf14436d88029be38b0c800a13d79557408bd0da31abebcb",
+    "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/kaixin-bridge-20261117-k12-6-windows-x64.tar.gz"
+  },
+  "prior_manifest": {
+    "formatVersion": 1,
+    "protocolVersion": 1,
+    "platform": "win32",
+    "arch": "x64",
+    "coreVersion": "1.7.1",
+    "runtimeId": "1.7.1-kaixin-20261117-k12-4-windows-x64-20261112",
+    "baseRuntimeId": "1.7.1-04276f68a-x64",
+    "commit": "2af326481943f7e072036637ba186aa829dce39d",
+    "builtAt": 1794900556998,
+    "archive": "kaixin-core-20261117-k12-4.tar.gz",
+    "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+    "corePayloadSha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+    "signature": "yO48Q//A2DrgSq4u3zIWdKfND7xYUjWEKzi0OziYhLyAZsUK0mj6NncC7k5mYklGY0fRzcSgclkOlGRUNxY7CA=="
+  },
+  "prior_manifest_asset": {
+    "name": "runtime-windows-x64-20261117-k12-4-20261112.json",
+    "id": 758227594,
+    "bytes": 649,
+    "sha256": "b02cce0d808e5454fb82dab162d08734e9a635f364097e31e4035f4b88c779d0",
+    "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/runtime-windows-x64-20261117-k12-4-20261112.json"
+  },
+  "prior_core_asset": {
+    "name": "kaixin-core-20261117-k12-4.tar.gz",
+    "id": 758074993,
+    "bytes": 572023510,
+    "sha256": "3220d81db122a1805eaa88b3f51de4bd31468192e056ea0bf461079120e9552f",
+    "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-4/kaixin-core-20261117-k12-4.tar.gz"
+  },
+  "public_key_sha256": "aed6f122112b2dcd78e98e9811c48dcaa779d0ab7a9150acadca36255603e062",
+  "signed_runtime_assets": [
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-20261112.json",
+      "id": 761276162,
+      "bytes": 640,
+      "sha256": "4f77b2ff3f2212d1c56327df3413aeb996cf0ad9443ac7dc95445cd9e64e800a",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-20261112.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-194178f05eea.json",
+      "id": 761276401,
+      "bytes": 678,
+      "sha256": "377bfdcd81fc040bfa000a76c137fa8aa0bb792a66425e1e3f8ce50d18db4ff9",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-194178f05eea.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-306c0073e240.json",
+      "id": 761276646,
+      "bytes": 680,
+      "sha256": "f6bfc8e438f1df84703f7ed296cd6edad13412e3fb00254718062cc6ad06ca35",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-306c0073e240.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-6c9c7f936933.json",
+      "id": 761276545,
+      "bytes": 677,
+      "sha256": "fd6771f37ca8d95ee05563c398fdd2ed7027e9a3d3d2a4b49c63aa85cc060c24",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-6c9c7f936933.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-6f6222533fad.json",
+      "id": 761276451,
+      "bytes": 679,
+      "sha256": "4d6d4699725936a62040330c0d5326d6ff605d7e86c0e59c7fd169cc0bcc9cd9",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-6f6222533fad.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-7056f6bb9861.json",
+      "id": 761276258,
+      "bytes": 675,
+      "sha256": "e01f5cbddde98196514132ce0e34838d7d81e31019e90da126461b9b44cbe5f6",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-7056f6bb9861.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-7744dbeb8d09.json",
+      "id": 761276211,
+      "bytes": 677,
+      "sha256": "b05205a62b18c1fb03e94acdbe59acc5349130d998cee85afc3fdc498922cc30",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-7744dbeb8d09.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-afbad5ed9bc4.json",
+      "id": 761276779,
+      "bytes": 677,
+      "sha256": "2a538f1765bb7f5d1cd334589c41200e42452bacf5d24aaf17f4ef115b781889",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-afbad5ed9bc4.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-b445b7c83c4d.json",
+      "id": 761276309,
+      "bytes": 680,
+      "sha256": "8eee4c2ff7323f47c090915e5254096de93a5c56ffb74c5a2319c45f07e66c67",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-b445b7c83c4d.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-b83c8329037e.json",
+      "id": 761276484,
+      "bytes": 681,
+      "sha256": "147152fc98aedf06b70aecd840bbcbdb1e1aafd4535dc2fec3bf6da918cf4d06",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-b83c8329037e.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-ba05e5de452a.json",
+      "id": 761276592,
+      "bytes": 680,
+      "sha256": "85a6140efd67b2d5046928ef824a72045408078ef3aac23d9b773e5d5997a18e",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-ba05e5de452a.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-c09b1d53f8d0.json",
+      "id": 761276360,
+      "bytes": 683,
+      "sha256": "edc7b2aaecb7a25ba5f27edb8b778fba3fda150b3416e483fdcf757faa7baf6d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-c09b1d53f8d0.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-cda1e4c99289.json",
+      "id": 761276712,
+      "bytes": 677,
+      "sha256": "dfc3f41a9421d4eff358135ec4fe254dc9b7699f3203823b2fc8676c22e2e4a4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-cda1e4c99289.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-prior-current.json",
+      "id": 761276839,
+      "bytes": 673,
+      "sha256": "ce55ca75eb1068767864bb5469755946a67291ab8c976dc57391ac527c4306c4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-prior-current.json"
+    },
+    {
+      "name": "runtime-macos-arm64.json",
+      "id": 761276892,
+      "bytes": 2907,
+      "sha256": "b843949b1f2d25dbb2a04025a931a7f31ea8990b10baae8949726cb1e969d19c",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-20261112.json",
+      "id": 761275893,
+      "bytes": 634,
+      "sha256": "8b907490ef61ad89b77adaf17d414db8c80739242607848d4423ab287388aa79",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-20261112.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-170a15b2f1a2.json",
+      "id": 761276096,
+      "bytes": 674,
+      "sha256": "cade5d571b0295df0d0f73ecdf838a16daf7c5e89786caa112fcefe8e3e27c02",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-170a15b2f1a2.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-22eb20a39a60.json",
+      "id": 761276143,
+      "bytes": 677,
+      "sha256": "0f1a4277c379ba6ef5867c2144cdd71c76fa16547e3e6364dcc94b9bc8138f7c",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-22eb20a39a60.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-3e8b6a21262c.json",
+      "id": 761276377,
+      "bytes": 671,
+      "sha256": "c5a703dbd92fd5ac7f6d3bd243a318a6f7874d2b10cdd37063aaaabfc378157e",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-3e8b6a21262c.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-681a198cf308.json",
+      "id": 761276038,
+      "bytes": 669,
+      "sha256": "f7a39d40e9d1c86fa051b3257c848b7d64f6e163cf3c4d934f9f75c0537c1eac",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-681a198cf308.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-688da252df85.json",
+      "id": 761276477,
+      "bytes": 674,
+      "sha256": "5afa568fdbe2dba576e200bfd7593fce169f5c8ec9575de5fcda1696960ee862",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-688da252df85.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-7d62b8ead190.json",
+      "id": 761276533,
+      "bytes": 671,
+      "sha256": "09a52b634b845dbe280b7daa4b80f313d94c380738b1a17f63d8150ceaa792ce",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-7d62b8ead190.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-80115ecd6d3d.json",
+      "id": 761276197,
+      "bytes": 672,
+      "sha256": "f374483eb1a161642a151b47283c32a789b80c4b1c9e7fed76e03cf6eab73df2",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-80115ecd6d3d.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-a521f11854b3.json",
+      "id": 761276427,
+      "bytes": 674,
+      "sha256": "c0ef1d6a3d61c8be2f88b4808afbf20f24a955f66ad5c800e44857a617cabeb4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-a521f11854b3.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-c41831772671.json",
+      "id": 761276307,
+      "bytes": 675,
+      "sha256": "529e4a86ae49a4ee9ad6ef6a2b6784291637850fff894812727fc81fa7e674ef",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-c41831772671.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-c452d12cb482.json",
+      "id": 761276255,
+      "bytes": 673,
+      "sha256": "3b3b4565a149876fabfcd3159eb4ff10bd5c629253eb95b1b58fdfaee0ce95ed",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-c452d12cb482.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-da8f97d625eb.json",
+      "id": 761276574,
+      "bytes": 671,
+      "sha256": "899e324975bd0a93a3e7d4e9b82b5539dff1699a2ab2534432d58ef4e2be03b7",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-da8f97d625eb.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-e2a196e1e65a.json",
+      "id": 761275959,
+      "bytes": 671,
+      "sha256": "781d46246c43eb7ced1db3d567924641b2fad67589417b7b9f00cf354db85f2d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-e2a196e1e65a.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-prior-current.json",
+      "id": 761276623,
+      "bytes": 667,
+      "sha256": "4d0db9994277eef084fc73b1f8b710e6d1b1f3deb962bac71af49542708038e5",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-prior-current.json"
+    },
+    {
+      "name": "runtime-macos-x64.json",
+      "id": 761276679,
+      "bytes": 2845,
+      "sha256": "c740b7329d5684b0c824353da7e097a8d09bd8157f7e40d7857bced603824c56",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-20261112.json",
+      "id": 761276223,
+      "bytes": 649,
+      "sha256": "70708513a038422c1a4b8cade2a7753332e93f9f202ddb105b6ce1146ff7b266",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-20261112.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-324194bea65b.json",
+      "id": 761276759,
+      "bytes": 691,
+      "sha256": "08121d67bbea58a79f936546cc96d10fae9f332d89641a77856bed394922c22b",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-324194bea65b.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-3e01c184c6a4.json",
+      "id": 761276414,
+      "bytes": 694,
+      "sha256": "be885e1a6d116263a1cb278c4f797ddfb7ea054f6b0935ca655c7f47d6e577df",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-3e01c184c6a4.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-573f105ed118.json",
+      "id": 761276322,
+      "bytes": 686,
+      "sha256": "bbd558bd5845d1353ab22bdc29d60b116c1d7e6937bb57aa7cd61a1644539ae1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-573f105ed118.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-70c8bc192b30.json",
+      "id": 761276881,
+      "bytes": 688,
+      "sha256": "52375f2ac8fc81f97189070efbecbfd685b7c91c51943614933d18169ae6502b",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-70c8bc192b30.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-77b621411568.json",
+      "id": 761276625,
+      "bytes": 688,
+      "sha256": "61b1b77810be6e97fb7b9574506ef5b29f0df7048bc98f4c676ad67f03f6cb75",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-77b621411568.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-7a52e2cacc9f.json",
+      "id": 761276466,
+      "bytes": 689,
+      "sha256": "9df3c197b648cd13fb54d5f4adb3956313016e2300d0844ca563329fd93f53b1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-7a52e2cacc9f.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-967544a178f2.json",
+      "id": 761276819,
+      "bytes": 688,
+      "sha256": "9efab6fda0e4f97dad5b4c54ea8ba4b9e44c4e5b0b3f04c34755eefa262c26d7",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-967544a178f2.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-9b7c2b84f908.json",
+      "id": 761276376,
+      "bytes": 691,
+      "sha256": "20a7fb9e7285f05b0f4a08b97484d413e245770049656079779e0068d7411c01",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-9b7c2b84f908.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-a0419326e159.json",
+      "id": 761276687,
+      "bytes": 691,
+      "sha256": "37cb6c0ac6e78690102a311cc3489a63a028b4fab6764c7a5c97a13ec722ec8b",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-a0419326e159.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-afb4dfe97ae4.json",
+      "id": 761276566,
+      "bytes": 692,
+      "sha256": "6eb913a6005b24fb56c8d99c33e24104922278631bf73ec43f9699ea9717fb3d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-afb4dfe97ae4.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-bb8f5191555d.json",
+      "id": 761276269,
+      "bytes": 688,
+      "sha256": "9803fcf0074b48a49c58e7956a9f5a33294552f45347513d946b2359069d9324",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-bb8f5191555d.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-e4abdb1cb594.json",
+      "id": 761276511,
+      "bytes": 690,
+      "sha256": "00bfb9071f7f191a0fc63b4a6f1b154d8f7bfd436b8a86618493ed88a32727c0",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-e4abdb1cb594.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-prior-current.json",
+      "id": 761276933,
+      "bytes": 684,
+      "sha256": "277fce6a4aca59e2b67f19577cb252f5024cef547e4d6c89dbfac49bdd95225a",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-prior-current.json"
+    },
+    {
+      "name": "runtime-windows-x64.json",
+      "id": 761276994,
+      "bytes": 2973,
+      "sha256": "f24d4e73f4f9300c01fb244c1401cc7df60ed58c7423d277d25e8000edb308d8",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64.json"
+    }
+  ],
+  "baseline_feeds": {
+    "runtime-macos-arm64.json": "87507b2cee9fa9d48dec408f69c926b667c830303e49f99c735e744955b58fac",
+    "runtime-macos-x64.json": "093397000b3223356aa5751550c2f1c7dc50f0fb3aeb15f548b7000df05d74f1",
+    "runtime-windows-x64.json": "e4f4be39cc44455a6815c48016d96a4bb939fd43d3df2005508ddc0c2e61b03e"
+  },
+  "immutable_existing_assets": [
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.002.dmgpart",
+      "id": 761134707,
+      "bytes": 1992295135,
+      "sha256": "7e2743ae8899a9cf08146c0191002944bc678d77194c77bfb5ee2fd170a86dd2",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.002.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.003.dmgpart",
+      "id": 761134708,
+      "bytes": 1992295135,
+      "sha256": "97427e949146defa53bf5d8dbd3a8f81dd19b34797162129a064c0c740be5c4c",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.003.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.004.dmgpart",
+      "id": 761134716,
+      "bytes": 1932676278,
+      "sha256": "c3b7252fd34abd6e8355614a98386ff452b07c9d91278c838908e6a97e3ccdfd",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.004.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.dmg",
+      "id": 761134709,
+      "bytes": 1992775383,
+      "sha256": "552302f4d04132e621c7065d5dec6af98633b836ec92d4ed0aadd7c2fd678820",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-6-part.dmg"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.002.dmgpart",
+      "id": 761167650,
+      "bytes": 1992295135,
+      "sha256": "a2b81c137b7689e395976f6887d9fecaa3d8f10796c459cac2ecc0b94ac64cd6",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.002.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.003.dmgpart",
+      "id": 761167652,
+      "bytes": 1992295135,
+      "sha256": "12bfa52fbb7b1d176ab42b8db3c8ffc13a4c5181057842d781c3a703cd0f22e7",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.003.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.004.dmgpart",
+      "id": 761167640,
+      "bytes": 1992295135,
+      "sha256": "ef4a82687698b7fd0c17c6dbcd3da9d7d1aa375f08a28a38efb3dd59eab43861",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.004.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.005.dmgpart",
+      "id": 761167654,
+      "bytes": 9706757,
+      "sha256": "4230332e57c7ec4bd15fdede7bc9e44f11063df364008ca37c9c18590a5f4350",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.005.dmgpart"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.dmg",
+      "id": 761167649,
+      "bytes": 1992780728,
+      "sha256": "22241c37ccbe7243fd30643ed31f56651f54774947ebc1ac53af369ff92d4aa1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-6-part.dmg"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+      "id": 761140113,
+      "bytes": 1992294400,
+      "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+      "id": 761140115,
+      "bytes": 1992294400,
+      "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+      "id": 761140106,
+      "bytes": 1992294400,
+      "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+      "id": 761140105,
+      "bytes": 1005564586,
+      "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004"
+    },
+    {
+      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+      "id": 761140111,
+      "bytes": 996819526,
+      "sha256": "586321b8ec5bbc0659ae8719920b3236ecc9be9bcd2f0881b5a93f4b2b3590fa",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe"
+    },
+    {
+      "name": "attachment-core.json",
+      "id": 761097771,
+      "bytes": 4156,
+      "sha256": "aa1765352400284eac30779fa4146770bcddbfce250befbed5ab15816d77651c",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/attachment-core.json"
+    },
+    {
+      "name": "attachment-stage-macos-arm64.json",
+      "id": 761187603,
+      "bytes": 727,
+      "sha256": "e721c39442bea9bd6c317bc9e24c2d61116bb97da8eb715f238e9436c71d8ac1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/attachment-stage-macos-arm64.json"
+    },
+    {
+      "name": "attachment-stage-macos-x64.json",
+      "id": 761264001,
+      "bytes": 721,
+      "sha256": "d007532d4835b37bbb6ce626873d75c96ad005f085edaa2064c6a193724df4af",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/attachment-stage-macos-x64.json"
+    },
+    {
+      "name": "attachment-stage-windows-x64.json",
+      "id": 761194074,
+      "bytes": 747,
+      "sha256": "05b867c09556a779fb8e5f77261f2c53b7e5db0bbbdd4d0fb77fdb71d1fe07b7",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/attachment-stage-windows-x64.json"
+    },
+    {
+      "name": "core-file-manifest.json",
+      "id": 761097766,
+      "bytes": 3011178,
+      "sha256": "0059752575ada93e81d060c1aa5a35e410dc174bc052126310155ec312a69866",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/core-file-manifest.json"
+    },
+    {
+      "name": "core-run.json",
+      "id": 761086172,
+      "bytes": 86,
+      "sha256": "6b0172671007435341e30f6e6654e28366b333eec0cd06ca127b088d18b8657d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/core-run.json"
+    },
+    {
+      "name": "kaixin-bridge-20261117-k12-6-macos-arm64.tar.gz",
+      "id": 761187593,
+      "bytes": 1983477456,
+      "sha256": "91a4659157997b3371731d0ecd8cd8c25f381c81a5517c892e63d2cd39aaf6a1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/kaixin-bridge-20261117-k12-6-macos-arm64.tar.gz"
+    },
+    {
+      "name": "kaixin-bridge-20261117-k12-6-macos-x64.tar.gz",
+      "id": 761263990,
+      "bytes": 2046867552,
+      "sha256": "81cb8e2300c179e67065407164b34658846e24d900eb534f0f1613a53ada6f36",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/kaixin-bridge-20261117-k12-6-macos-x64.tar.gz"
+    },
+    {
+      "name": "kaixin-bridge-20261117-k12-6-windows-x64.tar.gz",
+      "id": 761194073,
+      "bytes": 1958627156,
+      "sha256": "c52bc767964938fabf14436d88029be38b0c800a13d79557408bd0da31abebcb",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/kaixin-bridge-20261117-k12-6-windows-x64.tar.gz"
+    },
+    {
+      "name": "kaixin-core-20261117-k12-6.tar.gz",
+      "id": 761097765,
+      "bytes": 837565345,
+      "sha256": "97c3a9e50a3a0e1be88ed6855abab381cfe5689b9580b70ec287f7b6827867e6",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/kaixin-core-20261117-k12-6.tar.gz"
+    },
+    {
+      "name": "native-run-macos-arm64.json",
+      "id": 761109550,
+      "bytes": 86,
+      "sha256": "a16b8044bd0307fe2c064423cff9991303d34b213b9c79c8ca4f3dd1b73641d4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/native-run-macos-arm64.json"
+    },
+    {
+      "name": "native-run-macos-x64.json",
+      "id": 761111014,
+      "bytes": 86,
+      "sha256": "a16b8044bd0307fe2c064423cff9991303d34b213b9c79c8ca4f3dd1b73641d4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/native-run-macos-x64.json"
+    },
+    {
+      "name": "native-run-windows-x64.json",
+      "id": 761110250,
+      "bytes": 86,
+      "sha256": "a16b8044bd0307fe2c064423cff9991303d34b213b9c79c8ca4f3dd1b73641d4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/native-run-windows-x64.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-20261112.json",
+      "id": 761276162,
+      "bytes": 640,
+      "sha256": "4f77b2ff3f2212d1c56327df3413aeb996cf0ad9443ac7dc95445cd9e64e800a",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-20261112.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-194178f05eea.json",
+      "id": 761276401,
+      "bytes": 678,
+      "sha256": "377bfdcd81fc040bfa000a76c137fa8aa0bb792a66425e1e3f8ce50d18db4ff9",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-194178f05eea.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-306c0073e240.json",
+      "id": 761276646,
+      "bytes": 680,
+      "sha256": "f6bfc8e438f1df84703f7ed296cd6edad13412e3fb00254718062cc6ad06ca35",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-306c0073e240.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-6c9c7f936933.json",
+      "id": 761276545,
+      "bytes": 677,
+      "sha256": "fd6771f37ca8d95ee05563c398fdd2ed7027e9a3d3d2a4b49c63aa85cc060c24",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-6c9c7f936933.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-6f6222533fad.json",
+      "id": 761276451,
+      "bytes": 679,
+      "sha256": "4d6d4699725936a62040330c0d5326d6ff605d7e86c0e59c7fd169cc0bcc9cd9",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-6f6222533fad.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-7056f6bb9861.json",
+      "id": 761276258,
+      "bytes": 675,
+      "sha256": "e01f5cbddde98196514132ce0e34838d7d81e31019e90da126461b9b44cbe5f6",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-7056f6bb9861.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-7744dbeb8d09.json",
+      "id": 761276211,
+      "bytes": 677,
+      "sha256": "b05205a62b18c1fb03e94acdbe59acc5349130d998cee85afc3fdc498922cc30",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-7744dbeb8d09.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-afbad5ed9bc4.json",
+      "id": 761276779,
+      "bytes": 677,
+      "sha256": "2a538f1765bb7f5d1cd334589c41200e42452bacf5d24aaf17f4ef115b781889",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-afbad5ed9bc4.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-b445b7c83c4d.json",
+      "id": 761276309,
+      "bytes": 680,
+      "sha256": "8eee4c2ff7323f47c090915e5254096de93a5c56ffb74c5a2319c45f07e66c67",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-b445b7c83c4d.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-b83c8329037e.json",
+      "id": 761276484,
+      "bytes": 681,
+      "sha256": "147152fc98aedf06b70aecd840bbcbdb1e1aafd4535dc2fec3bf6da918cf4d06",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-b83c8329037e.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-ba05e5de452a.json",
+      "id": 761276592,
+      "bytes": 680,
+      "sha256": "85a6140efd67b2d5046928ef824a72045408078ef3aac23d9b773e5d5997a18e",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-ba05e5de452a.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-c09b1d53f8d0.json",
+      "id": 761276360,
+      "bytes": 683,
+      "sha256": "edc7b2aaecb7a25ba5f27edb8b778fba3fda150b3416e483fdcf757faa7baf6d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-c09b1d53f8d0.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-base-cda1e4c99289.json",
+      "id": 761276712,
+      "bytes": 677,
+      "sha256": "dfc3f41a9421d4eff358135ec4fe254dc9b7699f3203823b2fc8676c22e2e4a4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-base-cda1e4c99289.json"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-6-prior-current.json",
+      "id": 761276839,
+      "bytes": 673,
+      "sha256": "ce55ca75eb1068767864bb5469755946a67291ab8c976dc57391ac527c4306c4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64-20261117-k12-6-prior-current.json"
+    },
+    {
+      "name": "runtime-macos-arm64.json",
+      "id": 761276892,
+      "bytes": 2907,
+      "sha256": "b843949b1f2d25dbb2a04025a931a7f31ea8990b10baae8949726cb1e969d19c",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64.json"
+    },
+    {
+      "name": "runtime-macos-arm64.unsigned.json",
+      "id": 761187604,
+      "bytes": 504,
+      "sha256": "a0c3415a92439cfd0c511348b5f67d0e15fc83a87a164f4deea316db1fbb40fb",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-arm64.unsigned.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-20261112.json",
+      "id": 761275893,
+      "bytes": 634,
+      "sha256": "8b907490ef61ad89b77adaf17d414db8c80739242607848d4423ab287388aa79",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-20261112.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-170a15b2f1a2.json",
+      "id": 761276096,
+      "bytes": 674,
+      "sha256": "cade5d571b0295df0d0f73ecdf838a16daf7c5e89786caa112fcefe8e3e27c02",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-170a15b2f1a2.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-22eb20a39a60.json",
+      "id": 761276143,
+      "bytes": 677,
+      "sha256": "0f1a4277c379ba6ef5867c2144cdd71c76fa16547e3e6364dcc94b9bc8138f7c",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-22eb20a39a60.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-3e8b6a21262c.json",
+      "id": 761276377,
+      "bytes": 671,
+      "sha256": "c5a703dbd92fd5ac7f6d3bd243a318a6f7874d2b10cdd37063aaaabfc378157e",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-3e8b6a21262c.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-681a198cf308.json",
+      "id": 761276038,
+      "bytes": 669,
+      "sha256": "f7a39d40e9d1c86fa051b3257c848b7d64f6e163cf3c4d934f9f75c0537c1eac",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-681a198cf308.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-688da252df85.json",
+      "id": 761276477,
+      "bytes": 674,
+      "sha256": "5afa568fdbe2dba576e200bfd7593fce169f5c8ec9575de5fcda1696960ee862",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-688da252df85.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-7d62b8ead190.json",
+      "id": 761276533,
+      "bytes": 671,
+      "sha256": "09a52b634b845dbe280b7daa4b80f313d94c380738b1a17f63d8150ceaa792ce",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-7d62b8ead190.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-80115ecd6d3d.json",
+      "id": 761276197,
+      "bytes": 672,
+      "sha256": "f374483eb1a161642a151b47283c32a789b80c4b1c9e7fed76e03cf6eab73df2",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-80115ecd6d3d.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-a521f11854b3.json",
+      "id": 761276427,
+      "bytes": 674,
+      "sha256": "c0ef1d6a3d61c8be2f88b4808afbf20f24a955f66ad5c800e44857a617cabeb4",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-a521f11854b3.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-c41831772671.json",
+      "id": 761276307,
+      "bytes": 675,
+      "sha256": "529e4a86ae49a4ee9ad6ef6a2b6784291637850fff894812727fc81fa7e674ef",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-c41831772671.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-c452d12cb482.json",
+      "id": 761276255,
+      "bytes": 673,
+      "sha256": "3b3b4565a149876fabfcd3159eb4ff10bd5c629253eb95b1b58fdfaee0ce95ed",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-c452d12cb482.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-da8f97d625eb.json",
+      "id": 761276574,
+      "bytes": 671,
+      "sha256": "899e324975bd0a93a3e7d4e9b82b5539dff1699a2ab2534432d58ef4e2be03b7",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-da8f97d625eb.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-base-e2a196e1e65a.json",
+      "id": 761275959,
+      "bytes": 671,
+      "sha256": "781d46246c43eb7ced1db3d567924641b2fad67589417b7b9f00cf354db85f2d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-base-e2a196e1e65a.json"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-6-prior-current.json",
+      "id": 761276623,
+      "bytes": 667,
+      "sha256": "4d0db9994277eef084fc73b1f8b710e6d1b1f3deb962bac71af49542708038e5",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64-20261117-k12-6-prior-current.json"
+    },
+    {
+      "name": "runtime-macos-x64.json",
+      "id": 761276679,
+      "bytes": 2845,
+      "sha256": "c740b7329d5684b0c824353da7e097a8d09bd8157f7e40d7857bced603824c56",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64.json"
+    },
+    {
+      "name": "runtime-macos-x64.unsigned.json",
+      "id": 761263992,
+      "bytes": 498,
+      "sha256": "a43fe4220f2a86b6764dc10f99a814ba749ab2db7dfc6294580215610518657a",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-macos-x64.unsigned.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-20261112.json",
+      "id": 761276223,
+      "bytes": 649,
+      "sha256": "70708513a038422c1a4b8cade2a7753332e93f9f202ddb105b6ce1146ff7b266",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-20261112.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-324194bea65b.json",
+      "id": 761276759,
+      "bytes": 691,
+      "sha256": "08121d67bbea58a79f936546cc96d10fae9f332d89641a77856bed394922c22b",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-324194bea65b.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-3e01c184c6a4.json",
+      "id": 761276414,
+      "bytes": 694,
+      "sha256": "be885e1a6d116263a1cb278c4f797ddfb7ea054f6b0935ca655c7f47d6e577df",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-3e01c184c6a4.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-573f105ed118.json",
+      "id": 761276322,
+      "bytes": 686,
+      "sha256": "bbd558bd5845d1353ab22bdc29d60b116c1d7e6937bb57aa7cd61a1644539ae1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-573f105ed118.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-70c8bc192b30.json",
+      "id": 761276881,
+      "bytes": 688,
+      "sha256": "52375f2ac8fc81f97189070efbecbfd685b7c91c51943614933d18169ae6502b",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-70c8bc192b30.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-77b621411568.json",
+      "id": 761276625,
+      "bytes": 688,
+      "sha256": "61b1b77810be6e97fb7b9574506ef5b29f0df7048bc98f4c676ad67f03f6cb75",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-77b621411568.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-7a52e2cacc9f.json",
+      "id": 761276466,
+      "bytes": 689,
+      "sha256": "9df3c197b648cd13fb54d5f4adb3956313016e2300d0844ca563329fd93f53b1",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-7a52e2cacc9f.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-967544a178f2.json",
+      "id": 761276819,
+      "bytes": 688,
+      "sha256": "9efab6fda0e4f97dad5b4c54ea8ba4b9e44c4e5b0b3f04c34755eefa262c26d7",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-967544a178f2.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-9b7c2b84f908.json",
+      "id": 761276376,
+      "bytes": 691,
+      "sha256": "20a7fb9e7285f05b0f4a08b97484d413e245770049656079779e0068d7411c01",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-9b7c2b84f908.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-a0419326e159.json",
+      "id": 761276687,
+      "bytes": 691,
+      "sha256": "37cb6c0ac6e78690102a311cc3489a63a028b4fab6764c7a5c97a13ec722ec8b",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-a0419326e159.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-afb4dfe97ae4.json",
+      "id": 761276566,
+      "bytes": 692,
+      "sha256": "6eb913a6005b24fb56c8d99c33e24104922278631bf73ec43f9699ea9717fb3d",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-afb4dfe97ae4.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-bb8f5191555d.json",
+      "id": 761276269,
+      "bytes": 688,
+      "sha256": "9803fcf0074b48a49c58e7956a9f5a33294552f45347513d946b2359069d9324",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-bb8f5191555d.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-base-e4abdb1cb594.json",
+      "id": 761276511,
+      "bytes": 690,
+      "sha256": "00bfb9071f7f191a0fc63b4a6f1b154d8f7bfd436b8a86618493ed88a32727c0",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-base-e4abdb1cb594.json"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-6-prior-current.json",
+      "id": 761276933,
+      "bytes": 684,
+      "sha256": "277fce6a4aca59e2b67f19577cb252f5024cef547e4d6c89dbfac49bdd95225a",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64-20261117-k12-6-prior-current.json"
+    },
+    {
+      "name": "runtime-windows-x64.json",
+      "id": 761276994,
+      "bytes": 2973,
+      "sha256": "f24d4e73f4f9300c01fb244c1401cc7df60ed58c7423d277d25e8000edb308d8",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64.json"
+    },
+    {
+      "name": "runtime-windows-x64.unsigned.json",
+      "id": 761194072,
+      "bytes": 513,
+      "sha256": "ae0a9d4909005f0af3824ddf00380e1f5c8a52d5dbfb36ae401c687e985aa660",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/runtime-windows-x64.unsigned.json"
+    },
+    {
+      "name": "source-overlay-20261117-k12-6.tar.gz",
+      "id": 761097769,
+      "bytes": 296767036,
+      "sha256": "495698a69b33abb8221fea1e2f9d060b84f0269160036c6017a533dafeb6534e",
+      "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-6/source-overlay-20261117-k12-6.tar.gz"
+    }
+  ],
+  "picture_count": 294,
+  "picture_manifest_sha256": "3983e0c365daef3e15e3352323e1b5ec19d7be42de924744094c20567477cd10",
+  "runtime_exclusion_count": 17,
+  "runtime_exclusion_kinds": {
+    "bad_asset_sha256": 16,
+    "bad_payload_sha256": 1
+  },
+  "runtime_exclusion_ledger_sha256": "d83de01f607be564213c007a6613ca81b3adea2821ef1de83147a298d3f71522",
+  "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+  "recipe_inputs_sha256": {
+    "attachment-batch.json": "66ead0a97b0b73c946748b41c73871e59fe3c2441c2629e6be006610728ef2c4",
+    "attachment-final-manifests.json": "b27fe66424ff3ff3475d03d199a626b4d3667f56e2ccc6fd0f51f7b394b40c89",
+    "attachment-release.json": "697ba1ea27aa832788902eb76bee7757cfdd106edc048a24c126d872cad1c876",
+    "audio-card-probe.cjs": "50a3a9b160f022a6ee86f9222e381901b40ff8dd9f905a026211fb9be787f1ed",
+    "bootstrap_source.py": "743d6a95b359c5506452412a25e77fe0c9ce0c518e584c7f6cb84baab959c10b",
+    "ci-chat-audio-ui.cjs": "4bf3833f4c0c0325f949d4de705c700f358cd7b9d0216f3d8ab6862f7e2495bf",
+    "ci-fresh-smoke.mjs": "b79b3d45f6d5a05c813d7d34cc42d3384d4fa2f4996feead67ad2701f740b835",
+    "ci-k12-driver-selfcheck.cjs": "70fb91b8363b1bb784c27fec859bb08f416d48a410a82fd49cc8ef12dcb24dfb",
+    "ci-k12-library-ui.cjs": "17918de6d70f2ec25292d0c9d94719ba478eb580dde10e75ed6c701248c529ea",
+    "ci-mac-reuse.py": "6b2f176d0c631a6896a355f9e9337988405f36f76402847ae733fa49db118304",
+    "ci-materials-ui.cjs": "819e4d3100745c8549006b9b37e78dc92b23e72f9240ca086a5359f6b95be773",
+    "ci-picture-fresh.cjs": "11889ea909eef882f9293a98b0e558d5c6fcef6e693cd0ef8a526797128eda72",
+    "ci-proxy-smoke.cjs": "cacad3fd3e5ad31951d55e5ffa56ecdbbe75dce7650250d03929d469d68ed875",
+    "ci-turn-preview.cjs": "6a5395e5b211e241484e7a20bc23d368efec75b680332274bc1a80d6dff97650",
+    "ci-update-flow.cjs": "6b966da805c3e081a4f7c4ffd4e174a3f58c8453d26f7ec3910398b10352f688",
+    "ci_picture_fresh.py": "1d1eeeabce878947d88d9e61e473b672a77f5df03e71bf3b105c5252b991eedc",
+    "ci_update_probe.py": "cf4bad6de2fdc20afa147bae4d888020199db53cf14a38d022e35cd8848d2124",
+    "fetchfix-tests/archive-runtime.test.mjs": "aff510d1177509db652d9be3caaeb3851483c7b6431ffe64f7a2f80fb0808ead",
+    "fetchfix-tests/bundled-release.test.mjs": "3c83da1b1253965a81cb7e8060d782a74f9958276e3f773f5f8eb407ed0b27a7",
+    "fetchfix-tests/i18n.test.mjs": "9b3f5e66c94dd5d60467fd05eb841aabbe1026115bf68b6f22d832c5103f20ea",
+    "fetchfix-tests/macos-runtime-signing.test.mjs": "79fc7f4ef0b00031eaff80cc8774c5cea1649312301283052aa99983b6e427d2",
+    "fetchfix-tests/media-permissions.test.mjs": "960d107ac305b4705da286e6f50e8f3f7ba988500d71505b9b80a396ae535340",
+    "fetchfix-tests/notarize.test.mjs": "f291e29b73a9f8fdc7debddd76c57905df59cb725b52da85826ecaf4e26dcb56",
+    "fetchfix-tests/offline-update-selection.test.mjs": "6740fe671e4762b4940cdbf13f00eb9f93fedb848b68dce4cc4aa6f64ef5e2fa",
+    "fetchfix-tests/platform.test.mjs": "3fa6934e1e8f9b0dd463d82ff0fc5ed27bcb02c0aa28730293403e6a122a8cdc",
+    "fetchfix-tests/release-updates.test.mjs": "dd5d00c249e689cf1fce1db96270620fcda72794de18d725b38ee6a644a39701",
+    "fetchfix-tests/runtime.test.mjs": "37a6f37986c7c670b7da31e194c2392e67942478506352d063628fcfc68add6c",
+    "fetchfix-tests/shell-update.test.mjs": "88b9e9437d95eb683d5d24a163ffb05135d018b37d65ab38d73324973717c72d",
+    "fetchfix-tests/signing.test.mjs": "a5765fef7e2aeebfee735129250b7ddfe528b1ad68065da67f56c17f01a7dc54",
+    "fetchfix-tests/split-payload.test.mjs": "54f059fb9ffaf1d9a6e93e25487882e90e3a513b6782914ce4fe1b87875647c6",
+    "fetchfix-tests/student-runtime.test.mjs": "def82ca996927979193aeadc32358d463ee7ed5925c6c419a93b6a4cbb4cb7dd",
+    "fetchfix-tests/update-batch.test.mjs": "b1010ae62881a8caa3f55450fae3a092b74bd08d87b9b94dcb52cb2d73331848",
+    "fetchfix-tests/update-network.test.mjs": "d63f5db5cc5e4ea5d746cc467defa19143e8ef1db39c7d9e743204b793931f56",
+    "fetchfix-tests/update-notice.test.mjs": "c0e60c1ce80dee8080d4d8ca31dbecf9b4e81af58cd71926bf92a928dcddde72",
+    "fetchfix-tests/workspace-snapshot.test.mjs": "9400692a569514b88c222eac282086b8096f94e8d7fea6d4967959556f147bab",
+    "launcher-manifest.json": "618915dc1e662fa8c2ca435e12471af81ec1f044fef09c954a97adc74249e414",
+    "materials-launcher-src/bundles.mjs": "ab5edd2e8e775178fefdec0dd6f9242f7993fda635d9bfd7d158c1af652a59db",
+    "materials-launcher-src/config.mjs": "5442ee3b716c8234ba4e9c00cac5a999fc305ad07cb51088b4aedd5840d9af5f",
+    "materials-launcher-src/entry.mjs": "ed6bc9c89a241beed2314d042f23f9fbf4003394e87dcfd3391a493014acad8f",
+    "materials-launcher-src/i18n.mjs": "82b489024c64c61e26c9ca84397a7293ad40b7248c7ef0a2ce52055755e98fc5",
+    "materials-launcher-src/index.html": "d54b3176d0a28aac53e9fbf66bdf62bde10f035807049f65446d0ed3de939516",
+    "materials-launcher-src/lesson-browser.cjs": "b15e395a9b40c63d78d93d43854e8e93eebb8c752d6651615921b004423cc87f",
+    "materials-launcher-src/main.mjs": "57b36431bef3bb45430ba07701ad79e06ec10ffa93a9c513be9ce4f3a1f73a3f",
+    "materials-launcher-src/platform.mjs": "2244e4e11c57c508cf2d6e986b460a8d2689c1587e6e2b9e271302be6db71723",
+    "materials-launcher-src/preload.cjs": "ed17b465880e7eacf624e7858335d1ed7469ff2f60134da446d8cb975cab541b",
+    "materials-launcher-src/processes.mjs": "df57131cf94992e30e8474b21611ba78289942b98f56bdef0d417677ffa03c32",
+    "materials-launcher-src/release-updates.mjs": "e1d19421545668f85cf280a399cb96acdd5a4724d420d3b4d81daca024a64ee4",
+    "materials-launcher-src/renderer.js": "808dc4adcdcc670872d21413620aaa121b5519a1d24c44a75c02c0d890252994",
+    "materials-launcher-src/runtime.mjs": "28356dddd93b7ce614a07d98cbccf2504a367f88138da0df1f20426210385327",
+    "materials-launcher-src/shell.css": "dce67c67e27000cc5cad2fe886fcd4c0d9b266084a5b91fbd8594a9a16d9cd04",
+    "materials-launcher-src/student-runtime.mjs": "ab6d5978baf5d88451b1384c9c8e902d5a62f95d8c27e99ec0a42514133b634a",
+    "materials-launcher-src/supervisor.mjs": "11f9a1dfda92ef72c92623ba98345da067bff85c201aa733828e9391d4d85e19",
+    "materials-launcher-src/update-bridge.cjs": "411ec4e95e2ef9a0d57df035fd53e45796dddeedfa7cdd3df7d250b540e3a9a8",
+    "materials-launcher-src/update-network.mjs": "d8664ce99adac17cbd2f2ebd1ffe21c49232d55dc8f41d1b200d6d50813084b1",
+    "materials-launcher-src/workspace-snapshot.mjs": "246197cdfcf8fbeb482d5b3d6370e5c0af10d072a6c2eef9b105072fc4d69613",
+    "materials-upgrade-lock.json": "396935beedd7b6c0040b8c72717867e6dc09024acb9238f51d93b8043fe155d2",
+    "native-audio-fixture.py": "027a30a7b7243e9a5c12f658c2b64308c408669ba1ba30e5bbcfbec804f6c365",
+    "native-html-speech-diagnostic.cjs": "2bc0c0f1a35ba874506a36ea0b536caa0d3b0e10c1d2617ef8cd10ddfd316273",
+    "native-k12-fixture.py": "f8aef9741cac1fa5bf438fa25713a14f445e72e4a25a32266215db5caec84ae8",
+    "native-materials-fixture.py": "828627b8a59b5c470e380167891ef9b4d71f4138cffd90ff68a18874274e9a18",
+    "oldest-launcher-fingerprint.json": "19932f482319ac6cd8180beef4b7045d3238f00db1e62d81f312b9cc3cc1f6ba",
+    "oldest-launcher-src/bundles.mjs": "d8857e9e56f65771a8dfa7978fd1fd4d66950f0da5e18c75c2ca60df0c562913",
+    "oldest-launcher-src/config.mjs": "5442ee3b716c8234ba4e9c00cac5a999fc305ad07cb51088b4aedd5840d9af5f",
+    "oldest-launcher-src/entry.mjs": "ed6bc9c89a241beed2314d042f23f9fbf4003394e87dcfd3391a493014acad8f",
+    "oldest-launcher-src/i18n.mjs": "82b489024c64c61e26c9ca84397a7293ad40b7248c7ef0a2ce52055755e98fc5",
+    "oldest-launcher-src/index.html": "d54b3176d0a28aac53e9fbf66bdf62bde10f035807049f65446d0ed3de939516",
+    "oldest-launcher-src/lesson-browser.cjs": "b15e395a9b40c63d78d93d43854e8e93eebb8c752d6651615921b004423cc87f",
+    "oldest-launcher-src/main.mjs": "cb166709dfe420d1ad4e01b281c029ab5cc54853d19bc6063dd9dd72e1f012f3",
+    "oldest-launcher-src/platform.mjs": "2244e4e11c57c508cf2d6e986b460a8d2689c1587e6e2b9e271302be6db71723",
+    "oldest-launcher-src/preload.cjs": "ed17b465880e7eacf624e7858335d1ed7469ff2f60134da446d8cb975cab541b",
+    "oldest-launcher-src/processes.mjs": "df57131cf94992e30e8474b21611ba78289942b98f56bdef0d417677ffa03c32",
+    "oldest-launcher-src/release-updates.mjs": "ad01ec9fcfc075151fc51eedffd7b11260f7b11a9e280830a73c6fa6fac4281a",
+    "oldest-launcher-src/renderer.js": "808dc4adcdcc670872d21413620aaa121b5519a1d24c44a75c02c0d890252994",
+    "oldest-launcher-src/runtime.mjs": "28356dddd93b7ce614a07d98cbccf2504a367f88138da0df1f20426210385327",
+    "oldest-launcher-src/shell.css": "dce67c67e27000cc5cad2fe886fcd4c0d9b266084a5b91fbd8594a9a16d9cd04",
+    "oldest-launcher-src/student-runtime.mjs": "ab6d5978baf5d88451b1384c9c8e902d5a62f95d8c27e99ec0a42514133b634a",
+    "oldest-launcher-src/supervisor.mjs": "11f9a1dfda92ef72c92623ba98345da067bff85c201aa733828e9391d4d85e19",
+    "oldest-launcher-src/update-bridge.cjs": "411ec4e95e2ef9a0d57df035fd53e45796dddeedfa7cdd3df7d250b540e3a9a8",
+    "oldest-launcher-src/workspace-snapshot.mjs": "246197cdfcf8fbeb482d5b3d6370e5c0af10d072a6c2eef9b105072fc4d69613",
+    "release_source.py": "eee2e3ab58bb52be2409d14a49fe84fd89832420c672ebd95f69f8e3c0a582b2",
+    "science-ui.cjs": "fe431703c2e48c2cd6af3244acbb44348665ef4a5c996627e5ae553d015f8e17",
+    "science_seed.py": "ae3e49a22cb0170b1480e8f6296679db6d55266d8f4bd6aa627ba85ea47f0f45",
+    "source-inventory-20261116.json": "18cb0dab190253bd76aedaa11b6659b48d85a0fde48de99c62587df35cb4db6f",
+    "source-manifest.json": "3ab85ece3d928b37e54c1a7a96f7eeb4c1b166f23bccaf7255c2e1dab6795b19",
+    "test_windows6_reuse.py": "4b6b3ec93faebe1d339b6796f6387294d87639a40843083a59b96b850e5ffb6d",
+    "ci-promote-attachments.py": "beb32d67c8e0ae865f4283e6b2ac177349f5343f792b73a02d00971ac75aa900",
+    "math-baseline-selfcheck.cjs": "5e89e65b0c30f04726def28856db94578758b9e97d22a1711e1d98e8ea1a56de"
+  },
+  "locked_existing_assets_count": 76,
+  "execution_frozen": true,
+  "launcher_build": "20261118-updater-3",
+  "native_pages": {
+    "manifest_sha256": "91631719fe6e228a0b580d469a15943bb5ba80828f5114ea10e731dcd598da0a",
+    "records": 6915,
+    "pdfs": 698,
+    "total_bytes": 295359867,
+    "pdf_bytes": 289848249,
+    "manifest_bytes": 5511618,
+    "ui_fixture": {
+      "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
+      "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
+      "native": {
+        "url": "/api/student/question-bank/native/math%3Aq_e9dd00ffa1178d29b41fadb4_2?revision=26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee&sha256=7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+        "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
+        "bytes": 161962,
+        "page_count": 3,
+        "start_page": 1,
+        "end_page": 1,
+        "kind": "student-word-pages"
+      }
+    }
+  },
+  "launcher_tests": {
+    "tests": 82,
+    "pass": 78,
+    "fail": 0,
+    "skipped": 4
+  },
+  "pending_owner_requirements": [
+    "Integrate the separately diagnosed mathDOM helper without relaxing assertions; add every imported helper to recipe_inputs_sha256.",
+    "Freeze final ci-mac-reuse.py and ci-update-flow.cjs hashes, and any other recipe file changed by owner.",
+    "Set execution_frozen=true only after independent guardtests and QA review; freeze raw lockSHA into focused workflow KX_REUSE_LOCK_SHA256.",
+    "No partial completed-entry reuse, no new core/bridge/installer build/sign/replace; owner alone starts a new full synthetic run."
+  ],
+  "qa_changes": [
+    "Unique fixture identity and same-account read-only baseline before acceptance",
+    "Failure DOM/screenshot/resources with read-only practice endpoint",
+    "No production, installer, bridge, core or signature bytes changed; >=9 math threshold unchanged"
+  ]
+}

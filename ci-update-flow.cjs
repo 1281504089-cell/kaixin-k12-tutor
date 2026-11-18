@@ -26,6 +26,31 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 function optionalRead(name) {
   try { return readFileSync(path.join(home,name),'utf8'); } catch(error) { if(error.code==='ENOENT')return null;throw error; }
 }
+async function captureMathBaseline(view) {
+  const fixture = JSON.parse(readFileSync(path.join(home, 'attachment-fixture.json')));
+  assert.ok(typeof fixture.mistake === 'string' && fixture.mistake_title?.includes(fixture.mistake), 'Missing unique math fixture identity');
+  const receipt = await view.executeJavaScript(`(${(async function(record) {
+    const url = new URL('/api/student/mistakes?practice=' + encodeURIComponent(record) + '&dt_workspace=', location.href).href;
+    const result = { kind: 'pre-update read-only practice GET', url, requested_record: record };
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5000);
+    try {
+      const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
+      result.status = response.status; result.ok = response.ok;
+      if (response.ok) {
+        const data = await response.json();
+        result.target = { title: data.title, question: data.question, student_work: data.student_work,
+          image_count: Array.isArray(data.images) ? data.images.length : null };
+      }
+    } catch (error) { result.error = String(error); }
+    finally { clearTimeout(timer); }
+    return result;
+  }).toString()})(${JSON.stringify(fixture.mistake)})`);
+  writeFileSync(output + '.math-before.json', JSON.stringify({ ...receipt, accepted, expected_title: fixture.mistake_title }));
+  assert.equal(accepted, 0, 'Math fixture baseline must precede update acceptance');
+  assert.equal(receipt.ok, true, 'Math fixture is unreadable before updating: ' + JSON.stringify(receipt));
+  assert.equal(receipt.target?.title, fixture.mistake_title, 'Math fixture identity differs before updating');
+  assert.ok(receipt.target.question && receipt.target.student_work, 'Math fixture content is missing before updating');
+}
 function connectionTimeout(error) {
   const chain=[];for(let item=error;item&&chain.length<5;item=item.cause)chain.push(item);
   if(chain.some(item=>/signature|checksum|验签|签名|校验|ENOSPC|EACCES|EPERM/i.test(String(item.message||item)+' '+String(item.code||''))))return null;
@@ -295,6 +320,8 @@ async function content() {
     if (phase === 'old-launcher') {
       await pause(1000);
       initialUpgrade=optionalRead('upgrade.json');
+      stage='math-before-update';
+      await captureMathBaseline(view);
       await runCheck(view);
       stage='validate-installed';
       const updated = JSON.parse(readFileSync(path.join(home, 'active.json')));
