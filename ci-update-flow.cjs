@@ -30,27 +30,69 @@ function optionalRead(name) {
 async function captureMathBaseline(view) {
   const fixture = JSON.parse(readFileSync(path.join(home, 'attachment-fixture.json')));
   assert.ok(typeof fixture.mistake === 'string' && fixture.mistake_title?.includes(fixture.mistake), 'Missing unique math fixture identity');
-  const receipt = await view.executeJavaScript(`(${(async function(record) {
-    const url = new URL('/api/student/mistakes?practice=' + encodeURIComponent(record) + '&dt_workspace=', location.href).href;
-    const result = { kind: 'pre-update read-only practice GET', url, requested_record: record };
-    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5000);
-    try {
-      const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
-      result.status = response.status; result.ok = response.ok;
-      if (response.ok) {
-        const data = await response.json();
-        result.target = { title: data.title, question: data.question, student_work: data.student_work,
-          image_count: Array.isArray(data.images) ? data.images.length : null };
-      }
-    } catch (error) { result.error = String(error); }
-    finally { clearTimeout(timer); }
-    return result;
-  }).toString()})(${JSON.stringify(fixture.mistake)})`);
-  writeFileSync(output + '.math-before.json', JSON.stringify({ ...receipt, accepted, expected_title: fixture.mistake_title }));
+  const url = new URL('/api/student/mistakes?practice=' + encodeURIComponent(fixture.mistake) + '&dt_workspace=', view.getURL()).href;
+  const started = Date.now(), mainDeadline = 35000;
+  let timer;
+  const limit = new Promise(resolve => { timer = setTimeout(() => resolve({ kind: 'pre-update read-only practice GET', url,
+    requested_record: fixture.mistake, deadline_ms: 30000, elapsed_ms: Date.now() - started, within_original_5s: false,
+    main_deadline_ms: mainDeadline, error: 'Main-side math baseline deadline exceeded' }), mainDeadline); });
+  let receipt;
+  try {
+    receipt = await Promise.race([Promise.resolve().then(() => view.executeJavaScript(`(${(async function(record) {
+      const url = new URL('/api/student/mistakes?practice=' + encodeURIComponent(record) + '&dt_workspace=', location.href).href;
+      const result = { kind: 'pre-update read-only practice GET', url, requested_record: record, deadline_ms: 30000 };
+      const started = Date.now(), controller = new AbortController(), timer = setTimeout(() => controller.abort(), 30000);
+      try {
+        const response = await fetch(url, { method: 'GET', cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
+        result.status = response.status; result.ok = response.ok;
+        if (response.ok) {
+          const data = await response.json();
+          result.target = { title: data.title, question: data.question, student_work: data.student_work,
+            image_count: Array.isArray(data.images) ? data.images.length : null };
+        }
+      } catch (error) { result.error = String(error); }
+      finally { clearTimeout(timer); result.elapsed_ms = Math.max(0, Date.now() - started); result.within_original_5s = result.elapsed_ms <= 5000; }
+      return result;
+    }).toString()})(${JSON.stringify(fixture.mistake)})`)).catch(error => ({ kind: 'pre-update read-only practice GET', url,
+      requested_record: fixture.mistake, deadline_ms: 30000, elapsed_ms: Math.max(0, Date.now() - started),
+      within_original_5s: false, error: String(error).split(/[\r\n]/, 1)[0].slice(0, 240) })), limit]);
+  } finally { clearTimeout(timer); }
+  const valid = receipt.ok === true && receipt.target?.title === fixture.mistake_title && receipt.target.question && receipt.target.student_work;
+  if (!valid) {
+    // The separate GET diagnoses a failed renderer; it never supplies its acceptance result.
+    receipt.main_node_diagnostic = await probeMathBaselineFailure(receipt.url, fixture.mistake_title, Math.min(5000, Math.max(0, mainDeadline - (Date.now() - started))));
+  }
+  writeFileSync(output + '.math-before.json', JSON.stringify({ ...receipt, main_deadline_ms: mainDeadline, total_preparation_ms: Math.max(0, Date.now() - started), accepted, expected_title: fixture.mistake_title }));
   assert.equal(accepted, 0, 'Math fixture baseline must precede update acceptance');
   assert.equal(receipt.ok, true, 'Math fixture is unreadable before updating: ' + JSON.stringify(receipt));
   assert.equal(receipt.target?.title, fixture.mistake_title, 'Math fixture identity differs before updating');
   assert.ok(receipt.target.question && receipt.target.student_work, 'Math fixture content is missing before updating');
+}
+async function probeMathBaselineFailure(url, expectedTitle, budget) {
+  const result = { kind: 'failure-only main Node read-only GET; not the original renderer request', url, deadline_ms: budget,
+    status: null, ok: false, title_matches: false, question_present: false, student_work_present: false };
+  if (budget <= 0) return { ...result, skipped: 'main baseline deadline exhausted', elapsed_ms: 0 };
+  let target;
+  try { target = new URL(url); } catch { return { ...result, skipped: 'untrusted fixture URL', elapsed_ms: 0 }; }
+  if (target.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(target.hostname) || target.username || target.password || target.pathname !== '/api/student/mistakes') {
+    return { ...result, skipped: 'untrusted fixture URL', elapsed_ms: 0 };
+  }
+  const started = Date.now(), controller = new AbortController();
+  let timer;
+  const limit = new Promise(resolve => { timer = setTimeout(() => { controller.abort(); resolve({ ...result, error: 'Node diagnostic deadline exceeded' }); }, budget); });
+  const read = (async function readDiagnostic() {
+    try {
+      const response = await fetch(url, { method: 'GET', cache: 'no-store', redirect: 'error', headers: { Accept: 'application/json' }, signal: controller.signal });
+      result.status = response.status; result.ok = response.ok;
+      if (response.ok) {
+        const data = await response.json();
+        result.title_matches = data.title === expectedTitle; result.question_present = !!data.question; result.student_work_present = !!data.student_work;
+      }
+    } catch (error) { result.error = String(error).split(/[\r\n]/, 1)[0].slice(0, 240); }
+    return { ...result };
+  })();
+  try { return { ...await Promise.race([read, limit]), elapsed_ms: Math.max(0, Date.now() - started) }; }
+  finally { clearTimeout(timer); }
 }
 function connectionTimeout(error) {
   const chain=[];for(let item=error;item&&chain.length<5;item=item.cause)chain.push(item);
