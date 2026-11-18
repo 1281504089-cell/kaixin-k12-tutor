@@ -67,8 +67,15 @@ test('timeout is exactly 5000ms, aborts a hung read and never retries',async()=>
 test('original assertions, time limits, four viewports, Fetch patterns and native inputs remain',()=>{
   const source=fs.readFileSync(path.join(__dirname,'ci-k12-library-ui.cjs'),'utf8');
   const assertions=s=>s.split('\n').filter(line=>line.includes('assert(')||line.includes('assert.')).map(line=>line.trim());
-  assert.equal(assertions(source).length,62);
-  assert.equal(digest(assertions(source)),'bfcbcf2df9610f818bc15f7f850e34f4d29d67de1bcef71ca1c9668d17595453');
+  const rows=assertions(source);
+  // Only the old two-entry assertion moves into the stricter shared three-shelf
+  // helper. Bind that exact replacement, then retain the original hash for all
+  // other source/pixel/history assertions in their original order.
+  const newShelf="assert.deepEqual(probe,{groups:1,labels:['教材库','题库','长期资料'],visible:true,selected:[selected],uploadInput:uploads,uploadAction:uploads,overflow:false});";
+  assert.equal(rows.length,62);assert.equal(rows.filter(line=>line===newShelf).length,1);
+  const original=rows.filter(line=>line!==newShelf);
+  original.splice(55,0,'assert.deepEqual(shelf,{count:2,selected:1,uploadSeparate:true,overflow:false});');
+  assert.equal(digest(original),'bfcbcf2df9610f818bc15f7f850e34f4d29d67de1bcef71ca1c9668d17595453');
   for(const needle of ['timeout = 60000','heldUntil=Date.now()+30000','await pause(1000)','for ([width,height] of [[390,844],[844,390],[1366,900],[1920,1080]])','await navigation;'])assert(source.includes(needle));
   assert.equal(source.split('view.loadURL(').length-1,6);assert.equal(source.split('view.sendInputEvent(').length-1,5);
   const fetchLines=s=>s.split('\n').filter(line=>line.includes("sendCommand('Fetch.enable'")).map(line=>line.trim());

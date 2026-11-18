@@ -61,6 +61,9 @@ jobs:
         run: |
           node progress-read-selfcheck.cjs
           node math-baseline-selfcheck.cjs
+          node ci-student-controls-navigation-selfcheck.cjs
+          node ci-k12-session-diagnostics-selfcheck.cjs
+          node ci-materials-navigation-selfcheck.cjs
       - name: Verify fresh install, background indexing, bridge, and real update IPC
         run: python ci-fresh-install.py --target ${{ matrix.target }}
       - name: Retain native evidence

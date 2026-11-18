@@ -34,7 +34,7 @@ for row in runtime["files"]:
         assert not any(prefix.encode() in data for prefix in DOC_FIGURES), "Required omitted documentation figure: " + row["file"]
 
 env = {**os.environ, "NEXT_TELEMETRY_DISABLED": "1", "NEXT_PUBLIC_API_BASE": "__NEXT_PUBLIC_API_BASE_PLACEHOLDER__", "NEXT_PUBLIC_AUTH_ENABLED": "__NEXT_PUBLIC_AUTH_ENABLED_PLACEHOLDER__"}
-for command in [["npm", "ci", "--legacy-peer-deps", "--no-audit", "--no-fund"], ["npm", "run", "build"], ["npx", "vitest", "run", *CONFIG["web_tests"]]]:
+for command in [["npm", "ci", "--legacy-peer-deps", "--no-audit", "--no-fund"], ["npm", "run", "build"], ["npx", "vitest", "run", "--maxWorkers=1", *CONFIG["web_tests"]]]:
     subprocess.run(command, cwd=WEB, env=env, check=True)
 word = SOURCE / "scripts/report-word"
 subprocess.run(["npm", "ci", "--no-audit", "--no-fund"], cwd=word, check=True)

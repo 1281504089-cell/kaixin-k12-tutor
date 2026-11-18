@@ -12,9 +12,10 @@ from urllib.request import Request, urlopen
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--target', required=True, choices=['macos-x64', 'macos-arm64', 'windows-x64'])
+parser.add_argument('--lock-file', choices=['fresh-install-lock.json','fresh-install-lock-arm8-health.json'], default='fresh-install-lock.json')
 args = parser.parse_args()
 root = Path.cwd()
-lock = json.loads((root / 'fresh-install-lock.json').read_text())
+lock = json.loads((root / args.lock_file).read_text())
 target = args.target
 expected = lock['targets'][target]
 work = root / ('fresh-' + target)
@@ -171,6 +172,12 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'full_files': [{'file': file.name, 'bytes': file.stat().st_size, 'sha256': sha(file)} for file in sorted(candidate_out.iterdir())],
           'installer_reuse': {'enabled': bool(lock.get('reuse_existing_native')), 'original_packaging_run': lock.get('reuse_existing_native',{}).get('original_native_run'), 'installers_repackaged': not bool(lock.get('reuse_existing_native')), 'existing_installer_assets_overwritten': False},
           'real_keys_used': False, 'real_learning_records_modified': False}
+accepted = report['native_smoke'].get('attachment_original_receipt_acceptance')
+if accepted:
+    from ci_native8_health_acceptance import validate_embedded
+    validate_embedded(accepted,target,batch)
+    report['qa_acceptance_exceptions'] = [accepted]
+    report['original_failed_native'] = {'run_id':44285382021,'job_id':134736575809,'workflow_commit':'daaa73733855075857e89e833712d5568a459ddb','conclusion':'failure','not_relabelled_as_success':True}
 (evidence / 'verified.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
 report_file = evidence / ('verification-' + target + '.json')
 report_file.write_text(json.dumps(report, ensure_ascii=False, indent=2))

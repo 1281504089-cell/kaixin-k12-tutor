@@ -8,7 +8,8 @@ from urllib.parse import urlparse
 
 root=Path.cwd();repo='1281504089-cell/kaixin-k12-tutor'
 batch=json.loads((root/'attachment-publication.json').read_text())
-assert batch.get('prepared') is True and batch['tag']=='student-20261117-k12-7', 'Owner must prepare the exact final three-native-tested publication batch'
+release_config=json.loads((root/'attachment-release.json').read_text())
+assert batch.get('prepared') is True and release_config.get('prepared') is True and batch['tag']==release_config['tag'] and batch['core_commit']==release_config['source_commit'] and batch['tag'].startswith('student-20261117-'), 'Owner must prepare the exact final three-native-tested publication batch'
 targets=['windows-x64','macos-x64','macos-arm64']
 def gh(*args):return subprocess.check_output(['gh',*map(str,args)])
 def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
@@ -203,10 +204,12 @@ for target in targets:
    copied='completed-source-reuse-lock.json' if name=='reuse-lock.json' else name
    assert (native_evidence/copied).read_bytes()==raw, 'Reused native evidence was modified: '+name
  report['artifact_scene_binding']=verify_native_entry_artifacts(report,native_evidence)
+ attachment=json.loads((native_evidence/'attachments.json').read_text())
+ from native8_health_publication import validate_health_publication
+ validate_health_publication(batch,target,report,attachment)
  for size in ['390x844','1366x900']:
   screenshot=native_evidence/('quick-preview-'+size+'.png');raw=screenshot.read_bytes();assert len(raw)>1000 and raw.startswith(b'\x89PNG\r\n\x1a\n')
   public_screenshot=work/('quick-preview-'+target+'-'+size+'.png');public_screenshot.write_bytes(raw);gh('release','upload',batch['tag'],public_screenshot,'--clobber')
- attachment=json.loads((native_evidence/'attachments.json').read_text())
  assert all(attachment[k] for k in ['raw_originals_verified','temporary_excluded_from_library','concurrent_library_uploads_saved','scanned_pdf_retrievable'])
  assert attachment['short_pdf_pages']==2 and attachment['interactive_page_ready_while_indexing_seconds']<20
  report['attachment_uploads']=attachment

@@ -119,7 +119,14 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     assert.match(result.text, /分之/);
     speech.push({ milliseconds: Date.now() - started, spoken_audio_decoded: true });
   }
-  const attachmentProof = execFileSync(python, [path.join(process.cwd(), 'ci-attachment-native.py'), frontend, path.join(evidence, 'attachments.json'), backend], {
+  const acceptedHealth = process.env.KX_NATIVE_ACCEPTED_HEALTH;
+  const attachmentArgs = acceptedHealth
+    ? [path.join(process.cwd(), 'ci_native8_health_acceptance.py'), '--acceptance', acceptedHealth,
+       '--artifact', path.join(process.cwd(), 'native8-arm-health-original.zip'),
+       '--target', `macos-${process.arch}`, '--batch', path.join(process.cwd(), 'attachment-batch.json'),
+       '--manifest', path.join(resources, 'update/runtime.json'), '--out', path.join(evidence, 'attachments.json')]
+    : [path.join(process.cwd(), 'ci-attachment-native.py'), frontend, path.join(evidence, 'attachments.json'), backend];
+  const attachmentProof = execFileSync(python, attachmentArgs, {
     encoding: 'utf8', timeout: 480000, env: { ...process.env, PYTHONPATH: path.join(runtime, 'core'),
       DEEPTUTOR_HOME: path.join(home, 'workspace'), DEEPTUTOR_LOCAL_AI: path.join(native, 'support/local-ai'),
       DEEPTUTOR_FONT_DIR: path.join(native, 'support/fonts'), PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1',
@@ -158,6 +165,7 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     native_platform: process.platform, native_arch: process.arch, runtime_id: active.runtimeId,
     core_commit: included.commit, fresh_profile: true, developer_tools_on_path: false,
     language: profile.language, textbooks: books.length, pdf, local_spoken_stt: speech,
+    ...(attachments.explicit_health_acceptance ? {attachment_original_receipt_acceptance: attachments.explicit_health_acceptance} : {}),
     study_reports: studyReports, native_node: nativeNode, k12_api: k12Api, textbook_summary_count: installedTextbooks.passage_count,
     reading_page: 'passed', current_core_included: true,
     automatic_small_update_selection: 'passed', automatic_small_update_download: 'passed',

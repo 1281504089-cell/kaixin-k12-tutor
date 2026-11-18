@@ -1,55 +1,50 @@
-开心动力超级学霸 · 安装与更新说明（2026-11-18）
-目标批次：student-20261117-k12-7
-是否已正式提供，以同批 PUBLICATION-RECEIPT 与 GitHub Latest 一致为准。不要只看 v1.7.1，Mac请在屏幕顶部“开心动力超级学霸 → 关于 开心动力超级学霸”查看完整构建编号；Windows查看软件“关于”。
+开心动力超级学霸 · 安装与更新说明
+发行批次：student-20261117-k12-8
+完整构建号应包含：20261117-k12-8
+配套启动器：20261118-updater-4
 
-已有软件：正常使用“检查更新”
+已有软件：
+打开“设置 → 关于 → 检查更新”或顶部“核心 → 检查更新”，发现新版后点“下载并更新”，查看大小和进度。
+只有出现“重新打开完成更新”时才按提示重开。无需先卸载、清空聊天或删除学习目录。
+更新后核对完整构建号，并再检查一次。主版本v1.7.1或文件日期不能单独判断批次。
+遇到错误保留错误文字和运行日志，按完整构建核对对应方案；不要串装旧补丁、运行历史00脚本或修改环境编号。
 
-1. 进入“设置 → 关于 → 检查更新”，或顶部“核心 → 检查更新”。
-2. 发现新版后点击“下载并更新”。本批核心 837,565,146 字节（约799 MiB），包含理科原生题页；更新窗口显示实际下载进度与大小。
-3. 保持电脑开启。出现“重新打开完成更新”时，先结束正在进行的学习或通话，再点此按钮。
-4. 重开后查看完整构建应包含 20261117-k12-7；再次检查更新，应显示已是最新版本。
-5. 更新保留原聊天、设置、Key、教材和阅读记录，不需要卸载或删除学习目录。核心、启动器与原生环境分开核对；只关闭窗口不等于完全退出。
-6. 缺少兼容运行环境的早期安装可能自动选择约2GB的完整环境更新；不能把新题页自身的295MB当作整个核心包大小。
-7. 本批保留断流连接重建与备用通道，并修复信号结束的后台进程被重复等待、可能卡住退出的情况。仍在运行的后台必须真正退出，不能用超时跳过。旧更新器必须先成功取得一次更新，才能获得新恢复逻辑。持续断网、系统终止或磁盘错误仍可能失败；失败时保留完整日志，不清理学习数据。
-8. 如在线反复失败，不要串用不同批次文件；本批U盘尚未替换，盘上仍为旧4。下一整合批完成后提供对应系统离线更新。正常升级仍统一使用“检查更新”，不串装旧补丁、不运行旧00匹配脚本、不修改环境编号。
+新电脑：
+从以下同批发行页下载对应系统的完整一组，放在本机新建的同一文件夹，保留原名。
+https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-8
+首次安装建议预留40GB临时空间。不使用Source code代替安装包。
 
-第一次安装：从同一版本页面下载整套文件
-
-Windows 64位：以下五份必须同一文件夹。
+Windows x64：以下5份放同一文件夹，只运行Setup。
 Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe
 Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001
 Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002
 Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003
 Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004
-双击Setup.exe。若使用完整ZIP，先“全部解压”再运行；不要在ZIP里启动，不要单独解压Runtime。Windows文件名固定，禁止混用不同批次的Setup和Runtime。
+若使用完整ZIP，先“全部解压”再运行其中的Setup；不要在ZIP中启动，也不要单独解压Runtime。文件名跨批次可能相同，不能混用。
 
-Intel Mac（本批共五个分卷）：
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-7-part.dmg
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-7-part.002.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-7-part.003.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-7-part.004.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-7-part.005.dmgpart
+Intel Mac：以下5分卷放同一文件夹，只打开-part.dmg。
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-8-part.dmg
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-8-part.002.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-8-part.003.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-8-part.004.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-8-part.005.dmgpart
 
-Apple芯片Mac（本批共四个分卷）：
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-7-part.dmg
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-7-part.002.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-7-part.003.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-7-part.004.dmgpart
+Apple芯片Mac：以下4分卷放同一文件夹，只打开-part.dmg。
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-8-part.dmg
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-8-part.002.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-8-part.003.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-8-part.004.dmgpart
 
-对应系统的所有分卷下载完成后放在同一文件夹，打开主镜像-part.dmg，将软件拖进“应用程序”，再从应用程序启动。不要逐个打开.dmgpart，不混用Intel与Apple芯片分卷。两种Mac均要求macOS13或以上。
-U盘里的Mac包另行合成为普通单文件DMG，按盘上说明直接打开即可，不需要再找GitHub分卷。是否完成U盘替换，以同批USB-DELIVERY-RECEIPT为准。
-建议先空出40GB安装临时空间；本批三份首次安装文件已包含当前核心，不需要先装旧版再串装补丁。
+两种Mac均需macOS13或以上。打开首卷后拖入“应用程序”，从“应用程序”启动；不要逐个打开.dmgpart。镜像无法识别先查同批分卷是否下齐、完整、同目录且原名未改。首次启动等待本机环境和教材展开，再填写自己的聊天API；摄像头、麦克风和共享屏幕按需授权。
 
-查看版本与失败退路
+本批变化：
+1. 在当前聊天打开教材，保留原聊天、项目与阅读位置。
+2. 资料入口统一分为教材库、题库、长期资料。
+3. 聊天加号可直接引用资料、原页或原题，浅蓝色来源可跳转查看。
+4. 任务关联后短暂显示“已关联”，不再自动弹出右栏。
+5. 设置提供恢复显示偏好的入口，保留API、模型、老师规则和学习数据。
+6. “关于”显示正在运行的完整构建号，便于确认真正更新到了哪一批。
 
-只有v1.7.1和日期不足以判断是否需要迁移。关于弹窗中完整构建包含20261117-k12-7时，本轮无需再安装离线包；更高版本或未知候选不强行降级。
-旧正式版先检查更新，失败再用同批02；更早或未知底座未逐台实测，遇到签名或不兼容错误应停止、保留日志，不改编号。
-软件打不开或没有“安装核心更新”菜单时，完全退出后用对应系统整合完整版原位覆盖程序，保留原学习目录；不要先卸载清数据。
-下载需要能访问GitHub发布资源，不需要GitHub Token；速度取决于网络。U盘离线更新不需要重新下载包，学习时调用在线模型仍需联网。
-
-本批功能与验收范围
-
-新增698份理科原生题页PDF，共3888页，绑定6915条理科题源记录；这是原稿整页/单元，不等于6915张精准单题裁图。含图和公式保留原排版，支持原题预览、放大和页码跳转；正文先显示，题页异步加载。
-既有294条预制整题图和其他题源保留；17条已有异常隔离维持。20,845条是物理可读题源单位数，不能解释为所有题目或答案都已独立学术审核。
-本批不调整模型提示、老师规则、完整题干、历史上下文或输出预算；原生显示验收不冒充所有模型或所有实体学生电脑均已测试。
-维护识别：源fbb301fd21cf2169f834e0b548d56d201cc98365；启动器20261118-updater-4。具体三端验收、正式更新和本机更新结果看同批回执。
+保留原有教材、题库、图与公式、错题笔记、复盘、语音和高拍仪等功能。默认简体中文，模型API与语音服务在设置中配置。
+本批核心约799MiB，不是首次完整安装包大小。在线下载需能访问GitHub，无需GitHub Token。
+U盘本轮尚未更新，原第4批仍在；U盘完整ZIP和单文件DMG以盘内同批说明为准。

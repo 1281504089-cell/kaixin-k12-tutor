@@ -183,7 +183,12 @@ class PublicationTransactionTest(unittest.TestCase):
         text = source.read_text()
         first = text.split('- name: Record publication run', 1)[1].split('- name:', 1)[0]
         self.assertIn('b.get("prepared") is True', first)
-        self.assertIn('b["tag"]=="student-20261117-k12-7"', first)
+        self.assertIn('c.get("prepared") is True', first)
+        self.assertIn('b["tag"]==c["tag"]', first)
+        self.assertIn('b["core_commit"]==c["source_commit"]', first)
+        self.assertIn('b["tag"].startswith("student-20261117-")', first)
+        self.assertIn('publication-run.json', first)
+        self.assertNotRegex(first, r'student-20\d{6}-k12-\d+')
         self.assertNotIn('gh release', first)
         self.assertNotIn('codex/k12-publish-20261116', text)
 
