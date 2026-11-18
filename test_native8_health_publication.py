@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import ci_native8_health_acceptance as health
 import native8_health_publication as publication
@@ -116,6 +117,33 @@ class HealthPublication(unittest.TestCase):
         exec(code, namespace)
         namespace['report'] = copy.deepcopy(self.report); namespace['report'].pop('qa_acceptance_exceptions')
         with self.assertRaises(AssertionError): exec(code, namespace)
+
+    def test_prepared_publication_binds_original_native_schema(self):
+        native = copy.deepcopy(self.batch)
+        native.update(launcher_build='20261118-updater-4', builtAt=1794997450540, shell_files={})
+        native['core_asset']['size'] = 837620474
+        native['manifests'][health.TARGET]['archive'] = 'kaixin-core-20261117-k12-8.tar.gz'
+        prepared = {key:copy.deepcopy(native[key]) for key in ['tag', 'core_commit', 'launcher_build', 'builtAt', 'shell_files']}
+        prepared.update(prepared=True, manifests={'runtime-arm.json':copy.deepcopy(native['manifests'][health.TARGET])},
+            archives={'kaixin-core-20261117-k12-8.tar.gz':{'source_tag':native['tag'], 'sha256':health.CORE, 'bytes':837620474}})
+        with tempfile.TemporaryDirectory(prefix='health-prepared-') as temporary:
+            root = Path(temporary)
+            for name in ['native8-arm-health-acceptance.json', 'native8-arm-health-original.zip']:
+                shutil.copyfile(ROOT/name, root/name)
+            (root/'attachment-batch.json').write_text(json.dumps(native))
+            with patch.object(publication, 'ROOT', root):
+                before = publication.canonical([native, prepared, self.report, self.attachment])
+                self.assertEqual(publication.validate_health_publication(prepared, health.TARGET, self.report, self.attachment), self.attachment['explicit_health_acceptance'])
+                self.assertEqual(before, publication.canonical([native, prepared, self.report, self.attachment]))
+                changes = [lambda b:b.update(core_commit='0'*40), lambda b:b.update(tag='student-wrong'),
+                    lambda b:b.update(builtAt=1), lambda b:b.update(launcher_build='wrong'), lambda b:b.update(shell_files={'wrong':'file'}),
+                    lambda b:b['manifests'].clear(), lambda b:b['archives']['kaixin-core-20261117-k12-8.tar.gz'].update(source_tag='wrong'),
+                    lambda b:b['archives']['kaixin-core-20261117-k12-8.tar.gz'].update(sha256='0'*64),
+                    lambda b:b['archives']['kaixin-core-20261117-k12-8.tar.gz'].update(bytes=1)]
+                for change in changes:
+                    bad = copy.deepcopy(prepared); change(bad)
+                    with self.subTest(change=change), self.assertRaises(AssertionError):
+                        publication.validate_health_publication(bad, health.TARGET, self.report, self.attachment)
 
     def test_real_node_cli_invocation_rejects_bad_proof(self):
         # The owner runner is local-only. Exercise its shared CLI without depending

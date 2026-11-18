@@ -36,6 +36,14 @@ def validate_health_publication(batch, target, report, attachments):
     assert target == health.TARGET and all(marked), 'Unbound or non-ARM8 health exception'
     stamp = attachments['explicit_health_acceptance']
     assert isinstance(stamp, dict), 'Missing explicit health stamp'
+    if batch.get('prepared') is True:
+        native = json.loads((ROOT/'attachment-batch.json').read_bytes())
+        assert all(native[key] == batch[key] for key in ['tag', 'core_commit', 'launcher_build', 'builtAt', 'shell_files']), 'Publication differs from native batch'
+        manifest = native['manifests'][target]
+        assert manifest in batch['manifests'].values(), 'Native core manifest missing from publication'
+        archive = batch['archives'][manifest['archive']]
+        assert (archive['source_tag'], archive['sha256'], archive['bytes']) == (native['tag'], native['core_asset']['digest'][7:], native['core_asset']['size']), 'Publication core archive differs from native batch'
+        batch = native
     health.validate_embedded(stamp, target, batch)
     expected = health.validate_original(ROOT/'native8-arm-health-acceptance.json',
                                         ROOT/'native8-arm-health-original.zip', target,
