@@ -1,11 +1,11 @@
 {
-  "tag": "student-20261117-k12-8",
-  "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
+  "tag": "student-20261117-k12-9",
+  "source_commit": "e622661ffbe2ffcf71f2fe868a64c8357827a824",
   "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
-  "archive": "kaixin-core-20261117-k12-8.tar.gz",
+  "archive": "kaixin-core-20261117-k12-9.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261117-k12-7.tar.gz",
-    "sha256": "4c37b944c868861ebaee446d86c94d7d045c3d81224dcee5eeb3b8876deff892"
+    "archive": "kaixin-core-20261117-k12-8.tar.gz",
+    "sha256": "ad637c748061b639e9c984437e3439a3d82b8e0ecb0d86ac33ad002e11443728"
   },
   "web_tests": [
     "tests/pending-material.spec.ts",
@@ -65,13 +65,15 @@
     "tests/installed-build.spec.tsx",
     "tests/restore-default-preferences.spec.tsx",
     "tests/restore-defaults-i18n.spec.tsx",
-    "tests/task-link-composer-status.spec.tsx"
+    "tests/task-link-composer-status.spec.tsx",
+    "tests/trace-memory.test.ts",
+    "tests/image-description-model.spec.tsx"
   ],
-  "source_files_sha256": "cba8b13579c620d2fd373b120b926f086f206a9deed0d52834a48b135408fdd1",
+  "source_files_sha256": "06201374b251a36f68e6437dec64732afd5530e46a177c824a28fc363cf5dda5",
   "prepared": true,
   "source_scope": "published_export",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
-  "runtime_manifest_sha256": "88325b2a5ed92921f3cf032525d61e41189ede5b16492a875b35168272c20f4c",
+  "runtime_manifest_sha256": "3816ced51a7839baf13ea02f6b0070801d769fcda0d7805f63a289cce1cb8f13",
   "bank_manifest_sha256": "6743986468d69c720dfb5b59bb2ab07c69d515243406db86ebacfaef35643606",
   "bank_payload_manifest_sha256": "fe3acc9a3e671075d67f6cf3ba33a80440af7bf5581810bb2dff311d8759b179",
   "native_pages": {
