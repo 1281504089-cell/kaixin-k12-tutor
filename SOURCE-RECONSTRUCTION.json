@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "frozen_export_identity_native_acceptance_completed_publication_pending",
+  "status": "published_export_identity_native_publication_and_local_update_verified",
   "release_tag": "student-20261117-k12-8",
   "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
   "source_commit_role": "Internal frozen learning-source identity; not a checkout ref or commit link in the public release recipe repository.",
@@ -108,7 +108,10 @@
     "duplicate_GB_bank_part_upload_planned": false,
     "large_archives_are_public_release_assets": true,
     "source_910_is_not_a_public_recipe_checkout_commit": true,
-    "final_recipe_file_count_is_separate_from_source_inventory": true
+    "final_recipe_file_count_is_separate_from_source_inventory": true,
+    "verified_publication_recipe_commit": "ab3e162f0be15248f9e53d2f511c4e328c192c00",
+    "verified_publication_recipe_tree": "7337aab2c89a5badcfbd0d999a4d8fefd5047e12",
+    "verified_publication_recipe_file_count": 535
   },
   "reconstruction": {
     "entry": "bootstrap_source.py --with-updates",

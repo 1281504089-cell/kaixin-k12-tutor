@@ -1,244 +1,200 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "status": "published_three_native_targets_and_actual_local_update_verified",
-  "recorded_at_utc": "2026-11-18T09:15:54.766977+00:00",
-  "candidate_release_tag": "student-20261117-k12-7",
-  "final_source_commit": "fbb301fd21cf2169f834e0b548d56d201cc98365",
-  "published_export_sha256": "7b654dcb913aa8eb9e0ed446289c4798cff224b1fe46ebb456f16a4a04cf6fbe",
-  "runtime_source_manifest_sha256": "1a729b367cced58f79ad311a0f432d30257bf958688f2866fc6471b23d16cb7c",
+  "candidate_release_tag": "student-20261117-k12-8",
+  "final_source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
+  "source_tree": "779be37d5fae437a606565c32517e8cbb3f65aa5",
+  "published_export_sha256": "cba8b13579c620d2fd373b120b926f086f206a9deed0d52834a48b135408fdd1",
+  "published_export_file_count": 5952,
+  "original_git_tracked_file_count": 5958,
+  "intentionally_isolated_source_files": 6,
+  "runtime_source_manifest_sha256": "88325b2a5ed92921f3cf032525d61e41189ede5b16492a875b35168272c20f4c",
+  "frontend_build_id": "rIo5gzIQ_8pR7QVDtTQoR",
   "launcher_build": "20261118-updater-4",
-  "prior_published_release": "student-20261117-k12-4",
-  "prior_handoff_sha256": "be1bda3824d0854b9a211474fb458dfda558267ac9793eb370bcdb1314dc0dfb",
+  "core_archive": "kaixin-core-20261117-k12-8.tar.gz",
+  "core_sha256": "ad637c748061b639e9c984437e3439a3d82b8e0ecb0d86ac33ad002e11443728",
+  "core_bytes": 837620474,
+  "signed_stage_sha256": "19756c402340418b27d4c01246c13f0430d6753a3ed06ac362faa5e0daad01a6",
+  "signed_manifest_count": 48,
+  "prior_published_release": "student-20261117-k12-7",
+  "prior_handoff_file": "history/SOURCE-TEST-HANDOFF-20261118-K12-7.json",
+  "prior_handoff_sha256": "bfb2bf91d2c61f12a5c3bad253de6fddcce334659b68683a134f0801e8ebb5cf",
+  "prior_handoff_exact_bytes_preserved": true,
   "source_contract": {
+    "teacher_high_rules_and_permissions_retained": true,
     "teaching_model_or_budget_changed": false,
-    "original_bank_database_modified": false,
-    "classification_repairs_require_exact_original_labels": true,
-    "unconfirmed_grade_units": 11140,
     "existing_17_exact_source_isolations_retained": true,
+    "unconfirmed_grade_units": 11140,
     "prepared_picture_bindings": 294,
-    "no_claim_all_bank_answers_reviewed": true
+    "no_claim_all_bank_answers_reviewed": true,
+    "new_oral_or_semantic_research_or_grade_reclassification_included": false
   },
-  "inherited_local_learning_checks": {
-    "historical_not_rerun_this_batch": true,
-    "checks": {
-      "status": "candidate_checks_passed_pending_desktop_release",
-      "prior_source_commit": "f6bc7a8f8c104b29ec51e57649f9336fdd1b99d9",
-      "backend_regressions": 240,
-      "frontend_regressions": 74,
-      "native_engine_unit_tests": 32,
-      "web_typecheck": "passed",
-      "frontend_contracts": "passed",
-      "browser_viewports": [
-        320,
-        390,
-        1024,
-        1680
-      ],
-      "real_model_pair": {
-        "teacher_history_settings_and_budget_identical": true,
-        "wire_sha256_except_source": "a313743700c8983ac10919f1836b102602717abc94a841d4d9da95f6c0fbdd4e",
-        "model": "deepseek-flash",
-        "reasoning_effort": "high",
-        "output_budget": 65536,
-        "no_reference_first_content_s": 7.022506819921546,
-        "reference_first_content_s": 3.121013568015769,
-        "reference_lookup_cold_s": 0.34997831599321216,
-        "reference_complete_s": 4.242045585997403,
-        "source_and_full_question_manually_reviewed": true,
-        "whole_bank_quality_or_speed_claim": false
-      },
-      "all_real_model_HTTP_posts_this_task": 3,
-      "preflight_failures_with_zero_posts": 2,
-      "source_classifications": {
-        "sources_updated": 219,
-        "conflicting_sources_unchanged": [],
-        "subject_rows_recovered": 5448,
-        "grade_rows_recovered": 2753,
-        "remaining_unclassified_subject_rows": 0,
-        "remaining_unclassified_grade_rows": 11140
-      },
-      "classifications_sha256": "aa8f06ba8e60138dff44d76a96af01ca4b78296cdd21c3d78eb44a5e5205b00a",
-      "formal_profile_modified": false,
-      "original_bank_database_modified": false,
-      "released": false,
-      "scope": "source candidate evidence; published status determined by PUBLICATION-RECEIPT and CURRENT"
-    }
+  "current_frozen_source_checks": {
+    "feature_groups": [
+      "当前聊天打开教材，保留聊天、项目与阅读位置",
+      "资料入口统一教材库／题库／长期资料三类",
+      "引用资料、原页或原题及淡蓝色可跳转来源",
+      "关联任务保存后轻提示，不自动展开右栏",
+      "仅七项显示偏好安全恢复，保留账号、API、规则和学习数据",
+      "关于显示正在运行的完整构建号及翻译适配"
+    ],
+    "same_frozen_source": "9102686f43bff7162d3724abb86957ec6d644294",
+    "backend_tests": 527,
+    "frontend_tests": 282,
+    "actual_component_preview_viewports": 11,
+    "typecheck": "passed",
+    "scope": "六项功能的组合服务／组件预览；三端native另核新装、四历史更新、原图／公式／三类库及记录保留，不外推每项实际学生设备／真实模型交互。",
+    "all_existing_lint_clean": false,
+    "new_lint_errors": 0,
+    "excluded_research": [
+      "新口语功能",
+      "独立语义检索规则或学习年级重分类"
+    ]
   },
   "native_acceptance": {
     "windows-x64": {
-      "run_id": 44230306905,
-      "workflow_commit": "0738e1ac8cfbfddb9123d097bc90598abf5827fb",
-      "job_id": 134553415721,
+      "run_id": 44285382021,
+      "job_id": 134736575513,
+      "workflow_commit": "daaa73733855075857e89e833712d5568a459ddb",
       "status": "completed",
       "conclusion": "success",
       "independent_artifact_verified": true,
       "acceptance_kind": "original_native_matrix",
-      "scenarios_rerun_for_publication": false
-    },
-    "macos-arm64": {
-      "run_id": 44230306905,
-      "workflow_commit": "0738e1ac8cfbfddb9123d097bc90598abf5827fb",
-      "job_id": 134553416233,
-      "status": "completed",
-      "conclusion": "success",
-      "independent_artifact_verified": true,
-      "acceptance_kind": "original_native_matrix",
-      "scenarios_rerun_for_publication": false
+      "independent_receipt": "evidence/native8-windows-independent/VERIFICATION.json",
+      "independent_receipt_sha256": "2fdd40553c985e36ed88259fdf124c64838fdf4b56e9513fed225688f0764758",
+      "native_proof_sha256": "4548982c96843304647b4bdfac89e4d108567726e503fc90798ad97fe49246c4",
+      "fresh_and_all_four_update_paths_verified": true,
+      "physical_student_device_tested": false
     },
     "macos-x64": {
-      "run_id": 44264227072,
-      "workflow_commit": "b089fc010c53dfed3e429014a95cda8e12d0359a",
-      "job_id": 134664667172,
+      "run_id": 44285382021,
+      "job_id": 134736575942,
+      "workflow_commit": "daaa73733855075857e89e833712d5568a459ddb",
       "status": "completed",
       "conclusion": "success",
       "independent_artifact_verified": true,
-      "acceptance_kind": "exact_completed_native_source_plus_separate_actual_native_postflight",
-      "source_native_run": 44248561243,
-      "source_native_job": 134613361890,
-      "source_native_workflow_commit": "7a7c7e0d26f1796f35f606afe42eaa8c31599db6",
-      "source_native_outer_conclusion": "failure",
-      "four_source_update_entries_completed": true,
-      "four_source_update_entries_rerun_in_postflight": false,
-      "final_postchecks_completed": true,
-      "provenance": {
-        "verification_run": 44264227072,
-        "workflow_commit": "b089fc010c53dfed3e429014a95cda8e12d0359a",
-        "source_native_run": 44248561243,
-        "source_native_job": 134613361890,
-        "source_native_workflow_commit": "7a7c7e0d26f1796f35f606afe42eaa8c31599db6",
-        "postcheck_run": 44264227072,
-        "postcheck_workflow_commit": "b089fc010c53dfed3e429014a95cda8e12d0359a",
-        "complete_native_execution": {
-          "id": 14407657263,
-          "bytes": 13410126,
-          "sha256": "dc967707d98461e1840c80447904446067c4125d7dcabdf95994b61155cc388b",
-          "run_id": 44248561243,
-          "workflow_commit": "7a7c7e0d26f1796f35f606afe42eaa8c31599db6",
-          "job_id": 134613361890,
-          "source_lock_sha256": "7116479c7e4b3ceba3e5222258f8e2ff91eaf6f4f8dac990cd127e26174bfe97"
-        },
-        "original_failed_run": 44230306905,
-        "original_failed_job": 134553415977,
-        "original_stage_run": 44230306905,
-        "original_stage_workflow_commit": "0738e1ac8cfbfddb9123d097bc90598abf5827fb",
-        "frozen_stage_sha256": "10b18b0ea3d584feb4b8362e47bf590adaa06db054fe2513ebec89719b21871b",
-        "reuse_lock_file": "intel-k12-7-reuse-lock.json",
-        "reuse_lock_sha256": "7116479c7e4b3ceba3e5222258f8e2ff91eaf6f4f8dac990cd127e26174bfe97",
-        "finalization_lock_file": "intel7-finalization-lock.json",
-        "finalization_lock_sha256": "4f8e75b1202f605ec751da506dfbb32aac537ea5b32c0b2d9efe433127bd4926",
-        "bridge_rebuilt": false,
-        "installers_repackaged": false,
-        "existing_assets_overwritten": false,
-        "fresh_smoke_rerun": false,
-        "proxy_smoke_rerun": false,
-        "oldest_and_current_ipc_rerun": false,
-        "fresh_picture_ui_rerun": false,
-        "materials_both_variants_rerun": false,
-        "complete_native_records_reverified": true,
-        "production_launcher_byte_identical": true,
-        "existing_asset_metadata_before_after_unchanged": true,
-        "final_postchecks_completed": true
-      },
-      "postflight": {
-        "passed": true,
-        "source_artifact_sha256": "dc967707d98461e1840c80447904446067c4125d7dcabdf95994b61155cc388b",
-        "signed_stage_sha256": "10b18b0ea3d584feb4b8362e47bf590adaa06db054fe2513ebec89719b21871b",
-        "production_launcher_files_verified": 24,
-        "production_codesign_deep_strict_passed": true,
-        "immutable_assets_verified": 76,
-        "public_installer_files_verified": 5,
-        "signed_runtime_manifests_verified": 45,
-        "installation_scope": "Anonymous final Intel7 split-image bytes mounted and copied into a new temporary App; completed native scenarios were not rerun"
-      }
+      "acceptance_kind": "original_native_matrix",
+      "independent_receipt": "evidence/native8-intel-independent/VERIFICATION.json",
+      "independent_receipt_sha256": "4e639a29b4571bfaf373019a9e6dd4b80fcf2395b723a5cb3d2caa0f56c56c85",
+      "native_proof_sha256": "41194115d4192ff04dcfad7cac902a6d86d59e4f7b4d68dd098bc843e595e146",
+      "fresh_and_all_four_update_paths_verified": true,
+      "physical_student_device_tested": false
+    },
+    "macos-arm64": {
+      "run_id": 44291420363,
+      "job_id": 134757306286,
+      "workflow_commit": "9c526952ba253b6228a37ec810c798531288f694",
+      "status": "completed",
+      "conclusion": "success",
+      "independent_artifact_verified": true,
+      "acceptance_kind": "same_frozen_ARM8_assets_exact_original_health_exception_plus_fresh_and_all_four_paths",
+      "independent_receipt": "evidence/native8-arm-independent/INDEPENDENT-VERIFIED.json",
+      "independent_receipt_sha256": "ab92fa69d871e9fbc4627f42c0008d10fdfb2c949afbe1b4bea9edfb25cc14f8",
+      "native_proof_sha256": "d12dd9f8ddff3392c18867312906e27f2c5bb0493efd3aee980ecc73b4467f48",
+      "fresh_and_all_four_update_paths_verified": true,
+      "physical_student_device_tested": false
     }
   },
+  "native_update_scenarios_per_platform": [
+    "current_launcher",
+    "oldest_launcher",
+    "materials_runtime_unified_launcher",
+    "materials_runtime_oldest_launcher"
+  ],
+  "qa_acceptance_exceptions": {
+    "macos-arm64": {
+      "kind": "explicit_user_acceptance_exact_original_ARM8_sample",
+      "target": "macos-arm64",
+      "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
+      "core_sha256": "ad637c748061b639e9c984437e3439a3d82b8e0ecb0d86ac33ad002e11443728",
+      "original_run_id": 44285382021,
+      "original_job_id": 134736575809,
+      "original_workflow_commit": "daaa73733855075857e89e833712d5568a459ddb",
+      "acceptance_receipt_sha256": "5b8c3e0b6195b7c93e28f6e221431f2eb21995971c370c48bb2c7e6fe889b2e4",
+      "original_artifact_sha256": "6e662271d641b1766a00812b279490977a7a628e01bc134b7cad7231aa5acb39",
+      "original_default_health_limit_seconds": 5,
+      "original_health_max_seconds": 5.248,
+      "original_health_gate_passed": false,
+      "user_accepted_original_sample": true,
+      "original_attachment_functional_scenario_reused": true,
+      "attachment_scenario_rerun_in_new_profile": false,
+      "remaining_checks_completed_by_this_receipt": false,
+      "model_wait_exception": false
+    }
+  },
+  "original_failed_native": {
+    "run_id": 44285382021,
+    "job_id": 134736575809,
+    "workflow_commit": "daaa73733855075857e89e833712d5568a459ddb",
+    "conclusion": "failure",
+    "not_relabelled_as_success": true
+  },
+  "same_frozen_assets_in_successful_continuation": true,
+  "remaining_fresh_and_all_four_paths_completed_in_ARM_continuation": true,
+  "original_attachment_scenario_rerun_in_new_profile": false,
+  "native_qa_paid_model_calls": 0,
+  "physical_student_devices_all_tested": false,
   "public_readback": {
     "passed": true,
-    "release": "student-20261117-k12-7",
-    "release_id": 449471487,
-    "publication_run": 44268937990,
-    "workflow_commit": "794611acfc98f14ae5d72675e05d48238b1c83f6",
-    "independent_receipt": "POST-PUBLISH-VERIFIED.json",
-    "independent_receipt_sha256": "4c6c31a170bb9a50aff60c2d4becc0ea0f8ab3d8eb1315146a93eeee7427aebb",
-    "independent_receipt_bytes": 25630,
-    "anonymous_signed_manifests": 45,
+    "release": "student-20261117-k12-8",
+    "release_id": 449810016,
     "same_frozen_stage": true,
-    "signature_verified_manifests": 45,
-    "full_installation_files_verified_by_native_sha_metadata": 14,
-    "archive_downloads_anonymously_completed_in_publication_ci": 4,
-    "independent_large_archive_downloads_repeated": 0,
-    "intel_source_and_postcheck_provenance_preserved": true,
     "publication_receipt_matches_ci_artifact": true,
     "transaction_status": "published_and_receipt_verified",
-    "transaction_sha256": "3a62ba05454969e2072f889e5f89e99d73990755112a5598aa3ecf141b97f401"
+    "anonymous_signed_manifests": 48,
+    "signature_verified_manifests": 48,
+    "full_installation_files_verified_by_native_sha_metadata": 14,
+    "three_previous_defaults_retained": true,
+    "independent_verification_receipt_sha256": "16510b1cc7905256327a746e4ad1c6ef77a13b1f750ffc06a19e15726d31bd96"
   },
+  "publication_run": 44309897606,
+  "publication_job": 134821005157,
+  "publication_workflow_commit": "ab3e162f0be15248f9e53d2f511c4e328c192c00",
+  "publication_workflow_tree": "7337aab2c89a5badcfbd0d999a4d8fefd5047e12",
+  "publication_receipt_sha256": "9e01dce3e3c5c7ecff6d1a5eda1eda45e7ff46f3e1de9b57c188aa99401d9594",
+  "publication_receipt_bytes": 1947581,
   "actual_local_desktop_check_update": {
-    "checked_at_utc": "2026-11-18T09:08:38.740653+00:00",
+    "checked_at_utc": "2026-11-18T13:27:00.378561+00:00",
+    "status": "actual_normal_public_GUI_update_and_preservation_verified",
+    "passed": true,
+    "tag": "student-20261117-k12-8",
+    "from_tag": "student-20261117-k12-7",
+    "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
+    "launcher_build": "20261118-updater-4",
+    "core_runtime": "1.7.1-kaixin-20261117-k12-8-macos-x64-base-c41831772671",
+    "core_payload_sha256": "ad637c748061b639e9c984437e3439a3d82b8e0ecb0d86ac33ad002e11443728",
+    "native_about_full_build": "1.7.1-kaixin-20261117-k12-8-macos-x64-base-c41831772671",
     "normal_public_feed": true,
     "test_feed": false,
     "manual_core": false,
-    "pid_before": 39018,
-    "pid_after_reopen": 57008,
-    "reopen_via_existing_visible_button": "重新打开完成更新",
-    "core_runtime": "1.7.1-kaixin-20261117-k12-7-macos-x64-base-c41831772671",
-    "source_commit": "fbb301fd21cf2169f834e0b548d56d201cc98365",
-    "launcher_build": "20261118-updater-4",
-    "launcher_signed_files_exact_match": 24,
-    "codesign_deep_strict": true,
-    "native_core_menu_check": {
-      "result": "已是最新版本",
-      "genuine_ui": true
-    },
-    "settings_about_check": {
-      "result": "已是最新版本",
-      "genuine_ui": true
-    },
-    "normal_quit_reopen": {
-      "normal_quit": {
-        "normal_native_quit_menu": true,
-        "forced_termination_used": false,
-        "main_pid": 57008,
-        "original_descendant_count": 8,
-        "elapsed_seconds": 1.442,
-        "remaining_original_pids": [],
-        "passed": true,
-        "observed_at": "2026-11-18T09:07:24.659819+00:00"
-      },
-      "reopen": {
-        "main_pid": 57502,
-        "active_core_same": true,
-        "launcher_status": "current"
-      }
-    },
-    "preservation": {
-      "passed": true,
-      "databases": 11,
-      "settings": 19,
-      "all_previous_rows_retained": true,
-      "reading_json_exact_sha_preserved": 285,
-      "library_original_metadata_sqlite_exact_sha_preserved": true,
-      "notes_and_mistakes_files_exact_sha_preserved": 19,
-      "voice_credential_files_exact_sha_preserved": 3,
-      "private_contents_uploaded": false
-    },
-    "native_about_full_build": "1.7.1-kaixin-20261117-k12-7-macos-x64-base-c41831772671",
-    "passed": true,
-    "status": "completed_success_actual_mac",
-    "tag": "student-20261117-k12-7",
-    "from_tag": "student-20261117-k12-4",
     "entry": "设置 → 关于 → 检查更新",
-    "downloaded_core_bytes": 837565146,
-    "core_payload_sha256": "4c37b944c868861ebaee446d86c94d7d045c3d81224dcee5eeb3b8876deff892",
+    "downloaded_core_bytes": 837620474,
+    "pid_before": 90008,
+    "pid_after_core_switch": 90008,
+    "pid_after_reopen": 91685,
+    "signed_launcher_restarted": false,
+    "forced_termination_used": false,
+    "launcher_files_sha256_verified": 24,
+    "codesign_deep_strict": true,
+    "settings_about_entry_tested": true,
+    "native_menu_entry_tested": true,
+    "settings_about_check_again_current": true,
+    "native_menu_check_again_current": true,
+    "normal_exit_and_reopen_verified": true,
+    "pending_owner_checks": [],
+    "paid_model_calls": 0,
+    "physical_student_devices_all_tested": false,
     "download_and_install_flow": {
       "entry": "设置 → 关于 → 检查更新",
       "normal_public_feed": true,
-      "downloaded_core_bytes": 837565146,
-      "from_tag": "student-20261117-k12-4",
-      "to_tag": "student-20261117-k12-7",
-      "active_core_commit": "fbb301fd21cf2169f834e0b548d56d201cc98365",
-      "existing_reopen_button": "重新打开完成更新",
-      "pid_before": 39018,
-      "pid_after_reopen": 57008
+      "downloaded_core_bytes": 837620474,
+      "from_tag": "student-20261117-k12-7",
+      "to_tag": "student-20261117-k12-8",
+      "active_core_commit": "9102686f43bff7162d3724abb86957ec6d644294",
+      "existing_reopen_button": null,
+      "pid_before": 90008,
+      "pid_after_core_switch": 90008,
+      "pid_after_reopen": 91685
     },
     "post_update_entry_checks": {
       "native_core_menu": {
@@ -250,12 +206,6 @@
         "genuine_ui": true
       }
     },
-    "settings_about_entry_tested": true,
-    "native_menu_entry_tested": true,
-    "settings_about_check_again_current": true,
-    "native_menu_check_again_current": true,
-    "launcher_files_sha256_verified": 24,
-    "normal_exit_and_reopen_verified": true,
     "data_preservation": {
       "passed": true,
       "databases": 11,
@@ -267,64 +217,92 @@
       "voice_credential_files_exact_sha_preserved": 3,
       "private_contents_uploaded": false
     },
+    "normal_quit_reopen": {
+      "normal_quit": {
+        "normal_native_quit_menu": true,
+        "forced_termination_used": false,
+        "main_pid": 90008,
+        "original_descendant_count": 8,
+        "elapsed_seconds": 0.833,
+        "remaining_original_pids": [],
+        "passed": true,
+        "observed_at": "2026-11-18T13:25:23.723694+00:00"
+      },
+      "reopen": {
+        "main_pid": 91685,
+        "active_core_same": true,
+        "launcher_status": "current"
+      }
+    },
     "final_actual_local_receipt": {
+      "sha256": "f7d3148f7bdb83ef7d1b1e31b53f7c33023d73498341d552d6acd7a99ddc6c18",
+      "bytes": 2228,
       "file": "ACTUAL-UPDATE-RESULT.json",
-      "sha256": "c6b659b9f9f00449751d49bb168c3b12335f06f375973dd2497f3049748a0206",
-      "bytes": 1651
+      "private_receipt_contents_not_uploaded": true
     },
     "preservation_receipt": {
-      "file": "PRESERVATION.json",
       "sha256": "61d5dd3a365ba99e1b5a61818bb920c7269281d54d3c5e8f091053da53f731a1",
-      "bytes": 346
+      "bytes": 346,
+      "file": "PRESERVATION.json",
+      "private_receipt_contents_not_uploaded": true
     },
-    "pending_owner_checks": [],
-    "paid_model_calls": 0,
-    "physical_student_devices_all_tested": false
+    "public_summary_scope": "Actual update aggregate facts only; no private baselines, settings values, keys, messages, attachments, screenshots or backup contents."
   },
-  "publication": {
-    "run": 44268937990,
-    "commit": "794611acfc98f14ae5d72675e05d48238b1c83f6",
-    "receipt_sha256": "4b72999617c64d34c33363f57c273cae7e8a0de8ffd4b0fb9bf5eb0691c74d9b"
+  "actual_local_public_file": "LOCAL-ACTUAL-UPDATE-20261118-K12-8.json",
+  "actual_local_public_file_sha256": "b52b49b6ff29e7ec8616738eac4603ad0e49bfd37add3ffdb99a976aa8b91979",
+  "actual_local_public_file_bytes": 3423,
+  "model_comparison": {
+    "actual_posts": 5,
+    "complete_comparable_pairs": 0,
+    "population_quality_or_speed_claim": false,
+    "single_reference_math_case_correct": true,
+    "single_case_first_teaching_seconds_approx": 114,
+    "single_case_complete_seconds_approx": 131.5,
+    "single_case_reasoning_seconds_approx": 106,
+    "extra_reference_wait_under_5_seconds_verified": false,
+    "source_of_result": "isolated production-stage diagnostic; not a two-arm population comparison",
+    "default_model_or_output_budget_changed": false
   },
-  "usb_updated": false,
-  "usb_status": "old4_retained_pending_next_qualified_rollup_single_replacement",
-  "private_key_uploaded": false,
-  "not_a_publication_receipt": false,
-  "picture_display_scope": {
-    "native_pages": {
-      "manifest_sha256": "91631719fe6e228a0b580d469a15943bb5ba80828f5114ea10e731dcd598da0a",
-      "records": 6915,
-      "pdfs": 698,
-      "total_bytes": 295359867,
-      "pdf_bytes": 289848249,
-      "manifest_bytes": 5511618,
-      "ui_fixture": {
-        "qualified_id": "math:q_e9dd00ffa1178d29b41fadb4_2",
-        "bank_revision": "26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee",
-        "native": {
-          "url": "/api/student/question-bank/native/math%3Aq_e9dd00ffa1178d29b41fadb4_2?revision=26065ed727a40eab0e29711fd52c00233848e5cd2dd0baabd7f20fff2700c4ee&sha256=7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
-          "sha256": "7e62b32d0c7bd3105dad9e5bbeffd361dc4f39be8e4c77eddf0cdaddd98d99cf",
-          "bytes": 161962,
-          "page_count": 3,
-          "start_page": 1,
-          "end_page": 1,
-          "kind": "student-word-pages"
-        }
-      },
-      "total_pages": 3888,
-      "records_are_not_all_individual_question_crops": true
+  "usb_delivery": {
+    "updated_for_this_release": false,
+    "completed": false,
+    "tag": "student-20261117-k12-8",
+    "previous_delivered_tag": "student-20261117-k12-4",
+    "installation_directory": "开心动力超级学霸安装包/2026-11-17-最新版",
+    "old_installers_removed": false,
+    "existing_old_batch_retained": true,
+    "replacement_status": "deferred_waiting_original_USB_reconnection",
+    "reason": "用户急用已正常推出原盘；尚未写8或删除旧4／新增资料。交付授权持续有效，重接后核UUID、新资料和空间，全部准备与回读后一次替换。下一批不更新U盘。"
+  },
+  "source_vs_recipe_roles": {
+    "source_commit_is_public_recipe_checkout_ref": false,
+    "published_export_file_count": 5952,
+    "original_tracked_file_count": 5958,
+    "intentionally_isolated": 6,
+    "aggregate_sha256": "cba8b13579c620d2fd373b120b926f086f206a9deed0d52834a48b135408fdd1",
+    "final_thin_recipe_tree_files": 535,
+    "thin_recipe_does_not_claim_complete_source_checkout_or_raw_bank": true,
+    "source_reconstruction_file": "SOURCE-RECONSTRUCTION.json"
+  },
+  "publication_attempt_history": [
+    {
+      "run_id": 44306705350,
+      "conclusion": "failure",
+      "phase": "preflight",
+      "cause": "QA hardcoded Mac Node path",
+      "promotion_started": false
     },
-    "native_pages_are_not_all_individual_question_crops": true,
-    "prepared_picture_bindings_retained": 294,
-    "complete_native_acceptance": true,
-    "acceptance_scope": "Representative native scene/API and source integrity checks; not every record independently solved or academic-answer reviewed"
-  },
-  "unpublished_next_rollup": [
-    "chat-in-place reading routes",
-    "three material shelves",
-    "catalog references",
-    "task inline status",
-    "restore UI preferences",
-    "actual installed-build display"
+    {
+      "run_id": 44308626453,
+      "job_id": 134816627621,
+      "conclusion": "failure",
+      "phase": "early_publisher_guard",
+      "cause": "prepared publication versus native batch schema: KeyError core_asset",
+      "promotion_started": false
+    }
+  ],
+  "recorded_at_utc": "2026-11-18T13:27:55.352516+00:00",
+  "pending_finalization": [
+    "USB safely ejected; authorized delivery waits reconnection, protects additional files and requires whole-batch checksum before old4 removal"
   ]
 }
