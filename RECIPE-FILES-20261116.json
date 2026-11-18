@@ -5,14 +5,19 @@
     "sha256": "58fb8991556d80c24a7ea93593b4c8d3764e0c2d79b12f1ee18ba3264d5394cf"
   },
   {
+    "file": ".github/workflows/attachment-native-arm8-continue.yml",
+    "bytes": 4289,
+    "sha256": "b0c28159f92dc411d9108db092052bd313159f6c83cb70236d251d298ad80504"
+  },
+  {
     "file": ".github/workflows/attachment-native.yml",
     "bytes": 3361,
     "sha256": "aec28dc1b0205862b185a962e9203069739b752151ad0f8f3e4d81e9b1e88143"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 2312,
-    "sha256": "8bc4bfe2aa3bb50c36cefb02d03df5ac3a5503ead24906c4aeee763c4296a1b2"
+    "bytes": 2344,
+    "sha256": "2e384b657e0dc2a380060e73f1afa5345a9819f4ab301682e52d661d5f84021d"
   },
   {
     "file": ".github/workflows/k12-existing5-reverify.yml",
@@ -41,18 +46,33 @@
   },
   {
     "file": "CURRENT-DESKTOP-RELEASE.json",
-    "bytes": 84221,
-    "sha256": "bb6c157ce56a4490b5cd1ca5bb9451670ecb774f7dde8b4745dee51e4fc10170"
+    "bytes": 100470,
+    "sha256": "1f9a3a73d57eb6d6fd817a0c73520ce05ccab6f483c2a379653670c93c4f874a"
+  },
+  {
+    "file": "INSTALL-LATEST.md",
+    "bytes": 5717,
+    "sha256": "ba33bf7221564c13ae343ec21d62ebd934278ead868954ad2ee450c9627ec3de"
   },
   {
     "file": "INSTALLATION.txt",
-    "bytes": 5374,
-    "sha256": "86853ed89ef9ae17dd37f73508567bbaf608bee055fbdf4941a46e7be116180e"
+    "bytes": 3560,
+    "sha256": "571547af758ca08d8aa40e923282caa5b48498ca01a140cdb560ade49b608041"
   },
   {
     "file": "LOCAL-ACTUAL-UPDATE-20261117.json",
     "bytes": 1677,
     "sha256": "8fa1b73d1508db92a4396561801103515ad62f72312eff151dade8a4180fa83f"
+  },
+  {
+    "file": "LOCAL-ACTUAL-UPDATE-20261118-K12-8.json",
+    "bytes": 3423,
+    "sha256": "b52b49b6ff29e7ec8616738eac4603ad0e49bfd37add3ffdb99a976aa8b91979"
+  },
+  {
+    "file": "LOCAL-ACTUAL-UPDATE-20261118.json",
+    "bytes": 3687,
+    "sha256": "1dcb1a07f87b9b721baeea3a31d1284168c17e74af0eb492f10994e47f87a2e5"
   },
   {
     "file": "PICTURE-QUESTION-20261117.md",
@@ -61,8 +81,23 @@
   },
   {
     "file": "POST-PUBLISH-VERIFIED.json",
-    "bytes": 25630,
-    "sha256": "4c6c31a170bb9a50aff60c2d4becc0ea0f8ab3d8eb1315146a93eeee7427aebb"
+    "bytes": 27309,
+    "sha256": "16510b1cc7905256327a746e4ad1c6ef77a13b1f750ffc06a19e15726d31bd96"
+  },
+  {
+    "file": "PUBLICATION-RECEIPT.json",
+    "bytes": 1947581,
+    "sha256": "9e01dce3e3c5c7ecff6d1a5eda1eda45e7ff46f3e1de9b57c188aa99401d9594"
+  },
+  {
+    "file": "PUBLICATION-TRANSACTION.json",
+    "bytes": 2181,
+    "sha256": "eae8c8deefffe6f9d7e257e69d4220beab247e5a7866cf16a61fe8fac130eef3"
+  },
+  {
+    "file": "README.md",
+    "bytes": 3679,
+    "sha256": "4c29bf855537f190c30137d855db36daf6e7ba1c430c6a2807121b51744e2213"
   },
   {
     "file": "RECIPE-HANDOFF-20261116.md",
@@ -76,13 +111,18 @@
   },
   {
     "file": "RELEASE-NOTES.md",
-    "bytes": 1870,
-    "sha256": "00502825e03327133fafeffbaec95c0552fc9abd86a78dd6bb6355d6897fea4f"
+    "bytes": 2785,
+    "sha256": "d791a1c8eeaea4139b7307daf4dec8e8cbf057b07a3d2774a724b49e1727bf7c"
+  },
+  {
+    "file": "SOURCE-RECONSTRUCTION.json",
+    "bytes": 6835,
+    "sha256": "5c789cae0592a5cf6d6c8197c8af1535ef7adeb3fda1d4a224f21f7acd8b4a25"
   },
   {
     "file": "SOURCE-TEST-HANDOFF.json",
-    "bytes": 13987,
-    "sha256": "bfb2bf91d2c61f12a5c3bad253de6fddcce334659b68683a134f0801e8ebb5cf"
+    "bytes": 13886,
+    "sha256": "64d4bec26d86272dbd8199e281822c0e48cdab15a41a925317dae26081217282"
   },
   {
     "file": "VERIFICATION-QUESTION-PICTURES-20261117.json",
@@ -97,37 +137,37 @@
   {
     "file": "attachment-batch.json",
     "bytes": 8174,
-    "sha256": "24e8ba0f15fe04467812a7752d6f7a57242f8665971752b6c1d05e12e4f3652c"
+    "sha256": "b6e674efef09d7cde418347b7d3b87497a1514caa1e830cb2c6de566439b4096"
   },
   {
     "file": "attachment-publication.json",
-    "bytes": 50468,
-    "sha256": "c17e920be2ec8e18bef0ccdb90daaa96c9107f487b1066375ea5e0527806c184"
+    "bytes": 52772,
+    "sha256": "a98e560616be1cf33fd9cda87a701d8cac79c89b4a72bb76e8d5d3235c1a44ca"
   },
   {
     "file": "attachment-release.json",
-    "bytes": 4351,
-    "sha256": "40359855a5accc6ecf59e89722e6ef09d933e3181da1be128664043bef2ff98e"
+    "bytes": 4433,
+    "sha256": "f15707444e373d4416e319ee86ab0a47bbc2a19e463ab5268ab0dd8ee3812ffc"
   },
   {
     "file": "bootstrap_source.py",
-    "bytes": 2774,
-    "sha256": "743d6a95b359c5506452412a25e77fe0c9ce0c518e584c7f6cb84baab959c10b"
+    "bytes": 2873,
+    "sha256": "f7ae51bdc44471789ac02642620c3c9b4c60effd0b89168360857de686e7ba67"
   },
   {
     "file": "ci-attachment-core.py",
-    "bytes": 9147,
-    "sha256": "c701c65f0f42ccdbcfeed95b2481751851799fe37dfe70e9421c38a5df9a9272"
+    "bytes": 9243,
+    "sha256": "08d19a52964a2c1415eb08e7a56f0de95c6f673b6b294e5420a1a51034ce37e6"
   },
   {
     "file": "ci-fresh-install.py",
-    "bytes": 10705,
-    "sha256": "a5190f280fee10f45f92674daa4099c00be205dff23458afe1af307a9e2ba8f3"
+    "bytes": 11293,
+    "sha256": "2d6f3c7eb773f53e9cd0e7662b8db13a7f8c919caae0ba6fdd5cc4662ee90fe9"
   },
   {
     "file": "ci-fresh-smoke.mjs",
-    "bytes": 12126,
-    "sha256": "b79b3d45f6d5a05c813d7d34cc42d3384d4fa2f4996feead67ad2701f740b835"
+    "bytes": 12793,
+    "sha256": "9d599aca83b59f3ffd62315a9c2fe729abd628cc9f7cdfb8e6735ef006fecc9c"
   },
   {
     "file": "ci-intel-reuse.py",
@@ -145,9 +185,19 @@
     "sha256": "49f48e5bf6572abda8254220fc19cb270e138224290608f87f4632acec119ad9"
   },
   {
+    "file": "ci-k12-session-diagnostics-selfcheck.cjs",
+    "bytes": 8030,
+    "sha256": "36a124106827cc7b682670a7246d774cb4b89319ad1786181a48c7d3782b8de7"
+  },
+  {
     "file": "ci-mac-reuse.py",
     "bytes": 35767,
     "sha256": "e9c3f3b7e3e8ad1f35398b838ba5f50971d023662a204341a27faa19b3fbafdb"
+  },
+  {
+    "file": "ci-materials-navigation-selfcheck.cjs",
+    "bytes": 2998,
+    "sha256": "610ff9854e07e2519d2dfd02841c5bcf8746b68016733517c15dccd5253b2e26"
   },
   {
     "file": "ci-materials-ui.cjs",
@@ -161,8 +211,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 24062,
-    "sha256": "3bf010fd4649f138261d491a4196c0868d3e73f57516a3df1979cc2ea5f026c5"
+    "bytes": 24191,
+    "sha256": "5f43adcbb6728a7be00a2a0afdc0017ee82cc109845e2b4975bc0a1b0f6dfc31"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -173,6 +223,11 @@
     "file": "ci-stop-superseded.py",
     "bytes": 1153,
     "sha256": "c6bd2a142e9c4867b97a61b29a6e43360d7f1ac069ccb2a8c0b896a7b82e68ca"
+  },
+  {
+    "file": "ci-student-controls-navigation-selfcheck.cjs",
+    "bytes": 5134,
+    "sha256": "a852351152c967d2f714ea7677f2cdd8918d6b099d70250459e84ee87449aad8"
   },
   {
     "file": "ci-update-flow.backup-baseline.cjs",
@@ -200,14 +255,19 @@
     "sha256": "eda4482da18de622396e55166ce1a00138cb4cac7d9f842d318e4552056efbff"
   },
   {
+    "file": "ci_native8_health_acceptance.py",
+    "bytes": 7765,
+    "sha256": "a33409331d2e8f0e0ab0b7dd9c5edcb407c27eb2a15495dd27111ab33788eb29"
+  },
+  {
     "file": "ci_picture_fresh.py",
     "bytes": 5832,
     "sha256": "1d1eeeabce878947d88d9e61e473b672a77f5df03e71bf3b105c5252b991eedc"
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 11810,
-    "sha256": "fa3562a9b33416bf3b5f565373cb84f90a8c7839864ebd7e5f6496764168089d"
+    "bytes": 11983,
+    "sha256": "c182279b806dec8993d063a9e84f8eb349402e18ca41f677a33895011442a4ab"
   },
   {
     "file": "ci_update_probe.py",
@@ -320,9 +380,19 @@
     "sha256": "9400692a569514b88c222eac282086b8096f94e8d7fea6d4967959556f147bab"
   },
   {
+    "file": "fresh-install-lock-arm8-health.json",
+    "bytes": 5479,
+    "sha256": "878587bf6228f3cfff85816591f279e07a65e4cf2e8832e61c24acd4aa19ef51"
+  },
+  {
     "file": "fresh-install-lock.json",
     "bytes": 4058,
     "sha256": "543a48a8ecbe402775081bcd14619585c9f9ec48fbec3da67b51bebf22320ac9"
+  },
+  {
+    "file": "history/SOURCE-TEST-HANDOFF-20261118-K12-7.json",
+    "bytes": 13987,
+    "sha256": "bfb2bf91d2c61f12a5c3bad253de6fddcce334659b68683a134f0801e8ebb5cf"
   },
   {
     "file": "intel-k12-4-reuse-lock.json",
@@ -335,9 +405,19 @@
     "sha256": "e7cdebe0cfafcb26370044e6cf5d3e1ca2bd02b134e9fe05dff5aedf1c852faa"
   },
   {
+    "file": "intel7-complete-source-inputs.json",
+    "bytes": 7240701,
+    "sha256": "77b8762d96c8e787a8ea73aeaf253475f2d25510cb90d8d2e0959bc7fbf9b119"
+  },
+  {
     "file": "launcher-changes-20261117.json",
-    "bytes": 3,
-    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    "bytes": 201,
+    "sha256": "2d582f185f06d71a2cec93e2747a9238fac312638d03bac7a1489e4b5c331c3f"
+  },
+  {
+    "file": "launcher-manifest.json",
+    "bytes": 3918,
+    "sha256": "bbbe9da7ae918cf09d141a660e71d2985887b6eee3783c024a516285d9ff9818"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -475,6 +555,26 @@
     "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
   },
   {
+    "file": "native8-arm-candidate-files.json",
+    "bytes": 2355,
+    "sha256": "c5c0dddc9fd472c6c7a3287ca3fc64d33cf39ebb34a32921d9ba84ed2623c82a"
+  },
+  {
+    "file": "native8-arm-health-acceptance.json",
+    "bytes": 2732,
+    "sha256": "5b8c3e0b6195b7c93e28f6e221431f2eb21995971c370c48bb2c7e6fe889b2e4"
+  },
+  {
+    "file": "native8-arm-health-original.zip",
+    "bytes": 10539,
+    "sha256": "6e662271d641b1766a00812b279490977a7a628e01bc134b7cad7231aa5acb39"
+  },
+  {
+    "file": "native8_health_publication.py",
+    "bytes": 3995,
+    "sha256": "f4433c53bb70e18afc04ffb2aeb01ab7c2ad936beb948132908f40bf09bf1554"
+  },
+  {
     "file": "partial-entry-fixtures/oldest-update-entry.json",
     "bytes": 95767,
     "sha256": "694a7e8d525ff7c6a4d665d6ce65318d25d0512e8c95e5ca339b823c508c17f6"
@@ -516,8 +616,8 @@
   },
   {
     "file": "prior-launcher-fingerprint.json",
-    "bytes": 2697,
-    "sha256": "281633366f57b8e2e39af79e65c50f2d9e0ed54c7238735e3e0f828ab9ca3a06"
+    "bytes": 3149,
+    "sha256": "1c61de3d3ab406a060bac3886fd477e62494e0bb51ab7172f04cbf14fe2d99de"
   },
   {
     "file": "progress-read-selfcheck.cjs",
@@ -540,6 +640,36 @@
     "sha256": "eee2e3ab58bb52be2409d14a49fe84fd89832420c672ebd95f69f8e3c0a582b2"
   },
   {
+    "file": "runtime-source-manifest.json",
+    "bytes": 626774,
+    "sha256": "b81938dfb09d6725c3288006be89e4f51cf11fd2dea35fc7fd67bfe2a54ac20f"
+  },
+  {
+    "file": "source-delta-k12-10.001",
+    "bytes": 524288,
+    "sha256": "5195d66374c931767a723fac26be031cb4c54c2030cc2c3c9b64eea625fb01e4"
+  },
+  {
+    "file": "source-delta-k12-10.002",
+    "bytes": 524288,
+    "sha256": "d898369769e01e791db139bc51c37feb6a7075e7a47dae1dfcfde6ec000e0c8f"
+  },
+  {
+    "file": "source-delta-k12-10.003",
+    "bytes": 148211,
+    "sha256": "613f0738ee9416d8d9f37ecf474f82d066057cc82d71bbcb172efbdd28914e77"
+  },
+  {
+    "file": "source-inventory-k12-10.json",
+    "bytes": 1276272,
+    "sha256": "b286edbabb706901fee82f365a4b8906f8346d4262cd40a62ffe8e54c87fdb14"
+  },
+  {
+    "file": "source-manifest.json",
+    "bytes": 44941,
+    "sha256": "ca3b2d4bcb9cf37c79110565a8e42662c68e464fb523b44f6ea2ea2b3d22a18c"
+  },
+  {
     "file": "test-connector-upload.cjs",
     "bytes": 4994,
     "sha256": "4e9c50fc1f4c1d5274de1c5c06b33686ea04a1b5feec13cdbeb839220dbaad9f"
@@ -548,6 +678,11 @@
     "file": "test_installer_segments.py",
     "bytes": 1492,
     "sha256": "cd2a94f259afcfc5ed63b5d90a6a59e2fc0231f33259aaac9cb91bc71360bdee"
+  },
+  {
+    "file": "test_intel7_finalization.py",
+    "bytes": 23708,
+    "sha256": "aa9d422a4957e2bd95f303e023bc4437bf3b17217536e7463bfc0204d8999073"
   },
   {
     "file": "test_intel_reuse.py",
@@ -563,6 +698,16 @@
     "file": "test_materials_upgrade.py",
     "bytes": 2245,
     "sha256": "6bab1a60dae908fbbafb80aba6bc1bbec1cc5505b03ad2fcbf4ed27879053719"
+  },
+  {
+    "file": "test_native8_health_acceptance.py",
+    "bytes": 4984,
+    "sha256": "fe15875196a8a54ef8f057e52e12b646c614922f7769c9c283ce06e09a61dfc3"
+  },
+  {
+    "file": "test_native8_health_publication.py",
+    "bytes": 12584,
+    "sha256": "9d3b816a58654a7de6e247fa14f91778425c1a176bd1679de51fd26cefb9c32e"
   },
   {
     "file": "test_native_entry_artifacts.py",
@@ -595,9 +740,14 @@
     "sha256": "ce6ceafa874db0fe20a2a2e2f9c043c569f6bbafad69d55f6b0e3e2ad3b20d48"
   },
   {
+    "file": "test_publication_source_binding.py",
+    "bytes": 3333,
+    "sha256": "0bbac92016c213dc64816a748dc301f049dd5f2c253b2eae2c8f26726ea0028f"
+  },
+  {
     "file": "test_publication_transaction.py",
-    "bytes": 11450,
-    "sha256": "a18296f7d4551f379e036fdba4187089d86826aace3c64ec43e9903cf3ab26d6"
+    "bytes": 11750,
+    "sha256": "0cea463a012b9a8c426131171bf60a0e9552800fd7ff06d7b91bc93c571b6856"
   },
   {
     "file": "test_recovery_publication_gate.py",
@@ -633,30 +783,5 @@
     "file": "windows-k12-4-reuse-lock.json",
     "bytes": 49564,
     "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
-  },
-  {
-    "file": "LOCAL-ACTUAL-UPDATE-20261118.json",
-    "bytes": 3687,
-    "sha256": "1dcb1a07f87b9b721baeea3a31d1284168c17e74af0eb492f10994e47f87a2e5"
-  },
-  {
-    "file": "ci-student-controls-navigation-selfcheck.cjs",
-    "bytes": 5134,
-    "sha256": "a852351152c967d2f714ea7677f2cdd8918d6b099d70250459e84ee87449aad8"
-  },
-  {
-    "file": "test_publication_source_binding.py",
-    "bytes": 3333,
-    "sha256": "0bbac92016c213dc64816a748dc301f049dd5f2c253b2eae2c8f26726ea0028f"
-  },
-  {
-    "file": "ci-k12-session-diagnostics-selfcheck.cjs",
-    "bytes": 8030,
-    "sha256": "36a124106827cc7b682670a7246d774cb4b89319ad1786181a48c7d3782b8de7"
-  },
-  {
-    "file": "ci-materials-navigation-selfcheck.cjs",
-    "bytes": 2998,
-    "sha256": "610ff9854e07e2519d2dfd02841c5bcf8746b68016733517c15dccd5253b2e26"
   }
 ]
