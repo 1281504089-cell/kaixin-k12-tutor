@@ -86,6 +86,9 @@ def validate_windows6_lock(lock, frozen_raw):
     return frozen
 
 def validate_lock(lock, frozen_raw):
+    if lock.get('candidate_tag')=='student-20261117-k12-7':
+        from batch7_recheck import validate_intel7_lock
+        return validate_intel7_lock(lock,frozen_raw)
     if lock.get('candidate_tag')=='student-20261117-k12-6':return validate_windows6_lock(lock,frozen_raw)
     assert lock['target'] in TARGETS and lock['candidate_tag'] in {'student-20261117-k12-4','student-20261117-k12-5'}
     newer=lock['candidate_tag']=='student-20261117-k12-5'
@@ -150,7 +153,7 @@ def verify_metadata(lock):
     assert api('releases/latest')['id'] == lock['baseline_latest_id'], 'Latest changed during frozen Mac revalidation'
     release = api('releases/tags/' + lock['candidate_tag'])
     assert release['id'] == lock['candidate_release_id'] and release['prerelease'] and not release['draft']
-    if lock['candidate_tag']=='student-20261117-k12-6':assert release['tag_name']==lock['candidate_tag']
+    if lock['candidate_tag'] in {'student-20261117-k12-6','student-20261117-k12-7'}:assert release['tag_name']==lock['candidate_tag']
     assets = {a['name']: a for a in release['assets']}
     expected = lock['immutable_existing_assets']
     for row in expected:
@@ -183,11 +186,17 @@ def download(row, directory):
             errors.append(str(error))
     raise RuntimeError('Both anonymous routes failed: ' + row['name'] + ': ' + '; '.join(errors))
 
+def lock_name(tag, target):
+    if tag=='student-20261117-k12-7':
+        assert target=='macos-x64'
+        return 'intel-k12-7-reuse-lock.json'
+    return 'windows-k12-6-reuse-lock.json' if tag=='student-20261117-k12-6' else 'intel-k12-5-reuse-lock.json' if tag=='student-20261117-k12-5' else TARGETS[target]['lock']
+
 def verify_signatures(root, resources, lock, signed_downloads):
     key = resources / 'app/assets/runtime-public.pem'
     assert sha(key) == lock['public_key_sha256']
     code = """import{readFile}from'node:fs/promises';import{pathToFileURL}from'node:url';import path from'node:path';import assert from'node:assert/strict';const{verifyManifest}=await import(pathToFileURL(process.argv[1]));const key=await readFile(process.argv[2]);const lock=JSON.parse(await readFile(process.argv[3]));const f=JSON.parse(await readFile(process.argv[4]));for(const m of [lock.included_manifest,lock.prior_manifest,...Object.values(f.manifests)])verifyManifest(m,key,m.arch,m.platform);for(const row of lock.signed_runtime_assets){const actual=JSON.parse(await readFile(path.join(process.argv[5],row.name)));assert.deepEqual(actual,f.manifests[row.name]);}console.log('PASS: installed public key verified included/prior/all immutable downloaded stage manifests');"""
-    run(['node','--input-type=module','-e',code,resources/'app/src/bundles.mjs',key,root/('windows-k12-6-reuse-lock.json' if lock['candidate_tag']=='student-20261117-k12-6' else 'intel-k12-5-reuse-lock.json' if lock['candidate_tag']=='student-20261117-k12-5' else TARGETS[lock['target']]['lock']),root/'attachment-final-manifests.json',signed_downloads])
+    run(['node','--input-type=module','-e',code,resources/'app/src/bundles.mjs',key,root/lock_name(lock['candidate_tag'],lock['target']),root/'attachment-final-manifests.json',signed_downloads])
 
 def verify_proxy(root, resources, evidence, target):
     mac=target.startswith('macos')
@@ -211,9 +220,9 @@ def verify_proxy(root, resources, evidence, target):
         shutil.rmtree(qa_home)
 
 def upload_new(tag, path, target):
-    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6'}
+    assert target in TARGETS and tag in {'student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6','student-20261117-k12-7'}
     if tag=='student-20261117-k12-6':assert target=='windows-x64'
-    if tag=='student-20261117-k12-5':assert target=='macos-x64'
+    if tag in {'student-20261117-k12-5','student-20261117-k12-7'}:assert target=='macos-x64'
     assert path.name == 'verification-'+target+'.json' or re.fullmatch(r'native-reverify-run-'+re.escape(target)+r'-[0-9]+\.json', path.name), 'Only this Mac target\'s new evidence may be uploaded'
     before = api('releases/tags/' + tag)
     assert not any(a['name'] == path.name for a in before['assets']), 'Refuse to overwrite existing evidence: ' + path.name
@@ -226,10 +235,12 @@ def upload_new(tag, path, target):
     assert actual and actual['digest'] == 'sha256:' + sha(path) and actual['size'] == path.stat().st_size, str(error)
 
 def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, materials_oldest):
-    if lock['candidate_tag']=='student-20261117-k12-6':
+    if lock['candidate_tag'] in {'student-20261117-k12-6','student-20261117-k12-7'}:
         for entry in [current,oldest,materials,materials_oldest]:
-            assert entry['actual_download_install_backup_restart']=='passed' and entry['check_again_current'] is True and entry['to_launcher']=='20261118-updater-3'
+            assert entry['actual_download_install_backup_restart']=='passed' and entry['check_again_current'] is True and entry['to_launcher']==lock['launcher_build']
             assert all(entry[k] is True for k in ['chat_preserved','task_preserved','saved_key_preserved'])
+            if lock['candidate_tag']=='student-20261117-k12-7':
+                assert entry['signed_launcher_restarted'] is True and entry['old_pid'] != entry['restarted_pid']
     api_proof = smoke['k12_api']
     for field, expected in [('prepared_picture_bindings',lock['picture_count']),('prepared_picture_manifest_sha256',lock['picture_manifest_sha256']),('runtime_isolated_count',lock['runtime_exclusion_count']),('runtime_exclusion_kinds',lock['runtime_exclusion_kinds']),('runtime_exclusion_ledger_sha256',lock['runtime_exclusion_ledger_sha256']),('bank_revision',lock['bank_revision']),('model_calls',0)]:
         assert api_proof[field] == expected, field
@@ -249,19 +260,23 @@ def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, mater
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', required=True, choices=tuple(TARGETS))
-    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6'),default='student-20261117-k12-4')
+    parser.add_argument('--release-tag',choices=('student-20261117-k12-4','student-20261117-k12-5','student-20261117-k12-6','student-20261117-k12-7'),default='student-20261117-k12-4')
     args=parser.parse_args();target=args.target
     six=args.release_tag=='student-20261117-k12-6'
+    seven=args.release_tag=='student-20261117-k12-7'
     if six:assert target=='windows-x64' and not sys.flags.optimize, 'Only normal nonoptimized Windows6 QA is allowed'
-    if args.release_tag=='student-20261117-k12-5':assert target=='macos-x64'
+    if args.release_tag in {'student-20261117-k12-5','student-20261117-k12-7'}:assert target=='macos-x64'
     spec = TARGETS[target]
     assert sys.platform == spec['platform'] and platform.machine() == spec['machine'], 'The selected platform must be tested on its actual native runner'
     mac=target.startswith('macos')
     root = Path.cwd()
-    lock_file = root/('windows-k12-6-reuse-lock.json' if six else 'intel-k12-5-reuse-lock.json' if args.release_tag=='student-20261117-k12-5' else spec['lock'])
+    lock_file = root/lock_name(args.release_tag,target)
     lock = json.loads(lock_file.read_text())
     assert lock['target'] == target
     frozen = validate_lock(lock, (root/'attachment-final-manifests.json').read_bytes())
+    if seven:
+        from batch7_recheck import validate_intel7_execution
+        validate_intel7_execution(root,lock_file.read_bytes())
     if six:
         assert re.fullmatch(r'[a-f0-9]{64}',os.environ.get('KX_REUSE_LOCK_SHA256','')) and sha(lock_file)==os.environ['KX_REUSE_LOCK_SHA256'], 'Owner-frozen raw lock SHA required'
         assert os.environ.get('GITHUB_REF_NAME','').startswith('codex/k12-windows6-reverify-20261118-')
@@ -270,7 +285,7 @@ def main():
     batch = json.loads((root/'attachment-batch.json').read_text())
     for name,digest in lock['recipe_inputs_sha256'].items(): assert sha(root/name) == digest, 'Frozen recipe input changed: ' + name
     assert batch['manifests'][target] == lock['included_manifest']
-    if six:
+    if six or seven:
         assert batch['tag']==lock['candidate_tag'] and batch['core_commit']==lock['source_commit'] and batch['launcher_build']==lock['launcher_build']
         assert json.loads((root/'launcher-manifest.json').read_text())['buildId']==lock['launcher_build']
     release = verify_metadata(lock)
@@ -353,6 +368,7 @@ def main():
     counts = {key: int(re.search(r'^# ' + key + r' (\d+)$', tests.stdout, re.M).group(1)) for key in ['tests','pass','fail','skipped']}
     assert counts['tests'] >= 81 and counts['fail'] == 0
     if six:assert counts==lock['launcher_tests'], 'Windows6 exact launcher test counts changed'
+    if seven:assert counts==lock['launcher_tests'], 'Intel7 exact launcher test counts changed'
     (evidence / 'launcher-tests.json').write_text(json.dumps({'passed':True,'native_target':target,**counts},indent=2))
     environment = {**os.environ,'KX_EXPECTED_PLATFORM':spec['platform'],'KX_EXPECTED_ARCH':spec['arch']}
     home = work/'全新学习目录'

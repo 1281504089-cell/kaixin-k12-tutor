@@ -16,9 +16,13 @@ check('a pending finite animation also prevents committing a click',()=>assert(p
 check('an infinite decoration does not block the target forever',()=>assert.equal(probe({animation:{playState:'running',effect:{getTiming:()=>({iterations:Infinity})}}}).layoutPending,false));
 check('settled geometry remains actionable',()=>{const p=probe();assert(p.clickable&&!p.layoutPending)});
 check('original PDF, identity, private-header, cancellation and wheel gates are unchanged',()=>{for(const name of ['nativeSpec','inspectNativePages','assertNativeResponse','captureNativeResponse','continueNativeRequest','waitReady','nativeWheelDelta','wheelFeedback','calibratedWheelDelta'])assert.equal(t[name].toString(),baseline[name].toString(),name)});
-check('trusted click identity assertion and old prepared IMG function are unchanged',()=>{
+check('trusted click and prepared IMG gates remain unchanged apart from exact navigation diagnostics',()=>{
   const before=fs.readFileSync(__dirname+'/ci-k12-library-ui.click-baseline.cjs','utf8'),after=fs.readFileSync(__dirname+'/ci-k12-library-ui.cjs','utf8');
   const gate=source=>source.slice(source.indexOf("    await wait(token => window.__k12Driver.events.some"),source.indexOf('  async function preparedPictureHistory('));assert.equal(gate(after),gate(before));
-  const prepared=source=>source.slice(source.indexOf('  async function preparedPictureHistory('),source.indexOf('  async function nativeHTTP('));assert.equal(prepared(after),prepared(before));assert(!/\.click\s*\(/.test(after));
+  const prepared=source=>source.slice(source.indexOf('  async function preparedPictureHistory('),source.indexOf('  async function nativeHTTP('));
+  const current=prepared(after),diagnostic="    pictureDiagnostic={paused,navigation:{target_url:`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`,state:'pending'}};",observed='      navigation=recordNavigation(view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`),pictureDiagnostic.navigation);';
+  assert.equal(current.split(diagnostic).length,2);assert.equal(current.split(observed).length,2);
+  const stripped=current.replace(diagnostic,'    pictureDiagnostic={paused};').replace(observed,'      navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);\n      navigation.catch(()=>{});');
+  assert.equal(stripped,prepared(before));assert(!/\.click\s*\(/.test(after));
 });
 fs.writeFileSync(__dirname+'/NATIVE-CLICK-SELFCHECK.json',JSON.stringify({passed:true,checks:checks.length,names:checks,network_calls:0,browser_calls:0,model_calls:0},null,2)+'\n');

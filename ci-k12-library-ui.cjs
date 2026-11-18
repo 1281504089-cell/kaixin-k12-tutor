@@ -20,6 +20,49 @@ const calibratedWheelDelta = (delta, event) => !event?.trusted || !Number.isFini
 const imagesReady = (images, expected) => images.length === expected && images.every(image => image.complete && image.width > 0 && image.height > 0);
 const waitReady = value => value === true || value?.ready === true;
 
+const shortError = error => ({name:String(error?.name || 'Error').slice(0,80),message:String(error?.message ?? error ?? '').split(/[\r\n]/,1)[0].slice(0,240)});
+function recordNavigation(promise, diagnostic) {
+  promise.then(() => { diagnostic.state='fulfilled'; }, error => { Object.assign(diagnostic,{state:'rejected',error:shortError(error)}); });
+  return promise;
+}
+function sessionNetworkEvent(method, params, origin, requests) {
+  const sameSource = value => { try { const url=new URL(value);return url.origin===origin&&(url.pathname==='/api/sessions'||url.pathname.startsWith('/api/sessions/')); } catch { return false; } };
+  if(method==='Network.requestWillBeSent'&&sameSource(params.request.url)) {
+    requests.set(params.requestId,params.request.url);
+    return {type:'request',id:params.requestId,url:params.request.url,http_method:params.request.method,at:params.timestamp};
+  }
+  if(method==='Network.responseReceived'&&sameSource(params.response.url)) {
+    requests.set(params.requestId,params.response.url);
+    return {type:'response',id:params.requestId,url:params.response.url,status:params.response.status,at:params.timestamp};
+  }
+  if(method==='Network.loadingFailed'&&requests.has(params.requestId)) return {type:'failed',id:params.requestId,url:requests.get(params.requestId),error:shortError(params.errorText).message,at:params.timestamp};
+  return null;
+}
+function runtimeException(params) {
+  const detail=params.exceptionDetails||{},exception=detail.exception||{};
+  return {name:String(exception.className||'Error').slice(0,80),message:shortError(exception.description||detail.text||'').message};
+}
+async function probeSessionReadOnly(origin, session, marker, fetcher=globalThis.fetch) {
+  const result={status:null,id_matches:false,message_count:null,marker_present:false,sources_present:false};
+  const controller=new AbortController();let timer;
+  const timeout=new Promise(resolve=>{timer=setTimeout(()=>{controller.abort();resolve({...result});},5000);});
+  const read=(async()=>{
+    try {
+      const url=new URL(`/api/sessions/${encodeURIComponent(session)}?dt_workspace=`,origin);
+      if(url.origin!==origin||url.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname))return {...result};
+      const response=await fetcher(url.href,{method:'GET',cache:'no-store',redirect:'error',headers:{Accept:'application/json'},signal:controller.signal});
+      result.status=response.status;
+      const data=await response.json(),record=data?.session??data,messages=Array.isArray(data?.messages)?data.messages:Array.isArray(record?.messages)?record.messages:null;
+      result.id_matches=(record?.session_id||record?.id)===session;
+      result.message_count=messages?.length??null;
+      result.marker_present=!!messages?.some(message=>message.role==='assistant'&&typeof message.content==='string'&&message.content.includes(marker));
+      result.sources_present=!!messages?.some(message=>[message.sources,message.metadata?.sources,...(Array.isArray(message.events)?message.events.map(event=>event?.metadata?.sources):[])].some(sources=>Array.isArray(sources)&&sources.length>0));
+    } catch {} // Failure diagnostics contain booleans/counts only, never response prose.
+    return {...result};
+  })();
+  try { return await Promise.race([read,timeout]); } finally { clearTimeout(timer); }
+}
+
 function nativeSpec(fixture, origin) {
   const native=fixture.native;
   assert(native && /^[a-f0-9]{64}$/.test(native.sha256), 'Frozen native-page descriptor required');
@@ -177,7 +220,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   preparedURL.searchParams.set('dt_workspace','');
   const preparedHref = preparedURL.href;
   const markers = bodyMarkers(seed.question);
-  const debug = view.debugger, views = [], network = [], requestURLs = new Map(), nativeResponses = [];
+  const debug = view.debugger, views = [], network = [], requestURLs = new Map(), nativeResponses = [], sessionNetwork = [], sessionRequests = new Map(), runtimeExceptions = [];
   const nativeResponsePattern={urlPattern:'*question-bank/native/*',requestStage:'Response'};
   assert(!debug.isAttached());
   let width = 0, height = 0, phase = 'starting', lastAction, actionSequence = 0, pictureDiagnostic;
@@ -280,7 +323,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     phase='prepared-picture-history-delayed';
     assert(!(await liveSource(pictured.href)).native,'Prepared IMG regression fixture selected a native-priority source');
     const paused=[];
-    pictureDiagnostic={paused};
+    pictureDiagnostic={paused,navigation:{target_url:`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`,state:'pending'}};
     const listener=(_event,method,params)=>{
       if(method==='Fetch.requestPaused') paused.push({id:params.requestId,url:params.request.url,at:Date.now()});
     };
@@ -289,8 +332,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     try {
       await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:true});
       await debug.sendCommand('Fetch.enable',{patterns:[{urlPattern:'*question-bank/pictures/*',requestStage:'Request'}]});
-      navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);
-      navigation.catch(()=>{});
+      navigation=recordNavigation(view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`),pictureDiagnostic.navigation);
       await wait(marker=>document.body.innerText.includes(marker)&&!!document.querySelector('[aria-label="题库原题图"] img'),[pictured.answer_marker],'Saved image source/assistant body did not restore before image bytes');
       pictureDiagnostic.beforeReveal=await js(inspectPreparedPicture);
       await click({selector:'[aria-label="题库原题图"] a',history:true},{activate:false});
@@ -399,6 +441,9 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     return {...identity,native:value.source.native};
   }
   const networkListener = (_event, method, params) => {
+    const sessionEvent=sessionNetworkEvent(method,params,origin,sessionRequests);
+    if(sessionEvent){sessionNetwork.push({entry,width,height,phase,...sessionEvent});if(sessionNetwork.length>256)sessionNetwork.shift();}
+    if(method==='Runtime.exceptionThrown'){runtimeExceptions.push({entry,width,height,phase,...runtimeException(params)});if(runtimeExceptions.length>32)runtimeExceptions.shift();}
     if (method === 'Network.requestWillBeSent' && params.request.url.includes('/api/student/question-bank/')) {
       requestURLs.set(params.requestId,params.request.url);
       network.push({ entry,width,height,phase,type:'request',id:params.requestId,url:params.request.url,at:params.timestamp });
@@ -413,7 +458,8 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     reply.done=captureNativeResponse(debug,params,nativeSpecifications.get(params.request.url)).then(value=>Object.assign(reply,value,{complete:true}),error=>Object.assign(reply,{error:String(error.stack||error),complete:true}));
   };
   async function failure(error) {
-    const record = { entry,requestedEntry,width,height,phase,error:String(error.stack ?? error),action:lastAction,network,pictureDiagnostic,nativeResponses:nativeResponses.map(({raw,done,...reply})=>({...reply,bytes:raw?.length})) };
+    const record = { entry,requestedEntry,width,height,phase,error:String(error.stack ?? error),action:lastAction,network,pictureDiagnostic,sessionNetwork,runtimeExceptions,nativeResponses:nativeResponses.map(({raw,done,...reply})=>({...reply,bytes:raw?.length})) };
+    try { record.web_contents_url=view.getURL(); } catch {}
     try { record.preparedPicture=await js(inspectPreparedPicture); } catch(captureError) { record.preparedPictureCaptureError=String(captureError); }
     try { record.dom = await js(href => {
       const rect = node => { const r=node.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}; };
@@ -423,10 +469,11 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
         return {index,text:node.innerText,rect:r,clientRects:[...node.getClientRects()].map(r=>({left:r.left,top:r.top,width:r.width,height:r.height})),display:getComputedStyle(node).display,visibility:getComputedStyle(node).visibility,point,hit:hit?{tag:hit.tagName,href:hit.closest('a[href]')?.getAttribute('href')}:null,roots};
       });
       const preview=document.querySelector('[data-testid="question-source-preview"]');
-      return {viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},anchors,events:window.__k12Driver?.events,
+      return {actual_url:location.href,ready_state:document.readyState,viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},anchors,events:window.__k12Driver?.events,
         statuses:[...document.querySelectorAll('[role="status"]')].map(node=>node.innerText),dialogText:document.querySelector('[role="dialog"]')?.innerText,
         preview:preview?{id:preview.dataset.questionId,revision:preview.dataset.bankRevision,ready:preview.dataset.sourceReady,text:preview.innerText,images:[...preview.querySelectorAll('img')].map(image=>({src:image.src,currentSrc:image.currentSrc,complete:image.complete,width:image.naturalWidth,height:image.naturalHeight,rect:rect(image)}))}:null};
     },seed.href); } catch (captureError) { record.captureError=String(captureError); }
+    if(phase==='prepared-picture-history-delayed')record.session_api_after_failure=await probeSessionReadOnly(origin,pictured.session,pictured.answer_marker);
     save(file('failure','json'),record);
     try { save(file('failure','html'),await js(()=>document.documentElement.outerHTML)); } catch {}
     try { writeFileSync(file('failure','png'),(await view.capturePage()).toPNG(),{flag:'wx'}); } catch {}
@@ -436,6 +483,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
   debug.on('message',nativeResponseListener);
   try {
     await debug.sendCommand('Network.enable',{maxResourceBufferSize:64*1024*1024,maxTotalBufferSize:128*1024*1024});
+    await debug.sendCommand('Runtime.enable');
     await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
     const savedSource=await liveSource(seed.href);
     if(savedSource.native){const spec=nativeSpec(savedSource,origin);nativeSpecifications.set(spec.url,spec);}
@@ -513,4 +561,4 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     if(debug.isAttached())debug.detach();
   }
 };
-module.exports._test = { normalize, bodyMarkers, sameGeometry, sameClickGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest };
+module.exports._test = { normalize, bodyMarkers, sameGeometry, sameClickGeometry, nativeWheelDelta, wheelFeedback, calibratedWheelDelta, imagesReady, inspectTarget, inspectPreparedPicture, nativeSpec, assertNativeResponse, inspectNativePages, waitReady, captureNativeResponse, continueNativeRequest, shortError, recordNavigation, sessionNetworkEvent, runtimeException, probeSessionReadOnly };

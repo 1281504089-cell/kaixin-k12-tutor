@@ -80,6 +80,11 @@ def stage_run_for_target(batch,target):
 def recheck_lock_for_target(batch,target):
  old={'windows-x64':'windows-k12-4-reuse-lock.json','macos-x64':'intel-k12-4-reuse-lock.json','macos-arm64':'arm-k12-4-reuse-lock.json'}[target]
  selected=batch.get('native_rechecks',{}).get(target,{}).get('lock_file',old)
+ if batch['tag']=='student-20261117-k12-7':
+  assert target=='macos-x64' and selected=='intel-k12-7-reuse-lock.json'
+  assert batch['core_commit']=='fbb301fd21cf2169f834e0b548d56d201cc98365'
+  assert stage_run_for_target(batch,target)=={'run_id':44230306905,'workflow_commit':'0738e1ac8cfbfddb9123d097bc90598abf5827fb'}
+  return selected
  if batch['tag']=='student-20261117-k12-6':
   assert target=='windows-x64' and selected=='windows-k12-6-reuse-lock.json'
   assert batch['core_commit']=='4a61cd7edcd27c6bc6f6bb9305a5a4f3af8851e2'
@@ -110,6 +115,9 @@ for target in targets:
   assert target in {'macos-arm64','macos-x64','windows-x64'}
   lock_name=recheck_lock_for_target(batch,target)
   lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
+  if batch['tag']=='student-20261117-k12-7':
+   from batch7_recheck import validate_intel7_lock
+   validate_intel7_lock(lock,(root/'attachment-final-manifests.json').read_bytes())
   if batch['tag']=='student-20261117-k12-6':
    import importlib.util
    spec=importlib.util.spec_from_file_location('frozen_windows6_recheck',root/'ci-mac-reuse.py');guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
