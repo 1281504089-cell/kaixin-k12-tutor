@@ -108,13 +108,36 @@ class IntelSevenReuseTest(unittest.TestCase):
         for target,name in [('macos-x64','verification-macos-x64.json'),('macos-arm64','verification-macos-arm64.json'),('macos-x64','kaixin-bridge-20261117-k12-7-macos-x64.tar.gz')]:
             with patch.object(reuse,'api',return_value={'assets':[{'name':name}]}),patch.object(reuse,'gh',side_effect=AssertionError('no writes')),self.assertRaises(AssertionError):reuse.upload_new(self.lock['candidate_tag'],Path(name),target)
 
-    def test_four_complete_entry_receipts_precede_any_picture_acceptance(self):
-        good={'actual_download_install_backup_restart':'passed','check_again_current':True,'to_launcher':'20261118-updater-4','chat_preserved':True,'task_preserved':True,'saved_key_preserved':True,'signed_launcher_restarted':True,'old_pid':1,'restarted_pid':2}
+    def launcher_entries(self):
+        good={'actual_download_install_backup_restart':'passed','check_again_current':True,'to_launcher':'20261118-updater-4','chat_preserved':True,'task_preserved':True,'saved_key_preserved':True}
+        starts=['20261118-updater-4','a47b05f9136ca6fb72d2f1f8a04eeb425298f358','20261114-unified','a47b05f9136ca6fb72d2f1f8a04eeb425298f358']
+        return [{**good,'from_launcher':start,'signed_launcher_restarted':index!=0,'old_pid':index*10+1,'restarted_pid':index*10+(1 if index==0 else 2)} for index,start in enumerate(starts)]
+
+    def test_only_same_starting_launcher_current_entry_may_hot_update(self):
+        entries=self.launcher_entries()
+        self.assertIsNone(reuse.validate_intel7_launcher_transitions(*entries,self.lock))
+        entries[0].update(signed_launcher_restarted=True,restarted_pid=2)
+        self.assertIsNone(reuse.validate_intel7_launcher_transitions(*entries,self.lock))
+
+    def test_migration_roles_cannot_claim_hot_update_or_swap_starting_launchers(self):
         for index in range(4):
-            entries=[dict(good) for _ in range(4)];entries[index]['chat_preserved']=False
+            entries=self.launcher_entries();entries[index]['from_launcher']='20261118-updater-4' if index else '20261114-unified'
+            with self.subTest(wrong_start=index),self.assertRaises(AssertionError):reuse.validate_intel7_launcher_transitions(*entries,self.lock)
+        for index in [1,2,3]:
+            for restarted in [False,True]:
+                entries=self.launcher_entries();entries[index].update(signed_launcher_restarted=restarted,restarted_pid=entries[index]['old_pid'])
+                with self.subTest(migration=index,restarted=restarted),self.assertRaises(AssertionError):reuse.validate_intel7_launcher_transitions(*entries,self.lock)
+        entries=self.launcher_entries();entries[0]['restarted_pid']=2
+        with self.assertRaises(AssertionError):reuse.validate_intel7_launcher_transitions(*entries,self.lock)
+        entries=self.launcher_entries();entries[0]['old_pid']=entries[0]['restarted_pid']=0
+        with self.assertRaises(AssertionError):reuse.validate_intel7_launcher_transitions(*entries,self.lock)
+
+    def test_four_complete_entry_receipts_precede_any_picture_acceptance(self):
+        for index in range(4):
+            entries=self.launcher_entries();entries[index]['chat_preserved']=False
             with self.assertRaises(AssertionError):reuse.validate_native_proofs({},None,entries[0],entries[1],self.lock,entries[2],entries[3])
-        for field,value in [('signed_launcher_restarted',False),('restarted_pid',1)]:
-            entries=[dict(good) for _ in range(4)];entries[0][field]=value
+        for field,value in [('signed_launcher_restarted',True),('restarted_pid',2)]:
+            entries=self.launcher_entries();entries[0][field]=value
             with self.assertRaises(AssertionError):reuse.validate_native_proofs({},None,entries[0],entries[1],self.lock,entries[2],entries[3])
 
     def test_routing_workflow_and_existing_full_path_are_preserved(self):

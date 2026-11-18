@@ -67,6 +67,13 @@ def verify_native_entry_artifacts(report, evidence):
   assert json.loads((evidence/name).read_text())==final[key], 'Final scenario sidecar differs: '+name
  return {'per_entry_receipts_verified':len(entries),'shared_sidecars_from':'materials_oldest_launcher_entry'}
 
+def verify_complete_native_source(report,completed,source_metadata,stage_sha):
+ assert set(completed['entries'])=={'update_entry','oldest_launcher_entry','materials_launcher_entry','materials_oldest_launcher_entry'}
+ for key,value in completed['entries'].items():assert report[key]==value, 'Complete source entry changed: '+key
+ for key,source in [('native_smoke','smoke'),('fresh_picture_ui','fresh_picture_ui'),('network','network'),('launcher_tests','launcher_tests')]:assert report[key]==completed[source], 'Complete native source changed: '+key
+ post=report['native_postflight']
+ for key,value in dict(passed=True,source_artifact_sha256=source_metadata['sha256'],signed_stage_sha256=stage_sha,production_launcher_files_verified=24,production_codesign_deep_strict_passed=True,immutable_assets_verified=76,public_installer_files_verified=5,signed_runtime_manifests_verified=45).items():assert post[key]==value, 'Missing actual postcheck: '+key
+
 def stage_run_for_target(batch,target):
  assert target in {'windows-x64','macos-x64','macos-arm64'}
  mapping=batch.get('native_staging_runs')
@@ -108,6 +115,7 @@ work=root/'publication-work';work.mkdir();previous=work/'previous';previous.mkdi
 for target in targets:
  report=json.loads(public(assets['verification-'+target+'.json']))
  resumed=None
+ complete_source=None
  assert report['release']==batch['tag'] and report['core_commit']==batch['core_commit']
  staged=stage_run_for_target(batch,target)
  if batch['native_runs'][target]['run_id']==staged['run_id']:assert batch['native_runs'][target]['workflow_commit']==staged['workflow_commit']
@@ -133,7 +141,20 @@ for target in targets:
   assert lock['source_commit']==batch['core_commit'] and lock['candidate_tag']==batch['tag']
   assert lock['frozen_stage']['sha256']==batch['signed_stage_sha256']==p['frozen_stage_sha256']
   assert all(p[k] is False for k in ['bridge_rebuilt','installers_repackaged','existing_assets_overwritten'])
-  assert all(p[k] is True for k in ['fresh_smoke_rerun','proxy_smoke_rerun','materials_both_variants_rerun'])
+  if accepted.get('complete_native_execution'):
+   from intel7_complete_evidence import COMPLETE_SOURCE,fetch_complete_archive,validate_finalized_provenance
+   assert batch['tag']=='student-20261117-k12-7' and target=='macos-x64'
+   assert accepted['complete_native_execution']==COMPLETE_SOURCE and accepted['finalization_lock_file']=='intel7-finalization-lock.json'
+   final_raw=(root/accepted['finalization_lock_file']).read_bytes();final=json.loads(final_raw)
+   assert hashlib.sha256(final_raw).hexdigest()==accepted['finalization_lock_sha256']==p['finalization_lock_sha256']
+   assert final['frozen'] is True and final['candidate_tag']==batch['tag'] and final['source_commit']==batch['core_commit']
+   assert final['source_lock_file']==lock_name and final['source_lock_sha256']==hashlib.sha256(lock_raw).hexdigest()
+   validate_finalized_provenance(lock,p,final)
+   complete_source=fetch_complete_archive(lock,api,gh)
+   verify_complete_native_source(report,complete_source,COMPLETE_SOURCE,batch['signed_stage_sha256'])
+  else:
+   assert 'complete_native_execution' not in p
+   assert all(p[k] is True for k in ['fresh_smoke_rerun','proxy_smoke_rerun','materials_both_variants_rerun'])
   if 'resume_artifact' in lock:
    from partial_native_evidence import fetch_partial_archive
    resumed=fetch_partial_archive(lock,api,gh)
@@ -144,8 +165,8 @@ for target in targets:
     assert p['fresh_picture_ui_rerun'] is False and p['completed_fresh_picture_ui_reused']==lock['reused_fresh_picture_ui']
     assert report['fresh_picture_ui']==resumed['fresh_picture_ui'], 'Fresh UI differs from its exact completed source receipt'
    else:assert p['fresh_picture_ui_rerun'] is True
-  else:assert p['oldest_and_current_ipc_rerun'] is True
-  if 'resume_artifact' not in lock:assert p['fresh_picture_ui_rerun'] is True
+  elif complete_source is None:assert p['oldest_and_current_ipc_rerun'] is True
+  if 'resume_artifact' not in lock and complete_source is None:assert p['fresh_picture_ui_rerun'] is True
   assert sorted((r['file'],r['bytes'],r['sha256']) for r in report['full_files'])==sorted((r['name'],r['bytes'],r['sha256']) for r in lock['candidate_files'])
  assert report['launcher_build']==batch['launcher_build'] and report['shell_files']==batch['shell_files']
  verify_update_recovery(report,batch,target)
@@ -175,6 +196,8 @@ for target in targets:
  native_evidence=work/('evidence-'+target)
  gh('run','download',batch['native_runs'][target]['run_id'],'--name','attachments-'+target,'--dir',native_evidence)
  assert json.loads((native_evidence/'verified.json').read_text())==report
+ if complete_source:
+  for name,raw in complete_source['files'].items():assert (native_evidence/name).read_bytes()==raw, 'Original complete native evidence changed: '+name
  if resumed:
   for name,raw in resumed['files'].items():
    copied='completed-source-reuse-lock.json' if name=='reuse-lock.json' else name

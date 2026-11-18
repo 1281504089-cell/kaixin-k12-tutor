@@ -234,13 +234,24 @@ def upload_new(tag, path, target):
     actual = next((a for a in api('releases/tags/' + tag)['assets'] if a['name'] == path.name), None)
     assert actual and actual['digest'] == 'sha256:' + sha(path) and actual['size'] == path.stat().st_size, str(error)
 
+def validate_intel7_launcher_transitions(current, oldest, materials, materials_oldest, lock):
+    target=lock['launcher_build'];assert target=='20261118-updater-4'
+    oldest_build='a47b05f9136ca6fb72d2f1f8a04eeb425298f358'
+    for role,entry,expected_start in [('current',current,target),('oldest',oldest,oldest_build),('materials',materials,'20261114-unified'),('materials-oldest',materials_oldest,oldest_build)]:
+        assert entry['from_launcher']==expected_start and entry['to_launcher']==target, role+' launcher identity differs'
+        assert all(type(entry[k]) is int and entry[k]>0 for k in ['old_pid','restarted_pid']), role+' needs real process IDs'
+        if role=='current' and entry['signed_launcher_restarted'] is False:
+            assert entry['old_pid']==entry['restarted_pid'], 'Same-launcher hot update must keep its application PID'
+        else:
+            assert entry['signed_launcher_restarted'] is True and entry['old_pid']!=entry['restarted_pid'], role+' launcher migration must really restart'
+
 def validate_native_proofs(smoke, fresh, current, oldest, lock, materials, materials_oldest):
     if lock['candidate_tag'] in {'student-20261117-k12-6','student-20261117-k12-7'}:
         for entry in [current,oldest,materials,materials_oldest]:
             assert entry['actual_download_install_backup_restart']=='passed' and entry['check_again_current'] is True and entry['to_launcher']==lock['launcher_build']
             assert all(entry[k] is True for k in ['chat_preserved','task_preserved','saved_key_preserved'])
-            if lock['candidate_tag']=='student-20261117-k12-7':
-                assert entry['signed_launcher_restarted'] is True and entry['old_pid'] != entry['restarted_pid']
+        if lock['candidate_tag']=='student-20261117-k12-7':
+            validate_intel7_launcher_transitions(current,oldest,materials,materials_oldest,lock)
     api_proof = smoke['k12_api']
     for field, expected in [('prepared_picture_bindings',lock['picture_count']),('prepared_picture_manifest_sha256',lock['picture_manifest_sha256']),('runtime_isolated_count',lock['runtime_exclusion_count']),('runtime_exclusion_kinds',lock['runtime_exclusion_kinds']),('runtime_exclusion_ledger_sha256',lock['runtime_exclusion_ledger_sha256']),('bank_revision',lock['bank_revision']),('model_calls',0)]:
         assert api_proof[field] == expected, field
