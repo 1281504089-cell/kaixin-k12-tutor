@@ -1,0 +1,42 @@
+name: Restore the known Windows stable manifest after k12-11 readback failure
+on:
+  push:
+    branches: ['codex/k12-release-recover-20261117-11']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the expected mixed state and restore the previous Windows feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GH_REPO" = 1281504089-cell/kaixin-k12-tutor
+          [ "$(gh api "repos/$GH_REPO/actions/runs/44397244385" --jq '.conclusion')" = failure ]
+          [ "$(gh api "repos/$GH_REPO/releases/latest" --jq '.id')" = 449810016 ]
+          [ "$(gh api "repos/$GH_REPO/releases/tags/student-20261117-k12-11" --jq '.prerelease')" = true ]
+          file=recovery-k12-11/runtime-windows-x64.json
+          old=21bbaf662e2e4ea5c617ddfbe4a7b84e4a70d8161c42d0e18e9d220bdee0cb6f
+          new=9ce1deabb782d0c22f31e85a193c8208f3eb0b40abeebd9b22f4a539cb3e3a25
+          printf '%s  %s\n' "$old" "$file" | sha256sum --check
+          snapshot() {
+            gh api "repos/$GH_REPO/releases/tags/core-updates?verified=$GITHUB_RUN_ID-$1" --jq '.assets[] | select(.name | test("^runtime-(windows-x64|macos-x64|macos-arm64)\\.json$")) | [.name,.digest] | @tsv' | sort
+          }
+          expected() {
+            printf '%s\tsha256:%s\n' runtime-macos-arm64.json 60253a5e367bebe895aea06716d5d6a619df339e4ce8a11f9175f51684dbbaf8 runtime-macos-x64.json 334cf597f9869a13529b0c0fa3b640240ef3916c47ffb58128bc1fea5c74549e runtime-windows-x64.json "$1"
+          }
+          diff <(expected "$new") <(snapshot before)
+          gh release upload core-updates "$file" --clobber
+          diff <(expected "$old") <(snapshot after)
+          url="https://github.com/$GH_REPO/releases/download/core-updates/runtime-windows-x64.json?verified=$GITHUB_RUN_ID"
+          curl --fail --silent --show-error --location --retry 2 --max-time 25 "$url" --output /tmp/k12-11-restored.json
+          cmp "$file" /tmp/k12-11-restored.json
+          [ "$(gh api "repos/$GH_REPO/releases/latest" --jq '.id')" = 449810016 ]
+          echo 'Restored exact verified k12-8 manifests on all three stable targets'
