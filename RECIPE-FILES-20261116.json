@@ -111,8 +111,8 @@
   },
   {
     "file": "RELEASE-NOTES.md",
-    "bytes": 2785,
-    "sha256": "d791a1c8eeaea4139b7307daf4dec8e8cbf057b07a3d2774a724b49e1727bf7c"
+    "bytes": 1854,
+    "sha256": "312832ef73dc70515e87fd79fef694f609a233a2446f7d4aef468759d091e27e"
   },
   {
     "file": "SOURCE-RECONSTRUCTION.json",
@@ -147,7 +147,7 @@
   {
     "file": "attachment-release.json",
     "bytes": 4433,
-    "sha256": "f15707444e373d4416e319ee86ab0a47bbc2a19e463ab5268ab0dd8ee3812ffc"
+    "sha256": "7d4b915dcb1790847bf49690393b3bf1dd53c6f9fc8529b9533d503a45e93f03"
   },
   {
     "file": "bootstrap_source.py",
@@ -181,8 +181,8 @@
   },
   {
     "file": "ci-k12-library-ui.cjs",
-    "bytes": 54041,
-    "sha256": "49f48e5bf6572abda8254220fc19cb270e138224290608f87f4632acec119ad9"
+    "bytes": 55716,
+    "sha256": "0236e6f8b36d3e4773abd5da0cb0aa7cc8ae0c47bf50c10fdfc52031398abd95"
   },
   {
     "file": "ci-k12-session-diagnostics-selfcheck.cjs",
@@ -211,8 +211,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 24191,
-    "sha256": "5f43adcbb6728a7be00a2a0afdc0017ee82cc109845e2b4975bc0a1b0f6dfc31"
+    "bytes": 24267,
+    "sha256": "01d3d79d7475ace912dc537e8b6f631639355ff8a2b37d076cebf49890b815de"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -267,7 +267,7 @@
   {
     "file": "ci_repackage.py",
     "bytes": 11983,
-    "sha256": "c182279b806dec8993d063a9e84f8eb349402e18ca41f677a33895011442a4ab"
+    "sha256": "cfe5fe5bef24a15dd0f9887ef60a49a41357aca359316bae2d2e34759e478a97"
   },
   {
     "file": "ci_update_probe.py",
@@ -331,8 +331,8 @@
   },
   {
     "file": "fetchfix-tests/release-updates.test.mjs",
-    "bytes": 20085,
-    "sha256": "dd5d00c249e689cf1fce1db96270620fcda72794de18d725b38ee6a644a39701"
+    "bytes": 21281,
+    "sha256": "bb362ff60c7cf9a8e31197f12b8fb022715f264a6257afb84f001a64f42d90a4"
   },
   {
     "file": "fetchfix-tests/runtime.test.mjs",
@@ -387,7 +387,7 @@
   {
     "file": "fresh-install-lock.json",
     "bytes": 4058,
-    "sha256": "543a48a8ecbe402775081bcd14619585c9f9ec48fbec3da67b51bebf22320ac9"
+    "sha256": "bb049ad49d8f9c95d84311f9556668b96dd614917a97c3617afb2b8158ec8d8f"
   },
   {
     "file": "history/SOURCE-TEST-HANDOFF-20261118-K12-7.json",
@@ -417,7 +417,7 @@
   {
     "file": "launcher-manifest.json",
     "bytes": 3918,
-    "sha256": "bbbe9da7ae918cf09d141a660e71d2985887b6eee3783c024a516285d9ff9818"
+    "sha256": "73c26c35e587a7072ebf6e28ede11a088598f100c6cd56eeb46fd672a55a1141"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -526,8 +526,8 @@
   },
   {
     "file": "native-click-followup-selfcheck.cjs",
-    "bytes": 4331,
-    "sha256": "88eca1181a70f659787cc9edef757278596b3e005da99fe9cdb8083ac4b475ad"
+    "bytes": 5370,
+    "sha256": "3650e357066806830f9a5535dbf01cf3f4e98f63be167b3cf2af4f473653dba0"
   },
   {
     "file": "native-k12-api-smoke.py",
@@ -551,8 +551,8 @@
   },
   {
     "file": "native-visibility-selfcheck.cjs",
-    "bytes": 6037,
-    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
+    "bytes": 6109,
+    "sha256": "6653281d32303680cf784fdab940c99d1f9fa295af4e67792e6856101b4aa156"
   },
   {
     "file": "native8-arm-candidate-files.json",
@@ -641,33 +641,33 @@
   },
   {
     "file": "runtime-source-manifest.json",
-    "bytes": 626774,
-    "sha256": "b81938dfb09d6725c3288006be89e4f51cf11fd2dea35fc7fd67bfe2a54ac20f"
+    "bytes": 626775,
+    "sha256": "fec7a521010075b7aad4a18a3b370416f2e760124e7661e1100489ea13505bf6"
   },
   {
-    "file": "source-delta-k12-10.001",
+    "file": "source-delta-k12-11.001",
     "bytes": 524288,
-    "sha256": "5195d66374c931767a723fac26be031cb4c54c2030cc2c3c9b64eea625fb01e4"
+    "sha256": "9c0ecd4caa178553a3f9e9785af5cf14b832b78823f3f4902d91c8f0cdb74f31"
   },
   {
-    "file": "source-delta-k12-10.002",
+    "file": "source-delta-k12-11.002",
     "bytes": 524288,
-    "sha256": "d898369769e01e791db139bc51c37feb6a7075e7a47dae1dfcfde6ec000e0c8f"
+    "sha256": "de352247aa17fd12aa9fd0380ac48dd7bd499d9ed4c5007e05fafb48af6f4e3a"
   },
   {
-    "file": "source-delta-k12-10.003",
-    "bytes": 148211,
-    "sha256": "613f0738ee9416d8d9f37ecf474f82d066057cc82d71bbcb172efbdd28914e77"
+    "file": "source-delta-k12-11.003",
+    "bytes": 170284,
+    "sha256": "5972f0b5387d4dd41fe1e4922f73b8a152e80493a4563519a931fc3d2e66bb49"
   },
   {
-    "file": "source-inventory-k12-10.json",
-    "bytes": 1276272,
-    "sha256": "b286edbabb706901fee82f365a4b8906f8346d4262cd40a62ffe8e54c87fdb14"
+    "file": "source-inventory-k12-11.json",
+    "bytes": 1276478,
+    "sha256": "650a81487253ccb9bbbd21da66b57b81895e67cd748d0dab74252ce9f4ca563f"
   },
   {
     "file": "source-manifest.json",
     "bytes": 44941,
-    "sha256": "ca3b2d4bcb9cf37c79110565a8e42662c68e464fb523b44f6ea2ea2b3d22a18c"
+    "sha256": "7c361b5bbc476b53bb1e1ce44e1cd1d6db369415f829e0e54fab017f15ca02d4"
   },
   {
     "file": "test-connector-upload.cjs",
