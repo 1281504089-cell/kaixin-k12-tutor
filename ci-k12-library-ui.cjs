@@ -143,7 +143,7 @@ async function continueNativeRequest(debug, item, network, expectedURL) {
 
 // Runs in the renderer: loading labels and zero/blank canvases never qualify.
 function inspectNativePages(spec, dialog=false) {
-  const root=dialog?document.querySelector('[data-testid="question-source-preview"]'):[...document.querySelectorAll('[aria-label="题库原题图"] figure')].find(figure=>[...figure.querySelectorAll('a[href]')].some(a=>[spec.href,spec.originalHref].includes(a.getAttribute('href'))));
+  const root=dialog?document.querySelector('[data-testid="question-source-preview"]'):[...document.querySelectorAll('[aria-label="题库原题"] figure')].find(figure=>[...figure.querySelectorAll('a[href]')].some(a=>[spec.href,spec.originalHref].includes(a.getAttribute('href'))));
   if(!root)return {ready:false,reason:'missing-source'};
   const identity=!dialog||root.dataset.questionId===spec.qualified_id&&root.dataset.bankRevision===spec.bank_revision&&root.dataset.sourceRenderer==='native-pages';
   const units=[...root.querySelectorAll('[data-reader-unit]')],pages=units.map(node=>Number(node.dataset.readerUnit));
@@ -169,7 +169,7 @@ function inspectNativePages(spec, dialog=false) {
 // Runs in the renderer. Selecting a visible candidate does not activate it.
 function inspectTarget(spec, token, scroll = false) {
   const rect = node => { const r = node.getBoundingClientRect(); return { left:r.left, top:r.top, right:r.right, bottom:r.bottom, width:r.width, height:r.height }; };
-  const candidates = spec.cardHref ? [...document.querySelectorAll('[aria-label="题库原题图"] figure')].filter(figure => [...figure.querySelectorAll('a[href]')].some(a => a.getAttribute('href') === spec.cardHref))
+  const candidates = spec.cardHref ? [...document.querySelectorAll('[aria-label="题库原题"] figure')].filter(figure => [...figure.querySelectorAll('a[href]')].some(a => a.getAttribute('href') === spec.cardHref))
     : spec.href ? [...document.querySelectorAll('a[href]')].filter(node => node.getAttribute('href') === spec.href)
     : spec.text ? [...document.querySelectorAll('button')].filter(node => node.textContent.trim() === spec.text)
       : [...document.querySelectorAll(spec.selector)];
@@ -207,7 +207,7 @@ function inspectTarget(spec, token, scroll = false) {
 }
 
 function inspectPreparedPicture() {
-  const image=document.querySelector('[aria-label="题库原题图"] img'),root=image?.closest('[data-chat-scroll-root]');
+  const image=document.querySelector('[aria-label="题库原题"] img'),root=image?.closest('[data-chat-scroll-root]');
   const rect=node=>{const r=node.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
   return {viewport:{width:innerWidth,height:innerHeight},image:image?{src:image.src,currentSrc:image.currentSrc,complete:image.complete,naturalWidth:image.naturalWidth,naturalHeight:image.naturalHeight,loading:image.loading,decoding:image.decoding,rect:rect(image)}:null,
     root:root?{rect:rect(root),scrollTop:root.scrollTop,scrollHeight:root.scrollHeight,clientHeight:root.clientHeight}:null};
@@ -348,16 +348,16 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:true});
       await debug.sendCommand('Fetch.enable',{patterns:[{urlPattern:'*question-bank/pictures/*',requestStage:'Request'}]});
       navigation=recordNavigation(view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`),pictureDiagnostic.navigation);
-      await wait(marker=>document.body.innerText.includes(marker)&&!!document.querySelector('[aria-label="题库原题图"] img'),[pictured.answer_marker],'Saved image source/assistant body did not restore before image bytes');
+      await wait(marker=>document.body.innerText.includes(marker)&&!!document.querySelector('[aria-label="题库原题"] img'),[pictured.answer_marker],'Saved image source/assistant body did not restore before image bytes');
       pictureDiagnostic.beforeReveal=await js(inspectPreparedPicture);
-      await click({selector:'[aria-label="题库原题图"] a',history:true},{activate:false});
+      await click({selector:'[aria-label="题库原题"] a',history:true},{activate:false});
       pictureDiagnostic.afterReveal=await js(inspectPreparedPicture);
       const heldUntil=Date.now()+30000;
       while(!paused.length){assert(Date.now()<heldUntil,'Native renderer did not request the prepared image');await pause(50);}
       await pause(1000);
       before=await js((marker,url)=>{
-        const image=[...document.querySelectorAll('[aria-label="题库原题图"] img')].find(node=>new URL(node.currentSrc||node.src,location.origin).pathname===new URL(url,location.origin).pathname);
-        const caption=document.querySelector('[aria-label="题库原题图"] a span');
+        const image=[...document.querySelectorAll('[aria-label="题库原题"] img')].find(node=>new URL(node.currentSrc||node.src,location.origin).pathname===new URL(url,location.origin).pathname);
+        const caption=document.querySelector('[aria-label="题库原题"] a span');
         return {bodyRendered:document.body.innerText.includes(marker),imageRequested:!!image,imageComplete:image?.complete,naturalWidth:image?.naturalWidth,decoding:image?.decoding,captionColor:caption?getComputedStyle(caption).color:null,overflow:document.documentElement.scrollWidth>innerWidth+1};
       },pictured.answer_marker,preparedHref);
       assert(before.bodyRendered&&before.imageRequested&&!before.imageComplete&&before.naturalWidth===0&&before.decoding==='async'&&!before.overflow,'Image response is blocking the saved assistant body or the wrong image was held');
@@ -373,14 +373,14 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       }
     }
     await navigation;
-    await wait((url,w,h)=>[...document.querySelectorAll('[aria-label="题库原题图"] img')].some(image=>image.src===new URL(url,location.origin).href&&image.complete&&image.naturalWidth===w&&image.naturalHeight===h),[preparedHref,pictured.picture.width,pictured.picture.height],'Prepared image failed native decode or changed dimensions');
+    await wait((url,w,h)=>[...document.querySelectorAll('[aria-label="题库原题"] img')].some(image=>image.src===new URL(url,location.origin).href&&image.complete&&image.naturalWidth===w&&image.naturalHeight===h),[preparedHref,pictured.picture.width,pictured.picture.height],'Prepared image failed native decode or changed dimensions');
     const reply=network.findLast(item=>item.type==='response'&&item.status===200&&item.url===preparedHref);
     assert(reply,'The prepared image has no successful native HTTP response');
     const responseBody=await debug.sendCommand('Network.getResponseBody',{requestId:reply.id});
     const raw=Buffer.from(responseBody.body,responseBody.base64Encoded?'base64':'utf8');
     assert.equal(raw.length,pictured.picture.bytes);
     assert.equal(require('node:crypto').createHash('sha256').update(raw).digest('hex'),pictured.picture.sha256,'Native image response changed from the frozen display');
-    await click({selector:'[aria-label="题库原题图"] a'});
+    await click({selector:'[aria-label="题库原题"] a'});
     await wait((id,revision,w,h)=>{
       const body=document.querySelector('[data-testid="question-source-preview"]'),images=body?[...body.querySelectorAll('img')]:[];
       return body?.dataset.questionId===id&&body.dataset.bankRevision===revision&&body.dataset.sourceRenderer==='prepared-picture'&&body.dataset.sourceReady==='true'&&images.length===1&&images[0].complete&&images[0].naturalWidth===w&&images[0].naturalHeight===h;
@@ -392,7 +392,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     await wait(()=>!document.querySelector('[role="dialog"]'),[],'Prepared image preview did not close');
     // Reload the persisted history again: a live event alone is insufficient.
     await view.loadURL(`${origin}/chat/${encodeURIComponent(pictured.session)}?dt_workspace=`);
-    await wait((marker,url)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] img')].some(image=>image.src===new URL(url,location.origin).href),[pictured.answer_marker,preparedHref],'Prepared image did not survive a second history load');
+    await wait((marker,url)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题"] img')].some(image=>image.src===new URL(url,location.origin).href),[pictured.answer_marker,preparedHref],'Prepared image did not survive a second history load');
     return {qualified_id:pictured.qualified_id,bank_revision:pictured.bank_revision,sha256:pictured.picture.sha256,width:pictured.picture.width,height:pictured.picture.height,body_dom_before_image_response:true,held_response_ms:heldMs,async_decode:true,native_http_image_sha_verified:true,source_caption_blue:true,correct_source_opened:true,dialog_within_viewport:true,second_history_restore:true,body_probe:before};
   }
   async function nativeHTTP(spec, since=0) {
@@ -420,7 +420,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       await debug.sendCommand('Network.setCacheDisabled',{cacheDisabled:true});
       await debug.sendCommand('Fetch.enable',{patterns:[{urlPattern:'*question-bank/native/*',requestStage:'Request'},nativeResponsePattern]});
       navigation=view.loadURL(`${origin}/chat/${encodeURIComponent(native.session)}?dt_workspace=`);navigation.catch(()=>{});
-      await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Saved native source/assistant body did not restore before PDF bytes');
+      await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Saved native source/assistant body did not restore before PDF bytes');
       await click({cardHref:native.href,history:true},{activate:false});
       const until=Date.now()+30000;while(!paused.length){assert(Date.now()<until,'Native reader never requested its PDF');await pause(50);}
       await pause(1000);before=await js(inspectNativePages,native,false);
@@ -441,7 +441,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
     await click('button[aria-label="关闭题源"]');await wait(()=>!document.querySelector('[role="dialog"]'),[],'Native source did not close');
     const restoredStart=network.length;
     await view.loadURL(`${origin}/chat/${encodeURIComponent(native.session)}?dt_workspace=`);
-    await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题图"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Native history body did not restore twice');
+    await wait((marker,href)=>document.body.innerText.includes(marker)&&[...document.querySelectorAll('[aria-label="题库原题"] figure a[href]')].some(a=>a.getAttribute('href')===href),[native.answer_marker,native.href],'Native history body did not restore twice');
     await click({cardHref:native.href,history:true},{activate:false});await wait(inspectNativePages,[native,false],'Native PDF did not survive a second saved-history load');
     const restored=await js(inspectNativePages,native,false),restoredHTTP=await nativeHTTP(native,restoredStart);
     const restoredCard=await js(inspectTarget,{cardHref:native.href},lastAction.token);assert(restoredCard.clickable,'Restored native card left the visible chat scrollport');

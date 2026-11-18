@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
-  "published_export_sha256": "cba8b13579c620d2fd373b120b926f086f206a9deed0d52834a48b135408fdd1",
+  "source_commit": "7fc841b4e5b401f6efc3f96046625bfdd4948127",
+  "published_export_sha256": "8cbf73d9bdb81706ead2f8da03d2c4bc55316cae9f88fadecd5b3b1ae47f773d",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "files": [
     {
@@ -811,8 +811,8 @@
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
-      "bytes": 7177,
-      "sha256": "20a9c263382bf50330c0fa4ca2c5a0b545d22e0a499f59dd61f31d9f0d881512",
+      "bytes": 9643,
+      "sha256": "14d7681de79377f0d9bef914303ea547dc88f7d3633296f344a4a05ae3d45a5f",
       "mode": 420
     },
     {
@@ -823,14 +823,14 @@
     },
     {
       "file": "deeptutor/agents/chat/capability.py",
-      "bytes": 987,
-      "sha256": "903d4525852b08a2cafa091c65ba86d6b9583f93cee7e24dd1a3565f5331e290",
+      "bytes": 1707,
+      "sha256": "ba48fc6bbe38a768eeac1739e0a0956154449ee9c2c35114b959dfcd8bde4c9c",
       "mode": 420
     },
     {
       "file": "deeptutor/agents/chat/prompts/en/agentic_chat.yaml",
-      "bytes": 16519,
-      "sha256": "d6bd9f0cf6043b7285e4b326747f8d7e9d9d33415e075b74f255538a4db8061e",
+      "bytes": 16840,
+      "sha256": "7a42182f2fcbec26ff645f45f5f02095094032060dccb8994dad6a43c43a38b7",
       "mode": 420
     },
     {
@@ -841,8 +841,8 @@
     },
     {
       "file": "deeptutor/agents/chat/prompts/zh/agentic_chat.yaml",
-      "bytes": 15206,
-      "sha256": "afa14156c159e587191b9ee4b2390925dfbe516407f9eeeaeb803899efd144c6",
+      "bytes": 15476,
+      "sha256": "0b73274a6d7bb088cbbeed721bda192878cc1b67e00da5aed0b6b8a433ad4056",
       "mode": 420
     },
     {
@@ -859,8 +859,8 @@
     },
     {
       "file": "deeptutor/agents/loop/agent_loop.py",
-      "bytes": 74967,
-      "sha256": "5869f1f1afd59c8e7eaf531462c03ff83f36add796fd66887cd9af0440869004",
+      "bytes": 74551,
+      "sha256": "38173663616f1a16c01bb1a074971e2c90b27644468636fa0f1775af0aa76fe5",
       "mode": 420
     },
     {
@@ -895,8 +895,8 @@
     },
     {
       "file": "deeptutor/agents/loop/native_adapter.py",
-      "bytes": 21745,
-      "sha256": "e63d1c0288a689a8657a64761aa3649524e2bfd2ca1e1a17a6a2402ee13cbb3a",
+      "bytes": 21989,
+      "sha256": "eb08ee1d3366de625843d2bc21a1deb1cf059016ce345996b2124322730498f2",
       "mode": 420
     },
     {
@@ -919,8 +919,8 @@
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
-      "bytes": 101165,
-      "sha256": "3645e1ab6283024bda4c105bbd79fca9dd5d7fbb2703632324ae231c9043baa5",
+      "bytes": 101594,
+      "sha256": "ad8fdada9e8bac8e4b13736b14666b3328203c8ee26ca759081d36c2bb6eec08",
       "mode": 420
     },
     {
@@ -1849,8 +1849,8 @@
     },
     {
       "file": "deeptutor/api/routers/student_learning.py",
-      "bytes": 11562,
-      "sha256": "25bb8bb1105a41ea452efc22b87fe28456564bf8169566ab0d06bcd8db07722d",
+      "bytes": 11641,
+      "sha256": "d88769363b36b066628efe063e7314cf1ee0d55a31d5b8e18ea9b1b4c81ec2f8",
       "mode": 420
     },
     {
@@ -2551,8 +2551,8 @@
     },
     {
       "file": "deeptutor/capabilities/explore_context/capability.py",
-      "bytes": 11350,
-      "sha256": "72a48286a34447ce1efd3168add7b3dea998b6809496279312f656d22284e3e3",
+      "bytes": 11517,
+      "sha256": "39b9ed2d61ffd77ba40820ef6c2a1f144c4b548900fcef5f25de035e8f384eb5",
       "mode": 420
     },
     {
@@ -2947,14 +2947,14 @@
     },
     {
       "file": "deeptutor/capabilities/reading/capability.py",
-      "bytes": 21435,
-      "sha256": "57361435eb06b198aba648e8d07c13bb93eedf2caf5000a9445d71031bbad802",
+      "bytes": 21404,
+      "sha256": "5eab054d58f3c5bc624257a076c8e6946f34f2e3495930be99b975daad47f3d2",
       "mode": 420
     },
     {
       "file": "deeptutor/capabilities/reading/figure_view.py",
-      "bytes": 7329,
-      "sha256": "260a0269267b7a9330e78bd763f6cb8c39b71366bb8d376d0b262c4bed3df9cb",
+      "bytes": 7673,
+      "sha256": "13fbe2a6899cbf37fabfdb79977674b9c1c92739300148806e3e10284014d94a",
       "mode": 420
     },
     {
@@ -3193,8 +3193,8 @@
     },
     {
       "file": "deeptutor/core/context.py",
-      "bytes": 7264,
-      "sha256": "09546b5c978cfd50fb6f37d4354f472ff513276138312778e180000fa722f1fb",
+      "bytes": 7304,
+      "sha256": "a6bae8b55ce1b24499042fd6a9168dc35d1db66712aa42cda6effd724e045eda",
       "mode": 420
     },
     {
@@ -5419,8 +5419,8 @@
     },
     {
       "file": "deeptutor/services/llm/capabilities.py",
-      "bytes": 28343,
-      "sha256": "4c1ebe617b6fd77d9619d1c4e7d05f4a7f098781d1555e87f7253509eac491dd",
+      "bytes": 28479,
+      "sha256": "92c8c97730a840e0c25c48cb2d76c743bab1308f0bbeb9b98f44d205b2c84367",
       "mode": 420
     },
     {
@@ -5485,8 +5485,8 @@
     },
     {
       "file": "deeptutor/services/llm/image_description.py",
-      "bytes": 3282,
-      "sha256": "538e95b2d9c7fa1eff01df3c75e0e6298fb7616fd0367e3197de2dc09c4f0478",
+      "bytes": 3848,
+      "sha256": "ab4c4514713813da86f327ea6bbc15af35c5453cc07b27e2ec1bd5bc4f6d505a",
       "mode": 420
     },
     {
@@ -6079,8 +6079,8 @@
     },
     {
       "file": "deeptutor/services/model_selection/runtime.py",
-      "bytes": 4418,
-      "sha256": "f0a86a24bc29753c01d4b0725eef2eac25ed25c1bb71999c7e8338c3f7373954",
+      "bytes": 4333,
+      "sha256": "12d8b7fa9dbc0b6e709eebe0fdaee7791321e40a8c73eaaec61aab5f935c2c55",
       "mode": 420
     },
     {
@@ -6385,8 +6385,8 @@
     },
     {
       "file": "deeptutor/services/parsing/native_docx.py",
-      "bytes": 6278,
-      "sha256": "fe9dca2dd7ec70b0ccbafc752f49a129286c0049884c243ec48f8c0d88acf175",
+      "bytes": 6370,
+      "sha256": "3679ecacaf842e3cb9a1b1334c5c9f4ff6cd53642fe6ec6efb879c457cbc5a82",
       "mode": 420
     },
     {
@@ -6744,6 +6744,12 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/rag/image_search.py",
+      "bytes": 7055,
+      "sha256": "372cd672b3c787993780a9106048aca639729748a34ff6c2f1af6ea343eb57f4",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/rag/index_probe.py",
       "bytes": 10977,
       "sha256": "d714f4d61b0d7d6fdd733ba3b8f0a060d2524053df5afcd550bf3bc17e863e29",
@@ -6763,8 +6769,8 @@
     },
     {
       "file": "deeptutor/services/rag/kb_preseed.py",
-      "bytes": 8649,
-      "sha256": "5231b22d01c2f0c0f5798863f1254d3f1ba8beca5b05d3c35393fe47e00269b5",
+      "bytes": 11409,
+      "sha256": "c58f3d9018cb6088d3eb17e80573add0d7e04ad194d791186d2828232e0d40f0",
       "mode": 420
     },
     {
@@ -7081,8 +7087,8 @@
     },
     {
       "file": "deeptutor/services/rag/pipelines/llamaindex/document_loader.py",
-      "bytes": 32135,
-      "sha256": "e542f4f25650925426093010d0c4c51f78fcf09337dd302d4cb0cfd2e9c70e19",
+      "bytes": 32457,
+      "sha256": "29f5f649f4c70c3d94f5f80ef0014ef4a782c9ab62a0cfd09cc83ef3afd9fc8c",
       "mode": 420
     },
     {
@@ -7111,8 +7117,8 @@
     },
     {
       "file": "deeptutor/services/rag/pipelines/llamaindex/pipeline.py",
-      "bytes": 24197,
-      "sha256": "6ef2739183a51f0e581a0a21f5e3e5fb75e3a5434e9a8a2e84d54e466806750f",
+      "bytes": 24694,
+      "sha256": "310d04092be3abee7bc34b9dac8e6b16469f248f8eb42ff1fc11bafff6dedf9b",
       "mode": 420
     },
     {
@@ -7237,8 +7243,8 @@
     },
     {
       "file": "deeptutor/services/rag/retrieved_originals.py",
-      "bytes": 11944,
-      "sha256": "b2f70de0691a86d6353cb4aeba09ce3e1d0e60e5d1cb31e067973a3ec3a77920",
+      "bytes": 11799,
+      "sha256": "df2ccc9f7b50ab98cec499cd0bb57b2121ac7ec975a43acaf36546e762590c01",
       "mode": 420
     },
     {
@@ -7255,14 +7261,20 @@
     },
     {
       "file": "deeptutor/services/rag/source_pages.py",
-      "bytes": 13835,
-      "sha256": "00c0b4a29c33109246bef245aa068d1e9be971f011c6f513a4ddaf8ecdc97bbd",
+      "bytes": 13931,
+      "sha256": "eae3469a9515891634066455d9e3d50d005ca646b08672115c8945f94bd50407",
       "mode": 420
     },
     {
       "file": "deeptutor/services/rag/source_visuals.py",
-      "bytes": 19211,
-      "sha256": "e9d7a97ded51cfc223824cae1ad3dd70754e2416246f6a5d373e3ffaa7ea44e6",
+      "bytes": 19292,
+      "sha256": "c2c4776d4383cc21a7cfc51862dc54a219d83b5be1a9fad995d373d1f2461909",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/rag/upload_lookup.py",
+      "bytes": 7597,
+      "sha256": "c05b67e77d843405eb0871db0550c8e1f7644567228ebd82125c2202c7e24d07",
       "mode": 420
     },
     {
@@ -7513,20 +7525,20 @@
     },
     {
       "file": "deeptutor/services/session/attachment_parsing.py",
-      "bytes": 12002,
-      "sha256": "94e783eef36c514a93c18a41b79da01529e9a2b0fe80b0204a70bac2a68549c1",
+      "bytes": 12200,
+      "sha256": "c9e2e0b1b1eafeace360f412cf9e3b85c4f200f52c8013dfa11c0addef7febd5",
       "mode": 420
     },
     {
       "file": "deeptutor/services/session/context_builder.py",
-      "bytes": 37244,
-      "sha256": "c5a463a76a2275322b66e1f7844803ee9214e68ef514d744f34a08b246f1bf3e",
+      "bytes": 37671,
+      "sha256": "356476c8ab17554be64d08c08418a53ffa558e42a4658938ebe201d973571795",
       "mode": 420
     },
     {
       "file": "deeptutor/services/session/event_preview.py",
-      "bytes": 6720,
-      "sha256": "0d84640c6d3e3aed2fb9e4240f297411e92090442ecec8576e9d67b6be7fdc54",
+      "bytes": 6900,
+      "sha256": "e88a647ada13c12da4f90d1576b7afdec65b5bc00ee32603bb977c39e14cee69",
       "mode": 420
     },
     {
@@ -7555,8 +7567,8 @@
     },
     {
       "file": "deeptutor/services/session/pdf_pages.py",
-      "bytes": 6472,
-      "sha256": "867d4c1d6932c84a32ae2897217afecff4831f9d8dc83ce922bc38f87c020fc4",
+      "bytes": 6859,
+      "sha256": "0789c6b214fc4de8556573b7be23d8a6870417b4452b8e83590dba476413eaf4",
       "mode": 420
     },
     {
@@ -7603,14 +7615,14 @@
     },
     {
       "file": "deeptutor/services/session/source_inventory.py",
-      "bytes": 51171,
-      "sha256": "25e8fb8dcbedace73ac69afdd555317a5608df33b3aafbaeba6ec462766cb926",
+      "bytes": 51545,
+      "sha256": "218303c4dee28428cab31cdb35bd82b03a36d4310f215a5ea4934243fc8f955f",
       "mode": 420
     },
     {
       "file": "deeptutor/services/session/sqlite_store.py",
-      "bytes": 211484,
-      "sha256": "f32839d652a11b6f2ac4afba9ad8a74c637c0ed0e1dbc52e5b9a7622d17b5661",
+      "bytes": 211635,
+      "sha256": "dac184427403bac8b2d2241c3f2fc3c152f8f0ab4a0b6f7a55c18e969e07ad7c",
       "mode": 420
     },
     {
@@ -7639,8 +7651,8 @@
     },
     {
       "file": "deeptutor/services/session/turns/executor.py",
-      "bytes": 80994,
-      "sha256": "51f9d5f9e119f5806d054bcd135fcdac8b5cb87a484789ed6034ebfc80109f74",
+      "bytes": 82140,
+      "sha256": "81d38bd0956bd5c9fe5f80f695888fcbf5c4774cb0b80689d9d2413364061fcb",
       "mode": 420
     },
     {
@@ -8035,8 +8047,14 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_grounding.py",
-      "bytes": 9797,
-      "sha256": "17bee31b59206c8d07cbe8abb53e995486c4924fdbc0576b06f7f6f79b44bad4",
+      "bytes": 20475,
+      "sha256": "42d227190558e9bc0d4ea25f12c58614fbdd0e6fbf36d20be0d80c1626305e8e",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_inline_image_reviews.json",
+      "bytes": 1084,
+      "sha256": "e7f2b4cde3e254afc5c160f6029f5073feac448d400ebfcf42808d6a6b5cfae9",
       "mode": 420
     },
     {
@@ -14016,6 +14034,18 @@
       "mode": 420
     },
     {
+      "file": "deeptutor/services/student_learning/question_slice_index.json",
+      "bytes": 773550,
+      "sha256": "4b807635cb1bbbd6fe82767f180e142f2c9e6adc8e01787c001cf82591ba3e07",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_slices.py",
+      "bytes": 4837,
+      "sha256": "c3156a62d494834cd39fb0080d3ce2c19f48a1ad37408bc5475b801bca6b8a78",
+      "mode": 420
+    },
+    {
       "file": "deeptutor/services/student_learning/question_source_classifications.json",
       "bytes": 48477,
       "sha256": "aa8f06ba8e60138dff44d76a96af01ca4b78296cdd21c3d78eb44a5e5205b00a",
@@ -14029,8 +14059,32 @@
     },
     {
       "file": "deeptutor/services/student_learning/question_sources.py",
-      "bytes": 29403,
-      "sha256": "2d7ed64c7d2f0264a95725d76107156ae204c8b2da17845dd0e4c9b8afa4de2a",
+      "bytes": 36430,
+      "sha256": "bb4065177fd1e546fac7d4ffd2a396404d03e7fe84b3bb4cd3f70d283d883e13",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_topic_index.json",
+      "bytes": 956539,
+      "sha256": "55ab1ecd43c2db6ec9c306e10158b5b137d21de8edd73c9fc271ddd6e151f738",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_topic_reviews.json",
+      "bytes": 40979,
+      "sha256": "dd917b4033286554160fbd8ca7627783b7a77b141c1ffab6106299da9c1e66df",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_topics.json",
+      "bytes": 12883,
+      "sha256": "2ab79d0db1371d56aa39b6e64bb199550107f52fa24eb4ba1747170e15aa8162",
+      "mode": 420
+    },
+    {
+      "file": "deeptutor/services/student_learning/question_topics.py",
+      "bytes": 15862,
+      "sha256": "f18f346a8222429564438e9b3058d0d36cf456a596d1e83d59ae9e765305e905",
       "mode": 420
     },
     {
@@ -14047,8 +14101,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/reference_task_policy.py",
-      "bytes": 10104,
-      "sha256": "56b61c63a00db78a700b449e7c9ca45eb498e9732c649894ef24c9c635e495d3",
+      "bytes": 11877,
+      "sha256": "d8c8500210ecc97f2ba2a96f04b380602fef5542155cb82390d5880cda3359be",
       "mode": 420
     },
     {
@@ -14125,14 +14179,14 @@
     },
     {
       "file": "deeptutor/services/student_learning/textbook_exercises.py",
-      "bytes": 6240,
-      "sha256": "3ff0d34d20d2be3cedb03b665a6dd39f67959fc0c3437daf74e09343deda1cba",
+      "bytes": 6553,
+      "sha256": "3160cadcef68f9555adbe4c3857168d1ca4d6e9e780e03744869a3f88a85c898",
       "mode": 420
     },
     {
       "file": "deeptutor/services/student_learning/textbook_grounding.py",
-      "bytes": 22241,
-      "sha256": "3af5bbf4ff14025ef08db7e660584851c6ae2aaadb6db6e007a0706099945d7f",
+      "bytes": 37475,
+      "sha256": "4bb774362eef80e25018908bf1954b7b3e9c5e718870d3cbe2b12bb984394abc",
       "mode": 420
     },
     {
@@ -14143,8 +14197,8 @@
     },
     {
       "file": "deeptutor/services/student_learning/uploads.py",
-      "bytes": 18006,
-      "sha256": "a01b32129e0eebd7cab93701bc9338274755bfff35fb2b4032c15cf71e8e35b1",
+      "bytes": 18669,
+      "sha256": "f1803a2391160d9f249dfa28b134f0625c576a28299c259c4de97f0acc935307",
       "mode": 420
     },
     {
@@ -14761,8 +14815,8 @@
     },
     {
       "file": "deeptutor/tools/builtin/__init__.py",
-      "bytes": 107709,
-      "sha256": "be9555d17119c0fa39ba3381ba9ca00cb155d63726846c3cbd83803938f6aaa8",
+      "bytes": 108275,
+      "sha256": "92932918b5afc00dc60d97f9fa86b3fd14472ab16ea90075cd312d3e21c6add4",
       "mode": 420
     },
     {
@@ -15283,8 +15337,8 @@
     },
     {
       "file": "deeptutor/tools/student_question_sources.py",
-      "bytes": 5251,
-      "sha256": "d4d3a3f897616eb843e7bcb6e915333109aa29d9756a6d13c2d2e99698df0860",
+      "bytes": 6115,
+      "sha256": "9b668f1a26c23294a126cb4f583aa3fa29073d7cfd4c426ebee8bab2d4e37226",
       "mode": 420
     },
     {
@@ -16014,6 +16068,12 @@
       "mode": 420
     },
     {
+      "file": "scripts/build_question_slices.py",
+      "bytes": 21671,
+      "sha256": "b0011fb0e0300825c261ee2e2388c2362369944b3dd4829b3611a6f41895b7fd",
+      "mode": 420
+    },
+    {
       "file": "scripts/build_router_index.py",
       "bytes": 1667,
       "sha256": "e941f2ea667e481ee25c19bc93e848d23ec4dcd0fec78a99e414c723f5b7043b",
@@ -16041,6 +16101,12 @@
       "file": "scripts/check_module_install.py",
       "bytes": 5016,
       "sha256": "c5081d39505dcd993bf5ccfc026ca419355f8a0689630f29f032bd9d0cf14bc1",
+      "mode": 420
+    },
+    {
+      "file": "scripts/check_question_topic_index.py",
+      "bytes": 3989,
+      "sha256": "41d1eb03c4ec29dbab21d9d32df22ce2ada5bd129b4384f407e1a1835fbeea2d",
       "mode": 420
     },
     {

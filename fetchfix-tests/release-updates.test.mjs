@@ -94,6 +94,30 @@ test('a stalled manifest route leaves time to verify the installed version on th
   assert.deepEqual(requests, ['api.github.com', 'github.com']);
 });
 
+test('an archive that keeps transferring can complete beyond the old 30-minute deadline', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-download-slow-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bytes = Buffer.alloc(32, 1);
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  const oldDeadline = new AbortController();
+  t.mock.method(AbortSignal, 'timeout', () => oldDeadline.signal);
+  let clock = 0;
+  t.mock.method(Date, 'now', () => clock);
+  const progress = [];
+  await downloadReleaseUpdate(manifest, root, (_percent, { received }) => progress.push(received),
+    async () => new Response(new ReadableStream({
+      pull(stream) {
+        clock += 59000;
+        if (clock >= 30 * 60 * 1000) oldDeadline.abort(new Error('old total deadline'));
+        stream.enqueue(bytes.subarray(0, 1));
+        if (clock / 59000 === bytes.length) stream.close();
+      },
+    }), { headers: { 'content-length': String(bytes.length) } }));
+  assert.ok(clock > 30 * 60 * 1000);
+  assert.equal(progress.at(-1), bytes.length);
+  assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+});
+
 test('connection, interrupted-body and checksum failures retry the public API without retaining a partial archive', async t => {
   const bytes = Buffer.from('the complete signed archive');
   const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
