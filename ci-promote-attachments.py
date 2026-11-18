@@ -16,13 +16,19 @@ def api(path):return json.loads(gh('api','repos/'+repo+'/'+path))
 def sha(file):
  with file.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 def public(asset):
- for url in [asset['browser_download_url'],asset['url']+'?readback='+str(time.time_ns())]:
+ url=asset['browser_download_url']
+ expected=asset['digest'].split(':',1)[1]
+ for address in (url,url+'?readback='+str(time.time_ns())):
   try:
-   raw=urlopen(Request(url,headers={'User-Agent':'Kaixin-Publication-Readback','Accept':'application/octet-stream'}),timeout=60).read()
-   assert hashlib.sha256(raw).hexdigest()==asset['digest'].split(':')[1]
+   with urlopen(Request(address,headers={'User-Agent':'Kaixin-Publication-Readback','Accept':'application/octet-stream'}),timeout=30) as reply:
+    raw=reply.read(asset['size']+1)
+   assert len(raw)==asset['size'] and hashlib.sha256(raw).hexdigest()==expected, asset['name']
    return raw
-  except Exception as error:last=error
- raise last
+  except (OSError,AssertionError):
+   continue
+ raw=gh('api','-H','Accept: application/octet-stream','repos/'+repo+'/releases/assets/'+str(asset['id']))
+ assert len(raw)==asset['size'] and hashlib.sha256(raw).hexdigest()==expected, asset['name']
+ return raw
 
 def download_public_archive(asset,destination):
  partial=destination.with_name(destination.name+'.partial')
