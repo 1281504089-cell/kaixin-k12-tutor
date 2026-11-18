@@ -24,6 +24,11 @@ class IntelSevenFinalizationTest(unittest.TestCase):
     def setUpClass(cls):
         cls.original = json.loads((ROOT/finalize.SOURCE_LOCK).read_bytes())
         cls.inputs = {name:finalize.sha(ROOT/name) for name in set(cls.original['recipe_inputs_sha256']) | finalize.NEW_INPUTS}
+        # Publication metadata advances after native checks; retain the exact source-phase fixture.
+        cls.source_publication = (ROOT/'intel7-complete-source-publication.json').read_bytes()
+        expected = cls.original['recipe_inputs_sha256']['attachment-publication.json']
+        assert hashlib.sha256(cls.source_publication).hexdigest() == expected
+        cls.inputs['attachment-publication.json'] = expected
         cls.final = dict(schema_version=1, frozen=True, target='macos-x64', candidate_tag=cls.original['candidate_tag'],
                          source_commit=cls.original['source_commit'], launcher_build=cls.original['launcher_build'],
                          source_lock_file=finalize.SOURCE_LOCK, source_lock_sha256=finalize.SOURCE_LOCK_SHA,
@@ -38,6 +43,7 @@ class IntelSevenFinalizationTest(unittest.TestCase):
         for name in set(self.inputs) | {finalize.SOURCE_LOCK}:
             destination = self.root/name; destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT/name, destination)
+        (self.root/'attachment-publication.json').write_bytes(self.source_publication)
         self.final = copy.deepcopy(type(self).final)
         self.env = dict(GITHUB_RUN_ID='44260000001', GITHUB_SHA='a'*40,
                         GITHUB_REF_NAME=finalize.BRANCH_PREFIX+'unit-test')
@@ -90,6 +96,11 @@ class IntelSevenFinalizationTest(unittest.TestCase):
         self.reject(lambda d:d['allowed_source_input_changes'].append('ci-update-flow.cjs'))
         path = self.root/'ci-update-flow.cjs'; path.write_bytes(path.read_bytes()+b'\n')
         self.reject(lambda d:d['postflight_inputs_sha256'].update({'ci-update-flow.cjs':finalize.sha(path)}))
+
+    def test_later_publication_metadata_cannot_replace_the_native_source_baseline(self):
+        path = self.root/'attachment-publication.json'
+        path.write_text(json.dumps({'prepared':True, 'tag':'student-20261117-k12-7'}))
+        self.reject(lambda d:d['postflight_inputs_sha256'].update({'attachment-publication.json':finalize.sha(path)}))
 
     def test_unsafe_input_paths_and_hash_cycles_are_rejected(self):
         for name in ['../escape','/tmp/escape','x\\escape',finalize.FINALIZATION_LOCK,finalize.SOURCE_LOCK,'.github/workflows/test.yml']:
