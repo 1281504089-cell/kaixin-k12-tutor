@@ -1,0 +1,39 @@
+name: Final postchecks for completed immutable batch7 Intel execution
+on:
+  push:
+    branches: ['codex/k12-intel7-postflight-20261118-*']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  intel:
+    name: native (macos-x64, macos-15-intel)
+    timeout-minutes: 60
+    runs-on: macos-15-intel
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+      KX_FINALIZATION_LOCK_SHA256: 4f8e75b1202f605ec751da506dfbb32aac537ea5b32c0b2d9efe433127bd4926
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require independent owner-frozen postflight lock before any accepted request
+        run: python -B ci-finalize-intel7.py --validate-only
+      - name: Preserve original immutable and complete-evidence guards
+        run: python -B -m unittest test_mac_reuse test_k12_5_reuse test_intel7_reuse test_intel7_complete_evidence test_intel7_finalization
+      - name: Revalidate complete native evidence and perform missing final Intel postchecks
+        run: python -B ci-finalize-intel7.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: attachments-macos-x64
+          path: fresh-evidence/macos-x64/
+          if-no-files-found: error

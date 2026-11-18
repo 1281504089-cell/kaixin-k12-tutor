@@ -44,9 +44,23 @@ jobs:
           python -c 'import json,os;open("native-run-"+os.environ["KX_TARGET"]+".json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
           tag=$(python -c 'import json;print(json.load(open("attachment-batch.json"))["tag"])')
           gh release upload "$tag" "native-run-${KX_TARGET}.json" --clobber
+      - name: Check immutable installer reuse and native display guards
+        run: |
+          python -m unittest test_native_reuse_metadata test_native_reuse_inputs test_installer_segments test_native_pages_proof
+          node ci-k12-driver-selfcheck.cjs
+          node native-response-followup-selfcheck.cjs
+          node native-visibility-selfcheck.cjs
+          node native-click-followup-selfcheck.cjs
+          node update-flow-selfcheck.cjs
+          node update-flow-disposal-selfcheck.cjs
+          node update-flow-backup-selfcheck.cjs
       - name: Prepare Windows packaging tool
         if: runner.os == 'Windows'
         run: choco install nsis --yes --no-progress
+      - name: Verify bounded progress and same-account math fixture checks
+        run: |
+          node progress-read-selfcheck.cjs
+          node math-baseline-selfcheck.cjs
       - name: Verify fresh install, background indexing, bridge, and real update IPC
         run: python ci-fresh-install.py --target ${{ matrix.target }}
       - name: Retain native evidence

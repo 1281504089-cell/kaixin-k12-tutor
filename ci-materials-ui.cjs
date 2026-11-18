@@ -37,6 +37,76 @@ async function loadInitialLibrary(view, evidence) {
 module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
   const js = (fn, ...args) => view.executeJavaScript(`(${fn.toString()})(...${JSON.stringify(args)})`);
+
+  function mathReady(selector, count, identity) {
+    const enough = document.querySelectorAll(selector).length >= count;
+    if (!identity) return enough;
+    const articles = [...document.querySelectorAll('article')];
+    return enough && typeof identity.title === 'string' && identity.title.length > 0
+      && new URLSearchParams(location.search).get('record') === identity.record
+      && articles.length === 1 && articles[0].querySelector('h2')?.textContent.trim() === identity.title;
+  }
+
+  async function captureMathFailure(key, targetUrl, selector, count, error) {
+    const stem = 'native-math-' + key + '-failure-' + process.pid + '-' + Date.now();
+    const report = { key, target_url: targetUrl, expected_record: mathFixture[key], selector, expected_count: count,
+      expected_title: key === 'mistake' ? (mathFixture.mistake_title ?? null) : null,
+      original_error: String(error.stack || error), captured_at: new Date().toISOString() };
+    try { report.actual_url = view.getURL(); } catch (caught) { report.url_capture_error = String(caught); }
+    try {
+      report.snapshot = await js(async (selector, expectedRecord) => {
+        const article = document.querySelector('article');
+        const nodes = [...document.querySelectorAll(selector)];
+        const layoutVisible = node => [...node.getClientRects()].some(rect => rect.width > 0 && rect.height > 0)
+          && getComputedStyle(node).visibility !== 'hidden' && getComputedStyle(node).display !== 'none';
+        const inViewport = node => layoutVisible(node) && [...node.getClientRects()].some(rect => rect.bottom > 0 && rect.right > 0 && rect.top < innerHeight && rect.left < innerWidth);
+        const apiResources = performance.getEntriesByType('resource').filter(row => /\/api\/student\/mistakes(?:[?\/]|$)/.test(row.name))
+          .slice(-20).map(row => ({ url: row.name, duration: row.duration, response_status: row.responseStatus > 0 ? row.responseStatus : null, transfer_size: row.transferSize }));
+        const snapshot = { url: location.href, current_record: new URLSearchParams(location.search).get('record'),
+          expected_record: expectedRecord, ready_state: document.readyState, viewport: { width: innerWidth, height: innerHeight },
+          article_count: document.querySelectorAll('article').length, actual_article_h2: article?.querySelector('h2')?.textContent.trim() ?? null, katex_count: nodes.length,
+          layout_visible_count: nodes.filter(layoutVisible).length, in_viewport_count: nodes.filter(inViewport).length,
+          hidden_count: nodes.filter(node => !layoutVisible(node)).length,
+          errors: [...document.querySelectorAll('.katex-error')].map(node => ({ text: node.textContent, title: node.getAttribute('title') })).slice(0, 20),
+          formulas: nodes.slice(0, 30).map(node => ({ text: node.querySelector('.katex-html')?.textContent ?? node.textContent, layout_visible: layoutVisible(node), in_viewport: inViewport(node) })),
+          details: [...document.querySelectorAll('article details')].map(node => ({ open: node.open, katex_count: node.querySelectorAll('.katex').length })),
+          selected_buttons: [...document.querySelectorAll('button[aria-pressed="true"]')].map(node => node.textContent.slice(0, 300)).slice(0, 12),
+          article_text: article?.innerText.slice(0, 8000) ?? '', body_text: document.body.innerText.slice(0, 8000),
+          html: article?.outerHTML.slice(0, 180000) ?? document.body.outerHTML.slice(0, 30000), api_resources: apiResources,
+          named_workspace: new URLSearchParams(location.search).get('dt_workspace'),
+          script_resources: performance.getEntriesByType('resource').filter(row => row.initiatorType === 'script').slice(-20).map(row => ({ url: row.name, duration: row.duration, response_status: row.responseStatus > 0 ? row.responseStatus : null })) };
+        try { snapshot.workspace_storage = { local: localStorage.getItem('deeptutor:workspace'), session: sessionStorage.getItem('deeptutor:workspace') }; }
+        catch (caught) { snapshot.workspace_storage_error = String(caught); }
+        if (new URLSearchParams(location.search).get('record') === expectedRecord) {
+          const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5000);
+          const url = new URL('/api/student/mistakes?practice=' + encodeURIComponent(expectedRecord) + '&dt_workspace=', location.href).href;
+          snapshot.api_probe = { kind: 'failure-time read-only practice GET; not the original request', url, requested_record: expectedRecord,
+            not_exposed_by_endpoint: ['id', 'status', 'analysis', 'source'] };
+          try {
+            const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin', signal: controller.signal });
+            snapshot.api_probe.status = response.status; snapshot.api_probe.ok = response.ok;
+            if (response.ok) {
+              const data = await response.json();
+              snapshot.api_probe.target = { title: data.title ?? null, subject: data.subject ?? null,
+                question: data.question ?? null, student_work: data.student_work ?? null,
+                image_count: Array.isArray(data.images) ? data.images.length : null };
+            }
+          } catch (caught) { snapshot.api_probe.error = String(caught); }
+          finally { clearTimeout(timer); }
+        }
+        return snapshot;
+      }, selector, mathFixture[key]);
+      if (report.snapshot.html) {
+        try { await writeFile(path.join(evidence, stem + '.html'), report.snapshot.html); report.dom_file = stem + '.html'; }
+        catch (caught) { report.dom_write_error = String(caught); }
+        delete report.snapshot.html;
+      }
+    } catch (caught) { report.snapshot_error = String(caught); }
+    try { await writeFile(path.join(evidence, stem + '.png'), (await view.capturePage()).toPNG()); report.screenshot_file = stem + '.png'; }
+    catch (caught) { report.screenshot_error = String(caught); }
+    try { await writeFile(path.join(evidence, stem + '.json'), JSON.stringify(report, null, 2)); }
+    catch (caught) { console.warn('Math failure diagnostics could not be saved:', String(caught)); }
+  }
   async function wait(code, label) {
     const deadline = Date.now() + 180000;
     while (!await view.executeJavaScript(code)) {
@@ -195,11 +265,19 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
       ['saved_note', '/co-writer/', '.bn-editor table .katex', 2],
       ['mistake', '/mistakes?record=', 'article .katex', 9],
     ]) {
-      await view.loadURL(new URL(route + encodeURIComponent(mathFixture[key]), view.getURL()).href);
-      await wait(`document.querySelectorAll(${JSON.stringify(selector)}).length >= ${count}`, 'Native math rendering failed: ' + key);
-      assert.equal(await js(() => document.querySelectorAll('.katex-error').length), 0);
-      assert.equal(await js(() => document.documentElement.scrollWidth <= innerWidth), true);
-      await writeFile(path.join(evidence, 'native-math-' + key + '.png'), (await view.capturePage()).toPNG());
+      const targetUrl = new URL(route + encodeURIComponent(mathFixture[key]), view.getURL()).href;
+      try {
+        await view.loadURL(targetUrl);
+        const identity = key === 'mistake' ? { record: mathFixture[key], title: mathFixture.mistake_title } : null;
+        if (identity) assert.ok(typeof identity.title === 'string' && identity.title.length > 0, 'Missing unique mistake fixture title');
+        await wait('(' + mathReady.toString() + ')(...' + JSON.stringify([selector, count, identity]) + ')', 'Native math rendering failed: ' + key);
+        assert.equal(await js(() => document.querySelectorAll('.katex-error').length), 0);
+        assert.equal(await js(() => document.documentElement.scrollWidth <= innerWidth), true);
+        await writeFile(path.join(evidence, 'native-math-' + key + '.png'), (await view.capturePage()).toPNG());
+      } catch (error) {
+        await captureMathFailure(key, targetUrl, selector, count, error);
+        throw error;
+      }
     }
   }
   const report = { multiple: true, saved_files: 21, library_retention: true, originals_byte_identical: true, original_preview_opened: true,

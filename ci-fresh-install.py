@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import time
+import importlib.util
 from urllib.request import Request, urlopen
 
 parser = argparse.ArgumentParser()
@@ -36,14 +37,23 @@ def sha(file):
 
 
 def release_metadata():
-    return json.loads(subprocess.check_output([
-        'gh', 'api', 'repos/1281504089-cell/kaixin-k12-tutor/releases/latest'
-    ]))
+    latest = json.loads(subprocess.check_output(['gh', 'api', 'repos/1281504089-cell/kaixin-k12-tutor/releases/latest']))
+    reuse = lock.get('reuse_existing_native')
+    if reuse:
+        assert latest['id'] == reuse['baseline_latest_id'], 'Stable release changed during candidate reuse'
+        stable=json.loads(subprocess.check_output(['gh','api','repos/1281504089-cell/kaixin-k12-tutor/releases/tags/core-updates']))
+        stable_assets={row['name']:row for row in stable['assets']}
+        for name,digest in reuse['baseline_feeds'].items():assert stable_assets[name]['digest']=='sha256:'+digest, 'Stable feed changed: '+name
+        return json.loads(subprocess.check_output(['gh', 'api', 'repos/1281504089-cell/kaixin-k12-tutor/releases/tags/' + lock['tag']]))
+    return latest
 
 
 release = release_metadata()
 assert release['id'] == lock['release_id'] and release['tag_name'] == lock['tag']
-assert release['draft'] is False and release['prerelease'] is False
+assert release['draft'] is False and release['prerelease'] is bool(lock.get('reuse_existing_native'))
+if lock.get('reuse_existing_native'):
+    from ci_repackage import validate_reuse_lock
+    validate_reuse_lock(lock, json.loads((root/'attachment-batch.json').read_text()), release, target)
 assets = {row['name']: row for row in release['assets']}
 download_rows = []
 for file in expected['files']:
@@ -109,12 +119,27 @@ assert base['runtimeId'] == expected['base_runtime_id']
 assert included['runtimeId'] == expected['runtime_id']
 assert included['baseRuntimeId'] == base['runtimeId']
 assert included['commit'] == lock['core_commit'] and included['sha256'] == lock['core_sha256']
-from ci_repackage import prepare_candidate
-candidate_out, batch = prepare_candidate(root, target, install, resources, downloads, evidence, lock)
+from ci_repackage import prepare_candidate, verify_production_launcher
+if lock.get('reuse_existing_native'):
+    batch = json.loads((root/'attachment-batch.json').read_text())
+    assert included == batch['manifests'][target]
+    assert sha(resources/'update'/included['archive']) == batch['core_asset']['digest'].removeprefix('sha256:')
+    assert {file.name for file in (resources/'app/src').iterdir()} == {Path(name).name for name in batch['shell_files']}
+    for name,row in batch['shell_files'].items():assert sha(resources/'app'/name) == row['sha256']
+    helper_spec=importlib.util.spec_from_file_location('reuse_download',root/'ci-mac-reuse.py')
+    helper=importlib.util.module_from_spec(helper_spec);helper_spec.loader.exec_module(helper)
+    prior=root/'prior-update';prior.mkdir()
+    helper.download(lock['reuse_existing_native']['prior_core_asset'],prior)
+    (prior/'runtime.json').write_text(json.dumps(lock['reuse_existing_native']['prior_manifests'][target],indent=2))
+    candidate_out=root/('candidate-'+target);downloads.rename(candidate_out)
+    verify_production_launcher(root,target,install,resources,evidence)
+else:
+    candidate_out, batch = prepare_candidate(root, target, install, resources, downloads, evidence, lock)
 included = json.loads((resources / 'update/runtime.json').read_text())
 assert included == batch['manifests'][target]
 # Keep the exact unverified installer bytes in the isolated candidate for focused retries.
-run(['gh', 'release', 'upload', batch['tag'], *candidate_out.iterdir(), '--clobber'])
+if not lock.get('reuse_existing_native'):
+    run(['gh', 'release', 'upload', batch['tag'], *candidate_out.iterdir(), '--clobber'])
 environment = {**os.environ, 'KX_EXPECTED_PLATFORM': expected['platform'], 'KX_EXPECTED_ARCH': expected['arch']}
 run(['node', 'ci-fresh-smoke.mjs', executable, resources, work / '全新学习目录', evidence], env=environment, timeout=1100)
 from ci_picture_fresh import verify_picture_fresh
@@ -131,6 +156,7 @@ assert after['id'] == lock['release_id'], 'Latest release changed during validat
 for file in expected['files']:
     actual = next(row for row in after['assets'] if row['name'] == file['name'])
     assert actual['digest'] == 'sha256:' + file['sha256'] and actual['size'] == file['bytes']
+    assert actual['id'] == assets[file['name']]['id'], 'Existing installer asset was overwritten'
 report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lock['release_id'],
           'release': batch['tag'], 'launcher_build': batch['launcher_build'],
           'core_commit': batch['core_commit'], 'downloaded_from_public_github': True,
@@ -143,6 +169,7 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'launcher_migration': {'from_published_launcher': lock['tag'], 'signed_core_carrier': oldest_entry['signed_launcher_restarted']},
           'shell_files': batch['shell_files'],
           'full_files': [{'file': file.name, 'bytes': file.stat().st_size, 'sha256': sha(file)} for file in sorted(candidate_out.iterdir())],
+          'installer_reuse': {'enabled': bool(lock.get('reuse_existing_native')), 'original_packaging_run': lock.get('reuse_existing_native',{}).get('original_native_run'), 'installers_repackaged': not bool(lock.get('reuse_existing_native')), 'existing_installer_assets_overwritten': False},
           'real_keys_used': False, 'real_learning_records_modified': False}
 (evidence / 'verified.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
 report_file = evidence / ('verification-' + target + '.json')

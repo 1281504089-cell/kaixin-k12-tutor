@@ -1,18 +1,23 @@
 [
   {
     "file": ".github/workflows/attachment-core.yml",
-    "bytes": 2458,
-    "sha256": "5038feba169088f06e17c238dea8ef391c592005c324fb34c532ef15ed91a9c5"
+    "bytes": 2604,
+    "sha256": "58fb8991556d80c24a7ea93593b4c8d3764e0c2d79b12f1ee18ba3264d5394cf"
   },
   {
     "file": ".github/workflows/attachment-native.yml",
-    "bytes": 2466,
-    "sha256": "0ae2ebb3ef111fd6b254b74931a524f9ab2ecf2e26fb8b4b063efc9e4f25b09e"
+    "bytes": 3192,
+    "sha256": "d347b2194057703d2839873e55ec1dfed8f4b25e2e55f2aab2274de08f975bfa"
   },
   {
     "file": ".github/workflows/attachment-publish.yml",
-    "bytes": 1564,
-    "sha256": "934d5005376bd30b677d3a461c605f9924db53d0f50e06480ee6fe36274d9785"
+    "bytes": 2047,
+    "sha256": "70ad0f8e4172f7b603f594d3fc9d652bc7718eee115d4f6eccb4b54e8e1a4eeb"
+  },
+  {
+    "file": ".github/workflows/k12-existing5-reverify.yml",
+    "bytes": 1699,
+    "sha256": "81eff52df5b0e5d66e7072f40e38c4a53306bc4a399a67b5b3194e9e69d1be1d"
   },
   {
     "file": ".github/workflows/k12-intel-reverify.yml",
@@ -36,13 +41,13 @@
   },
   {
     "file": "CURRENT-DESKTOP-RELEASE.json",
-    "bytes": 53442,
-    "sha256": "db14563df0d55afaf77da10b0c527f3f2725d3e60b24e6b3c5b08219ae023344"
+    "bytes": 84221,
+    "sha256": "bb6c157ce56a4490b5cd1ca5bb9451670ecb774f7dde8b4745dee51e4fc10170"
   },
   {
     "file": "INSTALLATION.txt",
-    "bytes": 4102,
-    "sha256": "ba66ad6b951c9870e3f7b0431200108149b2d3dc61d0d24826ea2f76203d6b49"
+    "bytes": 5374,
+    "sha256": "86853ed89ef9ae17dd37f73508567bbaf608bee055fbdf4941a46e7be116180e"
   },
   {
     "file": "LOCAL-ACTUAL-UPDATE-20261117.json",
@@ -56,8 +61,8 @@
   },
   {
     "file": "POST-PUBLISH-VERIFIED.json",
-    "bytes": 650,
-    "sha256": "c4f876182f0a04819365ba4e9bb9ac17c5b5c07bccbe36fe99c7ceecb398f0cf"
+    "bytes": 25630,
+    "sha256": "4c6c31a170bb9a50aff60c2d4becc0ea0f8ab3d8eb1315146a93eeee7427aebb"
   },
   {
     "file": "RECIPE-HANDOFF-20261116.md",
@@ -66,18 +71,18 @@
   },
   {
     "file": "RECIPE-STATE.json",
-    "bytes": 1641,
-    "sha256": "551b4f5a3fba3e49f2515fe7c876605c01b53d1bd4e1edc0bfe4f7929818e1ef"
+    "bytes": 6011,
+    "sha256": "9b50af428eab356df2a17e92416814a98b0daf22a1125a0f8fde4d6a639edc65"
   },
   {
     "file": "RELEASE-NOTES.md",
-    "bytes": 1684,
-    "sha256": "38bbf846a6219c52afcfd42abfd685e1f112b3ac6e6b239b788a1222eaed3d16"
+    "bytes": 1870,
+    "sha256": "00502825e03327133fafeffbaec95c0552fc9abd86a78dd6bb6355d6897fea4f"
   },
   {
     "file": "SOURCE-TEST-HANDOFF.json",
-    "bytes": 9693,
-    "sha256": "be1bda3824d0854b9a211474fb458dfda558267ac9793eb370bcdb1314dc0dfb"
+    "bytes": 13987,
+    "sha256": "bfb2bf91d2c61f12a5c3bad253de6fddcce334659b68683a134f0801e8ebb5cf"
   },
   {
     "file": "VERIFICATION-QUESTION-PICTURES-20261117.json",
@@ -91,8 +96,8 @@
   },
   {
     "file": "attachment-batch.json",
-    "bytes": 7274,
-    "sha256": "14c41127ed26ac35cc22435d34fc521ba8f6dc2381c8278d08cf02c2beb3a9dd"
+    "bytes": 8174,
+    "sha256": "24e8ba0f15fe04467812a7752d6f7a57242f8665971752b6c1d05e12e4f3652c"
   },
   {
     "file": "attachment-publication.json",
@@ -101,13 +106,13 @@
   },
   {
     "file": "attachment-release.json",
-    "bytes": 2921,
-    "sha256": "b7559e60314410291ec0730b85d77ac78a1e2d6bb270e2d276cf3260e55b0033"
+    "bytes": 3901,
+    "sha256": "76678e0807090b1050d771efaed4a42236dcd376712ad5a525df78914365b270"
   },
   {
     "file": "bootstrap_source.py",
-    "bytes": 2759,
-    "sha256": "87e0dfa910d6699f5e25dc1d301abed67fe416914f12781b0f5b77050d75a24f"
+    "bytes": 2774,
+    "sha256": "743d6a95b359c5506452412a25e77fe0c9ce0c518e584c7f6cb84baab959c10b"
   },
   {
     "file": "ci-attachment-core.py",
@@ -116,8 +121,8 @@
   },
   {
     "file": "ci-fresh-install.py",
-    "bytes": 8265,
-    "sha256": "6ef3e89274467910a61bb7a1b0a5db152a8710f06dd19627617807967e32d851"
+    "bytes": 10705,
+    "sha256": "a5190f280fee10f45f92674daa4099c00be205dff23458afe1af307a9e2ba8f3"
   },
   {
     "file": "ci-fresh-smoke.mjs",
@@ -136,13 +141,18 @@
   },
   {
     "file": "ci-k12-library-ui.cjs",
-    "bytes": 28658,
-    "sha256": "04eaa417441aaf342950ba22c63cbad09773eeccd92efdca5aaa7797b0a1a43e"
+    "bytes": 48507,
+    "sha256": "17918de6d70f2ec25292d0c9d94719ba478eb580dde10e75ed6c701248c529ea"
   },
   {
     "file": "ci-mac-reuse.py",
-    "bytes": 22426,
-    "sha256": "1ed66de9e46e3f7b3c747acc38b026f91a733d3283786bdc1104132a744e5f0d"
+    "bytes": 33894,
+    "sha256": "6b2f176d0c631a6896a355f9e9337988405f36f76402847ae733fa49db118304"
+  },
+  {
+    "file": "ci-materials-ui.cjs",
+    "bytes": 20809,
+    "sha256": "819e4d3100745c8549006b9b37e78dc92b23e72f9240ca086a5359f6b95be773"
   },
   {
     "file": "ci-picture-fresh.cjs",
@@ -151,8 +161,8 @@
   },
   {
     "file": "ci-promote-attachments.py",
-    "bytes": 17550,
-    "sha256": "c1c089ebe2a497cd581b37ad484ef9dd70eaef39cebbf40a9f0cd51cad0539ae"
+    "bytes": 21050,
+    "sha256": "581f48142cb2ebbfd5f67289235eee77ad6592cb3ffde3382d48bb6ec5db5476"
   },
   {
     "file": "ci-proxy-smoke.cjs",
@@ -165,9 +175,24 @@
     "sha256": "c6bd2a142e9c4867b97a61b29a6e43360d7f1ac069ccb2a8c0b896a7b82e68ca"
   },
   {
-    "file": "ci-update-flow.cjs",
+    "file": "ci-update-flow.backup-baseline.cjs",
+    "bytes": 20885,
+    "sha256": "2ddf5e3fc81baa72e89ef2d983f7a8ef3250a1309b79d179f45e5b1f25b0084e"
+  },
+  {
+    "file": "ci-update-flow.baseline.cjs",
     "bytes": 11776,
     "sha256": "3af231152ead24096c09bbd4971668cf153d68ca9adb66a5fef47121c89c86ed"
+  },
+  {
+    "file": "ci-update-flow.cjs",
+    "bytes": 32468,
+    "sha256": "e0018a8d015b467fcc2b0d96147b9b971b185f95b35d6d4f1cf85ce2aa7e52a3"
+  },
+  {
+    "file": "ci-update-flow.disposal-baseline.cjs",
+    "bytes": 16740,
+    "sha256": "f188172acf5675591b7ebb74bcd90aeebef529c93083027aa2b70d009e443bbd"
   },
   {
     "file": "ci_attachment_bridge.py",
@@ -176,13 +201,13 @@
   },
   {
     "file": "ci_picture_fresh.py",
-    "bytes": 3784,
-    "sha256": "770278a15fc515aa715ba3d0c525f1771a6a3d81a3edb2dc8efdb93a00f891bb"
+    "bytes": 5832,
+    "sha256": "1d1eeeabce878947d88d9e61e473b672a77f5df03e71bf3b105c5252b991eedc"
   },
   {
     "file": "ci_repackage.py",
-    "bytes": 8346,
-    "sha256": "516bc14f57f5abcafdd2c243cd106ff770bcbcdb4192ab4cea7abfa690d5501f"
+    "bytes": 11810,
+    "sha256": "fa3562a9b33416bf3b5f565373cb84f90a8c7839864ebd7e5f6496764168089d"
   },
   {
     "file": "ci_update_probe.py",
@@ -220,6 +245,11 @@
     "sha256": "79fc7f4ef0b00031eaff80cc8774c5cea1649312301283052aa99983b6e427d2"
   },
   {
+    "file": "fetchfix-tests/main-lifecycle.test.mjs",
+    "bytes": 2769,
+    "sha256": "e7b52183aa6f5c409b9e9a4cb517e83aa469e56ac455c00f529a6994f1b8d30d"
+  },
+  {
     "file": "fetchfix-tests/media-permissions.test.mjs",
     "bytes": 3709,
     "sha256": "960d107ac305b4705da286e6f50e8f3f7ba988500d71505b9b80a396ae535340"
@@ -251,8 +281,8 @@
   },
   {
     "file": "fetchfix-tests/shell-update.test.mjs",
-    "bytes": 6623,
-    "sha256": "15472a3b3e8202439390a446adf62d858cedc909195a54e46e16b156970f5b1e"
+    "bytes": 8237,
+    "sha256": "88b9e9437d95eb683d5d24a163ffb05135d018b37d65ab38d73324973717c72d"
   },
   {
     "file": "fetchfix-tests/signing.test.mjs",
@@ -292,7 +322,7 @@
   {
     "file": "fresh-install-lock.json",
     "bytes": 3829,
-    "sha256": "fa450e1a8e251d59205bd1272be6ede894583bce7618c116331f59150801e4b7"
+    "sha256": "66be8d6e5d4dd3174ea26cf0bd2d53c6be4d82abf166a690e067b73125525446"
   },
   {
     "file": "intel-k12-4-reuse-lock.json",
@@ -303,6 +333,11 @@
     "file": "intel-reuse-lock.json",
     "bytes": 17844,
     "sha256": "e7cdebe0cfafcb26370044e6cf5d3e1ca2bd02b134e9fe05dff5aedf1c852faa"
+  },
+  {
+    "file": "launcher-changes-20261117.json",
+    "bytes": 385,
+    "sha256": "56f69d72746d2b7e7d5da36b22a8d542f970d5ede529d70943a5df6d3648902c"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -405,14 +440,64 @@
     "sha256": "396935beedd7b6c0040b8c72717867e6dc09024acb9238f51d93b8043fe155d2"
   },
   {
+    "file": "math-baseline-selfcheck.cjs",
+    "bytes": 2408,
+    "sha256": "5e89e65b0c30f04726def28856db94578758b9e97d22a1711e1d98e8ea1a56de"
+  },
+  {
+    "file": "native-click-followup-selfcheck.cjs",
+    "bytes": 3633,
+    "sha256": "eb23d6325e253ed4548d0e4adefd5d872ac2bd9da594ecea8ea528a2a855d76b"
+  },
+  {
     "file": "native-k12-api-smoke.py",
-    "bytes": 12752,
-    "sha256": "61e87c5387f1f0a6208b5889aca788156fba42dca433aee6a3b92f9ca3997895"
+    "bytes": 16208,
+    "sha256": "47f56a233bf36c07c67c4b57614a9a73181ecc139c92472f9255ec1934bb887c"
   },
   {
     "file": "native-k12-fixture.py",
-    "bytes": 4696,
-    "sha256": "d4cdf272a994258ff9f5a29eb9174b0bbbeab64648680935800e147d9122d71b"
+    "bytes": 6170,
+    "sha256": "f8aef9741cac1fa5bf438fa25713a14f445e72e4a25a32266215db5caec84ae8"
+  },
+  {
+    "file": "native-materials-fixture.py",
+    "bytes": 2212,
+    "sha256": "828627b8a59b5c470e380167891ef9b4d71f4138cffd90ff68a18874274e9a18"
+  },
+  {
+    "file": "native-response-followup-selfcheck.cjs",
+    "bytes": 6467,
+    "sha256": "41e49dfc541630e8e5745834fb78889d4dbcc0e47476784e1b1ec5756ab83cad"
+  },
+  {
+    "file": "native-visibility-selfcheck.cjs",
+    "bytes": 6037,
+    "sha256": "c39e71c144fdf6b81a35387b1d81359cf5d8ecba97900fd15ba6c420d7f3cd71"
+  },
+  {
+    "file": "partial-entry-fixtures/oldest-update-entry.json",
+    "bytes": 95767,
+    "sha256": "694a7e8d525ff7c6a4d665d6ce65318d25d0512e8c95e5ca339b823c508c17f6"
+  },
+  {
+    "file": "partial-entry-fixtures/picture-fresh-ui.json",
+    "bytes": 32314,
+    "sha256": "32ebe30703713498e8f80608fa2a6ae32645c0efa770062fa234cb894e98a801"
+  },
+  {
+    "file": "partial-entry-fixtures/reuse-lock.json",
+    "bytes": 53994,
+    "sha256": "36d851b7865fbdbb86355764198351cb69c72647f4842e5fcd9ca1c7087cf0d9"
+  },
+  {
+    "file": "partial-entry-fixtures/update-entry.json",
+    "bytes": 96051,
+    "sha256": "80a73595edbab1adc8ebf2831f6686430f4d993a274820697e1b5e6752a97395"
+  },
+  {
+    "file": "partial_native_evidence.py",
+    "bytes": 6469,
+    "sha256": "6e3a27698c184511cc5eb613bba7ba05bdcc7bd7e9443030f86cb08fd49a7080"
   },
   {
     "file": "prepare-bank-payload.py",
@@ -421,13 +506,23 @@
   },
   {
     "file": "prepare-candidate.py",
-    "bytes": 7118,
-    "sha256": "5a06cd494a6200a419c15e5053505785ee005e24236e889daaba363e63119e6c"
+    "bytes": 7119,
+    "sha256": "cf8c7e15d9a6e838970fd571b74a4a92ea7db735be54d3a91adddd0e915a55ce"
   },
   {
     "file": "prepare-connector-upload.py",
     "bytes": 2872,
     "sha256": "2a0c45e7949ceb8972927861cb26465f23bc890ff1966fa019c9c07732d3bbb2"
+  },
+  {
+    "file": "prior-launcher-fingerprint.json",
+    "bytes": 2697,
+    "sha256": "1ec1b69726c30657293ae663c4f7f337b3be1089420bd5d572029666c97a7fbc"
+  },
+  {
+    "file": "progress-read-selfcheck.cjs",
+    "bytes": 2199,
+    "sha256": "eb7cea6a7d63249492294ca30622041971a4f517b2ca3a1e76bc69c8887c8ceb"
   },
   {
     "file": "publication_transaction.py",
@@ -441,13 +536,18 @@
   },
   {
     "file": "release_source.py",
-    "bytes": 7680,
-    "sha256": "90ef54ebd8ade0e8d9478cfc69be8f068191d2600b6e4aaf6e3d84242f3b2210"
+    "bytes": 8271,
+    "sha256": "eee2e3ab58bb52be2409d14a49fe84fd89832420c672ebd95f69f8e3c0a582b2"
   },
   {
     "file": "test-connector-upload.cjs",
     "bytes": 4994,
     "sha256": "4e9c50fc1f4c1d5274de1c5c06b33686ea04a1b5feec13cdbeb839220dbaad9f"
+  },
+  {
+    "file": "test_installer_segments.py",
+    "bytes": 1492,
+    "sha256": "cd2a94f259afcfc5ed63b5d90a6a59e2fc0231f33259aaac9cb91bc71360bdee"
   },
   {
     "file": "test_intel_reuse.py",
@@ -456,8 +556,8 @@
   },
   {
     "file": "test_mac_reuse.py",
-    "bytes": 6087,
-    "sha256": "7293ecdf5efe6dfa178e73f5fd27b9a43287493225845707cd1edf25c7f79ef7"
+    "bytes": 6173,
+    "sha256": "3260ccc1a82cc657894fa59221399f440dd64e8f08bc6af3cfd329c666dd6ebe"
   },
   {
     "file": "test_materials_upgrade.py",
@@ -471,18 +571,38 @@
   },
   {
     "file": "test_native_k12_api.py",
-    "bytes": 10902,
-    "sha256": "8793c4536e4f9bf098bef01b87d6ed4ff5e0bcd8cf1104c9b5266b8c64e1946e"
+    "bytes": 14357,
+    "sha256": "b76cf5c3b87e4cc1a6c633dab1a86eaf04fc7c0e46c08e9eb213fd58ba08591d"
+  },
+  {
+    "file": "test_native_pages_proof.py",
+    "bytes": 3482,
+    "sha256": "00689aabd43f2902cf5ce57e103f4cec96693c58b5b576e2976fe975d8cdbd4a"
+  },
+  {
+    "file": "test_native_reuse_inputs.py",
+    "bytes": 3844,
+    "sha256": "71e971b7c137be2829de53ad37d21ca6b90fd5536404938c7225124b6e105b1d"
+  },
+  {
+    "file": "test_native_reuse_metadata.py",
+    "bytes": 2507,
+    "sha256": "55112ffed965f0e7c16f3ecd616405a3b6cbe957596ee47be03f5d5fb496c4b4"
+  },
+  {
+    "file": "test_partial_native_evidence.py",
+    "bytes": 4375,
+    "sha256": "ce6ceafa874db0fe20a2a2e2f9c043c569f6bbafad69d55f6b0e3e2ad3b20d48"
   },
   {
     "file": "test_publication_transaction.py",
     "bytes": 11450,
-    "sha256": "4f8057387ecba510bb8cffcc4b8e19a7ffa9170bfba00792aa864646de9a7061"
+    "sha256": "a18296f7d4551f379e036fdba4187089d86826aace3c64ec43e9903cf3ab26d6"
   },
   {
     "file": "test_recovery_publication_gate.py",
-    "bytes": 2580,
-    "sha256": "c077667608a13d594a236d6c06c80a2ed9a86079a0cd4b8c48a8e3ce9c498e50"
+    "bytes": 3407,
+    "sha256": "de1b0afb74a57b16e0e2f873c14e22c8605d7948d6671d493ccd61fdd7a29a36"
   },
   {
     "file": "test_release_bank.py",
@@ -491,12 +611,32 @@
   },
   {
     "file": "test_release_source.py",
-    "bytes": 6211,
-    "sha256": "0fe33973d9f40087281d7352414ef8e029d7e519e2d8c319f9413528f58c1224"
+    "bytes": 8275,
+    "sha256": "a875579780c0e5a9b6bc4d6d75f641247aa9afa361f1aaf14c69c716b10ac4d9"
+  },
+  {
+    "file": "update-flow-backup-selfcheck.cjs",
+    "bytes": 13760,
+    "sha256": "5afa9e358eb8e9c74cc1fde74a5ee6dfc0b8dd723a440ea5f181b2ac528852e1"
+  },
+  {
+    "file": "update-flow-disposal-selfcheck.cjs",
+    "bytes": 12451,
+    "sha256": "47c7c0984418ad59732b91b98c79f62b9ed8e72e21f230c9c0df93ed942f9af9"
+  },
+  {
+    "file": "update-flow-selfcheck.cjs",
+    "bytes": 13368,
+    "sha256": "49ed7d9db305d36c48b511b73fb0509ab537d15e31c1b2e57f8ac884513f7b52"
   },
   {
     "file": "windows-k12-4-reuse-lock.json",
     "bytes": 49564,
     "sha256": "47fa938be3cb2a4d366daf6ac1a651b855233b478cb8eb8c19088412f95f54cb"
+  },
+  {
+    "file": "LOCAL-ACTUAL-UPDATE-20261118.json",
+    "bytes": 3687,
+    "sha256": "1dcb1a07f87b9b721baeea3a31d1284168c17e74af0eb492f10994e47f87a2e5"
   }
 ]

@@ -4,6 +4,8 @@ import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promis
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { spawn, execFileSync } from 'node:child_process';
+import { setTimeout as pause } from 'node:timers/promises';
 import { canonicalManifest } from '../src/bundles.mjs';
 import { stageBundledShell, applyBundledShell } from '../src/shell-update.mjs';
 
@@ -79,6 +81,31 @@ test('refuses a running process and payload symlinks', async t => {
   await rm(file);
   await symlink(path.join(f.app, 'src/main.mjs'), file);
   await assert.rejects(stageBundledShell(f.context, f.options), /symlink/);
+});
+
+test('an exited macOS process awaiting parent reap cannot block a verified launcher replacement', { skip: process.platform === 'win32', timeout: 10000 }, async t => {
+  const f = await fixture(t);
+  const holder = spawn(process.env.PYTHON || 'python3', ['-u', '-c', 'import os,sys\npid=os.fork()\nif pid==0: os._exit(0)\nprint(pid,flush=True)\nsys.stdin.readline()\nos.waitpid(pid,0)'], { stdio: ['pipe', 'pipe', 'inherit'] });
+  holder.stdin.on('error', () => {});
+  t.after(() => {
+    const timer = setTimeout(() => holder.kill('SIGKILL'), 1000);
+    holder.once('exit', () => clearTimeout(timer));
+    holder.stdin.end('\n');
+  });
+  const pid = await new Promise((resolve, reject) => {
+    holder.once('error', reject);
+    holder.once('exit', () => reject(new Error('Zombie fixture exited before its PID was read')));
+    holder.stdout.once('data', value => resolve(Number(value.toString().trim())));
+  });
+  assert(Number.isSafeInteger(pid) && pid > 0);
+  const deadline = Date.now() + 2000;
+  while (!execFileSync('/bin/ps', ['-p', String(pid), '-o', 'stat='], { encoding: 'utf8' }).trim().startsWith('Z')) {
+    assert(Date.now() < deadline, 'The fixture did not become a real zombie');
+    await pause(20);
+  }
+  assert.doesNotThrow(() => process.kill(pid, 0));
+  assert.equal((await applyBundledShell({ ...f.context, appPid: pid }, f.options)).status, 'applied');
+  assert.equal(await readFile(path.join(f.profileRoot, 'workspace/study.json'), 'utf8'), 'KEEP CHAT AND SETTINGS');
 });
 
 test('codesign failure restores the source, executable and signature and keeps study data', async t => {
