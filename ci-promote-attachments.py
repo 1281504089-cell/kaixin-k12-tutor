@@ -43,7 +43,8 @@ def download_public_archive(asset,destination):
 
 def verify_update_recovery(report,batch,target):
  tests=report['launcher_tests'];skipped=4 if target=='windows-x64' else 0
- assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':83,'pass':83-skipped,'fail':0,'skipped':skipped}
+ expected=84 if batch['tag']=='student-20261117-k12-11' else 83
+ assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':expected,'pass':expected-skipped,'fail':0,'skipped':skipped}
  transport=report['network']['interrupted_transport_fixture']
  assert transport['faults']==2 and transport['recoveries']==1 and transport['verified_complete']
  mixed=report['network']['interrupted_direct_denied_api_fixture']
@@ -88,6 +89,11 @@ def stage_run_for_target(batch,target):
 def recheck_lock_for_target(batch,target):
  old={'windows-x64':'windows-k12-4-reuse-lock.json','macos-x64':'intel-k12-4-reuse-lock.json','macos-arm64':'arm-k12-4-reuse-lock.json'}[target]
  selected=batch.get('native_rechecks',{}).get(target,{}).get('lock_file',old)
+ if batch['tag']=='student-20261117-k12-11':
+  assert target=='macos-x64' and selected=='intel-k12-11-reuse-lock.json'
+  assert batch['core_commit']=='04fb2adc0c36e964d3a43fc4a4c9c45a877a67c0'
+  assert stage_run_for_target(batch,target)=={'run_id':44362174807,'workflow_commit':'a7dadd1f1c9e803ab1aa7a6f3a111a60c63fdd30'}
+  return selected
  if batch['tag']=='student-20261117-k12-7':
   assert target=='macos-x64' and selected=='intel-k12-7-reuse-lock.json'
   assert batch['core_commit']=='fbb301fd21cf2169f834e0b548d56d201cc98365'
@@ -142,6 +148,12 @@ for target in targets:
   assert lock['source_commit']==batch['core_commit'] and lock['candidate_tag']==batch['tag']
   assert lock['frozen_stage']['sha256']==batch['signed_stage_sha256']==p['frozen_stage_sha256']
   assert all(p[k] is False for k in ['bridge_rebuilt','installers_repackaged','existing_assets_overwritten'])
+  intel11=batch['tag']=='student-20261117-k12-11'
+  if intel11:
+   assert hashlib.sha256(lock_raw).hexdigest()=='82713206090f52bfcd5d14cbc67067b0dc76d6a9b7c634399e1843a2113fb6e3'
+   assert sha(root/'k12_11_intel_evidence.py')==lock['recipe_inputs_sha256']['k12_11_intel_evidence.py']
+   assert p['materials_oldest_variant_rerun'] is True and p['materials_both_variants_rerun'] is False
+   assert p['existing_asset_metadata_before_after_unchanged'] is True and lock['execution_frozen'] is True
   if accepted.get('complete_native_execution'):
    from intel7_complete_evidence import COMPLETE_SOURCE,fetch_complete_archive,validate_finalized_provenance
    assert batch['tag']=='student-20261117-k12-7' and target=='macos-x64'
@@ -155,9 +167,13 @@ for target in targets:
    verify_complete_native_source(report,complete_source,COMPLETE_SOURCE,batch['signed_stage_sha256'])
   else:
    assert 'complete_native_execution' not in p
-   assert all(p[k] is True for k in ['fresh_smoke_rerun','proxy_smoke_rerun','materials_both_variants_rerun'])
+   assert p['fresh_smoke_rerun'] is True and p['proxy_smoke_rerun'] is True
+   assert p['materials_both_variants_rerun'] is (not intel11)
   if 'resume_artifact' in lock:
-   from partial_native_evidence import fetch_partial_archive
+   if intel11:
+    from k12_11_intel_evidence import fetch_partial_archive
+   else:
+    from partial_native_evidence import fetch_partial_archive
    resumed=fetch_partial_archive(lock,api,gh)
    assert p['oldest_and_current_ipc_rerun'] is False and p['partial_artifact_source_verified'] is True
    assert p['partial_artifact_sha256']==lock['resume_artifact']['sha256'] and p['completed_entry_receipts_reused']==lock['reused_complete_entries']
