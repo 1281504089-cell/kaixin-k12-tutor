@@ -1860,8 +1860,12 @@
   ],
   "update_entry": "设置 → 关于 → 检查更新 / 核心 → 检查更新",
   "usb_delivery": {
-    "updated_for_this_release": false,
-    "previous_delivered_tag": "student-20261117-k12-11"
+    "updated_for_this_release": true,
+    "previous_delivered_tag": "student-20261117-k12-11",
+    "tag": "student-20261117-k12-13",
+    "full_installers": 3,
+    "offline_update_folders": 3,
+    "receipt_sha256": "89702c50255dbcb1a09028a1e98862f1523712a0ce3f427c482c57c81a24ad30"
   },
   "recorded_at_utc": "2026-11-19T19:28:51.402707+00:00"
 }
