@@ -86,11 +86,17 @@ def verify_candidate_cos(root, target, install, resources, executable, work, evi
     subprocess.run(['node', 'ci-fresh-smoke.mjs', str(executable), str(resources), str(template), str(fixture)],
                    check=True, timeout=1100, env=env)
     assert load(template / 'active.json') == selected
+    assert load(fixture / 'app.json')['real_keys_used'] is False
+    catalog_path = 'workspace/data/user/settings/model_catalog.json'
+    voice = load(template / catalog_path)['services']['tts']
+    assert voice['active_profile_id'] and voice['active_model_id']
     scenarios = {}
     for scenario in ('migration', 'cos', 'fallback'):
         print('Starting anonymous native route test:', target, scenario, flush=True)
         profile = work / ('isolated-' + scenario)
-        (profile / 'workspace').mkdir(parents=True)
+        catalog = profile / catalog_path
+        catalog.parent.mkdir(parents=True)
+        write(catalog, {'services':{'tts':voice}})
         shutil.copytree(template / 'runtimes', profile / 'runtimes', symlinks=True, copy_function=os.link)
         shutil.copyfile(template / 'active.json', profile / 'active.json')
         report_dir = evidence / scenario
@@ -105,6 +111,7 @@ def verify_candidate_cos(root, target, install, resources, executable, work, evi
                         '--candidate', 'attachment-batch.json', '--old-launcher', 'cos-k11-launcher-manifest.json',
                         '--new-launcher', 'launcher-manifest.json', '--out', str(spec), *switches], check=True)
         scenarios[scenario] = verify_update_entry(root, target, install, resources, profile, report_dir, cos_spec=spec)
+        shutil.rmtree(profile)
     write(evidence / 'COS-NATIVE-VERIFICATION.json', {
         'target':target, 'source_commit':batch['core_commit'], 'tag':batch['tag'],
         'launcher':batch['launcher_build'], 'native_run':int(os.environ['GITHUB_RUN_ID']),
