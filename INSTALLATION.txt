@@ -1,14 +1,14 @@
-开心动力超级学霸桌面版 k12-12
-发行批次 student-20261117-k12-12
-完整构建应包含 20261117-k12-12
+开心动力超级学霸桌面版 k12-13
+发行批次 student-20261117-k12-13
+完整构建应包含 20261117-k12-13
 配套启动器 20261119-updater-6
 
 已有软件
-在「设置 → 关于 → 检查更新」或顶部「核心 → 检查更新」发现新版后，点击「下载并更新」。出现「重新打开完成更新」时，按提示重开。更新后再检查一次，并在「关于」核对完整构建。更新到本批并按提示重开后，后续「检查更新」会优先从腾讯云 COS 下载。COS 下载或校验失败时自动回退 GitHub。保留原学习目录和设置。失败时记录完整构建、错误提示与运行日志。
+在「设置 → 关于 → 检查更新」或顶部「核心 → 检查更新」发现新版后，点击「下载并更新」。出现「重新打开完成更新」时，按提示重开。更新后再检查一次，并在「关于」核对完整构建。升级到本批并按提示重开后，应用默认通过腾讯云 COS 检查和下载更新。COS 访问或校验失败时，应用自动尝试 GitHub。保留原学习目录和设置。失败时记录完整构建、错误提示与运行日志。
 
 第一次安装
-从同一个发布页下载适合自己电脑的全套文件，保留原名并放进同一目录。
-https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-12
+在中国大陆通过 GitHub 下载安装包前，请先开启 VPN。从以下发布页下载适合自己电脑的全套安装文件，保留原名并放进同一目录。
+https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-13
 
 Windows 64 位，五份文件下齐后运行 Setup.exe
 Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001
@@ -18,17 +18,17 @@ Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004
 Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe
 
 Intel Mac，五份文件下齐后打开 -part.dmg
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.002.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.003.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.004.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.005.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.dmg
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-13-part.002.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-13-part.003.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-13-part.004.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-13-part.005.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-13-part.dmg
 
 Apple 芯片 Mac，四份文件下齐后打开 -part.dmg
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.002.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.003.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.004.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.dmg
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-13-part.002.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-13-part.003.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-13-part.004.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-13-part.dmg
 
 Mac 打开首卷后，把应用拖到「应用程序」，然后从「应用程序」启动。Windows 若使用完整 ZIP，先全部解压，再运行 Setup.exe。首次启动等本机环境和教材展开，在线模型需联网。U 盘中的完整包及离线更新步骤以盘内说明为准。
 

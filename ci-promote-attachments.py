@@ -49,7 +49,7 @@ def download_public_archive(asset,destination):
 
 def verify_update_recovery(report,batch,target):
  tests=report['launcher_tests'];skipped=4 if target=='windows-x64' else 0
- expected={'student-20261117-k12-12':94,'student-20261117-k12-11':84}.get(batch['tag'],83)
+ expected={'student-20261117-k12-13':94,'student-20261117-k12-12':94,'student-20261117-k12-11':84}.get(batch['tag'],83)
  assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':expected,'pass':expected-skipped,'fail':0,'skipped':skipped}
  transport=report['network']['interrupted_transport_fixture']
  assert transport['faults']==2 and transport['recoveries']==1 and transport['verified_complete']
@@ -132,7 +132,26 @@ for target in targets:
  assert report['release']==batch['tag'] and report['core_commit']==batch['core_commit']
  staged=stage_run_for_target(batch,target)
  if batch['native_runs'][target]['run_id']==staged['run_id']:assert batch['native_runs'][target]['workflow_commit']==staged['workflow_commit']
- if batch['native_runs'][target]['run_id'] != staged['run_id']:
+ if batch['native_runs'][target]['run_id'] != staged['run_id'] and batch['tag']=='student-20261117-k12-13':
+  from ci_repackage import validate_reuse_lock
+  lock_name='k12-13-native-recheck.json'
+  lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
+  accepted=batch['native_rechecks'][target];p=report['provenance']
+  assert accepted['lock_file']==p['reuse_lock_file']==lock_name
+  assert hashlib.sha256(lock_raw).hexdigest()==accepted['lock_sha256']==p['reuse_lock_sha256']
+  run=batch['native_runs'][target]
+  assert p['verification_run']==run['run_id']==accepted['run_id']
+  assert p['workflow_commit']==run['workflow_commit']==accepted['workflow_commit']
+  assert p['original_stage_run']==staged['run_id'] and p['original_stage_workflow_commit']==staged['workflow_commit']
+  assert p['original_native_job']==lock['reuse_existing_native']['original_jobs'][target]
+  assert p['frozen_stage_sha256']==batch['signed_stage_sha256']==lock['reuse_existing_native']['frozen_stage_sha256']
+  assert not any(p[key] for key in ['bridge_rebuilt','installers_repackaged','existing_assets_overwritten'])
+  assert all(p[key] for key in ['fresh_smoke_rerun','proxy_smoke_rerun','oldest_and_current_ipc_rerun',
+                             'materials_both_variants_rerun','fresh_picture_ui_rerun'])
+  validate_reuse_lock(lock,json.loads((root/'attachment-batch.json').read_text()),candidate,target)
+  assert sorted((r['file'],r['bytes'],r['sha256']) for r in report['full_files'])==sorted(
+   (r['name'],r['bytes'],r['sha256']) for r in lock['targets'][target]['files'])
+ elif batch['native_runs'][target]['run_id'] != staged['run_id']:
   assert target in {'macos-arm64','macos-x64','windows-x64'}
   lock_name=recheck_lock_for_target(batch,target)
   lock_raw=(root/lock_name).read_bytes();lock=json.loads(lock_raw)
@@ -253,7 +272,7 @@ for target in targets:
 assert 13 <= len(full_files) <= 15
 
 cos_native_proofs={}
-if batch['tag']=='student-20261117-k12-12':
+if batch['tag'] in {'student-20261117-k12-12','student-20261117-k12-13'}:
  mirror=release_config['update_mirror_base']
  assert mirror=='https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/'
  cos=json.loads((root/'COS-BATCH-READBACK.json').read_text())
@@ -271,18 +290,36 @@ if batch['tag']=='student-20261117-k12-12':
   with urlopen(Request(mirror+row['name'],headers={'Range':'bytes=0-0','Accept-Encoding':'identity'}),timeout=30) as reply:
    assert reply.status==206 and reply.geturl()==mirror+row['name'] and reply.headers['Content-Range']=='bytes 0-0/'+str(row['bytes'])
    assert reply.headers['ETag']==row['etag'] and len(reply.read(2))==1
- from cos_native_publication import validate_cos_native
- pinned=batch['cos_native_run']
- route_run=api('actions/runs/'+str(pinned['run_id']))
- assert route_run['head_sha']==pinned['workflow_commit'] and route_run['conclusion']=='success'
- assert route_run['head_branch']=='codex/k12-cos-native-20261117-12'
- route_jobs=api('actions/runs/'+str(pinned['run_id'])+'/jobs')['jobs']
- assert len(route_jobs)==len(targets)==3 and all(job['conclusion']=='success' for job in route_jobs)
- for target in targets:
-  assert sum(job['name'].startswith('cos-native ('+target+',') for job in route_jobs)==1
-  path=work/('cos-native-'+target)
-  gh('run','download',pinned['run_id'],'--name','cos-native-'+target,'--dir',path)
-  cos_native_proofs[target]=validate_cos_native(path,batch,target,proofs[target]['full_files'],cos)
+ if batch['tag']=='student-20261117-k12-12':
+  from cos_native_publication import validate_cos_native
+  pinned=batch['cos_native_run']
+  route_run=api('actions/runs/'+str(pinned['run_id']))
+  assert route_run['head_sha']==pinned['workflow_commit'] and route_run['conclusion']=='success'
+  assert route_run['head_branch']=='codex/k12-cos-native-20261117-12'
+  route_jobs=api('actions/runs/'+str(pinned['run_id'])+'/jobs')['jobs']
+  assert len(route_jobs)==len(targets)==3 and all(job['conclusion']=='success' for job in route_jobs)
+  for target in targets:
+   assert sum(job['name'].startswith('cos-native ('+target+',') for job in route_jobs)==1
+   path=work/('cos-native-'+target)
+   gh('run','download',pinned['run_id'],'--name','cos-native-'+target,'--dir',path)
+   cos_native_proofs[target]=validate_cos_native(path,batch,target,proofs[target]['full_files'],cos)
+ else:
+  raw=(root/'LOCAL-COS-UPDATE.json').read_bytes()
+  assert hashlib.sha256(raw).hexdigest()==batch['local_cos_update_sha256']
+  observed=json.loads(raw)
+  network=observed['network']
+  assert observed['source_commit']==batch['core_commit'] and observed['transaction_phase']=='complete'
+  assert all(observed[k] for k in ['application_ipc_update','profile_isolated','check_again_current'])
+  assert observed['physical_interface']=='en7' and observed['tls_passthrough'] is True
+  assert observed['staged_compatibility_manifest'] is False
+  selected=next(x for x in batch['manifests'].values() if x['runtimeId']==observed['to'])
+  assert selected['platform']=='darwin' and selected['arch']=='x64' and '-k12-12-' in observed['from']
+  assert network['host']=='kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com'
+  assert network['route']=='cos' and network['status']==200 and network['cache'] is False
+  assert network['asset']==selected['archive'] and network['sha256']==selected['sha256']
+  assert network['bytes']==batch['archives'][selected['archive']]['bytes']
+  slider=observed['offline_slider']
+  assert slider['canvas'] and slider['first']==2 and slider['second']==4
 
 stable_assets={a['name']:a for a in api('releases/tags/core-updates')['assets']}
 for name,expected in batch['expected_previous'].items():
