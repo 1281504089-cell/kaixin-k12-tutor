@@ -6,6 +6,8 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import time
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from ci_update_probe import verify_update_entry
@@ -53,9 +55,18 @@ def verify_candidate_cos(root, target, install, resources, executable, work, evi
     assert rows == len(old_descriptor['files'])
 
     default = 'runtime-' + target + '.json'
-    with urlopen(mirror + default, timeout=30) as response:
-        assert response.geturl() == mirror + default and response.status == 200
-        default_manifest = json.loads(response.read(65537))
+    print('Waiting for the signed COS release files:', target, flush=True)
+    deadline = time.monotonic() + 60 * 60
+    while True:
+        try:
+            with urlopen(mirror + default, timeout=30) as response:
+                assert response.geturl() == mirror + default and response.status == 200
+                default_manifest = json.loads(response.read(65537))
+            break
+        except HTTPError as error:
+            if error.code not in (403, 404) or time.monotonic() >= deadline:
+                raise
+            time.sleep(15)
     assert default_manifest['commit'] == selected['commit']
     alias = next(row['file'] for row in default_manifest['compatibleBaseManifests'] if row['baseRuntimeId'] == previous['baseRuntimeId'])
     expected_alias = default.removesuffix('.json') + '-' + batch['tag'].removeprefix('student-') + '-20261112.json'
