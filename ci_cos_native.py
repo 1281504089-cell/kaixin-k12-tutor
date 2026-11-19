@@ -96,7 +96,7 @@ def verify_candidate_cos(root, target, install, resources, executable, work, evi
         profile = work / ('isolated-' + scenario)
         catalog = profile / catalog_path
         catalog.parent.mkdir(parents=True)
-        write(catalog, {'services':{'tts':voice}})
+        shutil.copyfile(template / catalog_path, catalog)
         shutil.copytree(template / 'runtimes', profile / 'runtimes', symlinks=True, copy_function=os.link)
         shutil.copyfile(template / 'active.json', profile / 'active.json')
         report_dir = evidence / scenario
