@@ -154,6 +154,37 @@ test('both update IPC handlers reject foreign frames and windows', () => {
   assert.throws(()=>handlers['desktop:get-release-status'](valid),/Untrusted/);
 });
 
+test('the native Mac and Windows menus and Settings invoke the same interactive updater', async () => {
+  const menuStart = source.indexOf('function buildMenu(');
+  const menuSource = source.slice(menuStart, source.indexOf('if (!app.requestSingleInstanceLock()', menuStart));
+  const ipcStart = source.indexOf('  const trustedUpdateCaller =');
+  const ipcSource = source.slice(ipcStart, source.indexOf('  buildMenu();', ipcStart));
+  for (const entry of ['Mac menu', 'Windows menu', 'Settings']) {
+    const h = updater({ runtimeId: 'next' });
+    const frame = { url: 'http://127.0.0.1:18802/chat' };
+    const contents = h.context.view.webContents;
+    contents.mainFrame = frame;
+    h.context.state.url = new URL(frame.url).origin;
+    let menu;
+    const handlers = {};
+    Object.assign(h.context, {
+      WINDOWS: entry === 'Windows menu', URL,
+      Menu: { buildFromTemplate: template => template, setApplicationMenu: template => { menu = template; } },
+      ipcMain: { handle: (channel, handler) => { handlers[channel] = handler; } },
+    });
+    runInNewContext(menuSource + ipcSource, h.context);
+    h.context.buildMenu();
+    if (entry === 'Settings') {
+      const event = { sender: contents, senderFrame: frame };
+      await handlers['desktop:check-release'](event);
+    } else {
+      menu.flatMap(item => item.submenu).find(item => item.label === 'checkRelease').click();
+      await h.context.releaseCheck.promise;
+    }
+    assert.equal(h.dialogs[0]?.message, 'releaseAvailable', entry);
+  }
+});
+
 test('reopening the local learning page after suspension retries once without clearing its partition', async () => {
   const block = source.slice(source.indexOf('async function openContent('), source.indexOf('function trustedShell('));
   for (const mode of ['resume', 'persistent', 'other-error', 'quit']) {

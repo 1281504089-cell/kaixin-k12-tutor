@@ -6,7 +6,7 @@ permissions:
   contents: write
 jobs:
   native:
-    timeout-minutes: 150
+    timeout-minutes: 220
     strategy:
       fail-fast: false
       matrix:
@@ -14,7 +14,7 @@ jobs:
           - target: macos-x64
             runner: macos-15-intel
           - target: macos-arm64
-            runner: macos-15
+            runner: macos-26
           - target: windows-x64
             runner: windows-2025
     runs-on: ${{ matrix.runner }}

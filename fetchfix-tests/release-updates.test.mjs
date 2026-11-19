@@ -7,11 +7,19 @@ import path from 'node:path';
 import test from 'node:test';
 import { bundleConfig, canonicalManifest, installBundle } from '../src/bundles.mjs';
 import { systemTar, runtimeLayout, targetId } from '../src/platform.mjs';
-import { downloadReleaseUpdate, findReleaseUpdate, isInterruptedDownload } from '../src/release-updates.mjs';
+import {
+  downloadReleaseUpdate as downloadFromRelease, findReleaseUpdate as findFromRelease, isInterruptedDownload,
+} from '../src/release-updates.mjs';
 import { createUpdateFetch } from '../src/update-network.mjs';
 
 const { publicKey, privateKey } = generateKeyPairSync('ed25519');
 const current = { runtimeId: 'student-base', builtAt: 100 };
+const mirrorBase = 'https://updates.example.test/desktop/';
+// The GitHub transport fixtures explicitly disable the production mirror.
+const findReleaseUpdate = (target, installed, key, fetchAsset, signal, mirror = '') =>
+  findFromRelease(target, installed, key, fetchAsset, signal, mirror);
+const downloadReleaseUpdate = (manifest, directory, progress, fetchAsset, signal, mirror = '') =>
+  downloadFromRelease(manifest, directory, progress, fetchAsset, signal, mirror);
 function signed(values = {}) {
   const result = { formatVersion: 1, protocolVersion: 1, arch: process.arch, platform: process.platform,
     runtimeId: 'student-update', coreVersion: '1.7.1', builtAt: 200, archive: 'patch.tar.gz',
@@ -116,6 +124,201 @@ test('an archive that keeps transferring can complete beyond the old 30-minute d
   assert.ok(clock > 30 * 60 * 1000);
   assert.equal(progress.at(-1), bytes.length);
   assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+});
+
+test('the mirror alone can check, choose a compatible installation, download and verify a signed update', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-update-mirror-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bytes = Buffer.from('mirror archive');
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const identity = { commit: 'a'.repeat(40), corePayloadSha256: sha256, sha256 };
+  const target = targetId();
+  const alternative = `runtime-${target}-older.json`;
+  const manifest = signed({ ...identity, baseRuntimeId: 'student-base' });
+  const primary = signed({ ...identity, baseRuntimeId: 'newer-base', compatibleBaseManifests: [
+    { file: alternative, baseRuntimeId: 'student-base' },
+  ] });
+  const calls = [];
+  const fetchAsset = async (url, options) => {
+    assert.equal(url.origin, new URL(mirrorBase).origin);
+    assert.equal(options.credentials, 'omit');
+    assert.equal(options.redirect, 'error');
+    calls.push(url.pathname);
+    if (url.pathname === `/desktop/runtime-${target}.json`) return Response.json(primary);
+    if (url.pathname === `/desktop/${alternative}`) return Response.json(manifest);
+    assert.equal(url.pathname, '/desktop/patch.tar.gz');
+    return new Response(bytes, { headers: { 'content-length': String(bytes.length) } });
+  };
+  const next = await findReleaseUpdate(target, current, publicKey, fetchAsset, undefined, mirrorBase);
+  assert.deepEqual(next, manifest);
+  const file = await downloadReleaseUpdate(next, root, () => {}, fetchAsset, undefined, mirrorBase);
+  assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+  assert.deepEqual(JSON.parse(await readFile(file)), manifest);
+  assert.equal(await findReleaseUpdate(target, manifest, publicKey, fetchAsset, undefined, mirrorBase), null);
+  assert.deepEqual(calls, [
+    `/desktop/runtime-${target}.json`, `/desktop/${alternative}`, '/desktop/patch.tar.gz',
+    `/desktop/runtime-${target}.json`, `/desktop/${alternative}`,
+  ]);
+});
+
+test('mirror HTTP, signature, stale batch and compatibility errors fall back to a fresh GitHub check', async () => {
+  const next = signed();
+  const original = new URL(mirrorBase).origin;
+  const target = targetId();
+  for (const failure of ['HTTP', 'redirect', 'signature', 'stale', 'other batch']) {
+    const calls = [];
+    const found = await findReleaseUpdate(target, current, publicKey, async url => {
+      calls.push(url.hostname);
+      if (url.origin === original) {
+        if (failure === 'HTTP') return new Response(null, { status: 503 });
+        if (failure === 'redirect') return Response.redirect('https://unrelated.example.test/runtime.json');
+        if (failure === 'signature') return Response.json({ ...next, builtAt: 301 });
+        if (failure === 'stale') return Response.json(signed({ builtAt: 90 }));
+        if (url.pathname.endsWith('-older.json')) {
+          return Response.json(signed({ baseRuntimeId: 'student-base', corePayloadSha256: 'a'.repeat(64), commit: 'a'.repeat(40) }));
+        }
+        return Response.json(signed({ baseRuntimeId: 'newer-base', corePayloadSha256: 'a'.repeat(64), commit: 'b'.repeat(40),
+          compatibleBaseManifests: [{ file: `runtime-${target}-older.json`, baseRuntimeId: 'student-base' }] }));
+      }
+      if (url.hostname === 'api.github.com') {
+        return Response.json({ tag_name: 'core-updates', draft: false, assets: [] });
+      }
+      assert.equal(url.hostname, 'github.com');
+      return Response.json(next);
+    }, undefined, mirrorBase);
+    assert.deepEqual(found, next, failure);
+    assert.equal(calls[0], 'updates.example.test', failure);
+    assert.deepEqual(calls.slice(-2), ['api.github.com', 'github.com'], failure);
+  }
+});
+
+test('a corrupt mirror archive is discarded before GitHub fallback, but cancellation never falls back', async t => {
+  const bytes = Buffer.from('verified archive');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  for (const cancel of [false, true]) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-update-mirror-fallback-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    const controller = new AbortController();
+    const calls = [];
+    const download = downloadReleaseUpdate(manifest, root, () => {
+      if (cancel) controller.abort(new Error('user cancelled'));
+    }, async url => {
+      calls.push(url.hostname);
+      return new Response(url.hostname === 'updates.example.test' ? 'wrong archive' : bytes);
+    }, controller.signal, mirrorBase);
+    if (cancel) {
+      await assert.rejects(download, /user cancelled/);
+      for (const name of [manifest.archive, 'runtime.json']) {
+        await assert.rejects(readFile(path.join(root, name)), { code: 'ENOENT' });
+      }
+      assert.deepEqual(calls, ['updates.example.test']);
+    } else {
+      await download;
+      assert.deepEqual(calls, ['updates.example.test', 'github.com']);
+      assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+    }
+  }
+});
+
+test('an idle mirror triggers the download watchdog and falls back to GitHub', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-update-mirror-stall-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bytes = Buffer.from('verified archive');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  const setTimer = globalThis.setTimeout;
+  const calls = [];
+  t.mock.method(globalThis, 'setTimeout', (callback, ms, ...args) =>
+    setTimer(callback, ms === 60000 && calls.length === 1 ? 15 : ms, ...args));
+  await downloadReleaseUpdate(manifest, root, () => {}, async url => {
+    calls.push(url.hostname);
+    if (url.hostname === 'updates.example.test') return new Response(new ReadableStream());
+    return new Response(bytes);
+  }, undefined, mirrorBase);
+  assert.deepEqual(calls, ['updates.example.test', 'github.com']);
+  assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+});
+
+test('the mirror resumes a truncated transfer using its on-disk prefix and checks the entire archive', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-download-resume-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const bytes = Buffer.from('verified prefix and remaining archive');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  const offset = 15;
+  const etag = '"immutable-archive"';
+  const requests = [];
+  const progress = [];
+  const file = await downloadReleaseUpdate(manifest, root, (_percent, { received }) => progress.push(received), async (url, { headers }) => {
+    assert.equal(url.hostname, 'updates.example.test');
+    requests.push(headers);
+    if (!headers) return new Response(bytes.subarray(0, offset), {
+      headers: { etag, 'content-length': bytes.length },
+    });
+    assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes.subarray(0, offset));
+    return new Response(bytes.subarray(offset), { status: 206, headers: {
+      etag, 'content-range': `bytes ${offset}-${bytes.length - 1}/${bytes.length}`, 'content-length': bytes.length - offset,
+    } });
+  }, undefined, mirrorBase);
+  assert.deepEqual(requests, [undefined, { Range: `bytes=${offset}-`, 'If-Match': etag }]);
+  assert.equal(progress.at(-1), bytes.length);
+  assert.deepEqual([...progress].sort((a, b) => a - b), progress);
+  assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+  assert.deepEqual(JSON.parse(await readFile(file)), manifest);
+});
+
+test('an ignored range, changed object, invalid interval or corrupt suffix restarts on the backup route', async t => {
+  const bytes = Buffer.from('one stable archive');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  const offset = 4;
+  const etag = '"same-content"';
+  for (const failure of ['full', 'precondition', 'replaced', 'interval', 'wrong bytes']) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-bad-update-range-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    const routes = [];
+    await downloadReleaseUpdate(manifest, root, () => {}, async (url, { headers }) => {
+      routes.push([url.hostname, headers?.Range]);
+      if (url.hostname === 'github.com') return new Response(bytes);
+      assert.equal(url.hostname, 'updates.example.test');
+      if (!headers?.Range) return new Response(bytes.subarray(0, offset), {
+        headers: { etag, 'content-length': bytes.length },
+      });
+      if (failure === 'full') return new Response(bytes);
+      if (failure === 'precondition') return new Response(null, { status: 412 });
+      const suffix = failure === 'wrong bytes' ? Buffer.alloc(bytes.length - offset, 0) : bytes.subarray(offset);
+      return new Response(suffix, { status: 206, headers: {
+        etag: failure === 'replaced' ? '"different-object"' : etag,
+        'content-range': `bytes ${failure === 'interval' ? offset - 1 : offset}-${bytes.length - 1}/${bytes.length}`,
+        'content-length': bytes.length - offset,
+      } });
+    }, undefined, mirrorBase);
+    assert.deepEqual(routes, [['updates.example.test', undefined], ['updates.example.test', `bytes=${offset}-`], ['github.com', undefined]]);
+    assert.deepEqual(await readFile(path.join(root, manifest.archive)), bytes);
+  }
+});
+
+test('cancelling during the mirror continuation deletes the partial archive and does not fall back', async t => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-cancel-update-range-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const controller = new AbortController();
+  const bytes = Buffer.from('one stable archive');
+  const manifest = signed({ sha256: createHash('sha256').update(bytes).digest('hex') });
+  const etag = '"same-content"';
+  const requests = [];
+  await assert.rejects(downloadReleaseUpdate(manifest, root, () => {
+    if (requests.length === 2) controller.abort(new Error('user cancelled'));
+  }, async (url, { headers }) => {
+    assert.equal(url.hostname, 'updates.example.test');
+    requests.push(headers?.Range);
+    if (!headers?.Range) return new Response(bytes.subarray(0, 4), {
+      headers: { etag, 'content-length': bytes.length },
+    });
+    return new Response(bytes.subarray(4), { status: 206, headers: {
+      etag, 'content-range': `bytes 4-${bytes.length - 1}/${bytes.length}`, 'content-length': bytes.length - 4,
+    } });
+  }, controller.signal, mirrorBase), /user cancelled/);
+  assert.deepEqual(requests, [undefined, 'bytes=4-']);
+  for (const name of [manifest.archive, 'runtime.json']) {
+    await assert.rejects(readFile(path.join(root, name)), { code: 'ENOENT' });
+  }
 });
 
 test('connection, interrupted-body and checksum failures retry the public API without retaining a partial archive', async t => {
@@ -243,6 +446,7 @@ test('persistent interrupted downloads stop after one session recovery; cancella
 
 test('only transport interruption errors qualify for a fresh download session', () => {
   for (const error of [new TypeError('terminated'), new Error('net::ERR_CONNECTION_RESET'),
+    new Error('net::ERR_CONTENT_LENGTH_MISMATCH'),
     new TypeError('fetch failed', { cause: Object.assign(new Error('other side closed'), { code: 'UND_ERR_SOCKET' }) })]) {
     assert.equal(isInterruptedDownload(error), true);
   }

@@ -340,9 +340,11 @@ async function content() {
     await app.whenReady();
     const updates = session.fromPartition('kaixin-updates');
     const originalFetch = updates.fetch.bind(updates);
+    const fixtureMirror = 'https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com';
     updates.fetch = async (url, options) => {
       const tag = process.env.KX_CANDIDATE_TAG;
       const original = String(url);
+      if (new URL(original).origin === fixtureMirror) return new Response(null, { status: 404 });
       const mapped = original.replace('/tags/core-updates', '/tags/' + tag).replace('/download/core-updates/', '/download/' + tag + '/');
       const ciOptions = new URL(mapped).hostname === 'api.github.com' && process.env.GH_TOKEN
         ? { ...options, headers: { ...options?.headers, Authorization: `Bearer ${process.env.GH_TOKEN}` } } : options;
@@ -360,6 +362,7 @@ async function content() {
     const nodeFetch=globalThis.fetch;
     globalThis.fetch=async(url,options)=> {
       const original=String(url),tag=process.env.KX_CANDIDATE_TAG;
+      if (new URL(original).origin === fixtureMirror) return new Response(null, { status: 404 });
       const mapped=original.replace('/tags/core-updates','/tags/'+tag).replace('/download/core-updates/','/download/'+tag+'/');
       const result=await checkedFetch(nodeFetch,mapped,new URL(mapped).hostname==='api.github.com' && process.env.GH_TOKEN
         ? {...options,headers:{...options?.headers,Authorization:`Bearer ${process.env.GH_TOKEN}`}}:options);

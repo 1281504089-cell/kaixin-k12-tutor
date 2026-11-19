@@ -60,9 +60,9 @@ app.whenReady().then(async () => {
       }
     };
     fetch.recoverAfterSuspend=recoverSession;
-    const offered = await findReleaseUpdate(target, base, key, fetch, AbortSignal.timeout(30000));
+    const offered = await findReleaseUpdate(target, base, key, fetch, AbortSignal.timeout(30000), '');
     assert.equal(offered.baseRuntimeId, base.runtimeId);
-    await downloadReleaseUpdate(offered, process.env.KX_PROXY_HOME, () => {}, fetch, AbortSignal.timeout(180000));
+    await downloadReleaseUpdate(offered, process.env.KX_PROXY_HOME, () => {}, fetch, AbortSignal.timeout(180000), '');
     assert.equal(failedDirect, true);
     assert.ok(connections > 0, 'Electron must honor its proxy configuration');
     const fixtureName=`runtime-${target}.json`;
@@ -86,7 +86,7 @@ app.whenReady().then(async () => {
     };
     const inbox=path.join(process.env.KX_PROXY_HOME,'interrupted-fixture');mkdirSync(inbox);
     const fixtureSha=createHash('sha256').update(payload).digest('hex');
-    await downloadReleaseUpdate({archive:fixtureName,sha256:fixtureSha},inbox,()=>{},interruptedFetch,AbortSignal.timeout(90000));
+    await downloadReleaseUpdate({archive:fixtureName,sha256:fixtureSha},inbox,()=>{},interruptedFetch,AbortSignal.timeout(90000), '');
     assert.equal(faults,2);assert.equal(recoveries,1);assert.deepEqual(readFileSync(path.join(inbox,fixtureName)),payload);
     let mixedRecoveries=0,mixedFaults=0,apiDenials=0;
     const mixedFetch=async(url,options)=>{
@@ -99,7 +99,7 @@ app.whenReady().then(async () => {
       await recoverSession(signal);mixedRecoveries++;
     };
     const mixedInbox=path.join(process.env.KX_PROXY_HOME,'interrupted-denied-fixture');mkdirSync(mixedInbox);
-    await downloadReleaseUpdate({archive:fixtureName,sha256:fixtureSha},mixedInbox,()=>{},mixedFetch,AbortSignal.timeout(90000));
+    await downloadReleaseUpdate({archive:fixtureName,sha256:fixtureSha},mixedInbox,()=>{},mixedFetch,AbortSignal.timeout(90000), '');
     assert.equal(mixedFaults,1);assert.equal(apiDenials,1);assert.equal(mixedRecoveries,1);assert.deepEqual(readFileSync(path.join(mixedInbox,fixtureName)),payload);
     writeFileSync(process.env.KX_PROXY_RESULT, JSON.stringify({
       native_platform: process.platform, native_arch: process.arch, proxy_connections: connections,
