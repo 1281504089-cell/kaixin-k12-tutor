@@ -1,7 +1,16 @@
 {
   "passed": true,
-  "baseline_source_commit": "9102686f43bff7162d3724abb86957ec6d644294",
-  "source_commit": "04fb2adc0c36e964d3a43fc4a4c9c45a877a67c0",
-  "source_files_sha256": "33323998bb4d1be947417110bb98a6ef59c664332e48bf05ae265f530702fc90",
-  "files": 5965
+  "baseline_source_commit": "04fb2adc0c36e964d3a43fc4a4c9c45a877a67c0",
+  "source_commit": "0a5e607f85ff81b6ef1d80fd7ced2659798f7211",
+  "source_files_sha256": "aac8cca93193495c7b28f08e9823d24227b50438489c9ac9890a51b0f11fde6b",
+  "files": 5965,
+  "core_workflow_run": 44496105224,
+  "source_overlay": [
+    {
+      "file": "source-delta-k12-12.001",
+      "bytes": 28987,
+      "sha256": "ffdd728f7cc5d68952ef80bfb4e2b66214e47a2c8d340be337054b5993ad823b"
+    }
+  ],
+  "source_overlay_sha256": "ffdd728f7cc5d68952ef80bfb4e2b66214e47a2c8d340be337054b5993ad823b"
 }
