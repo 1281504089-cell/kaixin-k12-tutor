@@ -49,7 +49,7 @@ def download_public_archive(asset,destination):
 
 def verify_update_recovery(report,batch,target):
  tests=report['launcher_tests'];skipped=4 if target=='windows-x64' else 0
- expected=84 if batch['tag']=='student-20261117-k12-11' else 83
+ expected={'student-20261117-k12-12':94,'student-20261117-k12-11':84}.get(batch['tag'],83)
  assert tests['passed'] and {key:tests[key] for key in ['tests','pass','fail','skipped']}=={'tests':expected,'pass':expected-skipped,'fail':0,'skipped':skipped}
  transport=report['network']['interrupted_transport_fixture']
  assert transport['faults']==2 and transport['recoveries']==1 and transport['verified_complete']
@@ -252,6 +252,38 @@ for target in targets:
  full_files+=report['full_files'];proofs[target]=report
 assert 13 <= len(full_files) <= 15
 
+cos_native_proofs={}
+if batch['tag']=='student-20261117-k12-12':
+ mirror=release_config['update_mirror_base']
+ assert mirror=='https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/'
+ cos=json.loads((root/'COS-BATCH-READBACK.json').read_text())
+ assert cos['tag']==batch['tag'] and cos['source_commit']==batch['core_commit'] and cos['cos_mirror']==mirror
+ assert {row['name'] for row in cos['manifests']}==set(batch['manifests'])
+ for row in cos['manifests']:
+  raw=(json.dumps(batch['manifests'][row['name']],indent=2)+'\n').encode()
+  assert row['bytes']==len(raw) and row['sha256']==hashlib.sha256(raw).hexdigest()
+  with urlopen(Request(mirror+row['name'],headers={'Cache-Control':'no-cache'}),timeout=30) as reply:
+   assert reply.status==200 and reply.geturl()==mirror+row['name'] and reply.read(len(raw)+1)==raw
+ assert {row['name'] for row in cos['archives']}==set(batch['archives'])
+ for row in cos['archives']:
+  expected=batch['archives'][row['name']]
+  assert row['sha256']==expected['sha256'] and row['bytes']==expected['bytes'] and row['complete_sha256_verified']
+  with urlopen(Request(mirror+row['name'],headers={'Range':'bytes=0-0','Accept-Encoding':'identity'}),timeout=30) as reply:
+   assert reply.status==206 and reply.geturl()==mirror+row['name'] and reply.headers['Content-Range']=='bytes 0-0/'+str(row['bytes'])
+   assert reply.headers['ETag']==row['etag'] and len(reply.read(2))==1
+ from cos_native_publication import validate_cos_native
+ pinned=batch['cos_native_run']
+ route_run=api('actions/runs/'+str(pinned['run_id']))
+ assert route_run['head_sha']==pinned['workflow_commit'] and route_run['conclusion']=='success'
+ assert route_run['head_branch']=='codex/k12-cos-native-20261117-12'
+ route_jobs=api('actions/runs/'+str(pinned['run_id'])+'/jobs')['jobs']
+ assert len(route_jobs)==len(targets)==3 and all(job['conclusion']=='success' for job in route_jobs)
+ for target in targets:
+  assert sum(job['name'].startswith('cos-native ('+target+',') for job in route_jobs)==1
+  path=work/('cos-native-'+target)
+  gh('run','download',pinned['run_id'],'--name','cos-native-'+target,'--dir',path)
+  cos_native_proofs[target]=validate_cos_native(path,batch,target,proofs[target]['full_files'],cos)
+
 stable_assets={a['name']:a for a in api('releases/tags/core-updates')['assets']}
 for name,expected in batch['expected_previous'].items():
  actual=stable_assets[name];assert actual['digest']=='sha256:'+expected,'Live feed changed: '+name
@@ -297,7 +329,7 @@ class GitHubPublication:
   file=work/'release-edit.json';file.write_text(json.dumps(payload))
   gh('api','-X','PATCH','repos/'+repo+'/releases/'+str(release_id),'--input',file)
 def make_receipt(latest):
- return {**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'stable_manifests_read_back':list(batch['manifests']),'anonymous_archives':anonymous_archives,'physical_user_devices_tested':False,'private_key_uploaded':False}
+ return {**batch,'published_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'release_repository_commit':os.environ['GITHUB_SHA'],'release_id':latest['id'],'release_url':latest['html_url'],'full_files':full_files,'proofs':proofs,'cos_native_proofs':cos_native_proofs,'stable_manifests_read_back':list(batch['manifests']),'anonymous_archives':anonymous_archives,'physical_user_devices_tested':False,'private_key_uploaded':False}
 def check_immutable():
  current={a['name']:a for a in api('releases/tags/core-updates')['assets']}
  for name in batch['manifests']:
