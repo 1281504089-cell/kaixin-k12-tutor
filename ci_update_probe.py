@@ -21,12 +21,21 @@ def materials_baseline(root,target,evidence):
  (evidence/'materials-baseline-download.json').write_text(json.dumps({'target':target,'runtime_id':row['manifest']['runtimeId'],'bytes':asset['bytes'],'sha256':asset['sha256'],'anonymous_download':True,'full_archive_verified':True,'launcher_build':lock['launcher_build']},indent=2))
  return manifest
 
-def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=False,materials=False):
+def verify_update_entry(root,target,install,resources,home,evidence,*,legacy=False,materials=False,cos_spec=None):
  assert isinstance(legacy,bool) and isinstance(materials,bool)
  entry='materials-oldest-update-entry' if materials and legacy else 'materials-update-entry' if materials else 'oldest-update-entry' if legacy else 'update-entry'
  launcher='oldest-launcher-src' if legacy else 'materials-launcher-src' if materials else None
+ cos=json.loads(cos_spec.read_text()) if cos_spec else None
+ if cos:
+  assert not legacy and not materials and target==cos['target']
+  entry='cos-'+cos['scenario']
+  launcher='cos-k11-launcher-src' if cos['scenario']=='migration' else None
  base=json.loads((resources/'seed/runtime.json').read_text());native=home/'runtimes'/base['runtimeId']
  active=json.loads((home/'active.json').read_text());prior=materials_baseline(root,target,evidence) if materials else root/'prior-update/runtime.json'
+ if cos:
+  prior=root/'cos-k11-prior/runtime.json'
+  assert json.loads(prior.read_text())==cos['baseline'] and active==cos['selected']
+  assert not (evidence/(entry+'.json')).exists() and not (evidence/(entry+'.json.state.json')).exists()
  # Generate synthetic audio with the frozen core before testing its real reinstall over the prior core.
  python=native/('python/python.exe' if target.startswith('windows') else 'python/bin/python3')
  qa_home=home/'workspace'
@@ -68,7 +77,7 @@ print(json.dumps(asyncio.run(run())))
  seeded.update(audio=json.loads(audio_file.read_text(encoding='utf-8')),science=json.loads(science_file.read_text(encoding='utf-8')),k12=json.loads(k12_file.read_text(encoding='utf-8')))
  (home/'attachment-fixture.json').write_text(json.dumps(seeded))
  source=resources.parent.parent if target.startswith('macos') else install
- probe=root/('update-entry.app' if target.startswith('macos') else 'update-entry')
+ probe=root/(entry+('.app' if target.startswith('macos') else '') if cos else 'update-entry.app' if target.startswith('macos') else 'update-entry')
  shutil.copytree(source,probe,symlinks=True,ignore=lambda directory,names:[n for n in names if n in {'seed','update'}] if Path(directory)==resources else [])
  copied=probe/'Contents/Resources' if target.startswith('macos') else probe/'resources'
  # The production launcher always verifies its seed manifest, even when an older core is already installed.
@@ -77,12 +86,13 @@ print(json.dumps(asyncio.run(run())))
  if launcher:
   shutil.rmtree(copied/'app/src');shutil.copytree(root/launcher,copied/'app/src')
  (copied/'app/qa').mkdir()
- shutil.copyfile(root/'ci-update-flow.cjs',copied/'app/qa/update-flow.cjs')
+ shutil.copyfile(root/('ci-cos-update-flow.cjs' if cos else 'ci-update-flow.cjs'),copied/'app/qa/update-flow.cjs')
+ if cos:shutil.copyfile(root/'cos-native-net.cjs',copied/'app/qa/cos-native-net.cjs')
  shutil.copyfile(root/'ci-materials-ui.cjs',copied/'app/qa/materials-ui.cjs')
  for name in ['ci-chat-audio-ui.cjs','audio-card-probe.cjs','native-html-speech-diagnostic.cjs','science-ui.cjs','ci-turn-preview.cjs','ci-k12-library-ui.cjs']:
   shutil.copyfile(root/name,copied/'app/qa'/name)
  expected_src=root/launcher if legacy else resources/'app/src'
- if materials:expected_src=root/launcher
+ if materials or cos and launcher:expected_src=root/launcher
  for file in expected_src.iterdir():
   if file.is_file():assert (copied/'app/src'/file.name).read_bytes()==file.read_bytes()
  if materials and not legacy:
@@ -92,7 +102,9 @@ print(json.dumps(asyncio.run(run())))
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
  from_launcher='a47b05f9136ca6fb72d2f1f8a04eeb425298f358' if legacy else '20261114-unified' if materials else json.loads((root/'launcher-manifest.json').read_text())['buildId']
- subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if launcher else '0','KX_START_LAUNCHER_BUILD':from_launcher},check=True,timeout=1400)
+ extra={'KX_COS_NATIVE_SPEC':str(cos_spec.resolve())} if cos else {}
+ if cos and launcher:from_launcher='20261118-updater-5'
+ subprocess.run([str(exe)],env={**os.environ,**extra,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if launcher else '0','KX_START_LAUNCHER_BUILD':from_launcher},check=True,timeout=1400)
  deadline=time.monotonic()+1400
  while not (evidence/(entry+'.json')).is_file():
   error=evidence/(entry+'.json.error.json')
@@ -100,6 +112,9 @@ print(json.dumps(asyncio.run(run())))
   assert time.monotonic()<deadline,'The detached application did not finish its real restart test'
   time.sleep(1)
  result=json.loads((evidence/(entry+'.json')).read_text())
+ if cos:
+  assert result['from_runtime']==cos['baseline']['runtimeId'] and result['to_runtime']==cos['selected']['runtimeId']
+  assert result['cos_native']['scenario']==cos['scenario'] and result['old_pid']!=result['restarted_pid']
  if materials:
   assert result['from_runtime']==old['runtimeId']
   if legacy:

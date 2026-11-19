@@ -13,11 +13,24 @@ from urllib.request import Request, urlopen
 parser = argparse.ArgumentParser()
 parser.add_argument('--target', required=True, choices=['macos-x64', 'macos-arm64', 'windows-x64'])
 parser.add_argument('--lock-file', choices=['fresh-install-lock.json','fresh-install-lock-arm8-health.json'], default='fresh-install-lock.json')
+parser.add_argument('--cos-test', action='store_true')
 args = parser.parse_args()
 root = Path.cwd()
 lock = json.loads((root / args.lock_file).read_text())
 target = args.target
-expected = lock['targets'][target]
+if args.cos_test:
+    lock = json.loads((root/'cos-installer-lock.json').read_bytes())
+    batch = json.loads((root/'attachment-batch.json').read_bytes())
+    signed = batch['manifests'][target]
+    name_marker = {'windows-x64':'-Windows-', 'macos-x64':'-MacOS-Intel-', 'macos-arm64':'-MacOS-Apple-Silicon-'}[target]
+    expected = {'platform':signed['platform'], 'arch':signed['arch'], 'base_runtime_id':signed['baseRuntimeId'],
+                'runtime_id':signed['runtimeId'], 'files': [{'name':row['name'], 'asset_id':row['id'], 'bytes':row['size'],
+                'sha256':row['digest'].removeprefix('sha256:')} for row in lock['assets'] if name_marker in row['name']]}
+    assert len(expected['files']) == lock['parts_by_target'][{'windows-x64':'Windows','macos-x64':'Intel Mac','macos-arm64':'Apple Silicon Mac'}[target]]
+    lock = {**lock, 'tag':lock['candidate_tag'], 'release_id':lock['candidate_release'],
+            'core_commit':signed['commit'], 'core_sha256':signed['sha256']}
+else:
+    expected = lock['targets'][target]
 work = root / ('fresh-' + target)
 downloads = work / 'downloads'
 evidence = root / 'fresh-evidence' / target
@@ -39,6 +52,9 @@ def sha(file):
 
 def release_metadata():
     latest = json.loads(subprocess.check_output(['gh', 'api', 'repos/1281504089-cell/kaixin-k12-tutor/releases/latest']))
+    if args.cos_test:
+        assert latest['id'] == 450336530 and latest['tag_name'] == 'student-20261117-k12-11'
+        return json.loads(subprocess.check_output(['gh','api','repos/1281504089-cell/kaixin-k12-tutor/releases/'+str(lock['release_id'])]))
     reuse = lock.get('reuse_existing_native')
     if reuse:
         assert latest['id'] == reuse['baseline_latest_id'], 'Stable release changed during candidate reuse'
@@ -51,7 +67,7 @@ def release_metadata():
 
 release = release_metadata()
 assert release['id'] == lock['release_id'] and release['tag_name'] == lock['tag']
-assert release['draft'] is False and release['prerelease'] is bool(lock.get('reuse_existing_native'))
+assert release['draft'] is False and release['prerelease'] is bool(args.cos_test or lock.get('reuse_existing_native'))
 if lock.get('reuse_existing_native'):
     from ci_repackage import validate_reuse_lock
     validate_reuse_lock(lock, json.loads((root/'attachment-batch.json').read_text()), release, target)
@@ -60,6 +76,8 @@ download_rows = []
 for file in expected['files']:
     asset = assets[file['name']]
     assert asset['size'] == file['bytes'] and asset['digest'] == 'sha256:' + file['sha256']
+    if args.cos_test:
+        assert asset['id'] == file['asset_id']
     destination = downloads / file['name']
     # Do not send a GitHub token: new users must be able to download publicly.
     routes = [asset['browser_download_url'], asset['url'] + '?verify=' + str(time.time_ns())]
@@ -120,6 +138,12 @@ assert base['runtimeId'] == expected['base_runtime_id']
 assert included['runtimeId'] == expected['runtime_id']
 assert included['baseRuntimeId'] == base['runtimeId']
 assert included['commit'] == lock['core_commit'] and included['sha256'] == lock['core_sha256']
+if args.cos_test:
+    from ci_cos_native import verify_candidate_cos
+    assert included == signed
+    shutil.rmtree(downloads)
+    verify_candidate_cos(root,target,install,resources,executable,work,evidence,download_rows)
+    raise SystemExit(0)
 from ci_repackage import prepare_candidate, verify_production_launcher
 if lock.get('reuse_existing_native'):
     batch = json.loads((root/'attachment-batch.json').read_text())

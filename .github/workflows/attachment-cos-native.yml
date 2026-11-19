@@ -1,0 +1,45 @@
+name: Verify native COS update routes and exact installers
+on:
+  push:
+    branches: ['codex/k12-cos-native-20261117-12']
+permissions:
+  contents: read
+jobs:
+  cos-native:
+    timeout-minutes: 175
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows-x64
+            runner: windows-2025
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-26
+    runs-on: ${{ matrix.runner }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check the route receipt guard
+        run: node selfcheck-network.cjs
+      - name: Install exact package and verify real migration, COS and fallback downloads
+        run: python ci-fresh-install.py --cos-test --target ${{ matrix.target }}
+      - name: Retain native route evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cos-native-${{ matrix.target }}
+          path: fresh-evidence/${{ matrix.target }}/
+          if-no-files-found: error
