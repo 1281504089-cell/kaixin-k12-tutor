@@ -1,16 +1,26 @@
 {
   "passed": true,
-  "baseline_source_commit": "04fb2adc0c36e964d3a43fc4a4c9c45a877a67c0",
-  "source_commit": "0a5e607f85ff81b6ef1d80fd7ced2659798f7211",
-  "source_files_sha256": "aac8cca93193495c7b28f08e9823d24227b50438489c9ac9890a51b0f11fde6b",
-  "files": 5965,
-  "core_workflow_run": 44496105224,
+  "baseline_source_commit": "0a5e607f85ff81b6ef1d80fd7ced2659798f7211",
+  "source_commit": "46bb8ecd7394c6be6bbf4b6eef4d62eed2719127",
+  "source_files_sha256": "921128ac62964ce9ea610364ca7952e9594ba909ad9c1c97a159f1764a1bdbd2",
+  "files": 6005,
+  "core_workflow_run": 44555107205,
   "source_overlay": [
     {
-      "file": "source-delta-k12-12.001",
-      "bytes": 28987,
-      "sha256": "ffdd728f7cc5d68952ef80bfb4e2b66214e47a2c8d340be337054b5993ad823b"
+      "file": "source-delta-k12-13.001",
+      "bytes": 524288,
+      "sha256": "85e0510e8688ba6f5c9a7bf90a25c99e4c2e21567a2b76dbb1576923b8e123bc"
+    },
+    {
+      "file": "source-delta-k12-13.002",
+      "bytes": 524288,
+      "sha256": "571e06b1c3ab0ae7a49acbf5e5daa9a43d0cbea803bcfa2b32a299e2fcaf1d39"
+    },
+    {
+      "file": "source-delta-k12-13.003",
+      "bytes": 95166,
+      "sha256": "ae6d4d7b3b07d01cb185eb4e7e650ca92d97446734e6fa016fdf87ab128ecdde"
     }
   ],
-  "source_overlay_sha256": "ffdd728f7cc5d68952ef80bfb4e2b66214e47a2c8d340be337054b5993ad823b"
+  "source_overlay_sha256": "6d082e2185d14a0aacbab53ed1acd039473b51ba9c6407768111a81770d88d11"
 }

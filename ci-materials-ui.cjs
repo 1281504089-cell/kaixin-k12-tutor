@@ -1,5 +1,6 @@
 // Synthetic native acceptance against the exact updated production renderer.
 const assert = require('node:assert/strict');
+const { randomUUID } = require('node:crypto');
 const { writeFile } = require('node:fs/promises');
 const path = require('node:path');
 async function loadInitialLibrary(view, evidence) {
@@ -140,8 +141,12 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   await loadInitialLibrary(view, evidence);
   await click('长期资料');
   await wait('Boolean(document.querySelector(\'input[aria-label="选择要长期保存的资料"]\'))', 'Updated library did not expose bulk upload');
-  const originals = Array.from({ length: 20 }, (_, index) => ({ name: `native-background-${index.toString().padStart(2, '0')}.txt`, text: `SYNTHETIC NATIVE ORIGINAL ${index}\n切换页面后继续保存。` }));
-  originals.push({ name: 'native-listening.html', text: '<!DOCTYPE html><html><body><h1>Synthetic listening</h1><div class="row"><span class="text">Hello student.</span><button onclick="speakOne(0)">Play one</button></div><script>window.attachmentExecuted=true</script><a href="https://example.com">external</a></body></html>' });
+  // All upgrade paths preserve the same profile. New filenames exercise a new upload each time.
+  const fixtureId = randomUUID().slice(0, 8);
+  const htmlName = `native-listening-${fixtureId}.html`;
+  const previewSelector = `iframe[title="${htmlName}"]`;
+  const originals = Array.from({ length: 20 }, (_, index) => ({ name: `native-background-${fixtureId}-${index.toString().padStart(2, '0')}.txt`, text: `SYNTHETIC NATIVE ORIGINAL ${index}\n切换页面后继续保存。` }));
+  originals.push({ name: htmlName, text: '<!DOCTYPE html><html><body><h1>Synthetic listening</h1><div class="row"><span class="text">Hello student.</span><button onclick="speakOne(0)">Play one</button></div><script>window.attachmentExecuted=true</script><a href="https://example.com">external</a></body></html>' });
   await js(() => {
     window.__materialsDocument = 'same-document';
     const original = window.fetch.bind(window);
@@ -213,15 +218,15 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
     }
     return uploads.length;
   }, originals);
-  await js(() => {
-    const card = [...document.querySelectorAll('article')].find(node => node.querySelector('h2')?.textContent === 'native-listening.html');
+  await js(name => {
+    const card = [...document.querySelectorAll('article')].find(node => node.querySelector('h2')?.textContent === name);
     [...card.querySelectorAll('button')].find(node => node.textContent.trim() === '打开原件').click();
-  });
-  await wait('Boolean(document.querySelector(\'iframe[title="native-listening.html"]\')?.srcdoc)', 'HTML did not render an isolated page');
-  const safe = await js(() => {
-    const frame = document.querySelector('iframe[title="native-listening.html"]');
+  }, htmlName);
+  await wait(`Boolean(document.querySelector(${JSON.stringify(previewSelector)})?.srcdoc)`, 'HTML did not render an isolated page');
+  const safe = await js(selector => {
+    const frame = document.querySelector(selector);
     return frame.sandbox.value === 'allow-scripts' && !frame.srcdoc.includes('window.attachmentExecuted=true') && !frame.srcdoc.includes('href="https://example.com"') && frame.srcdoc.includes("connect-src 'none'");
-  });
+  }, previewSelector);
   assert.equal(safe, true);
   let frame;
   const frameDeadline = Date.now() + 30000;
@@ -252,9 +257,9 @@ module.exports = async function verifyMaterials(view, evidence, mathFixture) {
   const referenceShelves=await js(()=>{const group=document.querySelector('[role="dialog"] [role="group"][aria-label="资料类型"]');return [...group.querySelectorAll('button')].map(node=>({label:node.textContent.trim(),selected:node.getAttribute('aria-pressed')==='true',visible:node.offsetHeight>0}));});
   assert.deepEqual(referenceShelves,[{label:'教材库',selected:true,visible:true},{label:'题库',selected:false,visible:true},{label:'长期资料',selected:false,visible:true}]);
   await click('长期资料');
-  await wait('Boolean(document.querySelector(\'[aria-label="搜索资料库"]\')) && [...document.querySelectorAll(\'[role="dialog"] button\')].some(node => node.textContent.includes("native-background-00.txt"))', 'Library picker did not list original');
+  await wait(`Boolean(document.querySelector('[aria-label="搜索资料库"]')) && [...document.querySelectorAll('[role="dialog"] button')].some(node => node.textContent.includes(${JSON.stringify(originals[0].name)}))`, 'Library picker did not list original');
   const postsBefore = await js(() => window.__materialsPosts.length);
-  await js(() => [...document.querySelectorAll('[role="dialog"] button')].find(node => node.textContent.includes('native-background-00.txt')).click());
+  await js(name => [...document.querySelectorAll('[role="dialog"] button')].find(node => node.textContent.includes(name)).click(), originals[0].name);
   await wait('Boolean(window.__materialsAttached) && !document.querySelector(\'[aria-label="搜索资料库"]\')', 'Library reference failed');
   assert.equal(await js(() => document.querySelector('textarea').value), draft);
   await js(async (original, retained, postsBefore) => {

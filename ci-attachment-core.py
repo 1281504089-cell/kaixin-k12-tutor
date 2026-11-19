@@ -5,6 +5,7 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -34,6 +35,18 @@ for row in runtime["files"]:
         assert not any(prefix.encode() in data for prefix in DOC_FIGURES), "Required omitted documentation figure: " + row["file"]
 
 env = {**os.environ, "NEXT_TELEMETRY_DISABLED": "1", "NEXT_PUBLIC_API_BASE": "__NEXT_PUBLIC_API_BASE_PLACEHOLDER__", "NEXT_PUBLIC_AUTH_ENABLED": "__NEXT_PUBLIC_AUTH_ENABLED_PLACEHOLDER__"}
+resources = json.loads((SOURCE / "apps/desktop/student-resources.json").read_text())
+geogebra_url = resources["sources"]["geogebra"]
+geogebra = next(row for row in resources["assets"] if row["file"] == geogebra_url.rsplit("/", 1)[-1])
+with tempfile.TemporaryDirectory(prefix="geogebra-") as directory:
+    staging = Path(directory)
+    asset = staging / safe_name(geogebra["file"])
+    subprocess.run(["curl", "--fail", "--silent", "--show-error", "--location", "--retry", "3",
+                    "--max-time", "120", "--output", str(asset), geogebra_url], check=True)
+    assert asset.stat().st_size == geogebra["bytes"] and sha(asset) == geogebra["sha256"]
+    subprocess.run([sys.executable, str(SOURCE / "apps/desktop/scripts/prepare-student-support.py"),
+                    "--geogebra", str(asset), "--output", str(staging)], check=True)
+    shutil.copytree(staging / "web-public", WEB / "public", dirs_exist_ok=True)
 for command in [["npm", "ci", "--legacy-peer-deps", "--no-audit", "--no-fund"], ["npm", "run", "build"], ["npx", "vitest", "run", "--maxWorkers=1", *CONFIG["web_tests"]]]:
     subprocess.run(command, cwd=WEB, env=env, check=True)
 word = SOURCE / "scripts/report-word"
@@ -112,6 +125,11 @@ with archive.open("xb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=ra
 assert archive.stat().st_size < 2_000_000_000, "Current signed core protocol archive limit"
 required = {"core/deeptutor/services/student_learning/word-runtime.cjs", "core/deeptutor/services/student_learning/reference.cjs", "core/deeptutor/services/student_learning/miniapp/textbook-library.cjs", "core/deeptutor/services/student_learning/miniapp/retrieval.cjs", "core/deeptutor/services/student_learning/question_bank_data/manifest.json", "core/deeptutor/services/student_learning/question_bank_data/index.sqlite3", "web/server.js", "web/.next/BUILD_ID", "BUILD_COMMIT"}
 assert required.issubset(files), required - set(files)
+vendor = WEB / "public/vendor/geogebra"
+assert (vendor / "deployggb.js").is_file() and (vendor / "HTML5/5.0/web3d/web3d.nocache.js").is_file()
+for file in vendor.rglob("*"):
+    if file.is_file():
+        assert files["web/public/" + file.relative_to(WEB / "public").as_posix()]["sha256"] == sha(file)
 
 # Re-open the actual archive, check every member and run the existing static audit.
 with tempfile.TemporaryDirectory(prefix="core-readback-", dir=OUT) as directory:
@@ -133,7 +151,8 @@ file_manifest = {"source_commit": CONFIG["source_commit"], "files": sorted(files
 report = {"source_commit": CONFIG["source_commit"], "backend_source_commit": CONFIG["source_commit"], "source_scope": "published_export", "source_files_sha256": CONFIG["source_files_sha256"], "isolation_ledger_sha256": CONFIG["isolation_ledger_sha256"], "isolated_assets": isolation["excluded_files"], "frontend_build": (WEB / ".next/BUILD_ID").read_text().strip(), "archive": archive.name, "sha256": sha(archive), "bytes": archive.stat().st_size, "files": len(files), "runtime_source_files": len(runtime["files"]), "generated_word_sha256": sha(generated_word), "generated_word_bytes": generated_word.stat().st_size, "generated_word_archive_readback": files["core/deeptutor/services/student_learning/word-runtime.cjs"]["sha256"] == sha(generated_word), "bank_payload_manifest_sha256": sha(payload_file), "file_manifest_sha256": sha(OUT / "core-file-manifest.json"), "archive_full_readback": True, "static_bundle_audit": audit, "real_keys_used": False, "personal_records_included": False}
 (OUT / "attachment-core.json").write_text(json.dumps(report, indent=2) + "\n")
 print(json.dumps(report))
-overlay_descriptor = json.loads((ROOT / "source-manifest.json").read_text())["sourceOverlay"]
+source_manifest = json.loads((ROOT / "source-manifest.json").read_text())
+overlay_descriptor = ([source_manifest["sourceOverlay"], *source_manifest.get("additionalSourceOverlays", [])])[-1]
 source_asset = OUT / safe_name(overlay_descriptor["remote_archive"]["file"])
 join_source_overlay(ROOT, source_asset, overlay_descriptor)
 subprocess.run(["gh", "release", "upload", CONFIG["tag"], str(archive), str(source_asset), str(OUT / "attachment-core.json"), str(OUT / "core-file-manifest.json"), "--clobber"], check=True)

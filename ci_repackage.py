@@ -25,6 +25,35 @@ def validate_installer_files(files, target, tag):
 
 
 def validate_reuse_lock(lock, batch, release, target):
+    if lock.get('tag') == 'student-20261117-k12-13':
+        reuse = lock['reuse_existing_native']
+        assert lock['tag'] == batch['tag'] == release['tag_name'] and release['prerelease'] and not release['draft']
+        assert lock['release_id'] == release['id']
+        assert lock['core_commit'] == batch['core_commit']
+        assert lock['core_sha256'] == batch['core_asset']['digest'].removeprefix('sha256:')
+        assert (reuse['original_native_run'], reuse['original_native_workflow_commit']) == (
+            44558305449, 'fe8eb8724a7a2db15c8d5f0cd478d01c43611b26')
+        raw = Path('attachment-final-manifests.json').read_bytes()
+        assert reuse['frozen_stage_sha256'] == hashlib.sha256(raw).hexdigest()
+        final = json.loads(raw)
+        assert final['core_commit'] == batch['core_commit'] and len(final['manifests']) == 57
+        assert final['manifests'][f'runtime-{target}-20261117-k12-13-20261112.json'] == batch['manifests'][target]
+        files = lock['targets'][target]['files']
+        validate_installer_files([{**r, 'file':r['name']} for r in files], target, lock['tag'])
+        actual = {row['name']: row for row in release['assets']}
+        for row in reuse['immutable_existing_assets']:
+            value = actual[row['name']]
+            assert (value['id'], value['size'],value['digest']) == (row['id'], row['bytes'], 'sha256:'+row['sha256'])
+        bridge = reuse['bridge_stages'][target]
+        assert bridge['native_run_id'] == reuse['original_native_run'] and bridge['workflow_commit'] == reuse['original_native_workflow_commit']
+        assert bridge['core_commit'] == batch['core_commit'] and bridge['target'] == target and not bridge['real_keys_used']
+        assert all(bridge['native_bridge'][field] for field in ['ready','chat_preserved','task_preserved','saved_key_preserved'])
+        manifest = final['manifests'][f'runtime-{target}.json']
+        assert (manifest['archive'], manifest['sha256']) == (bridge['bridge']['file'], bridge['bridge']['sha256'])
+        prior = reuse['prior_manifests'][target]
+        assert prior['baseRuntimeId'] == batch['manifests'][target]['baseRuntimeId'] and prior['commit'] != batch['core_commit']
+        assert (prior['archive'], prior['sha256']) == (reuse['prior_core_asset']['name'], reuse['prior_core_asset']['sha256'])
+        return
     if lock.get('tag') == 'student-20261117-k12-8':
         from ci_native8_health_acceptance import validate_reuse
         return validate_reuse(lock,batch,release,target)

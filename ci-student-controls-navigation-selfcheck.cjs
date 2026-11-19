@@ -39,6 +39,6 @@ check('bulk and reference paths explicitly navigate to long-term originals witho
  assert(!source.includes('资料库 · 教材与长期资料'));assert(!source.includes('从资料库选择'));
  assert(source.includes('Shared reference shelves did not open in this chat'));
  assert(source.includes("assert.deepEqual(referenceShelves,[{label:'教材库',selected:true,visible:true},{label:'题库',selected:false,visible:true},{label:'长期资料',selected:false,visible:true}])"));
- for(const gate of ['Referenced original changed','Reference duplicated a library upload','Reference created an upload or conversation','same-document','native-background-00.txt'])assert(source.includes(gate),gate);
+ for(const gate of ['Referenced original changed','Reference duplicated a library upload','Reference created an upload or conversation','same-document','randomUUID().slice(0, 8)','JSON.stringify(originals[0].name)','}, originals[0], retained, postsBefore)'])assert(source.includes(gate),gate);
 });
 console.log(JSON.stringify({passed:true,checks,network_calls:0,browser_calls:0,model_calls:0,formal_data_used:false}));
