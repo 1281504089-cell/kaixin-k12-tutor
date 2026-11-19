@@ -146,8 +146,8 @@
   },
   {
     "file": "attachment-release.json",
-    "bytes": 4582,
-    "sha256": "9c8bd2b2a94e644fb5a4154fe4870bda685f4ce8393aa5c36eda630f4e334410"
+    "bytes": 4634,
+    "sha256": "84655734b4677e5250d4a95d007b353a0d633980f2e01ab3613f47d79a213c78"
   },
   {
     "file": "bootstrap_source.py",
@@ -156,8 +156,8 @@
   },
   {
     "file": "ci-attachment-core.py",
-    "bytes": 9243,
-    "sha256": "08d19a52964a2c1415eb08e7a56f0de95c6f673b6b294e5420a1a51034ce37e6"
+    "bytes": 10485,
+    "sha256": "ebafbccadc422d4e589455aeaa84a2c119ddadbb8245acc764b244fc23aa90b9"
   },
   {
     "file": "ci-fresh-install.py",
@@ -411,13 +411,13 @@
   },
   {
     "file": "launcher-changes-20261117.json",
-    "bytes": 585,
-    "sha256": "3997889e28e9b7672e9826e550871fced1dbe3c17aaa0637a672d64e8fdb38fa"
+    "bytes": 3,
+    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
   },
   {
     "file": "launcher-manifest.json",
     "bytes": 3920,
-    "sha256": "d37c89c8edf23164609d17ed6f2b8696f38c3ef10d4ce500219565f42007fcb7"
+    "sha256": "85b4e7aa671f138c115551d694236086cd2834bfc938e94f3522c7915c4faf07"
   },
   {
     "file": "materials-launcher-src/bundles.mjs",
@@ -616,8 +616,8 @@
   },
   {
     "file": "prior-launcher-fingerprint.json",
-    "bytes": 3149,
-    "sha256": "605fe61ac6d76f677f15177547d5d0800ba333e4eab59d3396b9e64d0e85f457"
+    "bytes": 3151,
+    "sha256": "79b5c42b5812040262bc63cb2a1710bf73ba57b5addbf79d370c8cbbbfa5efbf"
   },
   {
     "file": "progress-read-selfcheck.cjs",
@@ -641,8 +641,8 @@
   },
   {
     "file": "runtime-source-manifest.json",
-    "bytes": 626775,
-    "sha256": "4d7e3d0e8d6c806ec1ec4bd9be71056ac179549e793fa669c809569ca678b5fe"
+    "bytes": 632138,
+    "sha256": "915c7c2e832beaa985e110b786dd540950bcebbd1a2d246d96d491140d9ae889"
   },
   {
     "file": "source-delta-k12-11.001",
@@ -665,6 +665,21 @@
     "sha256": "ffdd728f7cc5d68952ef80bfb4e2b66214e47a2c8d340be337054b5993ad823b"
   },
   {
+    "file": "source-delta-k12-13.001",
+    "bytes": 524288,
+    "sha256": "85e0510e8688ba6f5c9a7bf90a25c99e4c2e21567a2b76dbb1576923b8e123bc"
+  },
+  {
+    "file": "source-delta-k12-13.002",
+    "bytes": 524288,
+    "sha256": "571e06b1c3ab0ae7a49acbf5e5daa9a43d0cbea803bcfa2b32a299e2fcaf1d39"
+  },
+  {
+    "file": "source-delta-k12-13.003",
+    "bytes": 95166,
+    "sha256": "ae6d4d7b3b07d01cb185eb4e7e650ca92d97446734e6fa016fdf87ab128ecdde"
+  },
+  {
     "file": "source-inventory-k12-11.json",
     "bytes": 1276478,
     "sha256": "650a81487253ccb9bbbd21da66b57b81895e67cd748d0dab74252ce9f4ca563f"
@@ -675,9 +690,14 @@
     "sha256": "6449ecc5669667b1aaf615afbf50609b29966d32f56c412a53e022b2beea4045"
   },
   {
+    "file": "source-inventory-k12-13.json",
+    "bytes": 1285336,
+    "sha256": "a288e8953405b010c305e1f8190ac0e6dbd0dd6d066a24c2c16af726e4d2277b"
+  },
+  {
     "file": "source-manifest.json",
-    "bytes": 45907,
-    "sha256": "f6075ff958beb4827dbb6717cccad9afa5af88cf75e3e7484cb67d6b75b65db3"
+    "bytes": 47235,
+    "sha256": "ed20a9825624cfb35463954221415e011ab6043a27b457973b6a88e795f305e7"
   },
   {
     "file": "test-connector-upload.cjs",
