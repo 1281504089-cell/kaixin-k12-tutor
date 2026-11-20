@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -193,4 +194,14 @@ def main():
     print('PASS: frozen Intel candidate fresh install and both complete real update paths')
 
 if __name__ == '__main__':
-    main()
+    prefix = 'codex/k12-intel-reverify-20261117-16-'
+    ref = os.environ.get('GITHUB_REF_NAME', '')
+    scene = ref.removeprefix(prefix)
+    if ref.startswith(prefix):
+        if scene == 'finalize':
+            run([sys.executable, 'ci-intel-k12-16-finalize.py'])
+        else:
+            assert scene in {'current', 'materials', 'materials-oldest'}
+            run([sys.executable, 'ci-fresh-install.py', '--target', TARGET, '--scene', scene])
+    else:
+        main()

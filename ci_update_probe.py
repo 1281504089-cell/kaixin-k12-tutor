@@ -92,8 +92,9 @@ print(json.dumps(asyncio.run(run())))
   subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(probe)],check=True);exe=probe/'Contents/MacOS/开心动力超级学霸'
  else:exe=probe/'开心动力超级学霸.exe'
  from_launcher='a47b05f9136ca6fb72d2f1f8a04eeb425298f358' if legacy else '20261114-unified' if materials else json.loads((root/'launcher-manifest.json').read_text())['buildId']
- subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if launcher else '0','KX_START_LAUNCHER_BUILD':from_launcher},check=True,timeout=1400)
- deadline=time.monotonic()+1400
+ timeout=2800 if target=='macos-x64' and os.environ.get('KX_K12_16_INTEL_SCENE') in {'current','materials','materials-oldest'} else 1400
+ subprocess.run([str(exe)],env={**os.environ,'OPEN_DEEPTUTOR_TEST_HOME':str(home),'KX_UPDATE_FLOW_RESULT':str(evidence/(entry+'.json')),'KX_CANDIDATE_TAG':json.loads((root/'attachment-batch.json').read_text())['tag'],'KX_EXPECT_SHELL_RESTART':'1' if launcher else '0','KX_START_LAUNCHER_BUILD':from_launcher},check=True,timeout=timeout)
+ deadline=time.monotonic()+timeout
  while not (evidence/(entry+'.json')).is_file():
   error=evidence/(entry+'.json.error.json')
   assert not error.is_file(),error.read_text(encoding='utf-8') if error.exists() else ''

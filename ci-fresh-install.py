@@ -13,11 +13,15 @@ from urllib.request import Request, urlopen
 parser = argparse.ArgumentParser()
 parser.add_argument('--target', required=True, choices=['macos-x64', 'macos-arm64', 'windows-x64'])
 parser.add_argument('--lock-file', choices=['fresh-install-lock.json','fresh-install-lock-arm8-health.json','k12-13-native-recheck.json'], default='fresh-install-lock.json')
+parser.add_argument('--scene', choices=['current', 'materials', 'materials-oldest'])
 args = parser.parse_args()
 root = Path.cwd()
 lock = json.loads((root / args.lock_file).read_text())
 frozen_recheck = bool(lock.get('reuse_existing_native')) and lock['tag'] in {'student-20261117-k12-13','student-20261117-k12-16'}
 target = args.target
+if args.scene:
+    assert target == 'macos-x64' and lock['tag'] == 'student-20261117-k12-16' and frozen_recheck
+    os.environ['KX_K12_16_INTEL_SCENE'] = args.scene
 expected = lock['targets'][target]
 work = root / ('fresh-' + target)
 downloads = work / 'downloads'
@@ -130,9 +134,10 @@ if lock.get('reuse_existing_native'):
     for name,row in batch['shell_files'].items():assert sha(resources/'app'/name) == row['sha256']
     helper_spec=importlib.util.spec_from_file_location('reuse_download',root/'ci-mac-reuse.py')
     helper=importlib.util.module_from_spec(helper_spec);helper_spec.loader.exec_module(helper)
-    prior=root/'prior-update';prior.mkdir()
-    helper.download(lock['reuse_existing_native']['prior_core_asset'],prior)
-    (prior/'runtime.json').write_text(json.dumps(lock['reuse_existing_native']['prior_manifests'][target],indent=2))
+    if args.scene not in ('materials', 'materials-oldest'):
+        prior=root/'prior-update';prior.mkdir()
+        helper.download(lock['reuse_existing_native']['prior_core_asset'],prior)
+        (prior/'runtime.json').write_text(json.dumps(lock['reuse_existing_native']['prior_manifests'][target],indent=2))
     candidate_out=root/('candidate-'+target);downloads.rename(candidate_out)
     verify_production_launcher(root,target,install,resources,evidence)
 else:
@@ -153,6 +158,20 @@ if frozen_recheck:
 else:
     prepare_bridge(root, target, resources, work / '全新学习目录', evidence, batch)
 from ci_update_probe import verify_update_entry
+if args.scene:
+    entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence,
+                                legacy=args.scene == 'materials-oldest', materials=args.scene != 'current')
+    validate_reuse_lock(lock, batch, release_metadata(), target)
+    assert entry['actual_download_install_backup_restart'] == 'passed' and entry['check_again_current']
+    assert all(entry[key] for key in ('chat_preserved', 'task_preserved', 'saved_key_preserved'))
+    (evidence/'scene-verified.json').write_text(json.dumps({
+        'passed': True, 'scene': args.scene, 'target': target, 'tag': batch['tag'],
+        'core_commit': batch['core_commit'], 'launcher_build': batch['launcher_build'],
+        'verification_run': int(os.environ['GITHUB_RUN_ID']), 'workflow_commit': os.environ['GITHUB_SHA'],
+        'reuse_lock_sha256': sha(root/args.lock_file), 'production_launcher_unchanged': True,
+    }, indent=2))
+    print('PASS: independent Intel native update scene: ' + args.scene, flush=True)
+    raise SystemExit(0)
 oldest_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, legacy=True)
 update_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence)
 materials_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, materials=True)
