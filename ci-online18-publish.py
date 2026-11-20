@@ -180,6 +180,10 @@ for target in targets:
     report = read(dest/"ONLINE-NATIVE-PASSED.json")
     assert report["passed"] and report["target"] == target and report["run_id"] == run_id and report["workflow_commit"] == native["head_sha"]
     assert report["source_commit"] == source and report["core_sha256"] == approval["core_sha256"] and report["delta_sha256"] == batch["proof"]["delta"]["sha256"]
+    bridge = report["standalone_bridge"]
+    default = batch["manifests"]["runtime-" + target + ".json"]
+    assert bridge["booted"] and (bridge["commit"], bridge["runtime_id"], bridge["archive"], bridge["sha256"]) == (source, default["runtimeId"], default["archive"], default["sha256"])
+    assert len(bridge["bank"]["questions"]) == 38
     for scenario in ("launcher_migration", "matching_delta"):
         evidence = report[scenario]
         assert evidence["check_again_current"] and evidence["memory_preserved"] and evidence["backup_created"]
