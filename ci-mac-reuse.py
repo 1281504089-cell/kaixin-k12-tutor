@@ -424,6 +424,7 @@ def main():
 if __name__ == '__main__':
     scopes = {
         'codex/k12-mac-reverify-20261117-16-viewport': {'macos-arm64', 'macos-x64'},
+        'codex/k12-mac-reverify-20261117-16-arm-drawer': {'macos-arm64'},
         'codex/k12-native-reverify-20261117-16-windows-viewport': {'windows-x64'},
     }
     selected = scopes.get(os.environ.get('GITHUB_REF_NAME'))

@@ -10,6 +10,10 @@ module.exports = async function verifyPreview(view, evidence, seed) {
   assert.equal(seed.titles.length, 8);
   const debug = view.debugger;
   assert(!debug.isAttached());
+  const viewer = '.dt-viewer-panel[data-open="true"]';
+  const closeViewer = viewer+' button[aria-label="关闭查看器"],'+viewer+' button[aria-label="Close viewer"]';
+  const mark = '[data-chat-turn-navigator] [data-tick]';
+  const preview = '[data-turn-preview]';
   const views = [];
   async function wait(fn, label, timeout = 60000) {
     const until = Date.now() + timeout;
@@ -18,10 +22,11 @@ module.exports = async function verifyPreview(view, evidence, seed) {
   async function moveTo(selector, click = false) {
     if (!click) await debug.sendCommand('Input.dispatchMouseEvent',{type:'mouseMoved',x:2,y:2});
     let point;
-    let lastHit;
+    let lastSample;
+    let dismissedViewer = false;
     const deadline = Date.now()+5000;
     while (!point) {
-      const sample = await js(selector => {
+      const sample = await js((selector, viewer) => {
         const element = document.querySelector(selector);
         if (!element) return null;
         element.scrollIntoView({block:'nearest'});
@@ -29,12 +34,43 @@ module.exports = async function verifyPreview(view, evidence, seed) {
         const x = Math.round(rect.left+rect.width/2);
         const y = Math.round(rect.top+rect.height/2);
         const hit = document.elementFromPoint(x,y);
-        return {x,y,actionable:!!hit&&element.contains(hit),hit:hit?.closest('button,[role="dialog"]')?.getAttribute('aria-label')||hit?.tagName};
-      }, selector);
-      lastHit = sample?.hit;
+        return {x,y,actionable:!!hit&&element.contains(hit),hit:hit?.tagName,viewerBlocks:!!hit?.closest(viewer)};
+      }, selector, viewer);
+      lastSample = sample;
       if (sample?.actionable) point = {x:sample.x,y:sample.y};
+      else if (selector === mark && sample?.viewerBlocks && !dismissedViewer) {
+        // Restoring the workspace drawer can complete after the conversation mounts.
+        await moveTo(closeViewer,true);
+        await wait(() => !document.querySelector('.dt-viewer-panel[data-open="true"]'), 'The restored activity drawer stayed open', 2000);
+        dismissedViewer = true;
+      }
       else {
-        assert(Date.now()<deadline, `Preview action unavailable: ${selector}, hit ${lastHit}`);
+        if (Date.now() >= deadline) {
+          const diagnostics = await js((selector, point, viewer) => {
+            const describe = node => {
+              const style = getComputedStyle(node);
+              return {
+                tag: node.tagName, role: node.getAttribute('role'), label: node.getAttribute('aria-label'),
+                className: node.getAttribute('class'), open: node.getAttribute('data-open'),
+                visibility: style.visibility, zIndex: style.zIndex, pointerEvents: style.pointerEvents,
+                rect: node.getBoundingClientRect().toJSON(),
+              };
+            };
+            const element = document.querySelector(selector);
+            const hits = point ? document.elementsFromPoint(point.x, point.y) : [];
+            const ancestors = [];
+            for (let node = hits[0]; node && ancestors.length < 8; node = node.parentElement) ancestors.push(describe(node));
+            return {
+              width: innerWidth, height: innerHeight, scrollX, scrollY,
+              target: element && describe(element), point, hitText: hits[0]?.textContent?.trim().slice(0, 120),
+              hits: hits.slice(0, 8).map(describe), ancestors,
+              viewers: [...document.querySelectorAll(viewer)].map(describe),
+            };
+          }, selector, lastSample, '.dt-viewer-panel,[role="dialog"]');
+          writeFileSync(join(evidence,'quick-preview-failure.json'),JSON.stringify({selector,...diagnostics},null,2));
+          writeFileSync(join(evidence,'quick-preview-failure.png'),(await view.capturePage()).toPNG());
+          assert.fail(`Preview action unavailable: ${selector}, hit ${diagnostics.hitText || lastSample?.hit}`);
+        }
         await pause(100);
       }
     }
@@ -46,15 +82,12 @@ module.exports = async function verifyPreview(view, evidence, seed) {
   }
   debug.attach('1.3');
   try {
-    const viewer = '.dt-viewer-panel[data-open="true"]';
-    const mark = '[data-chat-turn-navigator] [data-tick]';
-    const preview = '[data-turn-preview]';
     async function openConversation() {
       await view.loadURL(`${origin}/chat/${encodeURIComponent(seed.session)}?dt_workspace=`);
       await wait(() => document.querySelectorAll('[data-chat-turn-navigator] [data-tick]').length === 8, 'Eight question marks did not render');
       await pause(500);
       if (await js(selector => Boolean(document.querySelector(selector)), viewer)) {
-        await moveTo(viewer+' button[aria-label="关闭查看器"],'+viewer+' button[aria-label="Close viewer"]',true);
+        await moveTo(closeViewer,true);
         await wait(() => !document.querySelector('.dt-viewer-panel[data-open="true"]'), 'The existing activity drawer stayed open');
       }
       await wait(() => {
@@ -72,6 +105,7 @@ module.exports = async function verifyPreview(view, evidence, seed) {
     for (const [width,height] of [[390,844],[844,390],[1366,900],[1920,1080]]) {
       await debug.sendCommand('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
       await openConversation();
+      assert.deepEqual(await js(() => [innerWidth,innerHeight]),[width,height]);
       await moveTo(mark);
       await wait(() => Boolean(document.querySelector('[data-turn-preview]')), 'Hover did not open preview');
       const card = await js(() => {

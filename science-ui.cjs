@@ -101,6 +101,21 @@ async function verifyScienceNative(view, evidenceDir, seed) {
   async function snapshot(selector, name, width, height) {
     const actual = await resize(width, height);
     await wait(() => document.fonts.status === 'loaded', [], 'Formula fonts did not load', 10000);
+    if (name === 'chat') {
+      const selector = '.dt-viewer-panel[data-open="true"]';
+      if (await js(selector => !!document.querySelector('.chat-preview-shell[data-viewer-open="true"]') ||
+        !!document.querySelector(selector), selector)) {
+        await wait(selector => {
+          const button = document.querySelector(selector)?.querySelector('button[aria-label="关闭查看器"],button[aria-label="Close viewer"]');
+          if (!button) return false;
+          button.click();
+          return true;
+        }, [selector], 'The unrelated activity drawer could not be closed', 5000);
+        await wait(() => !document.querySelector('.chat-preview-shell[data-viewer-open="true"]') &&
+          [...document.querySelectorAll('.dt-viewer-panel')].every(panel => getComputedStyle(panel).visibility === 'hidden'),
+        [], 'The activity drawer still covered the conversation', 5000);
+      }
+    }
     const result = await js(selector => ({
       horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
       formulas: document.querySelectorAll(selector + ' .katex').length,
