@@ -1,14 +1,14 @@
-开心动力超级学霸桌面版 k12-12
-发行批次 student-20261117-k12-12
-完整构建应包含 20261117-k12-12
+开心动力超级学霸桌面版 k12-16
+发行批次 student-20261117-k12-16
+完整构建应包含 20261117-k12-16
 配套启动器 20261119-updater-6
 
 已有软件
-在「设置 → 关于 → 检查更新」或顶部「核心 → 检查更新」发现新版后，点击「下载并更新」。出现「重新打开完成更新」时，按提示重开。更新后再检查一次，并在「关于」核对完整构建。更新到本批并按提示重开后，后续「检查更新」会优先从腾讯云 COS 下载。COS 下载或校验失败时自动回退 GitHub。保留原学习目录和设置。失败时记录完整构建、错误提示与运行日志。
+在「设置 → 关于 → 检查更新」或顶部「核心 → 检查更新」发现新版后，点击「下载并更新」。出现「重新打开完成更新」时，按提示重开。更新后再检查一次，并在「关于」核对完整构建。升级到本批并按提示重开后，应用默认通过腾讯云 COS 检查和下载更新。COS 访问或校验失败时，应用自动尝试 GitHub。保留原学习目录和设置。失败时记录完整构建、错误提示与运行日志。
 
 第一次安装
-从同一个发布页下载适合自己电脑的全套文件，保留原名并放进同一目录。
-https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-12
+第一次完整安装可使用 GitHub 或正式 U 盘安装包。从以下发布页下载适合自己电脑的全套安装文件，保留原名并放进同一目录。
+https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-16
 
 Windows 64 位，五份文件下齐后运行 Setup.exe
 Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001
@@ -18,25 +18,22 @@ Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004
 Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe
 
 Intel Mac，五份文件下齐后打开 -part.dmg
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.002.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.003.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.004.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.005.dmgpart
-Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-12-part.dmg
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.002.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.003.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.004.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.005.dmgpart
+Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.dmg
 
 Apple 芯片 Mac，四份文件下齐后打开 -part.dmg
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.002.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.003.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.004.dmgpart
-Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-12-part.dmg
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.002.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.003.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.004.dmgpart
+Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.dmg
 
 Mac 打开首卷后，把应用拖到「应用程序」，然后从「应用程序」启动。Windows 若使用完整 ZIP，先全部解压，再运行 Setup.exe。首次启动等本机环境和教材展开，在线模型需联网。U 盘中的完整包及离线更新步骤以盘内说明为准。
 
-本批更新
-- 出题依次查找长期资料、题库和教材。普通出题共用 1 秒快检，明确要求找题时最长 30 秒。查完没有合适原题时会说明并标注原创。如果还没查完，应用会说明当前状态。明确只要原题时保留该要求。
-- 继续练习时会沿用当前目标。「再来一道」会跳过已经展示过的题，明确换知识点时按新目标找。遇到多个可能的考点，会询问一次，选择后继续。明确要求综合题时保留组合考点。讲解、批改或回看上一题继续走原对话。只想确认掌握情况、同时没选自测或复盘时，原对话模型会用一次正常回复先确认。
-- 上传长期资料后，后台建立文字和图片检索索引。图表和扫描页命中后可打开对应 PDF 原页。入库图像描述默认使用 DeepSeek V4.1 Flash。普通聊天和边读边问用对话中所选的模型读原图。
-- 九科题库支持更多口语说法、常见错字和排除条件。新增 5,486 条逐题索引，恢复 3,243 条原题的完整选项。原卷、共享材料、必要图示和出处可以回看。
-- 采用原题时，聊天内共用一个原题卡入口，显示题干、选项、共享材料和原图。原图资格与题目版本绑定。聊天生成的图片也会直接显示，并保留原文件入口。
-- 蓝色引用跟随对应句段，继续追问和重开历史后仍可打开。
-- 下载更新包时，持续收到数据可超过原来的 30 分钟总时限。连接与断流保护、手动取消和签名校验继续生效。
+- 回答引用真实资料时，蓝标贴在对应句段，点击打开原件或定位到对应页。旧回答没有保存句段定位时，可以展开「本轮检索参考」找原件。
+- 手动选中的聊天文字仍随提问发送，不会再当成原件。原页引用随原回答保留，继续提问或重开聊天时仍可查看。
+- 需要配图的普通讲题会先尝试匹配题型；匹配到时用本机画板并独立核对，没匹配到则沿题目条件画可核对的图。
+- 已安装用户在应用内点「检查更新」：优先通过国内 COS 下载，失败时尝试 GitHub。COS 只提供更新文件。
+- 新电脑首次完整安装，从本 GitHub 发行页选对应系统的全套安装文件，或者使用你收到的官方 U 盘安装包。还不认识国内地址的旧启动器可从 GitHub 或现有 U 盘完成一次过渡。

@@ -1,0 +1,31 @@
+{
+  "from": "1.7.1-kaixin-20261117-k12-13-macos-x64-base-c41831772671",
+  "to": "1.7.1-kaixin-20261117-k12-16-macos-x64-base-c41831772671",
+  "source_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+  "profile_isolated": true,
+  "application_ipc_update": true,
+  "check_again_current": true,
+  "transaction_phase": "complete",
+  "learning_record_sha256": "b3c79c190e565eb3973239f7c14014078fa268f95a91b6e8085df1e3351e7a6d",
+  "network": {
+    "kind": "archive-body",
+    "asset": "kaixin-core-20261117-k12-16.tar.gz",
+    "route": "cos",
+    "host": "kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com",
+    "status": 200,
+    "cache": false,
+    "bytes": 871501419,
+    "sha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07"
+  },
+  "elapsed_ms": 153842,
+  "physical_interface": "en7",
+  "tls_passthrough": true,
+  "staged_compatibility_manifest": false,
+  "offline_slider": {
+    "first": 2,
+    "second": 4,
+    "canvas": true,
+    "blocked_nonlocal_requests": 0
+  },
+  "real_model_calls": 0
+}

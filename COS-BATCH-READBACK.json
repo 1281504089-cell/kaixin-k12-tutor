@@ -1,312 +1,342 @@
 {
-  "tag": "student-20261117-k12-12",
-  "source_commit": "0a5e607f85ff81b6ef1d80fd7ced2659798f7211",
+  "tag": "student-20261117-k12-16",
+  "source_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
   "cos_mirror": "https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/",
   "manifests": [
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-20261112.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-20261112.json",
       "bytes": 643,
-      "sha256": "5f3f2c94400840a5a819c6dd1fa413117ce1ecd393415b038d7037c18677d7af"
+      "sha256": "5a849ae0ee1d59fbd20057c5b8140dfeaac2744921c1ade449f2beb86e60bc0e"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-194178f05eea.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-194178f05eea.json",
       "bytes": 681,
-      "sha256": "1f94111f3c7fe042572d85053c2a356fbdaad8f39d46da3086879a825cd073cd"
+      "sha256": "d233502bd2519c7692a596ee99205a4a908600adf1b23a78cd8f9ce7c2457c27"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-1ba5c03632ca.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-1ba5c03632ca.json",
       "bytes": 680,
-      "sha256": "f9d872c4f33e71ead2644a26aa425c2a0b3f37adda334c2bef15f8fd40d6345b"
+      "sha256": "6e60b21cd30a686b8350ecf53c03f0c8f85a4db262abbe57da2155118c6a4c93"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-306c0073e240.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-306c0073e240.json",
       "bytes": 683,
-      "sha256": "d013dbbfce023d6863205afba26fdeea1ef77e33bb9605e13fa864b6c4d4c1b3"
+      "sha256": "5cc43243ef355798de8544af0f21379769df9fe9e5020e5a707fbf76b4b67be7"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-6c9c7f936933.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-6c9c7f936933.json",
       "bytes": 680,
-      "sha256": "5823b0b32530134615d2ac959e9bcc6fe7741fce1dfffd12e925333532766cf9"
+      "sha256": "a256f929bd0394dffe83124633168cdd4103f1598ccbcdd4687697b203dd23b1"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-6f6222533fad.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-6f6222533fad.json",
       "bytes": 682,
-      "sha256": "5e5812aab86b297f8084a2425fd7c12f60c3793ed91fb616f76d5155fad88172"
+      "sha256": "74abd15575ce26f2b8a9e4adb1882dfffe5b589a4086d9eba171b35095ab534f"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-7056f6bb9861.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-6fbf654d5ac1.json",
+      "bytes": 681,
+      "sha256": "ac5c8b3472d33c38f9e8aaf5900c8b5dc1b1d901d9c7e2e127c1b881e506914a"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-16-base-7056f6bb9861.json",
       "bytes": 678,
-      "sha256": "8c5bf46c92569bb14cbfe767d310ad196a31191b59e38f291a80687ac4dd6de8"
+      "sha256": "e659c57632c6171942901a2ab2eb182a3146a38175ad31de85155c8817fea186"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-70cb97c3b840.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-70cb97c3b840.json",
       "bytes": 680,
-      "sha256": "1977ae9513b01223ddbe37d18b82921793593fba70b99438edd7a643fa8f2369"
+      "sha256": "24d72b87df1017a1706421754c80d40d420db271c3d841dff69acb4655431eab"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-7744dbeb8d09.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-7744dbeb8d09.json",
       "bytes": 680,
-      "sha256": "6cc0d6aba0a3833e03927528fa122bbb8ef07fa3c8d5a5742172f2f36b7f07e2"
+      "sha256": "e102816676e9f6aef444b7aec6db0db79cf2389164812c93726e21d73a7864c8"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-8fdc2e3e782e.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-7c3938d776e5.json",
+      "bytes": 681,
+      "sha256": "0f3b4f8986f540d9902d5e89f6a2f4d9f1eac598f9cba1451ffca9c3193d3571"
+    },
+    {
+      "name": "runtime-macos-arm64-20261117-k12-16-base-8fdc2e3e782e.json",
       "bytes": 680,
-      "sha256": "c7763676960c6289b1c2a15eafe3dc727bcbc8d0b23f1ba485e3f67e12256a52"
+      "sha256": "297e5c4f406d78e2dc66cdd83952888410162e507b0f29da53875f66e169b9a2"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-afbad5ed9bc4.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-afbad5ed9bc4.json",
       "bytes": 680,
-      "sha256": "daee7c14324d62a09bb30b50c4b8e27a6f7d86121a0b77c13b8fc769b6a36e3a"
+      "sha256": "3c96dfb4eb695f8275364143ac819f3e6c90dd1eb1387678d5f15b016f18afba"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-b445b7c83c4d.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-b445b7c83c4d.json",
       "bytes": 683,
-      "sha256": "bfcb76393a0387d603e146bfc9d42dbac8b822b1bdb350384a8a548dd7fef875"
+      "sha256": "c6a048253860d9d9cdc485604a3b72fa9e8f46f9fe9cac0082e7ce7b662a06ec"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-b83c8329037e.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-b83c8329037e.json",
       "bytes": 684,
-      "sha256": "7ff117439471ea797d3d2925b4d97416d163825006407c7d63aca5c4dc00a6d1"
+      "sha256": "b0f32872b7b8beaa1e39fb145a8f9f1e159f647bb825b8dafaca7a602ecaad73"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-ba05e5de452a.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-ba05e5de452a.json",
       "bytes": 683,
-      "sha256": "902eb92ca25165ff4ac96606d3b92cf7c95041f0fd46d4e287672ae5576dc57f"
+      "sha256": "2db4ef8216b7d87a9672140a87ff7531569b8062f1b91d194ef68551ccd7fa1a"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-c09b1d53f8d0.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-c09b1d53f8d0.json",
       "bytes": 686,
-      "sha256": "662409faec74f8ed34421016c99bcd227c83f36026c4cc88e60ecf4122139740"
+      "sha256": "19fa87b19b1a56e1c80f884f08037f424967bfdc5cbb52a1501f9eb909d58898"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-base-cda1e4c99289.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-base-cda1e4c99289.json",
       "bytes": 680,
-      "sha256": "30dba4d487cd632633508ae1e543355e88327f4a14f52c5d68df0faf6dd6263c"
+      "sha256": "1db673f5138b946d7a094ab67ed09c9de1d2bdab79ad7ec1c5493e5a484f128d"
     },
     {
-      "name": "runtime-macos-arm64-20261117-k12-12-prior-current.json",
+      "name": "runtime-macos-arm64-20261117-k12-16-prior-current.json",
       "bytes": 677,
-      "sha256": "3c6d9a399dbf97d7e3dd189394b393a88840e9a699fc26fd2cbee8f15a02df60"
+      "sha256": "a905e84ed990d343f589eb1174bc18f975e51418750f37f7f57920535f71975b"
     },
     {
       "name": "runtime-macos-arm64.json",
-      "bytes": 3417,
-      "sha256": "ca63a86ad442b05e43beec7c65b854a1c82b5c68670f7818599f9d3fbd3d1cb1"
+      "bytes": 3747,
+      "sha256": "186daa8c033a83ed0a9e0a6c509b8b37c96876a049b5c43a8df77576765b7cb1"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-20261112.json",
+      "name": "runtime-macos-x64-20261117-k12-16-20261112.json",
       "bytes": 637,
-      "sha256": "70f5f8f6d0b406a06b145b6bc98ce9f72342ab70e2a2e62c09465dcc10a94407"
+      "sha256": "4c548094fa0afde5933ac87a475373e9d87b3cf24686425d17040f53445ebce9"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-0a88aea2bd5e.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-0a88aea2bd5e.json",
       "bytes": 674,
-      "sha256": "29e3e7e9b2aaf900fc3a8e70631aa2331c87b55f8856f3d19ce2354c6867e175"
+      "sha256": "4f9179b2da3823e48bd7384fbb7e0b4462210d0a1fa9e40ee9d9e5b99d342c1b"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-170a15b2f1a2.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-170a15b2f1a2.json",
       "bytes": 677,
-      "sha256": "f46d9f65bf0ecc0732e265702a18a0210470f7c0b399eb271cb35810bbb0e1f5"
+      "sha256": "81f5f9158a7cd41b5ed27bbdd6865a05a5c2257aa2d602562eb9d0af21127b73"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-20001c7d4d7e.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-20001c7d4d7e.json",
       "bytes": 674,
-      "sha256": "a4b446a2aba79282665a8d78891ac30916d103be77f0c3cf461d7ad4a5522a04"
+      "sha256": "0fefb069d4a0024eae8282b97588f59d3fa2176a1f00af43650ad64cdd590319"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-22eb20a39a60.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-22eb20a39a60.json",
       "bytes": 680,
-      "sha256": "aefe4934e7750281b0ea7851e9a9b21248d5e549fbdc1a9997568b80fe9f4b79"
+      "sha256": "d23b1e08355bfef9cc3e9e640423b58471026a15b214a7b981b0d73d333657e2"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-3e8b6a21262c.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-3e8b6a21262c.json",
       "bytes": 674,
-      "sha256": "74fcaa79bed55b72a3581c0d0fa546f1603f62a8895f7563573ad0d6c22e5adb"
+      "sha256": "f1c4e4969b33f42ee6c400dea505a7d9fe3abba4f3524e485142d1b0ed66912e"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-681a198cf308.json",
-      "bytes": 672,
-      "sha256": "3649d0c807e6c470a41f91eb0982cda9b9a1ac29d15c28fd7fdf52e73033a8b2"
-    },
-    {
-      "name": "runtime-macos-x64-20261117-k12-12-base-688da252df85.json",
-      "bytes": 677,
-      "sha256": "02384e9e7178038a0aa16cbbc42580cf062c61fec7fb5d55391e3360ef1a1959"
-    },
-    {
-      "name": "runtime-macos-x64-20261117-k12-12-base-77869c010a21.json",
-      "bytes": 674,
-      "sha256": "e47a610deb2e822047ac0096bf970a20d4b81a9f9e97a452424fcaacf03915f1"
-    },
-    {
-      "name": "runtime-macos-x64-20261117-k12-12-base-7d62b8ead190.json",
-      "bytes": 674,
-      "sha256": "d8debc1c30597ddbcaf163f48d43463a157eed383e5173fad5897c7caee7ddfe"
-    },
-    {
-      "name": "runtime-macos-x64-20261117-k12-12-base-80115ecd6d3d.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-43a8d480d5b9.json",
       "bytes": 675,
-      "sha256": "60b823e3584d0349fc2a4649b6941e2fc80e2248819a14accd9b2576aa218d41"
+      "sha256": "b0d53b4c2cde7843aeb623196bad2878510cef3270d20a8270a95ac83cffe561"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-a521f11854b3.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-681a198cf308.json",
+      "bytes": 672,
+      "sha256": "72058feedf4ceb342bc110d829347b6519bbffe4faa59c34d2ed3bdc5ea26d5a"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-16-base-688da252df85.json",
       "bytes": 677,
-      "sha256": "d45ba4f6817146db9e78b6723563d9b8f351d39d5c3a22d4ce55508a8b6702a0"
+      "sha256": "4c129f23e108cecbc880b90a11895ab8e9d44273781d699f94d8cc7aef1f2419"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-c41831772671.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-77869c010a21.json",
+      "bytes": 674,
+      "sha256": "eb1b3bea2a895f7a559f2f46664fbd2c45d9c6f069573c558e57a7810ce34088"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-16-base-7d62b8ead190.json",
+      "bytes": 674,
+      "sha256": "aa166341f6bb878c18c73b60ea67ad91fefb797a857474d78a9c01446cc49b73"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-16-base-80115ecd6d3d.json",
+      "bytes": 675,
+      "sha256": "6885dfe0c674f8e8c652675a67445cd6fee57c588dfc7167a109d8f1881ad60e"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-16-base-a521f11854b3.json",
+      "bytes": 677,
+      "sha256": "a42ad9d06cbada777fbd903bba2be9f42c1f729ffde160c6addba3926f98c188"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-16-base-c41831772671.json",
       "bytes": 678,
-      "sha256": "a52049ca43f8fdcccfd67754ff667f61f0b744896d9cd0e9f05f1be4f7c5861e"
+      "sha256": "210ba47cea1ce1acb183db658278b02568f7f36833afae217f374694563e2ac8"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-c452d12cb482.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-c452d12cb482.json",
       "bytes": 676,
-      "sha256": "af3941cf74d1063c63ade700e1e490a3d7776a869cd67e862fd0ef2e96854f2e"
+      "sha256": "b1e2b08dae75c3c17d5ccf260e9e42eefad80a5f31cc1e8c4d03db4106dfa197"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-da8f97d625eb.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-c70748768152.json",
+      "bytes": 675,
+      "sha256": "1e2a29a5934cae6d4c559b6f2b8bc66a4c60bb1a5dd11dd5aca9dfcaad5ec210"
+    },
+    {
+      "name": "runtime-macos-x64-20261117-k12-16-base-da8f97d625eb.json",
       "bytes": 674,
-      "sha256": "65f2216ffab2d3f511eefb2caa2ffd62bc3d2f91ef7f337e9f5ccc92b0e65a61"
+      "sha256": "d93e6f01c75bd361c82151a813eca4788eb8993e798cb2c0a9312e1fc89a602a"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-base-e2a196e1e65a.json",
+      "name": "runtime-macos-x64-20261117-k12-16-base-e2a196e1e65a.json",
       "bytes": 674,
-      "sha256": "642dbcb3f1be5701b0bc210206980ec1fe20cf7c7be6e3d9a4a91b840a9e3840"
+      "sha256": "17b44d472118b6b6f794dc21600bba1051551d1de68d06d8220ec8cbb5015a02"
     },
     {
-      "name": "runtime-macos-x64-20261117-k12-12-prior-current.json",
+      "name": "runtime-macos-x64-20261117-k12-16-prior-current.json",
       "bytes": 671,
-      "sha256": "d5176882c523492d94064d504d371afd808f4ca975ecd799d7b618cda01d0135"
+      "sha256": "000bd562057335e07184847034137b192d0b27c10fe5e049528cc1c8451eea74"
     },
     {
       "name": "runtime-macos-x64.json",
-      "bytes": 3343,
-      "sha256": "ba1fe84bea292c74f2afbdd7a2e515919bb9746bf32f6358201c100cb946d783"
+      "bytes": 3665,
+      "sha256": "06ee7ef38ac9df12a8a645edf5f23eed2b58ddb26ec3a2a3224b4c49deffa608"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-20261112.json",
+      "name": "runtime-windows-x64-20261117-k12-16-20261112.json",
       "bytes": 638,
-      "sha256": "20fd2ce7c4831878cb27340b486a3662c6a76ea9706806d49736805e9436c471"
+      "sha256": "af48738caaa129358419d2f4a08c4450b6712a4ce2dc748d4f959583f4ff2352"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-324194bea65b.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-324194bea65b.json",
       "bytes": 680,
-      "sha256": "c0ebdf741431ee2fc75afe258c2372bbcdd27cda18864d7691e7f36023bf8d03"
+      "sha256": "0f4ae8722817743ea5cf874f7a119beee677c30d3a9ea700b041619c60b076ce"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-3e01c184c6a4.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-3e01c184c6a4.json",
       "bytes": 683,
-      "sha256": "021d2087802714661400f83ca5838941c41561b6a598c3fec00340be70aa5b20"
+      "sha256": "f1fa9035ff6b364007071b1a3d89d9000ab5651e3c1f5a766814188bd220252a"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-573f105ed118.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-573f105ed118.json",
       "bytes": 675,
-      "sha256": "2d145dcef61d9fb8cc84ae0fc066f6bf53f64fb0d48e4113f7e87c1b8acb7c58"
+      "sha256": "b7c9bd48a04c1a86b045c35a9c9b47f79bb0f5d0f02c0fed1d6cf5c000686eb9"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-70c8bc192b30.json",
-      "bytes": 677,
-      "sha256": "e774d959f64a2e476989f40c900f71f6619b0d0b4e723604a6ca04ba59a74263"
-    },
-    {
-      "name": "runtime-windows-x64-20261117-k12-12-base-77b621411568.json",
-      "bytes": 677,
-      "sha256": "202aba5d61e9058b84959d9ec04751fe9d35b804b99444507c7b62f9c4eb3ba3"
-    },
-    {
-      "name": "runtime-windows-x64-20261117-k12-12-base-7a52e2cacc9f.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-5a6e0e76c856.json",
       "bytes": 678,
-      "sha256": "9e7055a59ca2a33d583f24c9994699f99938cddf7754f48cea3f894a34e06c94"
+      "sha256": "fe85d34b98648c9f4c03edc3400b777a64f84df713551a8489b234d5437f8299"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-967544a178f2.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-70c8bc192b30.json",
       "bytes": 677,
-      "sha256": "366739c01cabc56c2415a4984124e6f212f319f7c66caef0da802eb6db433d16"
+      "sha256": "c86ccb88243644899534edf35d2d5729cd2c14a53981f62c9d3ad504bbe119f8"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-9b7c2b84f908.json",
-      "bytes": 680,
-      "sha256": "99a763e283f45fd08cdf8e6c5701aaf2a9bf1e5d50f717df6f41bfb90bc02c0d"
-    },
-    {
-      "name": "runtime-windows-x64-20261117-k12-12-base-9b7dc543315e.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-77b621411568.json",
       "bytes": 677,
-      "sha256": "45f52f9fb2c00750d66f0b03369f36a6221c1304ca4df8154381be667ebb0c10"
+      "sha256": "6f8802ed7b2338b2d0ee3d6be0d9e39b44565908e18187dbbd3c61c59bace853"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-a0419326e159.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-7a52e2cacc9f.json",
+      "bytes": 678,
+      "sha256": "fcd219006567315f944b65c1fdb737f0d32a00f1c74a4ecab3471a6a32177da2"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-16-base-8690cf0863da.json",
+      "bytes": 678,
+      "sha256": "938c6e5d70f6a502d1a7f9019f46f0cadd4db1e0a3ef9858b6cb0b71f94098ee"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-16-base-967544a178f2.json",
+      "bytes": 677,
+      "sha256": "3fbb655722703c4305bf06d39794ae961b9b5dd286fd06d7c99cb063c8947ff1"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-16-base-9b7c2b84f908.json",
       "bytes": 680,
-      "sha256": "8eb875f59341f94cb06aeef2e0effe60ae108cdc893f24cecec4c9c3e0604ca6"
+      "sha256": "dbf139fd78cac2907ed74ec37545b0ebe06234ef7cbb60169c0fc9647aa5fe32"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-afb4dfe97ae4.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-9b7dc543315e.json",
+      "bytes": 677,
+      "sha256": "1841c38e1ef837b1677eac9a8de907cb97540aa1c700a8500b026fe4f0a0ce20"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-16-base-a0419326e159.json",
+      "bytes": 680,
+      "sha256": "795906e4ad505fccb0edd3e9068f7fd52dbecf979900a65cba8223045e0a8a46"
+    },
+    {
+      "name": "runtime-windows-x64-20261117-k12-16-base-afb4dfe97ae4.json",
       "bytes": 681,
-      "sha256": "dd6a169a0b96ee9bca244553297cf59bb491d4dc19d3e67fda49c7d82109ed55"
+      "sha256": "03d38c2b0cfc183ff63191911e554d57eeff0d04788303bc197f79f17926cd4f"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-b6c3920aebfa.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-b6c3920aebfa.json",
       "bytes": 677,
-      "sha256": "23176c9f637898ec9d1987c3dc0cd84f4d220a9f0a0f687da43b2cbf3472155c"
+      "sha256": "b99480f6c56c2f5cf875d5400297eb79e5ec7feca2dd6758895b1b11fd6e619e"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-bb8f5191555d.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-bb8f5191555d.json",
       "bytes": 677,
-      "sha256": "56a3883795a574b16f3a880cf9755fd26da7bee8a1869535ecdf0950ca9b44c0"
+      "sha256": "e86bc46cd1b29ade46d8fd947e43c89def6fb3072dc2028be618bdf0c6e2cd03"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-e4abdb1cb594.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-e4abdb1cb594.json",
       "bytes": 679,
-      "sha256": "3d870c2294c81484d7fb47f0a5f849e90f632e0486752f7a2b3c75fa1f6b8e5a"
+      "sha256": "3ea9c20a703bd76a82d0255f06d98ff03061bd32f809ef48bf6c4d6db5838da7"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-base-e4b58f199119.json",
+      "name": "runtime-windows-x64-20261117-k12-16-base-e4b58f199119.json",
       "bytes": 677,
-      "sha256": "14e089e724a91614528c7d5a49cd9a73a3db9d2c46647434767bda29c111afe2"
+      "sha256": "5e959c608878facd8c69981a43907210c8cdb5d66550c9852af93487583812db"
     },
     {
-      "name": "runtime-windows-x64-20261117-k12-12-prior-current.json",
+      "name": "runtime-windows-x64-20261117-k12-16-prior-current.json",
       "bytes": 674,
-      "sha256": "e7c5ac2e2a87e929f7b651602d1a1edb083909f6d69dc4249f1225186b5eb476"
+      "sha256": "830ab7464468cd6e1c152baa7088be846c63ed26b49985f5df056b4fd2498cf7"
     },
     {
       "name": "runtime-windows-x64.json",
-      "bytes": 3412,
-      "sha256": "9d429abe7cb381f398c13052ae0b76a41033ffb48e600e9cf8f6acc648ce6f1a"
+      "bytes": 3742,
+      "sha256": "4d801f33846f4f0e2db87d1200182b781fd2258dad6e8730010b55340be904eb"
     }
   ],
   "archives": [
     {
-      "name": "kaixin-core-20261117-k12-12.tar.gz",
-      "bytes": 838088473,
-      "sha256": "502e6cfd58d357cee853a740e1b05e2c8b8fc3a39a94003fdbf120200e99c5cb",
+      "name": "kaixin-core-20261117-k12-16.tar.gz",
+      "bytes": 871501419,
+      "sha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
       "range": true,
-      "etag": "\"8d6b39d7260d6c1d0a277aa089f6a34a-100\"",
+      "etag": "\"51bd9d122be4da04f1aefb7718cf149e-104\"",
       "complete_sha256_verified": true
     },
     {
-      "name": "kaixin-bridge-20261117-k12-12-windows-x64.tar.gz",
-      "bytes": 1959142600,
-      "sha256": "57a80e1532f66b5c9cd818cb89ab4962bdf26845da05bb03e79c758f42175539",
+      "name": "kaixin-bridge-20261117-k12-16-windows-x64.tar.gz",
+      "bytes": 1992548151,
+      "sha256": "0fa564169b33efb07c66cb6012d8c69b219c5676b5f6ea5a64a323158635c716",
       "range": true,
-      "etag": "\"eebc819dc45b2b83d1533b4a70fa4340-234\"",
+      "etag": "\"53d39cc6008f7c7a7f68eb9f9c411db8-238\"",
       "complete_sha256_verified": true
     },
     {
-      "name": "kaixin-bridge-20261117-k12-12-macos-x64.tar.gz",
-      "bytes": 2047354792,
-      "sha256": "7a31f42c5cb265d02db3e070a1600db466c882416f06d38c13f9dd0a9188169a",
+      "name": "kaixin-bridge-20261117-k12-16-macos-x64.tar.gz",
+      "bytes": 2080786070,
+      "sha256": "4c53aef507adcd3fa813dd3349d4c20d8df6524a43381918d70fc664678664f7",
       "range": true,
-      "etag": "\"8d75a4fb58ee690490dd4f7f18cef437-245\"",
+      "etag": "\"7b713b7807ee073324f4d53d69d01927-249\"",
       "complete_sha256_verified": true
     },
     {
-      "name": "kaixin-bridge-20261117-k12-12-macos-arm64.tar.gz",
-      "bytes": 1984045894,
-      "sha256": "dae22b5935cce8bf33150b5744f14f2ff769c4e241da1fd2b15ea4f8a8d0ea5b",
+      "name": "kaixin-bridge-20261117-k12-16-macos-arm64.tar.gz",
+      "bytes": 2017475798,
+      "sha256": "5e07d5d8560032e3afe2f0ef32316f227b362f125a05e0a01367bf2e8615df0a",
       "range": true,
-      "etag": "\"192f23bce38700dadf1eea52b8d5ce6b-237\"",
+      "etag": "\"245b885589e6ccbf6a9ae5dcd61d36eb-241\"",
       "complete_sha256_verified": true
     }
   ],
-  "verified_at": "2026-11-19T10:35:13.229514+00:00"
+  "verified_at": "2026-11-20T10:50:56.144185+00:00"
 }
