@@ -1,6 +1,7 @@
-"""Build a signed-launcher core update over the verified public k12-16 bytes."""
+"""Build a signed-launcher core update over the verified public k12-17 bytes."""
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import file_digest, sha256
+import base64
 import gzip
 import json
 import os
@@ -13,7 +14,7 @@ from urllib.request import Request, urlopen
 
 REPO = "1281504089-cell/kaixin-k12-tutor"
 ROOT = Path.cwd()
-PREVIOUS = "student-20261117-k12-16"
+PREVIOUS = "student-20261117-k12-17"
 
 
 def read(path):
@@ -82,35 +83,37 @@ def emit_tar(destination, populate):
 def main():
     lock = read(ROOT / "online-update-lock.json")
     config = read(ROOT / "attachment-release.json")
-    assert lock["tag"] == config["tag"] == "student-20261117-k12-17" and config["prepared"]
-    assert config["source_commit"] == lock["source_commit"] and config["launcher_build"] == "20261120-updater-7"
+    assert lock["tag"] == config["tag"] == "student-20261117-k12-18" and config["prepared"]
+    assert config["source_commit"] == lock["source_commit"] and config["launcher_build"] == "20261121-updater-8"
     before = json.loads(gh("api", f"repos/{REPO}/releases/tags/{PREVIOUS}"))
-    assert before["id"] == 452304274 and not before["prerelease"]
+    assert before["id"] == 452647872 and not before["prerelease"]
     assets = {row["name"]: row for row in before["assets"]}
-    for row in [lock["old_core"], lock["old_file_manifest"], *lock["old_bridges"].values()]:
+    for row in [lock["old_core"], lock["old_file_manifest"], lock["old_source_overlay"], *lock["old_bridges"].values()]:
         remote = assets[row["name"]]
         assert (remote["size"], remote["digest"], remote["id"]) == (row["bytes"], "sha256:" + row["sha256"], row["id"])
     work = ROOT / "attachment-core"
     work.mkdir()
-    old_index_path = download(lock["old_file_manifest"], work)
+    published_index = download(lock["old_file_manifest"], work)
+    old_index_path = published_index.rename(work/"previous-core-file-manifest.json")
     old_index = read(old_index_path)
     assert old_index["source_commit"] == lock["old_source_commit"]
     previous = download(lock["old_core"], work)
     core = work / "runtime"
     core.mkdir()
+    print("Verified public baseline metadata; downloading the intact core", flush=True)
     with tarfile.open(previous, "r:gz") as archive:
         archive.extractall(core, filter="data")
     assert archive_files(core) == old_index["files"], "The baseline core differs from its public file inventory"
     previous.unlink()
-    payload = work / "online-supplement.tar.gz"
+    payload = work / lock["source_archive"]
     with payload.open("xb") as stream:
         for part in lock["input_parts"]:
             name = Path(part["name"])
-            assert name.name == str(name) and name.name.startswith("online-supplement.")
-            data = (ROOT / name).read_bytes()
+            assert name.name == str(name) and name.name.startswith("k12-18-source.")
+            data = base64.b64decode((ROOT / name).read_bytes().strip(), validate=True)
             assert len(data) == part["bytes"] and sha256(data).hexdigest() == part["sha256"]
             stream.write(data)
-    assert digest(payload) == lock["supplement_sha256"]
+    assert digest(payload) == lock["source_archive_sha256"]
     inputs = work / "inputs"
     with tarfile.open(payload, "r:gz") as archive:
         archive.extractall(inputs, filter="data")
@@ -123,9 +126,10 @@ def main():
         elif name.startswith("apps/desktop/src/"):
             target = core / "launcher/src" / Path(name).name
         else:
-            assert name.startswith(("tests/", "apps/desktop/scripts/", "apps/desktop/test/")), name
+            assert name.startswith(("tests/", "apps/desktop/scripts/", "apps/desktop/test/", "web/", "packages/chat-engine/")), name
             continue
-        assert target.parent.is_dir() and not target.is_symlink()
+        assert not target.is_symlink()
+        target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(inputs / "source" / name, target)
         target.chmod(row["mode"])
         changed_runtime.add(target.relative_to(core).as_posix())
@@ -137,25 +141,51 @@ def main():
         assert path.stat().st_size == row["bytes"] and digest(path) == row["sha256"]
     shutil.copyfile(descriptor, core / "launcher/manifest.json")
     (core / "BUILD_COMMIT").write_text(lock["source_commit"] + "\n")
-    bank = core / "core/deeptutor/services/student_learning"
-    repacked = subprocess.check_output(["python", str(inputs/"source/scripts/merge_question_supplements.py"),
-        "--bank", str(bank/"question_bank_data"), "--pack", str(inputs/"packs/recovered"),
-        "--pack", str(inputs/"packs/instruments")])
-    bank_proof = json.loads(repacked)
-    assert bank_proof["bank_revision"] == lock["bank_revision"] and bank_proof["question_count"] == 20864
-    assert len(bank_proof["recovered"]) == 36 and len(bank_proof["added"]) == 2 and bank_proof["previous_revision_retained"]
+    # Rebuild the frozen frontend, retaining the checked offline GeoGebra distribution.
+    subprocess.run(["python", "bootstrap_source.py", "--with-updates"], check=True)
+    source = ROOT / "student-source"
+    with tarfile.open(download(lock["old_source_overlay"], work)) as prior:
+        for member in prior:
+            if member.name.startswith("source/"):
+                assert member.isfile()
+                member.name = member.name.removeprefix("source/")
+                prior.extract(member, source, filter="data")
+    for name, row in expected.items():
+        target = source / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(inputs / "source" / name, target)
+        target.chmod(row["mode"])
+    web = source / "web"
+    web_files = archive_files(web)
+    fingerprint = "".join(f'{r["sha256"]}  web/{r["file"]}\n' for r in web_files)
+    assert lock["web_source"] == {"files": len(web_files), "sha256": sha256(fingerprint.encode()).hexdigest()}, "Reconstructed frontend differs from the local freeze"
+    old_web = work / "previous-web"
+    (core / "web").rename(old_web)
+    shutil.copytree(old_web / "public/vendor/geogebra", web / "public/vendor/geogebra", dirs_exist_ok=True)
+    env = {**os.environ, "NEXT_TELEMETRY_DISABLED": "1", "NEXT_PUBLIC_API_BASE": "__NEXT_PUBLIC_API_BASE_PLACEHOLDER__", "NEXT_PUBLIC_AUTH_ENABLED": "__NEXT_PUBLIC_AUTH_ENABLED_PLACEHOLDER__"}
+    print("Verified frozen web source; building standalone frontend", flush=True)
+    subprocess.run(["npm", "ci", "--legacy-peer-deps", "--no-audit", "--no-fund"], cwd=web, env=env, check=True)
+    subprocess.run(["npm", "run", "build"], cwd=web, env=env, check=True)
+    standalone = web / ".next/standalone"
+    assert (standalone / "server.js").is_file() and (standalone / ".next/BUILD_ID").is_file()
+    shutil.copytree(standalone, core / "web", ignore=shutil.ignore_patterns("node_modules", ".DS_Store", "__pycache__"))
+    assert archive_files(old_web / "public/vendor/geogebra") == archive_files(core / "web/public/vendor/geogebra")
+    shutil.rmtree(old_web)
+    frontend_build = (core / "web/.next/BUILD_ID").read_text().strip()
+    assert frontend_build
+    bank_prefix = "core/deeptutor/services/student_learning/question_bank_data/"
     current_index = {"source_commit": lock["source_commit"], "files": archive_files(core)}
     new_index = work / "core-file-manifest.json"
     write(new_index, current_index)
     old_rows = {row["file"]: row for row in old_index["files"]}
     new_rows = {row["file"]: row for row in current_index["files"]}
-    assert set(old_rows) <= set(new_rows)
-    assert {name: row for name, row in old_rows.items() if name.startswith("web/")} == {
-        name: row for name, row in new_rows.items() if name.startswith("web/")}
+    assert all(name.startswith("web/") for name in old_rows.keys() - new_rows.keys())
+    bank_inventory = {name: row for name, row in old_rows.items() if name.startswith(bank_prefix)}
+    assert bank_inventory and bank_inventory == {name: row for name, row in new_rows.items() if name.startswith(bank_prefix)}
     actual_changes = {name for name, row in new_rows.items() if old_rows.get(name) != row}
     assert changed_runtime <= actual_changes
-    assert all(name in changed_runtime or name in {"BUILD_COMMIT", "launcher/manifest.json"}
-               or name.startswith("core/deeptutor/services/student_learning/question_") for name in actual_changes)
+    assert all(name in changed_runtime or name in {"BUILD_COMMIT", "launcher/manifest.json"} or name.startswith("web/") for name in actual_changes)
+    bank_proof = {"retained_files": len(bank_inventory), "index_sha256": bank_inventory[bank_prefix + "index.sqlite3"]["sha256"]}
     clean_core = work / config["archive"]
 
     def append_core(out):
@@ -168,17 +198,19 @@ def main():
                 out.addfile(info, source)
 
     emit_tar(clean_core, append_core)
-    delta = work / "kaixin-core-delta-20261117-k12-16-to-k12-17.tar.gz"
+    delta = work / "kaixin-core-delta-20261117-k12-17-to-k12-18.tar.gz"
     with (work / "delta-descriptor.json").open("wb") as f:
-        subprocess.run(["python", str(inputs/"source/apps/desktop/scripts/build-core-delta.py"),
+        subprocess.run(["python", str(source/"apps/desktop/scripts/build-core-delta.py"),
             str(old_index_path), str(new_index), lock["old_core"]["sha256"], str(clean_core), str(delta)], stdout=f, check=True)
+    with tarfile.open(delta, "r:gz") as changed:
+        assert set(changed.getnames()) == actual_changes | {"delta-inventory.json"}
     delta_proof = read(work/"delta-descriptor.json")
     assert delta.stat().st_size < clean_core.stat().st_size and digest(delta) == delta_proof["sha256"]
 
     def bridge(entry):
         target, row = entry
         previous_bridge = download(row, work)
-        destination = work / f"kaixin-bridge-20261117-k12-17-{target}.tar.gz"
+        destination = work / f"kaixin-bridge-20261117-k12-18-{target}.tar.gz"
         preserved = 0
 
         def populate(out):
@@ -205,14 +237,12 @@ def main():
              "source_tree": lock["source_tree"], "launcher_build": config["launcher_build"], "bank": bank_proof,
              "run_id": int(os.environ["GITHUB_RUN_ID"]), "workflow_commit": os.environ["GITHUB_SHA"],
              "archives": {p.name: {"bytes": p.stat().st_size, "sha256": digest(p)} for p in archives},
-             "delta": delta_proof, "web_file_count_reused": sum(n.startswith("web/") for n in old_rows),
+             "delta": delta_proof, "frontend_build": frontend_build, "web_source": lock["web_source"],
              "bridge_native_members_reused": {target: item[1] for target, item in bridges.items()},
              "runtime_file_changes": sorted(actual_changes)}
     receipt = work / "attachment-core.json"
     write(receipt, proof)
-    source_archive = work / "source-overlay-20261117-k12-17.tar.gz"
-    payload.rename(source_archive)
-    gh("release", "upload", config["tag"], *archives, receipt, new_index, source_archive, work/"delta-descriptor.json")
+    gh("release", "upload", config["tag"], *archives, receipt, new_index, payload, work/"delta-descriptor.json")
     print(json.dumps({"built": True, "tag": lock["tag"], "archives": proof["archives"]}), flush=True)
 
 
