@@ -1,19 +1,19 @@
-name: Build frozen K12 bank and library candidate core
+name: Rebuild the three pinned k12-18 universal bridges
 on:
   push:
-    branches: ['codex/k12-core-20261116-*', 'codex/k12-core-20261117-*']
+    branches: ['codex/k12-core-20261117-18-bridge-r2*']
 permissions:
   contents: write
 jobs:
-  core:
+  bridge:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    permissions:
-      contents: write
-      actions: write
+    timeout-minutes: 70
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [macos-arm64, macos-x64, windows-x64]
     env:
       GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,36 +22,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Require the final owner-prepared input freeze
-        run: |
-          python -c 'import json; c=json.load(open("attachment-release.json")); assert c.get("prepared") is True; assert c["tag"].startswith(("student-20261116-", "student-20261117-"))'
-      - name: Create isolated prerelease
-        run: |
-          set -euo pipefail
-          tag=$(python -c 'import json;print(json.load(open("attachment-release.json"))["tag"])')
-          if gh release view "$tag" --json isPrerelease > current.json 2>/dev/null; then
-            python -c 'import json;assert json.load(open("current.json"))["isPrerelease"], "Never overwrite a final release"'
-          else
-            gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title "题库与资料来源候选 · ${tag#student-}" --notes '正在验证同批题库、教材资料来源、三端完整安装、检查更新与记录保留。尚未发布正式版。'
-          fi
-      - name: Record candidate run
-        run: |
-          python -c 'import json,os;open("core-run.json","w").write(json.dumps({"run_id":int(os.environ["GITHUB_RUN_ID"]),"workflow_commit":os.environ["GITHUB_SHA"]}))'
-          tag=$(python -c 'import json;print(json.load(open("attachment-release.json"))["tag"])')
-          gh release upload "$tag" core-run.json --clobber
-      - name: Stop this owner's superseded unqualified candidate
-        if: github.ref_name == 'codex/k12-core-20261117-4'
-        run: python ci-stop-superseded.py
-      - name: Verify exact frozen PDF staging and native proof guards
-        run: python -m unittest test_release_source test_native_pages_proof
-      - name: Build and verify core
-        run: python ci-attachment-core.py
-      - name: Keep core receipt
-        if: always()
+      - name: Build and read back only this target
+        run: python ci-bridge-r2.py --target ${{ matrix.target }} --output bridge-output --stage
+      - name: Save authenticated byte-level receipt
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: attachment-core
-          path: |
-            attachment-core/attachment-core.json
-            attachment-core/core-file-manifest.json
+          name: bridge-r2-${{ matrix.target }}
+          path: bridge-output/bridge-r2-${{ matrix.target }}.json
           if-no-files-found: warn

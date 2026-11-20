@@ -1,0 +1,52 @@
+{
+  "repository": "1281504089-cell/kaixin-k12-tutor",
+  "previous": {
+    "tag": "student-20261117-k12-16",
+    "release_id": 452304274,
+    "bridges": {
+      "windows-x64": {
+        "name": "kaixin-bridge-20261117-k12-16-windows-x64.tar.gz",
+        "id": 770702714,
+        "bytes": 1992548151,
+        "sha256": "0fa564169b33efb07c66cb6012d8c69b219c5676b5f6ea5a64a323158635c716"
+      },
+      "macos-x64": {
+        "name": "kaixin-bridge-20261117-k12-16-macos-x64.tar.gz",
+        "id": 770734484,
+        "bytes": 2080786070,
+        "sha256": "4c53aef507adcd3fa813dd3349d4c20d8df6524a43381918d70fc664678664f7"
+      },
+      "macos-arm64": {
+        "name": "kaixin-bridge-20261117-k12-16-macos-arm64.tar.gz",
+        "id": 770696682,
+        "bytes": 2017475798,
+        "sha256": "5e07d5d8560032e3afe2f0ef32316f227b362f125a05e0a01367bf2e8615df0a"
+      }
+    }
+  },
+  "candidate": {
+    "tag": "student-20261117-k12-18",
+    "release_id": 452916286,
+    "core": {
+      "name": "kaixin-core-20261117-k12-18.tar.gz",
+      "id": 772515254,
+      "bytes": 874338002,
+      "sha256": "e6784cf8b74c33e6a2e6c5728a175b60b556265b7f4532114b31caa2d97da1dd"
+    },
+    "core_index": {
+      "name": "core-file-manifest.json",
+      "id": 772515320,
+      "bytes": 3129344,
+      "sha256": "e9f5d39c2e3f5aa491e1e2d0c0bb698c94205604bcd2842561602b06042d2876"
+    },
+    "source_commit": "ec6cce3ba809d83e2226454c0ca713e747441714",
+    "launcher_build": "20261121-updater-8",
+    "frontend_build": "IsCGxLhMr-HxdmXKhQASF"
+  },
+  "expected_web_packages": {
+    "next": "16.4.5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "archive_limit_exclusive": 2147483648
+}
