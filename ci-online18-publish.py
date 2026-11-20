@@ -220,6 +220,15 @@ try:
         attempted.append(name)
         upload(stable, [next_files/name], replace=True)
         readback_stable([name])
+    # Remove only the rejected stage objects from this still-unpublished candidate.
+    repair = batch['proof']['bridge_repair']
+    retired = approval['retired_from_candidate']
+    assert set(retired) == set(repair['retired_archives'] + repair['excluded_incomplete_bases'])
+    assert not set(retired) & (set(batch['feeds']) | set(archive_entries))
+    for name, row in sorted(retired.items()):
+        if name in candidate_assets:
+            verified(candidate_assets[name], row)
+            gh('release', 'delete-asset', tag, name, '--yes')
     identity = work/"online-release-identity.json"
     write(identity, {"tag":tag,"source_commit":source,"archives":archive_entries,"delta":batch["proof"]["delta"],
                      "signed_manifests":batch["feeds"],"native_run_id":run_id,
@@ -235,12 +244,22 @@ try:
     assert not release(tag)["prerelease"]
     latest_check(promoted=True)
     readback_stable(set(batch["feeds"]) | set(archive_entries))
-except BaseException:
-    if made_public or not release(tag)["prerelease"]:
-        edit_candidate(prerelease=True, body=candidate["body"], title=candidate["name"])
+except BaseException as original:
+    rollback_errors = []
     for name in reversed(attempted):
-        upload(stable, [before/name], replace=True)
-        readback_stable([name], expected_prior=True)
+        try:
+            upload(stable, [before/name], replace=True)
+            readback_stable([name], expected_prior=True)
+        except Exception as failure:
+            rollback_errors.append((name, type(failure).__name__))
+    try:
+        if made_public or not release(tag)["prerelease"]:
+            edit_candidate(prerelease=True, body=candidate["body"], title=candidate["name"])
+        latest_check()
+    except Exception as failure:
+        rollback_errors.append((tag, type(failure).__name__))
+    if rollback_errors:
+        raise RuntimeError(f"GitHub rollback needs readback: {rollback_errors}") from original
     raise
 write(root/"PUBLICATION-RECEIPT.json", {"staged":True, "published":True, "tag":tag, "source_commit":source,
       "release_id":candidate["id"], "native_run_id":run_id, "native_targets":list(targets), "first_install_release_id":candidate["id"], "installer_run_id":install_run_id,
