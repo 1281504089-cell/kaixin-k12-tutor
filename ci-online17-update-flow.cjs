@@ -41,11 +41,17 @@ function connectionTimeout(error) {
 }
 async function checkedFetch(fetch,url,options) {
   const tracked=['github.com','api.github.com','release-assets.githubusercontent.com','objects.githubusercontent.com'].includes(new URL(url).hostname);
-  if(/\.tar\.gz$/.test(new URL(url).pathname)) {
-    downloadStarted=true;
-    requestedArchives.add(new URL(url).pathname.split('/').at(-1));
+  try {
+    const response=await fetch(url,options);
+    if(tracked)lastTransportError=null;
+    const attachment = response.headers.get('content-disposition')?.match(/filename="?([a-zA-Z0-9.+_-]+\.tar\.gz)"?/i)?.[1];
+    const archive = attachment ?? new URL(url).pathname.split('/').at(-1);
+    if (response.ok && /^kaixin-.*\.tar\.gz$/.test(archive)) {
+      downloadStarted=true;
+      requestedArchives.add(archive);
+    }
+    return response;
   }
-  try {const response=await fetch(url,options);if(tracked)lastTransportError=null;return response;}
   catch(error){if(tracked)lastTransportError={attempt:checkAttempts,url:new URL(url).origin+new URL(url).pathname,error};throw error;}
 }
 function flowState() {

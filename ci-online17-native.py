@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import plistlib
 import shutil
 import subprocess
 import time
@@ -39,7 +40,11 @@ for name, document in stage["manifests"].items():
     proof = stage["feeds"][name]
     assert path.stat().st_size == proof["bytes"] and digest(path) == proof["sha256"]
     if name in remote:
-        assert remote[name]["digest"] == "sha256:" + proof["sha256"]
+        if remote[name]["digest"] == "sha256:" + proof["sha256"]:
+            continue
+        superseded = stage["superseded_native_defaults"][name]
+        assert remote[name]["digest"] == "sha256:" + superseded["sha256"]
+        subprocess.run(["gh", "release", "upload", lock["tag"], str(path), "--clobber"], check=True, timeout=90)
     else:
         files.append(path)
 if files:
@@ -68,8 +73,16 @@ else:
 electron_archive.unlink()
 app = electron/"Electron.app" if is_mac else electron
 resources = app/("Contents/Resources" if is_mac else "resources")
-executable = app/("Contents/MacOS/Electron" if is_mac else "electron.exe")
-assert executable.is_file() and resources.is_dir(), f"Missing vendor Electron binary at {executable}"
+vendor_bin = app/("Contents/MacOS/Electron" if is_mac else "electron.exe")
+assert vendor_bin.is_file() and resources.is_dir(), f"Missing vendor Electron binary at {vendor_bin}"
+executable = vendor_bin.with_name("开心动力超级学霸" + ("" if is_mac else ".exe"))
+vendor_bin.rename(executable)
+if is_mac:
+    plist = app/"Contents/Info.plist"
+    metadata = plistlib.loads(plist.read_bytes())
+    metadata.update(CFBundleExecutable=executable.name, CFBundleIdentifier="org.kaixindongli.super-scholar",
+                    CFBundleName="开心动力超级学霸", CFBundleDisplayName="开心动力超级学霸")
+    plist.write_bytes(plistlib.dumps(metadata,sort_keys=False))
 (resources/"default_app.asar").unlink(missing_ok=True)
 shutil.copytree(prior, resources/"app")
 qa = resources/"app/qa"
