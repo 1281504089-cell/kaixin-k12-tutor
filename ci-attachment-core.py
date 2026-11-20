@@ -1,139 +1,220 @@
-"""Build and read back the one frozen, credential-free core for all three targets."""
+"""Build a signed-launcher core update over the verified public k12-16 bytes."""
+from concurrent.futures import ThreadPoolExecutor
+from hashlib import file_digest, sha256
 import gzip
-import hashlib
-import io
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import shutil
 import subprocess
-import sys
 import tarfile
-import tempfile
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
-from release_source import DOC_FIGURES, add_file, aggregate, inventory, join_source_overlay, safe_name, sha, verify_files
-
+REPO = "1281504089-cell/kaixin-k12-tutor"
 ROOT = Path.cwd()
-CONFIG = json.loads((ROOT / "attachment-release.json").read_text())
-assert CONFIG.get("prepared") is True, "Prepare a final clean owner-frozen source first"
-assert CONFIG["source_scope"] == "published_export"
-assert sha(ROOT / "isolation-ledger.json") == CONFIG["isolation_ledger_sha256"]
-isolation = json.loads((ROOT / "isolation-ledger.json").read_text())
-isolated_hashes = {row["sha256"] for row in isolation["excluded_files"]}
-subprocess.run([sys.executable, "bootstrap_source.py", "--with-updates"], check=True)
-SOURCE = ROOT / "student-source"
-WEB = SOURCE / "web"
-assert aggregate(inventory(SOURCE)) == CONFIG["source_files_sha256"], "Rebuilt source differs from owner freeze"
-runtime_file = ROOT / "runtime-source-manifest.json"
-assert sha(runtime_file) == CONFIG["runtime_manifest_sha256"]
-runtime = json.loads(runtime_file.read_text())
-assert runtime["source_commit"] == CONFIG["source_commit"]
-verify_files(SOURCE, runtime["files"])
-for row in runtime["files"]:
-    if row["file"].startswith(("deeptutor/", "deeptutor_cli/")):
-        data = (SOURCE / row["file"]).read_bytes()
-        assert not any(prefix.encode() in data for prefix in DOC_FIGURES), "Required omitted documentation figure: " + row["file"]
-
-env = {**os.environ, "NEXT_TELEMETRY_DISABLED": "1", "NEXT_PUBLIC_API_BASE": "__NEXT_PUBLIC_API_BASE_PLACEHOLDER__", "NEXT_PUBLIC_AUTH_ENABLED": "__NEXT_PUBLIC_AUTH_ENABLED_PLACEHOLDER__"}
-for command in [["npm", "ci", "--legacy-peer-deps", "--no-audit", "--no-fund"], ["npm", "run", "build"], ["npx", "vitest", "run", "--maxWorkers=1", *CONFIG["web_tests"]]]:
-    subprocess.run(command, cwd=WEB, env=env, check=True)
-word = SOURCE / "scripts/report-word"
-subprocess.run(["npm", "ci", "--no-audit", "--no-fund"], cwd=word, check=True)
-generated_word = ROOT / "word-runtime.cjs"
-subprocess.run(["node", "build.mjs", str(generated_word)], cwd=word, check=True)
-assert generated_word.is_file()
-
-payload_file = ROOT / "bank-payload-manifest.json"
-assert sha(payload_file) == CONFIG["bank_payload_manifest_sha256"]
-payload = json.loads(payload_file.read_text())
-assert payload["archive_prefix"] == "core/deeptutor/services/student_learning/question_bank_data"
-bank_archive = ROOT / "bank-payload.tar.gz"
-digest = hashlib.sha256()
-with bank_archive.open("xb") as output:
-    for part in payload["parts"]:
-        file = ROOT / safe_name(part["file"])
-        assert file.stat().st_size == part["bytes"] and sha(file) == part["sha256"]
-        with file.open("rb") as stream:
-            while block := stream.read(1024 * 1024):
-                output.write(block)
-                digest.update(block)
-assert digest.hexdigest() == payload["archive_sha256"]
-
-OUT = ROOT / "attachment-core"
-OUT.mkdir()
-archive = OUT / CONFIG["archive"]
-files = {}
+PREVIOUS = "student-20261117-k12-16"
 
 
-def add(out, name, data, mode=0o644):
-    safe_name(name)
-    assert name not in files and not name.lower().endswith((".node", ".dll", ".dylib", ".exe", ".so", ".pem")), name
-    digest = hashlib.sha256(data).hexdigest()
-    assert digest not in isolated_hashes, "An isolated asset was renamed into the export"
-    assert name.removeprefix("core/") not in {row["file"] for row in isolation["excluded_files"]}
-    files[name] = {"file": name, "bytes": len(data), "sha256": digest, "mode": mode}
-    add_file(out, name, io.BytesIO(data), len(data), mode)
+def read(path):
+    return json.loads(path.read_bytes())
 
 
-with archive.open("xb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0, compresslevel=6) as gz, tarfile.open(fileobj=gz, mode="w|", format=tarfile.PAX_FORMAT) as out:
-    for row in runtime["files"]:
-        data = (SOURCE / row["file"]).read_bytes()
-        assert len(data) == row["bytes"] and hashlib.sha256(data).hexdigest() == row["sha256"]
-        add(out, "core/" + row["file"], data, row["mode"])
-    add(out, "core/deeptutor/services/student_learning/word-runtime.cjs", generated_word.read_bytes())
-    expected = {row["archive"]: row for row in payload["files"]}
-    seen = set()
-    with tarfile.open(bank_archive) as package:
-        for item in package:
-            name = safe_name(item.name)
-            assert item.isfile() and name in expected and name not in seen
-            row = expected[name]
-            assert item.size == row["bytes"] and item.mode == 0o644
-            data = package.extractfile(item).read()
-            assert hashlib.sha256(data).hexdigest() == row["sha256"]
-            add(out, name, data)
-            seen.add(name)
-    assert seen == set(expected), "Incomplete student-only question bank payload"
-    descriptor = json.loads((ROOT / "launcher-manifest.json").read_text())
-    assert descriptor["coreCommit"] == CONFIG["source_commit"], "Owner must sign the final descriptor"
-    add(out, "launcher/manifest.json", (ROOT / "launcher-manifest.json").read_bytes())
-    for row in descriptor["files"]:
-        data = (SOURCE / "apps/desktop" / safe_name(row["file"])).read_bytes()
-        assert len(data) == row["bytes"] and hashlib.sha256(data).hexdigest() == row["sha256"]
-        add(out, "launcher/" + row["file"], data)
-    add(out, "BUILD_COMMIT", (CONFIG["source_commit"] + "\n").encode())
-    standalone = WEB / ".next/standalone"
-    assert (standalone / "server.js").is_file()
-    for file in sorted(standalone.rglob("*")):
-        relative = file.relative_to(standalone)
-        if any(part in {"node_modules", "__pycache__", ".DS_Store"} for part in relative.parts) or file.is_dir():
+def write(path, data):
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+
+
+def digest(path):
+    with path.open("rb") as stream:
+        return file_digest(stream, "sha256").hexdigest()
+
+
+def gh(*args):
+    return subprocess.check_output(["gh", *map(str, args)])
+
+
+def download(row, directory):
+    path = directory / row["name"]
+    assert path.name == row["name"] and Path(row["name"]).name == row["name"]
+    partial = path.with_suffix(path.suffix + ".partial")
+    urls = [f"https://github.com/{REPO}/releases/download/{PREVIOUS}/{path.name}"]
+    if row.get("id"):
+        urls.append(f"https://api.github.com/repos/{REPO}/releases/assets/{row['id']}")
+    for url in urls:
+        try:
+            with urlopen(Request(url, headers={"Accept": "application/octet-stream", "User-Agent": "Kaixin-Release-Readback"}),
+                         timeout=90) as response, partial.open("xb") as output:
+                final = urlparse(response.geturl())
+                assert final.scheme == "https" and final.hostname in {
+                    "github.com", "api.github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"}
+                state = sha256()
+                total = 0
+                while chunk := response.read(8 << 20):
+                    total += len(chunk)
+                    assert total <= row["bytes"]
+                    state.update(chunk)
+                    output.write(chunk)
+            assert total == row["bytes"] and state.hexdigest() == row["sha256"], path.name
+            partial.rename(path)
+            return path
+        except (OSError, AssertionError) as error:
+            partial.unlink(missing_ok=True)
+            failure = error
+    raise failure
+
+
+def archive_files(root):
+    rows = []
+    for path in sorted(root.rglob("*")):
+        assert not path.is_symlink(), path
+        if path.is_file():
+            rows.append({"file": path.relative_to(root).as_posix(), "bytes": path.stat().st_size,
+                         "sha256": digest(path), "mode": path.stat().st_mode & 0o777})
+    return sorted(rows, key=lambda row: row["file"])
+
+
+def emit_tar(destination, populate):
+    with destination.open("xb") as output, gzip.GzipFile(filename="", mode="wb", fileobj=output, mtime=0, compresslevel=6) as zipped:
+        with tarfile.open(fileobj=zipped, mode="w|", format=tarfile.PAX_FORMAT) as out:
+            populate(out)
+
+
+def main():
+    lock = read(ROOT / "online-update-lock.json")
+    config = read(ROOT / "attachment-release.json")
+    assert lock["tag"] == config["tag"] == "student-20261117-k12-17" and config["prepared"]
+    assert config["source_commit"] == lock["source_commit"] and config["launcher_build"] == "20261120-updater-7"
+    before = json.loads(gh("api", f"repos/{REPO}/releases/tags/{PREVIOUS}"))
+    assert before["id"] == 452304274 and not before["prerelease"]
+    assets = {row["name"]: row for row in before["assets"]}
+    for row in [lock["old_core"], lock["old_file_manifest"], *lock["old_bridges"].values()]:
+        remote = assets[row["name"]]
+        assert (remote["size"], remote["digest"], remote["id"]) == (row["bytes"], "sha256:" + row["sha256"], row["id"])
+    work = ROOT / "attachment-core"
+    work.mkdir()
+    old_index_path = download(lock["old_file_manifest"], work)
+    old_index = read(old_index_path)
+    assert old_index["source_commit"] == lock["old_source_commit"]
+    previous = download(lock["old_core"], work)
+    core = work / "runtime"
+    core.mkdir()
+    with tarfile.open(previous, "r:gz") as archive:
+        archive.extractall(core, filter="data")
+    assert archive_files(core) == old_index["files"], "The baseline core differs from its public file inventory"
+    previous.unlink()
+    payload = work / "online-supplement.tar.gz"
+    with payload.open("xb") as stream:
+        for part in lock["input_parts"]:
+            name = Path(part["name"])
+            assert name.name == str(name) and name.name.startswith("online-supplement.")
+            data = (ROOT / name).read_bytes()
+            assert len(data) == part["bytes"] and sha256(data).hexdigest() == part["sha256"]
+            stream.write(data)
+    assert digest(payload) == lock["supplement_sha256"]
+    inputs = work / "inputs"
+    with tarfile.open(payload, "r:gz") as archive:
+        archive.extractall(inputs, filter="data")
+    expected = {r["file"]: r for r in lock["source_files"]}
+    assert archive_files(inputs / "source") == list(expected.values())
+    changed_runtime = set()
+    for name, row in expected.items():
+        if name.startswith(("deeptutor/", "scripts/")):
+            target = core / "core" / name
+        elif name.startswith("apps/desktop/src/"):
+            target = core / "launcher/src" / Path(name).name
+        else:
+            assert name.startswith(("tests/", "apps/desktop/scripts/", "apps/desktop/test/")), name
             continue
-        assert file.is_file() and not file.is_symlink(), str(relative)
-        add(out, "web/" + relative.as_posix(), file.read_bytes(), file.stat().st_mode & 0o777)
-assert archive.stat().st_size < 2_000_000_000, "Current signed core protocol archive limit"
-required = {"core/deeptutor/services/student_learning/word-runtime.cjs", "core/deeptutor/services/student_learning/reference.cjs", "core/deeptutor/services/student_learning/miniapp/textbook-library.cjs", "core/deeptutor/services/student_learning/miniapp/retrieval.cjs", "core/deeptutor/services/student_learning/question_bank_data/manifest.json", "core/deeptutor/services/student_learning/question_bank_data/index.sqlite3", "web/server.js", "web/.next/BUILD_ID", "BUILD_COMMIT"}
-assert required.issubset(files), required - set(files)
+        assert target.parent.is_dir() and not target.is_symlink()
+        shutil.copyfile(inputs / "source" / name, target)
+        target.chmod(row["mode"])
+        changed_runtime.add(target.relative_to(core).as_posix())
+    descriptor = ROOT / "launcher-manifest.json"
+    signed_launcher = read(descriptor)
+    assert signed_launcher["coreCommit"] == lock["source_commit"] and signed_launcher["buildId"] == config["launcher_build"]
+    for row in signed_launcher["files"]:
+        path = core / "launcher" / row["file"]
+        assert path.stat().st_size == row["bytes"] and digest(path) == row["sha256"]
+    shutil.copyfile(descriptor, core / "launcher/manifest.json")
+    (core / "BUILD_COMMIT").write_text(lock["source_commit"] + "\n")
+    bank = core / "core/deeptutor/services/student_learning"
+    repacked = subprocess.check_output(["python", str(inputs/"source/scripts/merge_question_supplements.py"),
+        "--bank", str(bank/"question_bank_data"), "--pack", str(inputs/"packs/recovered"),
+        "--pack", str(inputs/"packs/instruments")])
+    bank_proof = json.loads(repacked)
+    assert bank_proof["bank_revision"] == lock["bank_revision"] and bank_proof["question_count"] == 20864
+    assert len(bank_proof["recovered"]) == 36 and len(bank_proof["added"]) == 2 and bank_proof["previous_revision_retained"]
+    current_index = {"source_commit": lock["source_commit"], "files": archive_files(core)}
+    new_index = work / "core-file-manifest.json"
+    write(new_index, current_index)
+    old_rows = {row["file"]: row for row in old_index["files"]}
+    new_rows = {row["file"]: row for row in current_index["files"]}
+    assert set(old_rows) <= set(new_rows)
+    assert {name: row for name, row in old_rows.items() if name.startswith("web/")} == {
+        name: row for name, row in new_rows.items() if name.startswith("web/")}
+    actual_changes = {name for name, row in new_rows.items() if old_rows.get(name) != row}
+    assert changed_runtime <= actual_changes
+    assert all(name in changed_runtime or name in {"BUILD_COMMIT", "launcher/manifest.json"}
+               or name.startswith("core/deeptutor/services/student_learning/question_") for name in actual_changes)
+    clean_core = work / config["archive"]
 
-# Re-open the actual archive, check every member and run the existing static audit.
-with tempfile.TemporaryDirectory(prefix="core-readback-", dir=OUT) as directory:
-    seen = set()
-    with tarfile.open(archive) as package:
-        for item in package:
-            assert item.isfile() and item.name in files and item.name not in seen
-            row = files[item.name]
-            with package.extractfile(item) as stream:
-                assert item.size == row["bytes"] and hashlib.file_digest(stream, "sha256").hexdigest() == row["sha256"]
-            seen.add(item.name)
-        assert seen == set(files)
-        package.extractall(directory, filter="data")
-    result = subprocess.check_output([sys.executable, str(Path(directory) / "core/scripts/audit-student-bundle.py"), directory], text=True)
-    audit = json.loads(result)
-bank_archive.unlink()
-file_manifest = {"source_commit": CONFIG["source_commit"], "files": sorted(files.values(), key=lambda row: row["file"])}
-(OUT / "core-file-manifest.json").write_text(json.dumps(file_manifest, indent=2) + "\n")
-report = {"source_commit": CONFIG["source_commit"], "backend_source_commit": CONFIG["source_commit"], "source_scope": "published_export", "source_files_sha256": CONFIG["source_files_sha256"], "isolation_ledger_sha256": CONFIG["isolation_ledger_sha256"], "isolated_assets": isolation["excluded_files"], "frontend_build": (WEB / ".next/BUILD_ID").read_text().strip(), "archive": archive.name, "sha256": sha(archive), "bytes": archive.stat().st_size, "files": len(files), "runtime_source_files": len(runtime["files"]), "generated_word_sha256": sha(generated_word), "generated_word_bytes": generated_word.stat().st_size, "generated_word_archive_readback": files["core/deeptutor/services/student_learning/word-runtime.cjs"]["sha256"] == sha(generated_word), "bank_payload_manifest_sha256": sha(payload_file), "file_manifest_sha256": sha(OUT / "core-file-manifest.json"), "archive_full_readback": True, "static_bundle_audit": audit, "real_keys_used": False, "personal_records_included": False}
-(OUT / "attachment-core.json").write_text(json.dumps(report, indent=2) + "\n")
-print(json.dumps(report))
-overlay_descriptor = json.loads((ROOT / "source-manifest.json").read_text())["sourceOverlay"]
-source_asset = OUT / safe_name(overlay_descriptor["remote_archive"]["file"])
-join_source_overlay(ROOT, source_asset, overlay_descriptor)
-subprocess.run(["gh", "release", "upload", CONFIG["tag"], str(archive), str(source_asset), str(OUT / "attachment-core.json"), str(OUT / "core-file-manifest.json"), "--clobber"], check=True)
+    def append_core(out):
+        for row in current_index["files"]:
+            name = row["file"]
+            info = tarfile.TarInfo(name)
+            info.size = row["bytes"]
+            info.mode = row["mode"]
+            with (core / name).open("rb") as source:
+                out.addfile(info, source)
+
+    emit_tar(clean_core, append_core)
+    delta = work / "kaixin-core-delta-20261117-k12-16-to-k12-17.tar.gz"
+    with (work / "delta-descriptor.json").open("wb") as f:
+        subprocess.run(["python", str(inputs/"source/apps/desktop/scripts/build-core-delta.py"),
+            str(old_index_path), str(new_index), lock["old_core"]["sha256"], str(clean_core), str(delta)], stdout=f, check=True)
+    delta_proof = read(work/"delta-descriptor.json")
+    assert delta.stat().st_size < clean_core.stat().st_size and digest(delta) == delta_proof["sha256"]
+
+    def bridge(entry):
+        target, row = entry
+        previous_bridge = download(row, work)
+        destination = work / f"kaixin-bridge-20261117-k12-17-{target}.tar.gz"
+        preserved = 0
+
+        def populate(out):
+            nonlocal preserved
+            with tarfile.open(previous_bridge, mode="r|gz") as previous:
+                for member in previous:
+                    name = member.name
+                    if name == "BUILD_COMMIT" or name.split("/", 1)[0] in {"core", "web", "launcher"}:
+                        continue
+                    assert not PurePosixPath(name).is_absolute() and ".." not in PurePosixPath(name).parts
+                    out.addfile(member, previous.extractfile(member) if member.isfile() else None)
+                    preserved += 1
+            append_core(out)
+
+        emit_tar(destination, populate)
+        previous_bridge.unlink()
+        assert preserved > 0 and destination.stat().st_size < 2 * 1024**3
+        return target, (destination, preserved)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        bridges = dict(pool.map(bridge, sorted(lock["old_bridges"].items())))
+    archives = [clean_core, delta, *(path for path, _ in bridges.values())]
+    proof = {"passed": True, "tag": lock["tag"], "source_commit": lock["source_commit"],
+             "source_tree": lock["source_tree"], "launcher_build": config["launcher_build"], "bank": bank_proof,
+             "run_id": int(os.environ["GITHUB_RUN_ID"]), "workflow_commit": os.environ["GITHUB_SHA"],
+             "archives": {p.name: {"bytes": p.stat().st_size, "sha256": digest(p)} for p in archives},
+             "delta": delta_proof, "web_file_count_reused": sum(n.startswith("web/") for n in old_rows),
+             "bridge_native_members_reused": {target: item[1] for target, item in bridges.items()},
+             "runtime_file_changes": sorted(actual_changes)}
+    receipt = work / "attachment-core.json"
+    write(receipt, proof)
+    source_archive = work / "source-overlay-20261117-k12-17.tar.gz"
+    payload.rename(source_archive)
+    gh("release", "upload", config["tag"], *archives, receipt, new_index, source_archive, work/"delta-descriptor.json")
+    print(json.dumps({"built": True, "tag": lock["tag"], "archives": proof["archives"]}), flush=True)
+
+
+if __name__ == "__main__":
+    main()

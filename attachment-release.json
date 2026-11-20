@@ -1,11 +1,13 @@
 {
-  "tag": "student-20261117-k12-16",
-  "source_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
-  "baseline_source_commit": "46bb8ecd7394c6be6bbf4b6eef4d62eed2719127",
-  "archive": "kaixin-core-20261117-k12-16.tar.gz",
+  "tag": "student-20261117-k12-17",
+  "source_commit": "51328c98d89dc0a30d81e7cdbf5d891350465a3c",
+  "baseline_source_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+  "archive": "kaixin-core-20261117-k12-17.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261117-k12-13.tar.gz",
-    "sha256": "5584d7253480ac2e91c3cdbe7742a217c01454c3baccb649b70bb34e7f644a01"
+    "name": "kaixin-core-20261117-k12-16.tar.gz",
+    "id": 770600221,
+    "bytes": 871501419,
+    "sha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07"
   },
   "web_tests": [
     "tests/pending-material.spec.ts",
@@ -74,7 +76,7 @@
   ],
   "source_files_sha256": "1e9c4ba96da3dbf9a65aac87b7f354b2fe0ce763360f926c8043fb3ac3006b5c",
   "prepared": true,
-  "source_scope": "published_export",
+  "source_scope": "verified_online_overlay",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "runtime_manifest_sha256": "d28ff28856879859bac4cc6423d7c33657bce3c418047d1b4710a407fdbd7d33",
   "bank_manifest_sha256": "6743986468d69c720dfb5b59bb2ab07c69d515243406db86ebacfaef35643606",
@@ -100,6 +102,6 @@
       }
     }
   },
-  "launcher_build": "20261119-updater-6",
+  "launcher_build": "20261120-updater-7",
   "update_mirror_base": "https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/"
 }
