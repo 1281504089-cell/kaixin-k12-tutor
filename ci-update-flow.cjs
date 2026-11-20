@@ -328,8 +328,7 @@ dialog.showMessageBox = async (...args) => {
   return { response: 0 };
 };
 dialog.showErrorBox = (title, detail) => fail(new Error(title + ': ' + detail),'native-error-box');
-const intelScene = process.platform === 'darwin' && process.arch === 'x64' && ['current','materials','materials-oldest'].includes(process.env.KX_K12_16_INTEL_SCENE);
-const timer = setTimeout(() => fail(new Error('Native update flow timed out')), intelScene ? 2700000 : 1300000);
+const timer = setTimeout(() => fail(new Error('Native update flow timed out')), 1300000);
 async function content() {
   for (const window of BrowserWindow.getAllWindows()) {
     const found = window.contentView.children.find(view => view.webContents?.getURL().startsWith('http://127.0.0.1:'));
@@ -440,15 +439,10 @@ async function content() {
     await require('node:fs/promises').writeFile(path.join(path.dirname(output), 'native-ui-updated.png'), (await view.capturePage()).toPNG());
     stage='ui-checks';
     const fixture = JSON.parse(readFileSync(path.join(home, 'attachment-fixture.json')));
-    if (intelScene) stage='ui-materials';
     const library = await require('./materials-ui.cjs')(view, path.dirname(output), fixture);
-    if (intelScene) stage='ui-audio';
     const audio = await require('./ci-chat-audio-ui.cjs')(view, path.dirname(output), fixture.audio);
-    if (intelScene) stage='ui-science';
     const science = await require('./science-ui.cjs').verifyScienceNative(view, path.dirname(output), fixture.science);
-    if (intelScene) stage='ui-preview';
     const preview = await require('./ci-turn-preview.cjs')(view, path.dirname(output), fixture.science.preview);
-    if (intelScene) stage='ui-source';
     const k12 = await require('./ci-k12-library-ui.cjs')(view, path.dirname(output), fixture.k12, { entry: path.basename(output, '.json') });
     assert.equal(k12.passed, true);
     assert.equal(preview.passed, true);
