@@ -1,5 +1,9 @@
 """Promote only the exact three native-tested attachment installers and signed feeds."""
 import hashlib,json,os,re,subprocess,time
+import sys
+if __name__ == "__main__" and os.environ.get("GITHUB_REF_NAME") == "codex/k12-publish-20261117-17-online":
+    subprocess.run([sys.executable, "ci-online17-publish.py"], check=True)
+    sys.exit(0)
 from concurrent.futures import ThreadPoolExecutor
 from ci_picture_fresh import validate_native_page_views, validate_native_page_api
 from ci_repackage import validate_installer_files
