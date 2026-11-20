@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import time
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -51,11 +52,21 @@ def open_url(url):
     return response
 
 
-def small(url):
-    with open_url(url) as response:
-        data = response.read(200_000)
-    assert len(data) < 200_000
-    return data
+def small(url, accept=lambda payload: True):
+    for attempt in range(6):
+        address = url
+        if urlparse(url).netloc == "github.com":
+            # Asset names are stable but their download targets are replaced.
+            address = url + "?readback=" + str(time.time_ns())
+        try:
+            with open_url(address) as response:
+                data = response.read(200_000)
+            assert len(data) < 200_000 and accept(data), "Downloaded signed manifest differs: " + url
+            return data
+        except (OSError, AssertionError, ValueError):
+            if attempt == 5:
+                raise
+            time.sleep(min(2**attempt, 8))
 
 
 def verified(row, expected):
@@ -86,16 +97,18 @@ def upload(name, filenames, *, replace=False):
 
 def readback_stable(names, *, expected_prior=False):
     rows = inventory(release(stable))
-    for name in names:
+    def verify_one(name):
         if expected_prior:
-            raw = small(rows[name]["browser_download_url"])
-            assert json.loads(raw) == batch["prior"][name], "Stable feed changed outside this release"
+            raw = small(rows[name]["browser_download_url"], lambda payload: json.loads(payload) == batch["prior"][name])
             (before/name).write_bytes(raw)
         else:
             expected = batch["feeds"].get(name) or batch["proof"]["archives"][name]
             verified(rows[name], expected)
             if name in batch["feeds"]:
-                assert small(rows[name]["browser_download_url"]) == (next_files/name).read_bytes()
+                data = (next_files/name).read_bytes()
+                small(rows[name]["browser_download_url"], lambda payload: payload == data)
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(verify_one, names))
     return rows
 
 
@@ -145,9 +158,13 @@ approval = read(approval_file)
 assert approval["source_commit"] == source and approval["core_sha256"] == archive_entries["kaixin-core-20261117-k12-17.tar.gz"]["sha256"]
 assert approval["cos_archive_readback"] == archive_entries
 assert set(approval["cos_feeds_sha256"]) == set(batch["feeds"])
-for name, expected in batch["feeds"].items():
+def verify_cos(name):
+    expected = batch["feeds"][name]
     assert approval["cos_feeds_sha256"][name] == expected["sha256"]
-    assert small(cos+"/"+name) == (next_files/name).read_bytes()
+    data = (next_files/name).read_bytes()
+    small(cos+"/"+name, lambda payload: payload == data)
+with ThreadPoolExecutor(max_workers=8) as pool:
+    list(pool.map(verify_cos, batch["feeds"]))
 
 run_id = approval["native_run_id"]
 native = api("actions/runs/"+str(run_id))
