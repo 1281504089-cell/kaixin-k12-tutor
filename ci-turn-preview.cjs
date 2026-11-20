@@ -16,32 +16,62 @@ module.exports = async function verifyPreview(view, evidence, seed) {
     while (!await js(fn)) { assert(Date.now() < until, label); await pause(100); }
   }
   async function moveTo(selector, click = false) {
-    const point = await js(selector => {
-      const el = document.querySelector(selector);
-      if (!el) throw Error('Missing preview action: ' + selector);
-      el.scrollIntoView({block:'nearest'});
-      const r = el.getBoundingClientRect();
-      return {x:Math.round(r.left+r.width/2), y:Math.round(r.top+r.height/2)};
-    }, selector);
-    view.sendInputEvent({type:'mouseMove',...point}); await pause(200);
+    if (!click) await debug.sendCommand('Input.dispatchMouseEvent',{type:'mouseMoved',x:2,y:2});
+    let point;
+    let lastHit;
+    const deadline = Date.now()+5000;
+    while (!point) {
+      const sample = await js(selector => {
+        const element = document.querySelector(selector);
+        if (!element) return null;
+        element.scrollIntoView({block:'nearest'});
+        const rect = element.getBoundingClientRect();
+        const x = Math.round(rect.left+rect.width/2);
+        const y = Math.round(rect.top+rect.height/2);
+        const hit = document.elementFromPoint(x,y);
+        return {x,y,actionable:!!hit&&element.contains(hit),hit:hit?.closest('button,[role="dialog"]')?.getAttribute('aria-label')||hit?.tagName};
+      }, selector);
+      lastHit = sample?.hit;
+      if (sample?.actionable) point = {x:sample.x,y:sample.y};
+      else {
+        assert(Date.now()<deadline, `Preview action unavailable: ${selector}, hit ${lastHit}`);
+        await pause(100);
+      }
+    }
+    await debug.sendCommand('Input.dispatchMouseEvent',{type:'mouseMoved',...point});
     if (click) {
-      view.sendInputEvent({type:'mouseDown',button:'left',clickCount:1,...point});
-      view.sendInputEvent({type:'mouseUp',button:'left',clickCount:1,...point});
+      await debug.sendCommand('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...point});
+      await debug.sendCommand('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...point});
     }
   }
   debug.attach('1.3');
   try {
-    for (const [width,height] of [[390,844],[844,390],[1366,900],[1920,1080]]) {
-      await debug.sendCommand('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+    const viewer = '.dt-viewer-panel[data-open="true"]';
+    const mark = '[data-chat-turn-navigator] [data-tick]';
+    const preview = '[data-turn-preview]';
+    async function openConversation() {
       await view.loadURL(`${origin}/chat/${encodeURIComponent(seed.session)}?dt_workspace=`);
       await wait(() => document.querySelectorAll('[data-chat-turn-navigator] [data-tick]').length === 8, 'Eight question marks did not render');
       await pause(500);
-      const rail = await js(() => {
-        const el = document.querySelector('[data-chat-turn-navigator]');
-        return {visible:getComputedStyle(el).visibility,overflow:document.documentElement.scrollWidth>innerWidth};
-      });
-      assert.equal(rail.visible,'visible'); assert(!rail.overflow);
-      const mark = '[data-chat-turn-navigator] [data-tick]';
+      if (await js(selector => Boolean(document.querySelector(selector)), viewer)) {
+        await moveTo(viewer+' button[aria-label="关闭查看器"],'+viewer+' button[aria-label="Close viewer"]',true);
+        await wait(() => !document.querySelector('.dt-viewer-panel[data-open="true"]'), 'The existing activity drawer stayed open');
+      }
+      await wait(() => {
+        const rail = document.querySelector('[data-chat-turn-navigator]');
+        return rail && getComputedStyle(rail).visibility === 'visible';
+      }, 'Question navigator did not become visible', 6000);
+      assert.equal(await js(() => document.documentElement.scrollWidth>innerWidth),false);
+    }
+    const reachedFirstQuestion = () => {
+      const root = document.querySelector('[data-chat-scroll-root]');
+      const first = document.querySelector('[data-tick]');
+      const target = first && root?.querySelector(`[data-turn-key="${first.dataset.tick}"]`);
+      return !!target && Math.abs(target.getBoundingClientRect().top-root.getBoundingClientRect().top)<160;
+    };
+    for (const [width,height] of [[390,844],[844,390],[1366,900],[1920,1080]]) {
+      await debug.sendCommand('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+      await openConversation();
       await moveTo(mark);
       await wait(() => Boolean(document.querySelector('[data-turn-preview]')), 'Hover did not open preview');
       const card = await js(() => {
@@ -54,17 +84,16 @@ module.exports = async function verifyPreview(view, evidence, seed) {
       assert(card.top>=card.paneTop-1 && card.bottom<=card.paneBottom+1,'Preview covers composer: '+JSON.stringify(card));
       assert(card.left>=0 && card.right<=card.width+1 && card.top>=0 && card.bottom<=card.height+1,JSON.stringify(card));
       writeFileSync(join(evidence,`quick-preview-${width}x${height}.png`),(await view.capturePage()).toPNG());
+      await moveTo(preview+' button',true);
+      await wait(reachedFirstQuestion, 'Clicking the preview did not reach the original question',3000);
+      await wait(() => !document.querySelector('[data-turn-preview]'), 'The preview did not close after clicking the card',3000);
+
+      // Test the rail click independently from the preview click's scroll and flash.
+      await openConversation();
       await moveTo(mark,true);
       const jumpStarted=Date.now();
-      await wait(() => {
-        const root=document.querySelector('[data-chat-scroll-root]'),mark=document.querySelector('[data-tick]');
-        const target=root.querySelector(`[data-turn-key="${mark.dataset.tick}"]`);
-        return Math.abs(target.getBoundingClientRect().top-root.getBoundingClientRect().top)<160;
-      },'Click did not reach original question',3000);
+      await wait(reachedFirstQuestion,'Click did not reach original question',3000);
       const jumpMilliseconds=Date.now()-jumpStarted;
-      await moveTo('[data-turn-preview] button',true);
-      await pause(250);
-      assert.equal(await js(() => document.querySelectorAll('[data-turn-preview]').length),0);
       views.push({width,height,visible:true,previewCorrect:true,jumpToOriginal:true,jumpMilliseconds,cardWithinViewport:true,cardWithinMessagePane:true});
     }
     await view.loadURL(`${origin}/chat?dt_workspace=`);

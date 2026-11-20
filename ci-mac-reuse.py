@@ -422,4 +422,21 @@ def main():
     print('PASS: frozen '+target+' candidate fresh install and all four complete real update paths')
 
 if __name__ == '__main__':
-    main()
+    scopes = {
+        'codex/k12-mac-reverify-20261117-16-viewport': {'macos-arm64', 'macos-x64'},
+        'codex/k12-native-reverify-20261117-16-windows-viewport': {'windows-x64'},
+    }
+    selected = scopes.get(os.environ.get('GITHUB_REF_NAME'))
+    if selected:
+        assert len(sys.argv) == 3 and sys.argv[1] == '--target' and sys.argv[2] in TARGETS
+        target = sys.argv[2]
+        if target in selected:
+            lock = json.loads(Path('fresh-install-lock.json').read_text())
+            assert lock['tag']=='student-20261117-k12-16' and lock['release_id']==452304274 and lock.get('reuse_existing_native')
+            subprocess.run([sys.executable,'ci-fresh-install.py','--target',target],check=True)
+        else:
+            evidence = Path('fresh-evidence')/target
+            evidence.mkdir(parents=True, exist_ok=True)
+            (evidence/'target-not-selected.json').write_text(json.dumps({'target':target,'selected':False,'native_acceptance':False}))
+    else:
+        main()

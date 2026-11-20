@@ -549,7 +549,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
         await wait((id,revision)=>{const body=document.querySelector('[data-testid="question-source-preview"]');return body?.dataset.questionId===id&&body.dataset.bankRevision===revision&&['original-html','prepared-picture'].includes(body.dataset.sourceRenderer)&&body.dataset.sourceReady==='true'&&body.innerText.trim().length>20&&[...body.querySelectorAll('img')].every(image=>image.complete&&image.naturalWidth>0);},[librarySource.qualified_id,librarySource.bank_revision],'Library question did not finish original images');
       }
       await click('button[aria-label="关闭题源"]');
-      await wait(()=>!document.querySelector('[role="dialog"]'),[],'Source did not close');
+      await wait(()=>!document.querySelector('[data-testid="question-source-preview"],button[aria-label="关闭题源"]'),[],'Source did not close');
       writeFileSync(file('library','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
       phase='history-source';
       await view.loadURL(`${origin}/chat/${encodeURIComponent(seed.session)}?dt_workspace=`);
@@ -572,7 +572,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
         return images.length===expected&&images.every(image=>image.complete&&image.naturalWidth>0&&image.naturalHeight>0)&&markers.every(marker=>text.includes(marker));
       },[seed.qualified_id,seed.bank_revision,seed.images,markers],'History citation opened the wrong question/revision or lost original body/images');
       await frames();
-      const dialog=await js(()=>{const node=document.querySelector('[role="dialog"]'),r=node.getBoundingClientRect(),body=document.querySelector('[data-testid="question-source-preview"]');return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,text:body.innerText,images:[...body.querySelectorAll('img')].map(image=>({complete:image.complete,width:image.naturalWidth,height:image.naturalHeight})),overflow:document.documentElement.scrollWidth>innerWidth+1};});
+      const dialog=await js(()=>{const body=document.querySelector('[data-testid="question-source-preview"]'),r=body.closest('[role="dialog"]').getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,text:body.innerText,images:[...body.querySelectorAll('img')].map(image=>({complete:image.complete,width:image.naturalWidth,height:image.naturalHeight})),overflow:document.documentElement.scrollWidth>innerWidth+1};});
       assert(dialog.text.trim().length>20&&imagesReady(dialog.images,seed.images));
       assert(markers.every(marker=>normalize(dialog.text).includes(marker)),'Original question start/end is missing');
       assert(dialog.left>=-1&&dialog.right<=width+1&&dialog.top>=-1&&dialog.bottom<=height+1&&!dialog.overflow,'Original source escapes the viewport');
@@ -580,7 +580,7 @@ module.exports = async function verifyK12Library(view, evidence, seed, options =
       }
       writeFileSync(file('source','png'),(await view.capturePage()).toPNG(),{flag:'wx'});
       await click('button[aria-label="关闭题源"]');
-      await wait(()=>!document.querySelector('[role="dialog"]'),[],'History source did not close');
+      await wait(()=>!document.querySelector('[data-testid="question-source-preview"],button[aria-label="关闭题源"]'),[],'History source did not close');
       await Promise.all(nativeResponses.map(reply=>reply.done));
       const preparedPicture = await preparedPictureHistory();
       await debug.sendCommand('Fetch.enable',{patterns:[nativeResponsePattern]});
