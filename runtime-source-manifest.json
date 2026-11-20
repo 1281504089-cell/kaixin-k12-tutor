@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "scope": "published_export",
-  "source_commit": "46bb8ecd7394c6be6bbf4b6eef4d62eed2719127",
-  "published_export_sha256": "921128ac62964ce9ea610364ca7952e9594ba909ad9c1c97a159f1764a1bdbd2",
+  "source_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+  "published_export_sha256": "1e9c4ba96da3dbf9a65aac87b7f354b2fe0ce763360f926c8043fb3ac3006b5c",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
   "files": [
     {
@@ -812,8 +812,8 @@
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
       "mode": 420,
-      "bytes": 14503,
-      "sha256": "11de5f811551842ceaaf0393440b6a58b43bdc6e555a306fb4941ae5ec89438a"
+      "bytes": 16587,
+      "sha256": "2b9a039df9a07727b81e2f8454ed3bf7511867b408afe93a92edf1c56edcf68c"
     },
     {
       "file": "deeptutor/agents/chat/app_actions.py",
@@ -829,9 +829,9 @@
     },
     {
       "file": "deeptutor/agents/chat/prompts/en/agentic_chat.yaml",
-      "bytes": 16840,
-      "sha256": "7a42182f2fcbec26ff645f45f5f02095094032060dccb8994dad6a43c43a38b7",
-      "mode": 420
+      "mode": 420,
+      "bytes": 17082,
+      "sha256": "a9427ba4c811e281fe83769e065b61717f34966de0e9399cefdf37f80f1c0ed8"
     },
     {
       "file": "deeptutor/agents/chat/prompts/en/chat_agent.yaml",
@@ -841,9 +841,9 @@
     },
     {
       "file": "deeptutor/agents/chat/prompts/zh/agentic_chat.yaml",
-      "bytes": 15476,
-      "sha256": "0b73274a6d7bb088cbbeed721bda192878cc1b67e00da5aed0b6b8a433ad4056",
-      "mode": 420
+      "mode": 420,
+      "bytes": 15836,
+      "sha256": "ac898227e22b646a45a486d12c0c6e7d6c4ae74f94345a16d0afe4937148183e"
     },
     {
       "file": "deeptutor/agents/chat/prompts/zh/chat_agent.yaml",
@@ -920,8 +920,8 @@
     {
       "file": "deeptutor/agents/loop/pipeline.py",
       "mode": 420,
-      "bytes": 103631,
-      "sha256": "57b6db663031abf2b50dced249d4f6fc3dd18a28de0f6ffdaf25a647d513aa51"
+      "bytes": 104042,
+      "sha256": "435af39e1f1d2ac978c2a1d1e2e513addc3e6efb58bd174152885a5c08002c78"
     },
     {
       "file": "deeptutor/agents/loop/prompt_blocks.py",
@@ -7250,8 +7250,8 @@
     {
       "file": "deeptutor/services/rag/retrieved_originals.py",
       "mode": 420,
-      "bytes": 14697,
-      "sha256": "2c889e5da19e21c3557b565900b6e3b17592b26ced635a627b93c50a61c467aa"
+      "bytes": 15245,
+      "sha256": "526191fc28730cec1887950548b9571146cdfa9a50dcdaad353d8afd3159c19e"
     },
     {
       "file": "deeptutor/services/rag/service.py",
@@ -7627,9 +7627,9 @@
     },
     {
       "file": "deeptutor/services/session/source_inventory.py",
-      "bytes": 51545,
-      "sha256": "218303c4dee28428cab31cdb35bd82b03a36d4310f215a5ea4934243fc8f955f",
-      "mode": 420
+      "mode": 420,
+      "bytes": 51926,
+      "sha256": "7ced1041cf039480460fe3aedb3dc759c4b62943a6edce74f22de0717a495f77"
     },
     {
       "file": "deeptutor/services/session/sqlite_store.py",
@@ -7664,8 +7664,8 @@
     {
       "file": "deeptutor/services/session/turns/executor.py",
       "mode": 420,
-      "bytes": 83505,
-      "sha256": "4138bd630cdb8613a1b7a70333c059e4d9e7262e786aff9edb32bab9e039d86f"
+      "bytes": 83690,
+      "sha256": "e0b9f81e3c6b4a0f42edbcb47c227aaafc47db0af5f4f935a41c514f90668679"
     },
     {
       "file": "deeptutor/services/session/turns/inbox.py",
@@ -14156,8 +14156,8 @@
     {
       "file": "deeptutor/services/student_learning/study_preferences.py",
       "mode": 420,
-      "bytes": 7116,
-      "sha256": "4edcdc503049411f735b4aa3da9a6592ef2bab8da4e490ea7f64d0f97d8d3a71"
+      "bytes": 8739,
+      "sha256": "302263bddd0a7bf9941eb1d67e087d9bd40e01a2e9cf103b2ff9af3867951bd5"
     },
     {
       "file": "deeptutor/services/student_learning/study_source_choice.py",
@@ -15608,8 +15608,8 @@
     {
       "file": "deeptutor/visualizers/coordinate_diagram.py",
       "mode": 420,
-      "bytes": 14243,
-      "sha256": "bfb455849b18ccb22f21b0ed7c15ef944d7e4d51d607a406877273d9010f7c4a"
+      "bytes": 14535,
+      "sha256": "cb4db065008996a3c199d00611d8027053679abd0881a0a63ae6653781b02230"
     },
     {
       "file": "deeptutor/visualizers/declarative_scene.py",
@@ -15632,8 +15632,8 @@
     {
       "file": "deeptutor/visualizers/local_diagram.py",
       "mode": 420,
-      "bytes": 13244,
-      "sha256": "07e2fc46b802d47980859084e9b1e81c3bf53b28a18d08e3dd8f8f8900d1ce03"
+      "bytes": 14002,
+      "sha256": "6a7d2d88ea1b19544c51fe909e9f81c593cce8a22109d96144385fb031789749"
     },
     {
       "file": "deeptutor/visualizers/loop_capability.py",
@@ -15644,14 +15644,14 @@
     {
       "file": "deeptutor/visualizers/math_review.py",
       "mode": 420,
-      "bytes": 10089,
-      "sha256": "26d9e9b3cfcb2d131a6480b2bc6c83a36f13777b8554dab55be52da625dbb550"
+      "bytes": 11103,
+      "sha256": "eb45c9c2f10aeef3a2f1cddd6eb257ac7412fdc3256ced305868329bd9b79476"
     },
     {
       "file": "deeptutor/visualizers/math_tool.py",
       "mode": 420,
-      "bytes": 9151,
-      "sha256": "40eace1ccc8f4e4c526bd23422194b972fc63675b3dd95ccc95fe9a9bca9a457"
+      "bytes": 12175,
+      "sha256": "2a5bc8e102d83bef11900fbd18e7770643799723b4db622d6963f2f426dd4e8c"
     },
     {
       "file": "deeptutor/visualizers/protocol.py",
@@ -15674,8 +15674,8 @@
     {
       "file": "deeptutor/visualizers/static_math.py",
       "mode": 420,
-      "bytes": 16911,
-      "sha256": "3a862b0d702470d52b4f47dfc1f17d9483fac23fafb5e99349f3abe1d4551e32"
+      "bytes": 17086,
+      "sha256": "84bcf1b1d07c928ea07ea3bde8d1b311beb1f45d96ae71b5623bdf7c8a7ac714"
     },
     {
       "file": "deeptutor/visualizers/store.py",
@@ -15692,8 +15692,8 @@
     {
       "file": "deeptutor/visualizers/textbook_circuit.py",
       "mode": 420,
-      "bytes": 4649,
-      "sha256": "d18cfdc3dbf66a60fb82bf97d0d456fc1a916fb486980eebe337f7fa1bbbbc9e"
+      "bytes": 8046,
+      "sha256": "0a19a082e4e9c0d1e3ea68021b8e529db2ff9655d2cbc02ac0c0e5ebae776c51"
     },
     {
       "file": "deeptutor/visualizers/textbook_electromechanics.py",
@@ -15722,8 +15722,8 @@
     {
       "file": "deeptutor/visualizers/textbook_local_specs.py",
       "mode": 420,
-      "bytes": 14749,
-      "sha256": "81e8bcc9ac838f3b19823a3baa2b8d96020fb7a8f6d4ecebe798b6dddabdc053"
+      "bytes": 15739,
+      "sha256": "8f8512e62f5c0a1927fad255fea082528ff71b6e0ce4a49158fa668d680b99ae"
     },
     {
       "file": "deeptutor/visualizers/textbook_math.py",
@@ -15794,8 +15794,8 @@
     {
       "file": "deeptutor/visualizers/tool.py",
       "mode": 420,
-      "bytes": 14386,
-      "sha256": "09c2ff3fddee047a823e9e6bc3b50303139e0177c9545e5d0ce5cc039f1f29b3"
+      "bytes": 14492,
+      "sha256": "5563b8458aa4b6c21d0a67d52eb0548b7d3576397bf09c5b45055b4f3514e618"
     },
     {
       "file": "deeptutor_cli/README.md",
