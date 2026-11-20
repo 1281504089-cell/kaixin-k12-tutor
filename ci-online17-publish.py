@@ -178,6 +178,20 @@ try:
         attempted.append(name)
         upload(stable, [next_files/name], replace=True)
         readback_stable([name])
+    superseded = "kaixin-core-delta-20261117-k12-16-to-k12-17.tar.gz"
+    obsolete = candidate_assets.get(superseded)
+    if obsolete:
+        assert obsolete["size"] == 574039 and obsolete["digest"] == "sha256:c9910cfe844bce7103d7c7c8f5e3033b488b095d09a27438fa9a7c1e1daa9720"
+        gh("release", "delete-asset", tag, superseded, "--yes")
+    identity = work/"online-release-identity.json"
+    write(identity, {"tag":tag,"source_commit":source,"archives":archive_entries,"delta":batch["proof"]["delta"],
+                     "signed_manifests":batch["feeds"],"native_run_id":run_id,
+                     "first_installation_tag":"student-20261117-k12-16"})
+    linked = inventory(release(tag)).get(identity.name)
+    if linked:
+        assert linked["digest"] == "sha256:" + digest(identity)
+    else:
+        upload(tag,[identity])
     notes = (root/"ONLINE-RELEASE-NOTES.md").read_text(encoding="utf-8")
     edit_candidate(prerelease=False, body=notes, title="开心动力超级学霸 · k12-17 在线更新")
     made_public = True
