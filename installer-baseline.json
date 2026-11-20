@@ -1,0 +1,116 @@
+{
+  "tag": "student-20261117-k12-16",
+  "release_id": 452304274,
+  "core_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+  "core_sha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+  "targets": {
+    "windows-x64": {
+      "arch": "x64",
+      "platform": "win32",
+      "runtime_id": "1.7.1-kaixin-20261117-k12-16-windows-x64-20261112",
+      "base_runtime_id": "1.7.1-04276f68a-x64",
+      "files": [
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+          "bytes": 1992294400,
+          "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6",
+          "id": 770650610
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+          "bytes": 1992294400,
+          "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142",
+          "id": 770650604
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+          "bytes": 1992294400,
+          "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d",
+          "id": 770650605
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+          "bytes": 1005564586,
+          "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034",
+          "id": 770650597
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+          "bytes": 1030723440,
+          "sha256": "891dc21c1c2c9942b18dd7769dcfaee34bbf5798d4c442faa86b76caf1bfa6eb",
+          "id": 770650603
+        }
+      ]
+    },
+    "macos-x64": {
+      "arch": "x64",
+      "platform": "darwin",
+      "runtime_id": "1.7.1-kaixin-20261117-k12-16-macos-x64-20261112",
+      "base_runtime_id": "1.7.1-04276f68a-x64",
+      "files": [
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "52dec6fbb923fe837e728b4b83ca430b59ecb2b5111143682fcfe8a7f6fbd3f8",
+          "id": 770656801
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "c480c6d21207790cddf5145fa93f849617af3e255b7787eeeb5742e3a0095eac",
+          "id": 770656808
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.004.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "eddb6363e6cf0c1593118cd22bf037aa914ea587f00a9e9f1094f0768013efea",
+          "id": 770656806
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.005.dmgpart",
+          "bytes": 43950116,
+          "sha256": "9844e0104ed0953f9d708a5f12a48fbd445be6ffee8e9aaf53dccddab8fbf3fb",
+          "id": 770656802
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.dmg",
+          "bytes": 1992780789,
+          "sha256": "0422acbeec86583c0bb2cba43f2189e853b7548f33828664c714fe6090260b16",
+          "id": 770656809
+        }
+      ]
+    },
+    "macos-arm64": {
+      "arch": "arm64",
+      "platform": "darwin",
+      "runtime_id": "1.7.1-kaixin-20261117-k12-16-macos-arm64-20261112",
+      "base_runtime_id": "1.7.1-04276f68a-arm64",
+      "files": [
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "8fc229da32b511ef1118d120a204e8376257f50518f6fade2bf3189229f8af59",
+          "id": 770643480
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "415850aab2ed79eccf831a15eb7795ce309af5c7232339b1429e03e6f66c1456",
+          "id": 770643479
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.004.dmgpart",
+          "bytes": 1965837798,
+          "sha256": "68f025233d8da771c5a3d29fc9089331f868629617945c2f5f93967cee35977e",
+          "id": 770643481
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.dmg",
+          "bytes": 1992777049,
+          "sha256": "46ed67a8a5b68df424dc265026ad37bf0751ea8db67255c765078625bb79e413",
+          "id": 770643489
+        }
+      ]
+    }
+  }
+}

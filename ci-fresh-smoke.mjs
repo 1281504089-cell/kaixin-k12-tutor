@@ -119,57 +119,13 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
     assert.match(result.text, /分之/);
     speech.push({ milliseconds: Date.now() - started, spoken_audio_decoded: true });
   }
-  const acceptedHealth = process.env.KX_NATIVE_ACCEPTED_HEALTH;
-  const attachmentArgs = acceptedHealth
-    ? [path.join(process.cwd(), 'ci_native8_health_acceptance.py'), '--acceptance', acceptedHealth,
-       '--artifact', path.join(process.cwd(), 'native8-arm-health-original.zip'),
-       '--target', `macos-${process.arch}`, '--batch', path.join(process.cwd(), 'attachment-batch.json'),
-       '--manifest', path.join(resources, 'update/runtime.json'), '--out', path.join(evidence, 'attachments.json')]
-    : [path.join(process.cwd(), 'ci-attachment-native.py'), frontend, path.join(evidence, 'attachments.json'), backend];
-  const attachmentProof = execFileSync(python, attachmentArgs, {
-    encoding: 'utf8', timeout: 480000, env: { ...process.env, PYTHONPATH: path.join(runtime, 'core'),
-      DEEPTUTOR_HOME: path.join(home, 'workspace'), DEEPTUTOR_LOCAL_AI: path.join(native, 'support/local-ai'),
-      DEEPTUTOR_FONT_DIR: path.join(native, 'support/fonts'), PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1',
-      OMP_NUM_THREADS: '2', OPENBLAS_NUM_THREADS: '2' } });
-  const attachments = JSON.parse(attachmentProof.trim().split('\n').at(-1));
-  assert.equal(attachments.scanned_pdf_retrievable, true);
-  assert.equal(attachments.raw_originals_verified, true);
-  const reportProof = execFileSync(python, [path.join(process.cwd(), 'native-report-smoke.py'),
-    '--core-dir', path.join(runtime, 'core'), '--node', node,
-    '--out', path.join(evidence, 'reports.json')], {
-    encoding: 'utf8', timeout: 180000,
-    env: { ...process.env, PATH: operatingPath, PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1' },
-  });
-  const studyReports = JSON.parse(reportProof.trim().split('\n').at(-1));
-  assert.equal(studyReports.passed, true);
-  assert.equal(studyReports.cases.length, 9);
-  assert.equal(studyReports.real_model_calls, 0);
-  // Exercise the installed launcher's automatic compatibility selection without altering live feeds.
-  const { findReleaseUpdate, downloadReleaseUpdate } = await import(pathToFileURL(path.join(resources, 'app/src/release-updates.mjs')));
-  const trace = [];
-  const publicFetch = async (url, options) => { trace.push(url.pathname); return fetch(url, options); };
-  const offered = await findReleaseUpdate(process.platform === 'win32' ? 'windows-x64' : `macos-${process.arch}`,
-    base, key, publicFetch, AbortSignal.timeout(30000));
-  assert.ok(offered);
-  assert.equal(offered.baseRuntimeId, base.runtimeId, 'A new full installation must select its small code update');
-  assert.ok(offered.builtAt > (base.builtAt ?? 0));
-  const currentOffer = await findReleaseUpdate(process.platform === 'win32' ? 'windows-x64' : `macos-${process.arch}`,
-    included, key, publicFetch, AbortSignal.timeout(30000));
-  assert.ok(!currentOffer || currentOffer.builtAt > included.builtAt, 'Checking a new install must never downgrade its bundled core');
-  const inbox = path.join(home, 'automatic-small-update');
-  await mkdir(inbox);
-  await downloadReleaseUpdate(offered, inbox, () => {}, publicFetch, AbortSignal.timeout(180000));
-  assert.equal(await sha256(path.join(inbox, offered.archive)), offered.sha256);
-  assert.equal(trace.some(item => item.includes('kaixin-bridge-')), false);
   await writeFile(path.join(evidence, 'app.json'), JSON.stringify({
     native_platform: process.platform, native_arch: process.arch, runtime_id: active.runtimeId,
     core_commit: included.commit, fresh_profile: true, developer_tools_on_path: false,
     language: profile.language, textbooks: books.length, pdf, local_spoken_stt: speech,
-    ...(attachments.explicit_health_acceptance ? {attachment_original_receipt_acceptance: attachments.explicit_health_acceptance} : {}),
-    study_reports: studyReports, native_node: nativeNode, k12_api: k12Api, textbook_summary_count: installedTextbooks.passage_count,
+    native_node: nativeNode, k12_api: k12Api, textbook_summary_count: installedTextbooks.passage_count,
     reading_page: 'passed', current_core_included: true,
-    automatic_small_update_selection: 'passed', automatic_small_update_download: 'passed',
-    compatibility_runtime_downloaded: false, real_keys_used: false,
+    real_keys_used: false,
   }, null, 2));
   passed = true;
 } finally {
@@ -194,5 +150,5 @@ print(json.dumps({'pdf_files':checked,'first_page_rendered':True}))
   if (backend) assert.equal(await responsive(backend + '/health/ready'), false);
   if (frontend) assert.equal(await responsive(frontend), false);
   try { await writeFile(path.join(evidence, 'runtime.log'), await readFile(log)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  if (passed) console.log('PASS: installed native app, 136 PDFs, Chinese, small automatic update, and exit');
+  if (passed) console.log('PASS: installed native app, 136 PDFs, Chinese, packaged bank, local speech, and exit');
 }

@@ -10,8 +10,8 @@ from urllib.parse import quote, urljoin, urlparse
 from urllib.request import urlopen
 
 
-NATIVE_EXPECTED = {"manifest_sha256": "91631719fe6e228a0b580d469a15943bb5ba80828f5114ea10e731dcd598da0a",
-    "records": 6915, "pdfs": 698, "total_bytes": 295359867,
+NATIVE_EXPECTED = {"manifest_sha256": "c456bed09be738e9523c3e606e4beaf06c6a00e89bbd77c6d0ce54b9c6345574",
+    "records": 6915, "pdfs": 698, "total_bytes": 295359976,
     "samples": {"math:q_e9dd00ffa1178d29b41fadb4_2": "math", "new-five:q_0264cefbf2bc2978e20b01f3_b00012_3": "physics",
         "five-subject:src_04fccdbddbb0696b58cc5678_b00001_full": "biology", "five-subject:q_075b4515a0802954bc5c6a4f": "chemistry"}}
 
@@ -21,7 +21,7 @@ def verify_native_pages(get, core, revision, database, expected):
     raw_manifest = (root / "manifest.json").read_bytes()
     assert hashlib.sha256(raw_manifest).hexdigest() == expected["manifest_sha256"]
     manifest = json.loads(raw_manifest)
-    assert manifest["bank_revision"] == revision and len(manifest["items"]) == expected["records"]
+    assert revision in [manifest["bank_revision"], *manifest.get("compatible_bank_revisions", [])] and len(manifest["items"]) == expected["records"]
     files = {item["file"] for item in manifest["items"].values()}
     assert files == {p.relative_to(root).as_posix() for p in (root / "documents").glob("*.pdf")}
     assert len(files) == expected["pdfs"] and sum((root / name).stat().st_size for name in files) + len(raw_manifest) == expected["total_bytes"]
@@ -138,7 +138,7 @@ def run(frontend, core, native_expected=None):
                 assert len(raw) == row[0] and hashlib.sha256(raw).hexdigest() == row[1]
         picture_root = core / "deeptutor/services/student_learning/question_picture_data"
         pictures = json.loads((picture_root / "manifest.json").read_text())
-        assert pictures["schema_version"] == 1 and pictures["bank_revision"] == revision
+        assert pictures["schema_version"] == 1 and revision in [pictures["bank_revision"], *pictures.get("compatible_bank_revisions", [])]
         assert pictures["teacher_evidence_included"] is False and pictures["items"], "Required prepared question display pack is absent"
         bindings = []
         for identity, item in pictures["items"].items():
