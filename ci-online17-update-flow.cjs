@@ -215,6 +215,7 @@ async function runCheck(view, expectCurrent=false) {
     if(!expectCurrent&&backupContext.names===null)await sampleBackup(backupContext,true);
     if(nativeFailure)throw nativeFailure;
     let error,done=false,disposal;
+    const priorCheckJournal=optionalRead('upgrade.json');
     const invocation=Promise.resolve().then(()=>view.executeJavaScript('window.kaixinDesktop.checkForUpdates()')).then(()=>{done=true;},value=>{error=value||new Error('Update check rejected without an error detail');invokeError=String(error.message||error);done=true;});
     for(;;) {
       await collectProgress();
@@ -242,6 +243,16 @@ async function runCheck(view, expectCurrent=false) {
           } else await waitForBackup(backupContext,disposal);
           assert(Date.now()<disposal.deadline,'The verified apply stage exceeded its bounded '+disposal.wait_phase+' wait');
           stage='await-installed-after-renderer-close';await pause(100);continue;
+        }
+        // A post-install manifest timeout can be tried again without replaying the upgrade.
+        if (expectCurrent && done && !current && currentCheckAttempts < 4 &&
+            active.commit === process.env.KX_ONLINE_SOURCE && optionalRead('upgrade.json') === priorCheckJournal &&
+            lastTransportError?.attempt === checkAttempts && /^https:\/\/(api\.)?github\.com\//.test(lastTransportError.url) &&
+            (lastTransportError.error?.name === 'TimeoutError' || connectionTimeout(lastTransportError.error))) {
+          readOnlyRetries.push({attempt:checkAttempts, reason:'post-install manifest request timed out', active_runtime_id:active.runtimeId});
+          nativeFailure=null;
+          await pause(800);
+          break;
         }
         let status,reason=connectionTimeout(error);
         if(done&&!expectCurrent&&reason&&accepted===0&&!installed&&!current&&!downloadStarted&&!progressVisible&&readOnlyRetries.length===0&&active.runtimeId===before.runtimeId&&optionalRead('upgrade.json')===initialUpgrade) {
@@ -298,8 +309,13 @@ async function content() {
         return Response.json({ ...metadata, tag_name: 'core-updates' });
       }
       if(!needsRestart && original.includes('.tar.gz') && response.ok && response.body) {
-        let chunks = 0;
-        const paced=response.body.pipeThrough(new TransformStream({async transform(chunk,controller){if(chunks++ < 20) await pause(20);controller.enqueue(chunk);}}));
+        // Pace the real 2.3 MB delta so the progress view can paint on a fast runner.
+        const paced=response.body.pipeThrough(new TransformStream({async transform(chunk, controller) {
+          for (let offset=0; offset<chunk.byteLength; offset+=128*1024) {
+            controller.enqueue(chunk.subarray(offset, offset+128*1024));
+            await pause(150);
+          }
+        }}));
         return new Response(paced,{status:response.status,headers:response.headers});
       }
       return response;
