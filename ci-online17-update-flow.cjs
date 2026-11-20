@@ -384,9 +384,9 @@ async function content() {
     const checkedBank = await require('./verify-online17-bank.cjs')(view, path.dirname(output));
     assert.equal(after.commit, process.env.KX_ONLINE_SOURCE);
     const memory = path.join(home, 'workspace/data/user/memory/L3/profile.md');
-    assert.equal(readFileSync(memory, 'utf8'), 'k12-17 synthetic learning memory');
+    assert.equal(readFileSync(memory, 'utf8'), 'k12-18 synthetic learning memory');
     const backup = transaction.backup;
-    assert.equal(readFileSync(path.join(backup, 'data/user/memory/L3/profile.md'), 'utf8'), 'k12-17 synthetic learning memory');
+    assert.equal(readFileSync(path.join(backup, 'data/user/memory/L3/profile.md'), 'utf8'), 'k12-18 synthetic learning memory');
     const archives = [...requestedArchives];
     assert(archives.includes(process.env.KX_ONLINE_EXPECT_ARCHIVE), JSON.stringify(archives));
     assert(!archives.includes(process.env.KX_ONLINE_FORBID_ARCHIVE), JSON.stringify(archives));

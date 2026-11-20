@@ -422,6 +422,9 @@ def main():
     print('PASS: frozen '+target+' candidate fresh install and all four complete real update paths')
 
 if __name__ == '__main__':
+    if os.environ.get('GITHUB_REF_NAME') == 'codex/k12-native-reverify-20261117-18-online':
+        subprocess.run([sys.executable, 'ci-online18-native.py', *sys.argv[1:]], check=True)
+        raise SystemExit(0)
     if os.environ.get('GITHUB_REF_NAME') == 'codex/k12-native-reverify-20261117-17-online':
         subprocess.run([sys.executable, 'ci-online17-native.py', *sys.argv[1:]], check=True)
         sys.exit(0)

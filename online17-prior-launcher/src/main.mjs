@@ -11,7 +11,7 @@ import { resolveLanguage, translate } from './i18n.mjs';
 import { WINDOWS, agentMarker, edition, targetId } from './platform.mjs';
 import { killTree } from './processes.mjs';
 import { snapshotWorkspace } from './workspace-snapshot.mjs';
-import { findReleaseUpdate, downloadReleaseUpdate, isNetworkSuspended, isInterruptedDownload } from './release-updates.mjs';
+import { findReleaseUpdate, prepareReleaseUpdate, isNetworkSuspended, isInterruptedDownload } from './release-updates.mjs';
 import { createUpdateFetch } from './update-network.mjs';
 
 app.setName('开心动力超级学霸');
@@ -347,8 +347,7 @@ async function boot() {
   } finally { busy = false; }
 }
 
-async function applyCoreUpdate(file) {
-  const next = await installBundle(file, userRoot, publicKey);
+async function applyCoreUpdate(next) {
   if (next.manifest.runtimeId === active.manifest.runtimeId) return;
   let transaction;
   try {
@@ -388,7 +387,7 @@ async function installUpdate() {
       type: 'question', buttons: [t('cancel'), t('updateConfirm')], defaultId: 0, cancelId: 0,
       message: t('updateMessage'), detail: t('updateDetail'),
     });
-    if (confirmation.response === 1) await applyCoreUpdate(choice.filePaths[0]);
+    if (confirmation.response === 1) await applyCoreUpdate(await installBundle(choice.filePaths[0], userRoot, publicKey));
   } catch (error) {
     await updateNotice('updateFailed', error.message, 'error');
   } finally {
@@ -463,14 +462,21 @@ async function performReleaseCheck(check) {
     window.setProgressBar(2);
     const blocker = powerSaveBlocker.start('prevent-app-suspension');
     try {
-      const file = await downloadReleaseUpdate(next, temporary, (progress, bytes) => {
-        updateProgress({ phase: 'downloading', ...bytes, canCancel: true });
-        if (!window.isDestroyed()) window.setProgressBar(progress);
-      }, updateFetch, request.signal);
+      const prepared = await prepareReleaseUpdate({
+        manifest: next, current: active.manifest, directory: temporary, root: userRoot,
+        publicKey, fetchAsset: updateFetch, signal: request.signal,
+        onProgress: (progress, bytes) => {
+          updateStage = 'downloading';
+          updateProgress({ phase: 'downloading', ...bytes, canCancel: true });
+          if (!window.isDestroyed()) window.setProgressBar(progress);
+        },
+        onInstall: () => {
+          updateStage = 'installing';
+          updateProgress({ phase: 'installing', canCancel: false });
+        },
+      });
       if (quitting) return;
-      updateStage = 'installing';
-      updateProgress({ phase: 'installing', canCancel: false });
-      await applyCoreUpdate(file);
+      await applyCoreUpdate(prepared);
     } finally {
       powerSaveBlocker.stop(blocker);
     }

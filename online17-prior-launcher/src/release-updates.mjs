@@ -4,7 +4,7 @@ import { open, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { verifyManifest } from './bundles.mjs';
+import { compatibleCoreDelta, installBundle, verifyManifest } from './bundles.mjs';
 
 const REPOSITORY = '1281504089-cell/kaixin-k12-tutor';
 const TAG = 'core-updates';
@@ -160,13 +160,13 @@ export async function findReleaseUpdate(target, current, publicKey, fetchAsset =
   return newerRelease(manifest, current);
 }
 
-export async function downloadReleaseUpdate(manifest, directory, onProgress, fetchAsset = fetch, signal = new AbortController().signal, mirrorBase) {
+async function downloadUpdateArchive(asset, directory, onProgress, fetchAsset, signal, mirrorBase, exactBytes) {
   const mirror = updateMirrorBase(mirrorBase);
-  const archive = path.join(directory, manifest.archive);
+  const archive = path.join(directory, asset.archive);
   const routes = [
-    ...(mirror ? [(routeSignal, headers) => fetchMirrorAsset(manifest.archive, mirror, fetchAsset, routeSignal, headers)] : []),
-    routeSignal => fetchGitHub(new URL(manifest.archive, RELEASE), fetchAsset, routeSignal),
-    routeSignal => getApiAsset(manifest.archive, fetchAsset, routeSignal),
+    ...(mirror ? [(routeSignal, headers) => fetchMirrorAsset(asset.archive, mirror, fetchAsset, routeSignal, headers)] : []),
+    routeSignal => fetchGitHub(new URL(asset.archive, RELEASE), fetchAsset, routeSignal),
+    routeSignal => getApiAsset(asset.archive, fetchAsset, routeSignal),
   ];
   let sessionRetried = false;
   let interruptedRoute = -1;
@@ -190,7 +190,8 @@ export async function downloadReleaseUpdate(manifest, directory, onProgress, fet
       const length = Number(response.headers.get('content-length'));
       const etag = response.headers.get('etag') ?? '';
       const identity = (response.headers.get('content-encoding') ?? 'identity').toLowerCase() === 'identity';
-      expected = partial?.total ?? length;
+      expected = partial?.total ?? (length || exactBytes || 0);
+      if (exactBytes && expected !== exactBytes) throw new Error('Incremental update download length does not match');
       if (expected > ARCHIVE_LIMIT) throw new Error('Update archive is too large');
       if (partial) {
         const contentRange = `bytes ${partial.offset}-${partial.total - 1}/${partial.total}`;
@@ -239,7 +240,7 @@ export async function downloadReleaseUpdate(manifest, directory, onProgress, fet
         throw new Error('Update download was incomplete');
       }
       signal.throwIfAborted();
-      if (digest.digest('hex') !== manifest.sha256) throw new Error('The core bundle checksum does not match; download it again');
+      if (digest.digest('hex') !== asset.sha256) throw new Error('The core bundle checksum does not match; download it again');
       break;
     } catch (error) {
       await output?.close();
@@ -274,7 +275,40 @@ export async function downloadReleaseUpdate(manifest, directory, onProgress, fet
       await response?.body?.cancel().catch(() => {});
     }
   }
+}
+
+async function writeReleaseManifest(manifest, directory) {
   const file = path.join(directory, 'runtime.json');
   await writeFile(file, JSON.stringify(manifest), { mode: 0o600, flag: 'wx' });
   return file;
+}
+
+export async function downloadReleaseUpdate(manifest, directory, onProgress, fetchAsset = fetch, signal = new AbortController().signal, mirrorBase) {
+  await downloadUpdateArchive(manifest, directory, onProgress, fetchAsset, signal, mirrorBase);
+  return writeReleaseManifest(manifest, directory);
+}
+
+export async function prepareReleaseUpdate({ manifest, current, directory, root, publicKey,
+  onProgress, onInstall, fetchAsset = fetch, signal = new AbortController().signal, mirrorBase }) {
+  verifyManifest(manifest, publicKey);
+  const delta = compatibleCoreDelta(manifest, current);
+  const file = await writeReleaseManifest(manifest, directory);
+  if (delta) {
+    try {
+      await downloadUpdateArchive(delta, directory, onProgress, fetchAsset, signal, mirrorBase, delta.bytes);
+      signal.throwIfAborted();
+      onInstall();
+      return await installBundle(file, root, publicKey, undefined, { current, signal });
+    } catch (error) {
+      signal.throwIfAborted();
+      if (['ENOSPC', 'EEXIST'].includes(error.code)) throw error;
+      console.warn('Incremental desktop update unavailable; downloading the complete core:', error.message);
+      await rm(path.join(directory, delta.archive), { force: true });
+      onProgress(2, { received: 0, total: 0 });
+    }
+  }
+  await downloadUpdateArchive(manifest, directory, onProgress, fetchAsset, signal, mirrorBase);
+  signal.throwIfAborted();
+  onInstall();
+  return installBundle(file, root, publicKey);
 }

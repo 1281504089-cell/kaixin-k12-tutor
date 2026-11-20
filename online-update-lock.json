@@ -1,559 +1,505 @@
 {
-  "tag": "student-20261117-k12-17",
-  "source_commit": "51328c98d89dc0a30d81e7cdbf5d891350465a3c",
-  "source_tree": "e11864771257c2905cf6d4e02b3b0abd54b837a5",
-  "old_source_commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+  "tag": "student-20261117-k12-18",
+  "previous_tag": "student-20261117-k12-17",
+  "previous_release_id": 452647872,
+  "source_commit": "ec6cce3ba809d83e2226454c0ca713e747441714",
+  "source_tree": "7889656b8846846e53cb741dbdefbce387e66d9a",
+  "old_source_commit": "51328c98d89dc0a30d81e7cdbf5d891350465a3c",
   "old_core": {
-    "name": "kaixin-core-20261117-k12-16.tar.gz",
-    "id": 770600221,
-    "bytes": 871501419,
-    "sha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07"
+    "name": "kaixin-core-20261117-k12-17.tar.gz",
+    "id": 771709432,
+    "bytes": 874300077,
+    "sha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38"
   },
   "old_file_manifest": {
     "name": "core-file-manifest.json",
-    "id": 770600232,
-    "bytes": 3116439,
-    "sha256": "db68ca6f95310c960d32a6464479a30f8d6153cf0ae5a2f880aac41d7f805de3"
+    "id": 771709493,
+    "bytes": 3128152,
+    "sha256": "c318de10c11f73f3f1783f4a95ab3a370716681134832e56d8a763781087a1ce"
   },
-  "old_bridges": {
-    "windows-x64": {
-      "name": "kaixin-bridge-20261117-k12-16-windows-x64.tar.gz",
-      "id": 770702714,
-      "bytes": 1992548151,
-      "sha256": "0fa564169b33efb07c66cb6012d8c69b219c5676b5f6ea5a64a323158635c716"
-    },
-    "macos-x64": {
-      "name": "kaixin-bridge-20261117-k12-16-macos-x64.tar.gz",
-      "id": 770734484,
-      "bytes": 2080786070,
-      "sha256": "4c53aef507adcd3fa813dd3349d4c20d8df6524a43381918d70fc664678664f7"
-    },
-    "macos-arm64": {
-      "name": "kaixin-bridge-20261117-k12-16-macos-arm64.tar.gz",
-      "id": 770696682,
-      "bytes": 2017475798,
-      "sha256": "5e07d5d8560032e3afe2f0ef32316f227b362f125a05e0a01367bf2e8615df0a"
-    }
+  "old_source_overlay": {
+    "name": "source-overlay-20261117-k12-17.tar.gz",
+    "id": 771709541,
+    "bytes": 1320395,
+    "sha256": "9cb7c5e5b6033aaced6f915b49e41b9fa921d2f2ff1c85ee75c03c5d1b382ef5"
   },
-  "old_installation_files": [
-    {
-      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
-      "id": 770650610,
-      "bytes": 1992294400,
-      "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
-      "id": 770650604,
-      "bytes": 1992294400,
-      "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
-      "id": 770650605,
-      "bytes": 1992294400,
-      "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
-      "id": 770650597,
-      "bytes": 1005564586,
-      "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
-      "id": 770650603,
-      "bytes": 1030723440,
-      "sha256": "891dc21c1c2c9942b18dd7769dcfaee34bbf5798d4c442faa86b76caf1bfa6eb"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.002.dmgpart",
-      "id": 770656801,
-      "bytes": 1992295135,
-      "sha256": "52dec6fbb923fe837e728b4b83ca430b59ecb2b5111143682fcfe8a7f6fbd3f8"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.003.dmgpart",
-      "id": 770656808,
-      "bytes": 1992295135,
-      "sha256": "c480c6d21207790cddf5145fa93f849617af3e255b7787eeeb5742e3a0095eac"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.004.dmgpart",
-      "id": 770656806,
-      "bytes": 1992295135,
-      "sha256": "eddb6363e6cf0c1593118cd22bf037aa914ea587f00a9e9f1094f0768013efea"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.005.dmgpart",
-      "id": 770656802,
-      "bytes": 43950116,
-      "sha256": "9844e0104ed0953f9d708a5f12a48fbd445be6ffee8e9aaf53dccddab8fbf3fb"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261117-k12-16-part.dmg",
-      "id": 770656809,
-      "bytes": 1992780789,
-      "sha256": "0422acbeec86583c0bb2cba43f2189e853b7548f33828664c714fe6090260b16"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.002.dmgpart",
-      "id": 770643480,
-      "bytes": 1992295135,
-      "sha256": "8fc229da32b511ef1118d120a204e8376257f50518f6fade2bf3189229f8af59"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.003.dmgpart",
-      "id": 770643479,
-      "bytes": 1992295135,
-      "sha256": "415850aab2ed79eccf831a15eb7795ce309af5c7232339b1429e03e6f66c1456"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.004.dmgpart",
-      "id": 770643481,
-      "bytes": 1965837798,
-      "sha256": "68f025233d8da771c5a3d29fc9089331f868629617945c2f5f93967cee35977e"
-    },
-    {
-      "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261117-k12-16-part.dmg",
-      "id": 770643489,
-      "bytes": 1992777049,
-      "sha256": "46ed67a8a5b68df424dc265026ad37bf0751ea8db67255c765078625bb79e413"
-    }
-  ],
-  "supplement_sha256": "9cb7c5e5b6033aaced6f915b49e41b9fa921d2f2ff1c85ee75c03c5d1b382ef5",
+  "source_archive": "source-overlay-20261117-k12-18.tar.gz",
+  "source_archive_sha256": "548c2fdc2a46fb0c718a11945e246e959c02cecc9f4334a0e965c86c24c68454",
   "input_parts": [
     {
-      "name": "online-supplement.001",
-      "bytes": 49152,
-      "sha256": "ebcd58a789bc3311fdd07c6fc65ef065ded9e0d08ae073d352d6e1aa03baf719"
+      "name": "k12-18-source.001.b64",
+      "bytes": 24576,
+      "sha256": "d452da86cd0692b0c29160a9c6448bb88dd68698fd5696f5b2d7c4495d472551"
     },
     {
-      "name": "online-supplement.002",
-      "bytes": 49152,
-      "sha256": "2a72e583cfab34ca438b90b5896fd0627d5cea6403f2a2de082dc3d8ee60e931"
+      "name": "k12-18-source.002.b64",
+      "bytes": 24576,
+      "sha256": "80cc7250e94b1fba2fb1119f282d740eee5bfafbd98ad0639349d912b808925b"
     },
     {
-      "name": "online-supplement.003",
-      "bytes": 49152,
-      "sha256": "683c471ebdcdaf4e6068b1d3d0bb27cff158fa07b8379343b458e148a6267999"
+      "name": "k12-18-source.003.b64",
+      "bytes": 24576,
+      "sha256": "372b1280b0d2d0b73f1bca1113374788e2ad7e2f24e3c8e35fecf9f0fb6c4745"
     },
     {
-      "name": "online-supplement.004",
-      "bytes": 49152,
-      "sha256": "1c184f7843fd067a36e0fadebcfce35a12509f0af6b20d59bedfc8d6b587b1a5"
+      "name": "k12-18-source.004.b64",
+      "bytes": 24576,
+      "sha256": "d1efb88da6366bebf336a5855b0ed61e8a2d4ad2dc25dde1f36d56c8d14f973e"
     },
     {
-      "name": "online-supplement.005",
-      "bytes": 49152,
-      "sha256": "b1f1359c8ea3774bc10f33c9bac23f7a961413f8eecda4ab88c112cae8d0e7b3"
+      "name": "k12-18-source.005.b64",
+      "bytes": 24576,
+      "sha256": "257ff6ab94ec2ad79a5dc9ab2750563914d2dd3e417ac970bc7d0ac879f12073"
     },
     {
-      "name": "online-supplement.006",
-      "bytes": 49152,
-      "sha256": "1e19a954a60a4dfa8690248ea64132e6c3bac588ee79e449ae3c1fe76887dd71"
+      "name": "k12-18-source.006.b64",
+      "bytes": 24576,
+      "sha256": "3c38cdd66af241ba58a7169f42739f988473852270143d01383b065b1e3c8fb7"
     },
     {
-      "name": "online-supplement.007",
-      "bytes": 49152,
-      "sha256": "a5fb03fed97a937da6ce0459c056fdf752bd0f332acc9aab531a9b1b0909e18a"
+      "name": "k12-18-source.007.b64",
+      "bytes": 24576,
+      "sha256": "7fa40835d29f1fe788337613d9ce18d38f15b090387725d5da76560c1614026f"
     },
     {
-      "name": "online-supplement.008",
-      "bytes": 49152,
-      "sha256": "d7e5b649f165c1d1b171bcb3d25c840d3d87c65e09efdcb8592a490c07e91d85"
+      "name": "k12-18-source.008.b64",
+      "bytes": 24576,
+      "sha256": "7a095988adc7ea4cd3fc408c70992624663f97e25a7fba79d5989afbebaad09d"
     },
     {
-      "name": "online-supplement.009",
-      "bytes": 49152,
-      "sha256": "77b823e57ce6fcd69a9bd721f0b06e6d0f28e5c4a28c2bfea1ff6665dbd89bab"
+      "name": "k12-18-source.009.b64",
+      "bytes": 24576,
+      "sha256": "a40669f94a6cc5c51062944ae1295eaf2571d0dc9f17a2525a015743f976b1c3"
     },
     {
-      "name": "online-supplement.010",
-      "bytes": 49152,
-      "sha256": "2aee8dadd14c80731d85757cd08a2b7ecd328220ec9e38bcb84253d9f72ea954"
+      "name": "k12-18-source.010.b64",
+      "bytes": 24576,
+      "sha256": "a3a04fe36c66d82456153a41a80d8660a9ea943467d2715e10a412e0780b5bbe"
     },
     {
-      "name": "online-supplement.011",
-      "bytes": 49152,
-      "sha256": "92fdb81a5da4ce09c9e620515451462042d8fe3b234d497a6d1c9a501f8e840d"
+      "name": "k12-18-source.011.b64",
+      "bytes": 24576,
+      "sha256": "45a844a3fcea4d035d875db602c8a08d43d5d9cb2187fd584e54952cdd60afe4"
     },
     {
-      "name": "online-supplement.012",
-      "bytes": 49152,
-      "sha256": "f65d777d6582f18cf22cf060f82bc59ae5034f63f8576e4db62beaa1de65c58b"
+      "name": "k12-18-source.012.b64",
+      "bytes": 24576,
+      "sha256": "05ff2ca441e08043d15a75c893a02ba25ee6c12441286568625cd2b0a68da659"
     },
     {
-      "name": "online-supplement.013",
-      "bytes": 49152,
-      "sha256": "dbd4769fd4a9781dbf59684187023827be74af3b76f4be6e6c08a360008691df"
+      "name": "k12-18-source.013.b64",
+      "bytes": 24576,
+      "sha256": "8bcd93800444748495c1c92b55a995fcf87279dbd3ef3a307b242c869f6b6cea"
     },
     {
-      "name": "online-supplement.014",
-      "bytes": 49152,
-      "sha256": "f222eac48bb86ae4504e7dc2ad301b81d4f256039503b91d720165a1f37679f4"
+      "name": "k12-18-source.014.b64",
+      "bytes": 24576,
+      "sha256": "e98d7ffbf2cdb63b7fdb3b9f1399eea530ea7e2c63c6e05db5ae72522abe663f"
     },
     {
-      "name": "online-supplement.015",
-      "bytes": 49152,
-      "sha256": "bd79253ec6eef951501c6dc1ccff412f4435068c6e33459d360282d72642db7d"
+      "name": "k12-18-source.015.b64",
+      "bytes": 24576,
+      "sha256": "ab813c8508fe997e665a3296a9cddcb1f306c923b6e38cecb0a5693ef6bd69f7"
     },
     {
-      "name": "online-supplement.016",
-      "bytes": 49152,
-      "sha256": "59872128f77d809ef9b55883f1e7a1dc20c8e56f2a81176d24620fcec473dee9"
+      "name": "k12-18-source.016.b64",
+      "bytes": 24576,
+      "sha256": "4b2719299642ce2ab32b730f3939a918f4aff87d8841b7e7afbf57a295331690"
     },
     {
-      "name": "online-supplement.017",
-      "bytes": 49152,
-      "sha256": "b01da0173b6c1a32043b764e4963aa3f73ec1f775a4e1f19da19c2e5b7585f48"
+      "name": "k12-18-source.017.b64",
+      "bytes": 24576,
+      "sha256": "d884fa82beb3137e7e3833e6ee562a3e72b87fae5e75b3eabe321fdea0b08b5a"
     },
     {
-      "name": "online-supplement.018",
-      "bytes": 49152,
-      "sha256": "a08cc11bdd662e6b5328320b1428b8f3b988902acba86e1fce2bc557bb749154"
+      "name": "k12-18-source.018.b64",
+      "bytes": 24576,
+      "sha256": "a84bb808b78c94884023317fa12c7ee8d0734585f7a102818ee70830e6464604"
     },
     {
-      "name": "online-supplement.019",
-      "bytes": 49152,
-      "sha256": "e80ed35a04e646869b78286b858e6e1651e84d6f405d4ef9a536f32b9c514aa9"
-    },
-    {
-      "name": "online-supplement.020",
-      "bytes": 49152,
-      "sha256": "d9667956959945c8baad291b9953848bf7d93a12c204a7877317a3277020dac7"
-    },
-    {
-      "name": "online-supplement.021",
-      "bytes": 49152,
-      "sha256": "d251cfa34869af08b2f46b32d8b069e571a8004a598d54ba482b45016dc5220f"
-    },
-    {
-      "name": "online-supplement.022",
-      "bytes": 49152,
-      "sha256": "ed9204f8631ac865eab27f115e53c4797f8528b1af0580a628833dd5cea8957c"
-    },
-    {
-      "name": "online-supplement.023",
-      "bytes": 49152,
-      "sha256": "c6a5eee5828709c9bc7fe944a9518c7e516b3f7a047e76979e95f1b255301ccc"
-    },
-    {
-      "name": "online-supplement.024",
-      "bytes": 49152,
-      "sha256": "18b01b0175f4cde1f8dfb2b3c46bcf8e5b7149f9eb43e4f0113d35095eba08f0"
-    },
-    {
-      "name": "online-supplement.025",
-      "bytes": 49152,
-      "sha256": "45bb6457e32c2d1acd2fb842e4a5a1f402e11900eefbe1b1ba48c1d91867f973"
-    },
-    {
-      "name": "online-supplement.026",
-      "bytes": 49152,
-      "sha256": "5089b1545812105fe04575bae6c99b3a3346e79deb8b33528dbe4919bad7e0ff"
-    },
-    {
-      "name": "online-supplement.027",
-      "bytes": 42443,
-      "sha256": "bedec4b4384c1ff6cf370b7c385dde9a5374e779d204016d2a12b6dacdb60d3c"
+      "name": "k12-18-source.019.b64",
+      "bytes": 11108,
+      "sha256": "1f3a4d44130813f7cfbc0ea70f872b8da7596adb0c1e802f3eac3a41e3808eef"
     }
   ],
   "source_files": [
     {
-      "file": "apps/desktop/scripts/build-core-delta.py",
-      "mode": 420,
-      "bytes": 5994,
-      "sha256": "8dbb61259eba175df5e98046047a059656cd6f2eb9c69a2675cf6a5a2d9e9276"
-    },
-    {
-      "file": "apps/desktop/scripts/check-update-batch.mjs",
-      "mode": 420,
-      "bytes": 3799,
-      "sha256": "0554d2e75cf5e4777210b15601fad212bd9559ae4d1f46011b62516a556faabb"
-    },
-    {
-      "file": "apps/desktop/src/bundles.mjs",
-      "mode": 420,
-      "bytes": 11931,
-      "sha256": "aaff9df354910a87efb44705ab7398466a4498720bdee756e4fb134f7cf0dea5"
-    },
-    {
       "file": "apps/desktop/src/main.mjs",
       "mode": 420,
-      "bytes": 33922,
-      "sha256": "80518d7c6eb5bfb17882e081ba94cb8140ee06f0edbead0bdfe3240a3fa0de6e"
-    },
-    {
-      "file": "apps/desktop/src/release-updates.mjs",
-      "mode": 420,
-      "bytes": 15305,
-      "sha256": "d740dbf46823b38d628c6bd4a5d2bf4fb289638202dc98918777a8b6185fdda8"
-    },
-    {
-      "file": "apps/desktop/test/main-lifecycle.test.mjs",
-      "mode": 420,
-      "bytes": 5572,
-      "sha256": "ee8fb1454f098868fc694bd6e9045a519226681bbae12926e4322f8667966e99"
-    },
-    {
-      "file": "apps/desktop/test/release-updates.test.mjs",
-      "mode": 420,
-      "bytes": 38089,
-      "sha256": "688dcfcad76dab57cb7956e2bf3d58f8ce245184d1871eb7466f6f6e6c94f6e1"
-    },
-    {
-      "file": "apps/desktop/test/update-batch.test.mjs",
-      "mode": 420,
-      "bytes": 4223,
-      "sha256": "96590f3bbedc7295bbcd5da2d373d97c27d597cab226de64356c4725ac0b6426"
+      "bytes": 35768,
+      "sha256": "73482a9a12c3ede23844ca898b8e514834700ed45c6e7568c68976e42fe4d1e2"
     },
     {
       "file": "apps/desktop/test/update-notice.test.mjs",
       "mode": 420,
-      "bytes": 12411,
-      "sha256": "098e500df396fe423f73b1d540db1b8e5ae214894a5d163970061345aaf4f99e"
+      "bytes": 15489,
+      "sha256": "59ad224581a383ba99cf6038daaac53c4457db0f4a66b95d0596d9b360d7ba5a"
     },
     {
       "file": "deeptutor/agents/chat/agentic_pipeline.py",
       "mode": 420,
-      "bytes": 24274,
-      "sha256": "44f64081b7313cfeef8048120eac47e454c3ac5274b0e524790fbe28adf3cd56"
+      "bytes": 35681,
+      "sha256": "7ac1efc8ed3ff44fd1a3ce2e9fccbbdd9ee4c16d6bf8f33ba8cbbce0f8064d0c"
+    },
+    {
+      "file": "deeptutor/agents/chat/prompts/en/agentic_chat.yaml",
+      "mode": 420,
+      "bytes": 17501,
+      "sha256": "07da20e2e1f3b7c9f39819bfd668b8ecb7e8516ef217da6e60dc400662a38c37"
     },
     {
       "file": "deeptutor/agents/chat/prompts/zh/agentic_chat.yaml",
       "mode": 420,
-      "bytes": 16449,
-      "sha256": "a2f186288ef12fbca35e9425f6a6b3d135a4a0fec45bcaae34655db4f9a2bac6"
+      "bytes": 17072,
+      "sha256": "864865a143465d36210ede4c7af51f51c3899a8f88f75ed9eaf7eb4df22ee8cd"
+    },
+    {
+      "file": "deeptutor/agents/loop/agent_loop.py",
+      "mode": 420,
+      "bytes": 74765,
+      "sha256": "a0d5d9d6713abe68739a076dea8d5a2d18686ffebb3360c9ac488845cb7f45fe"
     },
     {
       "file": "deeptutor/agents/loop/native_adapter.py",
       "mode": 420,
-      "bytes": 22308,
-      "sha256": "8fd5e0bbc8590b092255051993c5fe8cc2222020bca1abc8c50528bce5133b48"
+      "bytes": 22448,
+      "sha256": "fc827dee985aae4f4fcdeed613f1d85b566b06a4d783c5609cc36a7935333053"
+    },
+    {
+      "file": "deeptutor/agents/loop/native_tools.py",
+      "mode": 420,
+      "bytes": 2745,
+      "sha256": "06a664f73ef27bd8abaf43cdbefda2459e7f215a0acb14179c591db332322779"
     },
     {
       "file": "deeptutor/agents/loop/pipeline.py",
       "mode": 420,
-      "bytes": 105566,
-      "sha256": "642f5883106cbbce38778fffc1f9140b4f82d249794b34a439d57fef10a9f129"
+      "bytes": 106239,
+      "sha256": "141854177baab05151db359acd78b1f8e0c4de4fb3232f0aec71daf8c913c23c"
     },
     {
       "file": "deeptutor/capabilities/reading/capability.py",
       "mode": 420,
-      "bytes": 21639,
-      "sha256": "eb2509efd129cfab30ed5fb567b2e489584fb6d124f1342fd9cd1e69dc654e46"
+      "bytes": 22530,
+      "sha256": "9859dbdecb6cc358aaf6503ab9e4b873215f5e63a3375993a7f2d0e741266ee4"
     },
     {
-      "file": "deeptutor/capabilities/reading/figure_view.py",
+      "file": "deeptutor/services/session/quote_attachments.py",
       "mode": 420,
-      "bytes": 8319,
-      "sha256": "29e783731b27ad5099ce4a784b6393b09b6852208eb5d4738d979f35895116c2"
-    },
-    {
-      "file": "deeptutor/runtime/agentic/tool_dispatch.py",
-      "mode": 420,
-      "bytes": 41406,
-      "sha256": "70e67930b873df9d8d8c80ab72f57accedaabd7498f54f43abd84cf3ced1d8fb"
-    },
-    {
-      "file": "deeptutor/services/session/model_history.py",
-      "mode": 420,
-      "bytes": 16100,
-      "sha256": "73a00bc8f25ff9b8d04ad984c1f267dda6232d17b10d3824cbbdcdb3ac365802"
-    },
-    {
-      "file": "deeptutor/services/session/source_inventory.py",
-      "mode": 420,
-      "bytes": 53977,
-      "sha256": "5471efa68013a677435cd5ff91093403947c9c1d4a684a784b0b9a263125ccad"
+      "bytes": 2303,
+      "sha256": "7b92873e18cc043b5e6102021004bfc5946bc4723fea8eb77b12856e14f5753c"
     },
     {
       "file": "deeptutor/services/session/turns/executor.py",
       "mode": 420,
-      "bytes": 84402,
-      "sha256": "b073d5ebfef647ae6dc3b0944db38669f5929adf0e5a80f4766e0cbb9ce09df3"
+      "bytes": 86712,
+      "sha256": "1794f02572eb5594d237834ae92735d4387572d2429a77cc4973e9f8cd6bcb39"
     },
     {
-      "file": "deeptutor/services/student_learning/catalog_references.py",
+      "file": "deeptutor/services/student_learning/question_grounding.py",
       "mode": 420,
-      "bytes": 9597,
-      "sha256": "cd0f6378198557f4b318754436c83fda111dd625aec5e2f504e83bba3f4cad51"
-    },
-    {
-      "file": "deeptutor/services/student_learning/question_inline_image_reviews.json",
-      "mode": 420,
-      "bytes": 21393,
-      "sha256": "609ec1f5b7d85cb6a6345278896df8b805fb322ca2e9004d764ebcdedfddc1ed"
-    },
-    {
-      "file": "deeptutor/services/student_learning/question_native.py",
-      "mode": 420,
-      "bytes": 3205,
-      "sha256": "34388b0619c2b1e402634a384bec9e90e23d82f09a66b18f52e73cd7002882d8"
-    },
-    {
-      "file": "deeptutor/services/student_learning/question_pictures.py",
-      "mode": 420,
-      "bytes": 4576,
-      "sha256": "ee48ee5335648282d24270057195de4abed10522c42208b17dcaaf883ea6dc5d"
-    },
-    {
-      "file": "deeptutor/services/student_learning/question_slices.py",
-      "mode": 420,
-      "bytes": 4917,
-      "sha256": "640ad03faa7cbf6b75b9d7390d23fe0906f97c1e1a2e43a52eafe4affdf5f88b"
+      "bytes": 29141,
+      "sha256": "0cc714735f1666928f819c538ccdb14ed9902c4fd5aa8a0896f2bd81ad9bff44"
     },
     {
       "file": "deeptutor/services/student_learning/question_sources.py",
       "mode": 420,
-      "bytes": 38170,
-      "sha256": "5f9079a8f9426b611bbe427beb480eed2d9f62dfc30770ecc3d3a113223cc394"
+      "bytes": 39309,
+      "sha256": "25c0a2694feb1e503ec9e59c705613359cb3943bc2d74ffbc962694c00971339"
     },
     {
-      "file": "deeptutor/services/student_learning/question_topic_reviews.json",
+      "file": "deeptutor/services/student_learning/reference_task_policy.py",
       "mode": 420,
-      "bytes": 50360,
-      "sha256": "28f8632be6790b7dabfa355d4e56304a4761adee431798e006e22168ddb08b20"
-    },
-    {
-      "file": "deeptutor/services/student_learning/question_topics.py",
-      "mode": 420,
-      "bytes": 16300,
-      "sha256": "337709211b1c5daba1006b997e01ea07c5a3142f3524b820662b0942a1326f73"
+      "bytes": 17415,
+      "sha256": "188bac0ac67366e20b4aa3066af7eed5e66f2ca350ccc46f2c6f7f9fc38699e4"
     },
     {
       "file": "deeptutor/services/student_learning/study_preferences.py",
       "mode": 420,
-      "bytes": 13287,
-      "sha256": "37e5993a33051b419fe269fb6ca8565f41ae0d71234263b56421cff16eac8566"
+      "bytes": 14853,
+      "sha256": "f9e8ce8da7ae7d3cfb7375b7d4a3ec75195079ccc720f0a40e9759e5cf63a97e"
+    },
+    {
+      "file": "deeptutor/services/student_learning/study_quiz.py",
+      "mode": 420,
+      "bytes": 11698,
+      "sha256": "dca231330fa235eb7a9c544c65ee2c0cec2ccc53ed69c2e384fff71c43468abc"
+    },
+    {
+      "file": "deeptutor/services/student_learning/textbook_grounding.py",
+      "mode": 420,
+      "bytes": 51012,
+      "sha256": "405a45d6d279dfdc738c5f6781c899eba5e64774177129cea2688931f4b584b5"
+    },
+    {
+      "file": "deeptutor/tools/builtin/__init__.py",
+      "mode": 420,
+      "bytes": 110181,
+      "sha256": "b9f1eb9cbb82e65a538294586c4a261be0f71fe8ed157ab843950cefc76bff1b"
     },
     {
       "file": "deeptutor/visualizers/coordinate_diagram.py",
       "mode": 420,
-      "bytes": 15394,
-      "sha256": "730db09e32b319ae38c936161c3eacd0a939fd4da3e296995671f07e91a8cebc"
+      "bytes": 17268,
+      "sha256": "ba598a73a4db2538db50b78a43860f1ab037cd1e655c8a8e0e9e25c37dd38773"
+    },
+    {
+      "file": "deeptutor/visualizers/explicit_graph.py",
+      "mode": 420,
+      "bytes": 4208,
+      "sha256": "a66a657bd1af66427a80496c34aaceff0aa8168688bc47af6a7868e5c59c2d1e"
+    },
+    {
+      "file": "deeptutor/visualizers/figure_sources.py",
+      "mode": 420,
+      "bytes": 3671,
+      "sha256": "99e97973cc73340c8d64a289179e37a69820132cafbeaacb415466cc6f086d05"
+    },
+    {
+      "file": "deeptutor/visualizers/function_plot.py",
+      "mode": 420,
+      "bytes": 13694,
+      "sha256": "34e3fedc3942ed943fa3af0b3be962514c8b76738384e46a6ae4f6e5a4ba4caa"
+    },
+    {
+      "file": "deeptutor/visualizers/lesson_diagrams.py",
+      "mode": 420,
+      "bytes": 10689,
+      "sha256": "92b90cfbada16df45d8288b23728bee4e3e3765e0bab57a2ace064bedd15fef3"
     },
     {
       "file": "deeptutor/visualizers/local_diagram.py",
       "mode": 420,
-      "bytes": 22834,
-      "sha256": "0272fce2f567a072a814d70291d24b7cc6baf64aa1552901215376071f5f3d81"
+      "bytes": 30286,
+      "sha256": "b002abd64f0ee6ff10da1a0104ac93115ad7f265810d87dbd5a3b0ca5c8eda9d"
     },
     {
       "file": "deeptutor/visualizers/math_review.py",
       "mode": 420,
-      "bytes": 16789,
-      "sha256": "a60a57c7e25aefaf1f088524c949d8a97e57f59b075fa1a915839eab1e81a0c0"
+      "bytes": 22084,
+      "sha256": "0b0d731e9a7d696e292454b9266bc81fc074389f53f6a1d7d00bebe0db0cafd1"
     },
     {
       "file": "deeptutor/visualizers/math_tool.py",
       "mode": 420,
-      "bytes": 16961,
-      "sha256": "92e1f104d2beadf52bae503284feb07ebeafb686139536a9d8a9ee9c327b2365"
+      "bytes": 18913,
+      "sha256": "285ff863717d5065b95e3eda8b819daf09ad6e929c433a27d577bdba9ab10324"
     },
     {
-      "file": "deeptutor/visualizers/textbook_apparatus.py",
+      "file": "deeptutor/visualizers/static_math.py",
       "mode": 420,
-      "bytes": 11397,
-      "sha256": "af3d0e8caa1cab540f79e91cb633c8e7e6f9fff01e1f1ee787d2106d883c73eb"
+      "bytes": 18287,
+      "sha256": "a1b5ba8ac568a93e95e98ef389a18596bf2316de98710646d98f18316a78ed29"
+    },
+    {
+      "file": "deeptutor/visualizers/textbook_circuit.py",
+      "mode": 420,
+      "bytes": 18623,
+      "sha256": "4197f7c9d19442b65998261760993b4446469475ffb600351824d384798edcea"
     },
     {
       "file": "deeptutor/visualizers/textbook_fields.py",
       "mode": 420,
-      "bytes": 10824,
-      "sha256": "f5ac07eea0319aa824d0c6b985e06862b3b415c948715fe10893f9aa3fd4a674"
+      "bytes": 24745,
+      "sha256": "633dae78f1f40ccb73ec3b393e30ae634af12e46eeff555c4074582d03770fba"
     },
     {
-      "file": "deeptutor/visualizers/textbook_instruments.py",
+      "file": "deeptutor/visualizers/textbook_geometry.py",
       "mode": 420,
-      "bytes": 7192,
-      "sha256": "cdc4e37e9f5f548f2b4ff8b46e2f75b9fca9774ec1b1c0dfc63a2509799c2462"
+      "bytes": 28828,
+      "sha256": "701ddc2de0af6f9839be800204361c9f1f70ab4feaa32ba82105c2815c72f384"
     },
     {
       "file": "deeptutor/visualizers/textbook_local_specs.py",
       "mode": 420,
-      "bytes": 18258,
-      "sha256": "bef37d9db9cb528d541dd8fb1f0290cc07204dc478e1ee5f2270f13883152732"
+      "bytes": 23180,
+      "sha256": "bb015222506e8ea46eba81b531b0851aaa30cdb8e147e5006f2549b25e35b3d5"
     },
     {
-      "file": "deeptutor/visualizers/textbook_physics_extended.py",
+      "file": "deeptutor/visualizers/textbook_physics.py",
       "mode": 420,
-      "bytes": 45134,
-      "sha256": "898bd99a35bcb78abba57962e67fbb765e2a158a3412b3594d7ddeb4e2f6db7d"
+      "bytes": 14093,
+      "sha256": "946580a2dceb3640bf005cd4d9898e4d170ae3a73aeabca6ea2802ef15114a90"
     },
     {
       "file": "deeptutor/visualizers/textbook_prism.py",
       "mode": 420,
-      "bytes": 6722,
-      "sha256": "263b6e6f5fdb507adc5b3527f00569b29d7de19b6296a8c58e9a762c1c324d1a"
+      "bytes": 12909,
+      "sha256": "3aa64e433a2efe8698a2dfdfce137b58943084b189057ef11be12d66ee12dbf0"
     },
     {
       "file": "deeptutor/visualizers/textbook_sections.py",
       "mode": 420,
-      "bytes": 12879,
-      "sha256": "2b2683a7c05261f676c54ba59941d63de4a4f7843474a6b4818a46c563945356"
+      "bytes": 14063,
+      "sha256": "cac8f0e1101435ad910efe6e0d67dc49267f3e170fc31384949777dca9c0ce5c"
     },
     {
-      "file": "scripts/build_question_bank.py",
+      "file": "deeptutor/visualizers/tool.py",
       "mode": 420,
-      "bytes": 21339,
-      "sha256": "1c2775e21bece347e91576402ee1b980387ff6a09f2bb2ab99a4b379709b5ddd"
+      "bytes": 14633,
+      "sha256": "581e15cfea3f75ed433359ce03a046d9f8a2ac73fa2d50c372d7cbad4dbfdd11"
     },
     {
-      "file": "scripts/merge_question_supplements.py",
+      "file": "packages/chat-engine/src/native/model-round.ts",
       "mode": 420,
-      "bytes": 9064,
-      "sha256": "8a900d603af6c01320eb813e14b3a04965e48afc1c57295c4be8f2e18bdf11a1"
+      "bytes": 6461,
+      "sha256": "39b29fa54b27258d680d1fe4350ed09887c10466e42d4043eba4ab8ead69011b"
     },
     {
       "file": "tests/agents/chat/test_teaching_image_routing.py",
       "mode": 420,
-      "bytes": 50181,
-      "sha256": "18e01d6089fd6508b4a5828b43bf2bbe13306fbafcba1ec681ef9eb3aa973d4e"
-    },
-    {
-      "file": "tests/reading/test_view_figure.py",
-      "mode": 420,
-      "bytes": 5241,
-      "sha256": "3b51e55ac9456a00a310fcd1efb61d3ee187ef212d66575b81b073e7aa94f4a7"
+      "bytes": 52531,
+      "sha256": "47c0dcb6af661ee0526b69c74bcdcf4af31c00adfd206a9384c275a83bb646d2"
     },
     {
       "file": "tests/services/test_catalog_references.py",
       "mode": 420,
-      "bytes": 20187,
-      "sha256": "55d76b702daa171660390727212b3e43397aabd1049a0952024bcba8827df79e"
+      "bytes": 20269,
+      "sha256": "cac93080524e32285b69a81401286b59a8e69e4fa2b1fceab4e210dc75f9f9dc"
     },
     {
-      "file": "tests/services/test_question_topics.py",
+      "file": "tests/services/test_question_grounding.py",
       "mode": 420,
-      "bytes": 9173,
-      "sha256": "1fd768ac2eed70988c359d88819f7ffca549c65de57dc675cfafbdd0b83fc0ad"
+      "bytes": 17645,
+      "sha256": "32c19e6717e1220f7abcc4eb8971f5e861d480d7c2ccc98984ad77f7292c19ea"
+    },
+    {
+      "file": "tests/services/test_question_sources.py",
+      "mode": 420,
+      "bytes": 56478,
+      "sha256": "bb8bb0a1d26959d99d6ca61f2fcd3a737d6d5268e7f5c5b30d545e6beb73b744"
+    },
+    {
+      "file": "tests/services/test_reading_question_bank_route.py",
+      "mode": 420,
+      "bytes": 9745,
+      "sha256": "0f33bb50809f9f213ae5effaa3694c9ceb3f4f9aa6d6f9f56010527b0c7ca7d0"
     },
     {
       "file": "tests/services/test_study_preferences.py",
       "mode": 420,
-      "bytes": 25659,
-      "sha256": "ea6e4b390c489754eab6c68ae54ed0dbadff41d3c42b72f36a7661c87027bcd9"
+      "bytes": 29354,
+      "sha256": "7b4f270bc7e13eef13375b949e7cf22e716552c2aeb7f2338facc087266729b2"
     },
     {
-      "file": "tests/visualizers/test_math_diagram.py",
+      "file": "tests/services/test_study_quiz.py",
       "mode": 420,
-      "bytes": 26745,
-      "sha256": "408a16581f814e2966dbdb0348e6449ae90ea1d5eeb9d2f79a396e103abfac47"
+      "bytes": 7442,
+      "sha256": "b8ab94f2c8871b25fcf6aa749d8d59c3c62aba442f1ec71f62e05646aa87fb46"
+    },
+    {
+      "file": "tests/visualizers/test_figure_sources.py",
+      "mode": 420,
+      "bytes": 8749,
+      "sha256": "9ec033fb78f861912e7023040ed788546aa1a267205165437e28792932912641"
     },
     {
       "file": "tests/visualizers/test_static_diagram_fallback.py",
       "mode": 420,
-      "bytes": 17049,
-      "sha256": "58eaea2475d0d6166b76f71121cfc91d9a530e433b0e3f51fab340aa6c99390b"
+      "bytes": 21024,
+      "sha256": "fa80254c7d8c1942d78e15ed0d51a5d5fbfd48ac745f49d99bdbc9d97a4c1e0e"
     },
     {
-      "file": "tests/visualizers/test_textbook_diagrams.py",
+      "file": "tests/visualizers/test_textbook_drawing_gaps.py",
       "mode": 420,
-      "bytes": 22351,
-      "sha256": "8b43b8f057417e7556c37a4efc89980a7a93241beab007767008da5a039dc8c2"
+      "bytes": 5333,
+      "sha256": "e9a94dc2918cfc418dc4e500869fbe34e88f2ffd9141fc7941b4c287f23fd02d"
+    },
+    {
+      "file": "tests/visualizers/test_textbook_three_gaps.py",
+      "mode": 420,
+      "bytes": 4365,
+      "sha256": "283cf25c88adaacae7d7a7e851e93d17b6d69ca902e60af7ba4324c2e9346233"
+    },
+    {
+      "file": "web/components/sidebar/SidebarNav.tsx",
+      "mode": 420,
+      "bytes": 24377,
+      "sha256": "a6c693b90d88aa74fb57ad6b6a71746e33733895445c1d364944679a94fa9db1"
+    },
+    {
+      "file": "web/components/sidebar/SidebarShell.tsx",
+      "mode": 420,
+      "bytes": 19996,
+      "sha256": "44c25389a0bb20291ecf45f035480b23848414dbd7d14f1422a7659bf2609653"
+    },
+    {
+      "file": "web/components/sidebar/WorkspaceSidebar.tsx",
+      "mode": 420,
+      "bytes": 12852,
+      "sha256": "1ff9652b47c5cb634c144c18dddb03d1733b6e53c3bc8b3231fc92947c0783c0"
+    },
+    {
+      "file": "web/features/chat/ChatStateAdapter.tsx",
+      "mode": 420,
+      "bytes": 181552,
+      "sha256": "f40bb3729728dae2eaf8b777ef646075b452a5bd59cac9d7d7acf16ef0afcb18"
+    },
+    {
+      "file": "web/features/chat/components/ChatWorkspace.tsx",
+      "mode": 420,
+      "bytes": 141473,
+      "sha256": "0e2a3b69828e7a675b3d706eb6a80d3a6640d698aa5f6e5321af9e79c4314a2f"
+    },
+    {
+      "file": "web/features/chat/controllers/pending-attachments.ts",
+      "mode": 420,
+      "bytes": 4398,
+      "sha256": "5fe1b18ae2834716ff4ee0c76376aff8c5110893d5a0354088bc6402f059a69b"
+    },
+    {
+      "file": "web/features/ui-layout/classic/ClassicSidebarShell.tsx",
+      "mode": 420,
+      "bytes": 15357,
+      "sha256": "25f26e0c397c275ffe9b0824cd941ef8a1c2353b5836c8cc7c50079c6cf40ee9"
+    },
+    {
+      "file": "web/tests/chat/ChatWorkspace.smoke.spec.tsx",
+      "mode": 420,
+      "bytes": 23534,
+      "sha256": "485c80b12a4a4d1bcb306c6bb283b71c68399e364e02bda57148b30a05884808"
+    },
+    {
+      "file": "web/tests/sidebar-lazy-history.spec.tsx",
+      "mode": 420,
+      "bytes": 8044,
+      "sha256": "515673f7f473e3fd5cbe65d23e3a403a3b554d3357f18a722b8625648b5bb4d7"
+    },
+    {
+      "file": "web/tests/sidebar-prefetch.spec.tsx",
+      "mode": 420,
+      "bytes": 2695,
+      "sha256": "1382636d7cd0b180f472dfead8b769362c46803d03f5d22ec832657ca29bae41"
+    },
+    {
+      "file": "web/tests/workspace-sidebar-history.spec.tsx",
+      "mode": 420,
+      "bytes": 7968,
+      "sha256": "2371f7e0ed2808834e5b66285d8c139d34f3f16262ec5dff44ae18966b8852f2"
     }
   ],
-  "bank_revision": "186141579970aed219c4c556338ac9af90b256a2698a15ba48b37d0e88706895"
+  "old_bridges": {
+    "windows-x64": {
+      "name": "kaixin-bridge-20261117-k12-17-windows-x64.tar.gz",
+      "id": 771709430,
+      "bytes": 1980649422,
+      "sha256": "2ff7c44b4de9b5c029a66a1d4e7ae52d2310012c5faaa81cb5cb486dfe68dca6"
+    },
+    "macos-x64": {
+      "name": "kaixin-bridge-20261117-k12-17-macos-x64.tar.gz",
+      "id": 771709434,
+      "bytes": 2068211780,
+      "sha256": "4ea85d3f2e47e3ce323dcd1a0754f736a96f32b540a7a375aaf2ed090e0e5097"
+    },
+    "macos-arm64": {
+      "name": "kaixin-bridge-20261117-k12-17-macos-arm64.tar.gz",
+      "id": 771709429,
+      "bytes": 2005644991,
+      "sha256": "e94eae1b1bfa9185849391be34d68706fc427070a31acb5783a0c9dea8da534a"
+    }
+  },
+  "web_source": {
+    "files": 1894,
+    "sha256": "ed00f81f84085eaf25e6582984faa8d2bd2a20635dcbbc3dc6082231209acf9b"
+  }
 }
