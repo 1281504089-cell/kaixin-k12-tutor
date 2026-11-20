@@ -187,8 +187,11 @@ function fail(error, failedStage=stage) {
 async function collectProgress() {
   for(const win of BrowserWindow.getAllWindows()) {
     if(win.isDestroyed?.())continue;
-    const contents=win.webContents;
-    if(!contents || contents.isDestroyed?.() || !contents.getURL().endsWith('/update-progress.html'))continue;
+    // The signed macOS launcher presents progress in a child view of the original window.
+    const views = win.contentView.children.filter(view => view.getVisible?.() !== false);
+    const contents = [win.webContents, ...views.map(view => view.webContents)].find(candidate =>
+      candidate && !candidate.isDestroyed() && candidate.getURL().endsWith('/update-progress.html'));
+    if (!contents) continue;
     progressVisible=true;downloadStarted=true;
     let timer;
     const outcome=await Promise.race([
