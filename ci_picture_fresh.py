@@ -75,6 +75,7 @@ def verify_picture_fresh(root, target, install, resources, home, evidence):
             'KX_PICTURE_FIXTURE': str(fixture), 'KX_PICTURE_FRESH_OUTPUT': str(output)}, check=True, timeout=720)
         result = json.loads(output.read_text())
         assert result['passed'] and result['active_runtime_id'] == active['runtimeId']
+        assert result['desktop_citation']['passed'] and result['desktop_citation']['reopened_history']
         assert result['k12_library']['passed'] and result['k12_library']['diagnostic_entry'] == 'fresh'
         validate_native_page_views(result['k12_library'], json.loads(fixture.read_text())['native_fixture'])
         assert json.loads((home / 'active.json').read_text()) == active, 'Fresh display QA unexpectedly changed the installed runtime'

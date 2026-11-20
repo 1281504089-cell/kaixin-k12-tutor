@@ -1225,6 +1225,26 @@
         "bytes": 1143742,
         "sha256": "6d082e2185d14a0aacbab53ed1acd039473b51ba9c6407768111a81770d88d11"
       }
+    },
+    {
+      "manifest": "source-inventory-k12-14.json",
+      "manifest_sha256": "a0414a917a2fcc587f918f9fcdf06e09aa31ea94984430bebbf96d0beb897480",
+      "source_commit": "8cfc6ed2f4659b84bfb73a36a612b576c3ec0098",
+      "source_files_sha256": "707aa75bdb9c901ae036a2b88bb4b8990224369391b7c864d4d04cf5368352fa",
+      "archive_sha256": "d996d6647c96017fc9c3b6ee6e10139ce87f8b3834b8a442c77e0b28849c4259",
+      "parts": [
+        {
+          "file": "source-delta-k12-14.001",
+          "bytes": 100562,
+          "sha256": "d996d6647c96017fc9c3b6ee6e10139ce87f8b3834b8a442c77e0b28849c4259"
+        }
+      ],
+      "remote_archive": {
+        "file": "source-overlay-20261117-k12-14.tar.gz",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261117-k12-14/source-overlay-20261117-k12-14.tar.gz",
+        "bytes": 100562,
+        "sha256": "d996d6647c96017fc9c3b6ee6e10139ce87f8b3834b8a442c77e0b28849c4259"
+      }
     }
   ]
 }
