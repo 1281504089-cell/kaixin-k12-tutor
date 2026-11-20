@@ -22,6 +22,7 @@ lock = read(root / "online-update-lock.json")
 assert stage["proof"]["source_commit"] == lock["source_commit"]
 evidence = root/"fresh-evidence"/target
 evidence.mkdir(parents=True)
+write(evidence/"qa-inputs.json", {"target": target, "source_commit": lock["source_commit"], "launcher_build": stage["proof"]["launcher_build"]})
 work = root/"online-native"
 work.mkdir()
 candidate = json.loads(subprocess.check_output(["gh", "api", f"repos/{REPO}/releases/tags/{lock['tag']}"]))
@@ -34,7 +35,7 @@ for name, document in stage["manifests"].items():
     if name != f"runtime-{target}.json" and not name.startswith(f"runtime-{target}-"):
         continue
     path = signed/name
-    write(path, document)
+    path.write_bytes((json.dumps(document, ensure_ascii=False, indent=2)+"\n").encode("utf-8"))
     proof = stage["feeds"][name]
     assert path.stat().st_size == proof["bytes"] and digest(path) == proof["sha256"]
     if name in remote:
@@ -50,12 +51,25 @@ for row in descriptor["files"]:
     file = prior/row["file"]
     assert file.stat().st_size == row["bytes"] and digest(file) == row["sha256"]
 version = read(prior/"package.json")["devDependencies"]["electron"]
-subprocess.run(["npm.cmd" if not is_mac else "npm", "install", "--prefix", str(work), "--no-audit",
-                "--no-fund", "--no-save", "electron@" + version], check=True, timeout=240)
-electron = work/"node_modules/electron/dist"
+assert version == "45.1.0"
+electron = work/"electron"
+electron.mkdir()
+archive_name = "electron-v"+version+"-"+("darwin" if is_mac else "win32")+"-"+target.split("-")[-1]+".zip"
+official = "https://github.com/electron/electron/releases/download/v"+version+"/"
+checksums = subprocess.check_output(["curl", "-fLsS", "--retry", "2", official+"SHASUMS256.txt"], text=True)
+pinned = {line.split()[1].lstrip("*"): line.split()[0] for line in checksums.splitlines() if line.strip()}
+electron_archive = work/archive_name
+subprocess.run(["curl", "-fLsS", "--retry", "2", official+archive_name, "-o", str(electron_archive)], check=True, timeout=240)
+assert digest(electron_archive) == pinned[archive_name]
+if is_mac:
+    subprocess.run(["/usr/bin/ditto", "-x", "-k", str(electron_archive), str(electron)], check=True, timeout=120)
+else:
+    subprocess.run([str(Path(os.environ["SystemRoot"])/"System32/tar.exe"), "-xf", str(electron_archive), "-C", str(electron)], check=True, timeout=120)
+electron_archive.unlink()
 app = electron/"Electron.app" if is_mac else electron
 resources = app/("Contents/Resources" if is_mac else "resources")
 executable = app/("Contents/MacOS/Electron" if is_mac else "electron.exe")
+assert executable.is_file() and resources.is_dir(), f"Missing vendor Electron binary at {executable}"
 (resources/"default_app.asar").unlink(missing_ok=True)
 shutil.copytree(prior, resources/"app")
 qa = resources/"app/qa"
