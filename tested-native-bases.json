@@ -1,0 +1,381 @@
+{
+  "native_tag": "student-20261117-k12-16",
+  "overlay_tag": "student-20261117-k12-17",
+  "native": {
+    "macos-x64": {
+      "manifest": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+        "builtAt": 1795153305615,
+        "corePayloadSha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-16-macos-x64-universal",
+        "archive": "kaixin-bridge-20261117-k12-16-macos-x64.tar.gz",
+        "sha256": "4c53aef507adcd3fa813dd3349d4c20d8df6524a43381918d70fc664678664f7",
+        "compatibleBaseManifests": [
+          {
+            "baseRuntimeId": "1.7.1-04276f68a-x64",
+            "file": "runtime-macos-x64-20261117-k12-16-20261112.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-e2a196e1e65a.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-681a198cf308.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-170a15b2f1a2.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-22eb20a39a60.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-80115ecd6d3d.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-c452d12cb482.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-c41831772671.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-3e8b6a21262c.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-a521f11854b3.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-688da252df85.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-7d62b8ead190.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-da8f97d625eb.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-0a88aea2bd5e.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-20001c7d4d7e.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-77869c010a21.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-c70748768152.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-base-43a8d480d5b9.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-macos-x64-universal",
+            "file": "runtime-macos-x64-20261117-k12-16-prior-current.json"
+          }
+        ],
+        "signature": "to9awCboILQaL0Iz7d7hA0CIfz3wDxNcPyYNPaEfKTgjLHfGGJWFrF0CtvHy0sTOg9XMorfNUR37luHnjxo2BA=="
+      },
+      "asset": {
+        "name": "kaixin-bridge-20261117-k12-16-macos-x64.tar.gz",
+        "id": 770734484,
+        "bytes": 2080786070,
+        "sha256": "4c53aef507adcd3fa813dd3349d4c20d8df6524a43381918d70fc664678664f7"
+      },
+      "overlay": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "commit": "51328c98d89dc0a30d81e7cdbf5d891350465a3c",
+        "builtAt": 1795178273189,
+        "corePayloadSha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-17-macos-x64-base-a898dae55578",
+        "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-macos-x64-universal",
+        "archive": "kaixin-core-20261117-k12-17.tar.gz",
+        "sha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+        "coreDelta": {
+          "formatVersion": 1,
+          "fromCoreSha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+          "toCoreSha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+          "archive": "kaixin-core-delta-20261117-k12-16-to-k12-17-r2.tar.gz",
+          "bytes": 38420938,
+          "sha256": "37ca3c220c1ad68834043df3422381114560777c2ec68ba32417326d569a17dd"
+        },
+        "signature": "ceptEXmoBlQctQK5kkJ3zf7lseSrAlXVbNdrgo6utTTLukR0x/ilfyU7yL8XvV506ns9fORikdfKdwEf5+5ABQ=="
+      }
+    },
+    "macos-arm64": {
+      "manifest": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "arm64",
+        "coreVersion": "1.7.1",
+        "commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+        "builtAt": 1795153305615,
+        "corePayloadSha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-16-macos-arm64-universal",
+        "archive": "kaixin-bridge-20261117-k12-16-macos-arm64.tar.gz",
+        "sha256": "5e07d5d8560032e3afe2f0ef32316f227b362f125a05e0a01367bf2e8615df0a",
+        "compatibleBaseManifests": [
+          {
+            "baseRuntimeId": "1.7.1-04276f68a-arm64",
+            "file": "runtime-macos-arm64-20261117-k12-16-20261112.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-7744dbeb8d09.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-7056f6bb9861.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-b445b7c83c4d.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-c09b1d53f8d0.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-194178f05eea.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-6f6222533fad.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-b83c8329037e.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-6c9c7f936933.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-ba05e5de452a.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-306c0073e240.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-cda1e4c99289.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-afbad5ed9bc4.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-1ba5c03632ca.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-70cb97c3b840.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-8fdc2e3e782e.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-7c3938d776e5.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-base-6fbf654d5ac1.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-macos-arm64-universal",
+            "file": "runtime-macos-arm64-20261117-k12-16-prior-current.json"
+          }
+        ],
+        "signature": "++L7ANF7zI0fAMkn2E+SpMB5pUl5ItvuUmk5PyMiULGjkalfnicWnWdnB0o/Z2fA0YE60q3T2ke2gjs0QrPWDg=="
+      },
+      "asset": {
+        "name": "kaixin-bridge-20261117-k12-16-macos-arm64.tar.gz",
+        "id": 770696682,
+        "bytes": 2017475798,
+        "sha256": "5e07d5d8560032e3afe2f0ef32316f227b362f125a05e0a01367bf2e8615df0a"
+      },
+      "overlay": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "arm64",
+        "coreVersion": "1.7.1",
+        "commit": "51328c98d89dc0a30d81e7cdbf5d891350465a3c",
+        "builtAt": 1795178273189,
+        "corePayloadSha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-17-macos-arm64-base-d9957978846e",
+        "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-macos-arm64-universal",
+        "archive": "kaixin-core-20261117-k12-17.tar.gz",
+        "sha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+        "coreDelta": {
+          "formatVersion": 1,
+          "fromCoreSha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+          "toCoreSha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+          "archive": "kaixin-core-delta-20261117-k12-16-to-k12-17-r2.tar.gz",
+          "bytes": 38420938,
+          "sha256": "37ca3c220c1ad68834043df3422381114560777c2ec68ba32417326d569a17dd"
+        },
+        "signature": "RkeZSu4eYZHtHTVhzQETTY7xjd9pC4ActEMlmC7b2CT6gmH+xCnktdrTQRMoLTBhPPwhpvQ6eNnDNV8nObvZCg=="
+      }
+    },
+    "windows-x64": {
+      "manifest": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "win32",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "commit": "01876cb5b1cf3223708e6770fdd61c99d995b092",
+        "builtAt": 1795153305615,
+        "corePayloadSha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-16-windows-x64-universal",
+        "archive": "kaixin-bridge-20261117-k12-16-windows-x64.tar.gz",
+        "sha256": "0fa564169b33efb07c66cb6012d8c69b219c5676b5f6ea5a64a323158635c716",
+        "compatibleBaseManifests": [
+          {
+            "baseRuntimeId": "1.7.1-04276f68a-x64",
+            "file": "runtime-windows-x64-20261117-k12-16-20261112.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-bb8f5191555d.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-stt-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-573f105ed118.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-projects-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-9b7c2b84f908.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-3e01c184c6a4.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-review-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-7a52e2cacc9f.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-library-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-e4abdb1cb594.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-materials-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-afb4dfe97ae4.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261114-audio-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-77b621411568.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-a0419326e159.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-324194bea65b.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-967544a178f2.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-70c8bc192b30.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-9b7dc543315e.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-e4b58f199119.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-b6c3920aebfa.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-5a6e0e76c856.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-base-8690cf0863da.json"
+          },
+          {
+            "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-windows-x64-universal",
+            "file": "runtime-windows-x64-20261117-k12-16-prior-current.json"
+          }
+        ],
+        "signature": "NuAeqLsCP4FJ2knwNtwuDDmJ+pb6xTLKgeUS6SyMnQ4Z4S2eLjTYtFpSAQmrNXlbxkMXrhd3CQa8UFTx7bhuCg=="
+      },
+      "asset": {
+        "name": "kaixin-bridge-20261117-k12-16-windows-x64.tar.gz",
+        "id": 770702714,
+        "bytes": 1992548151,
+        "sha256": "0fa564169b33efb07c66cb6012d8c69b219c5676b5f6ea5a64a323158635c716"
+      },
+      "overlay": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "win32",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "commit": "51328c98d89dc0a30d81e7cdbf5d891350465a3c",
+        "builtAt": 1795178273189,
+        "corePayloadSha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+        "runtimeId": "1.7.1-kaixin-20261117-k12-17-windows-x64-base-1bb8a743bc42",
+        "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-windows-x64-universal",
+        "archive": "kaixin-core-20261117-k12-17.tar.gz",
+        "sha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+        "coreDelta": {
+          "formatVersion": 1,
+          "fromCoreSha256": "cf629aefea83735d53397c459f4052d4cf327434ee9f267ca245615cab4b4f07",
+          "toCoreSha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38",
+          "archive": "kaixin-core-delta-20261117-k12-16-to-k12-17-r2.tar.gz",
+          "bytes": 38420938,
+          "sha256": "37ca3c220c1ad68834043df3422381114560777c2ec68ba32417326d569a17dd"
+        },
+        "signature": "aOUz4RHw3Asng6ySssK+hWFyIjwOdWPLRTpUQjIuBajSxwvHUq4heFEIsYAQEYAfOOqafl2HdlP13BYRqrBYDQ=="
+      }
+    }
+  },
+  "overlay_assets": {
+    "name": "kaixin-core-20261117-k12-17.tar.gz",
+    "id": 771709432,
+    "bytes": 874300077,
+    "sha256": "40c798d255a5c0f09994e6f33a3047090920911598704368b5ae466dc2f15f38"
+  }
+}

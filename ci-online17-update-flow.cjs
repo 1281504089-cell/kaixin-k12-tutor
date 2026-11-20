@@ -323,6 +323,13 @@ async function content() {
       assert.ok(Date.now() < readyDeadline, 'The old installed core did not open the update test interface');
       await pause(500);
     }
+    if (process.env.KX_BRIDGE_BOOT==='1') {
+      assert.equal(before.baseRuntimeId, undefined);
+      const bank = await require('./verify-online17-bank.cjs')(view);
+      writeFileSync(output,JSON.stringify({booted:true,platform:process.platform,runtime_id:before.runtimeId,commit:before.commit,archive:before.archive,sha256:before.sha256,bank},null,2)+'\n');
+      app.quit();
+      return;
+    }
     if (phase === 'old-launcher') {
       await pause(1000);
       initialUpgrade=optionalRead('upgrade.json');

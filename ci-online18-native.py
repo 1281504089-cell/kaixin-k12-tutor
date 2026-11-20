@@ -1,4 +1,4 @@
-"""Drive the frozen v6 and v7 production update modules in native Electron."""
+"""Drive the frozen v7 and v8 production update modules in native Electron."""
 import argparse
 import json
 import os
@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import time
 
+import ci_attachment_core as runner
 from ci_attachment_core import REPO, digest, download, read, write
 
 parser = argparse.ArgumentParser()
@@ -42,7 +43,9 @@ for name, document in stage["manifests"].items():
     if name in remote:
         if remote[name]["digest"] == "sha256:" + proof["sha256"]:
             continue
-        raise ValueError("A previously staged feed differs: " + name)
+        prior = stage['superseded_native_defaults'].get(name)
+        assert prior and name == f'runtime-{target}.json' and remote[name]['digest'] == 'sha256:' + prior['sha256'] and remote[name]['size'] == prior['bytes']
+        subprocess.run(['gh','release','upload',lock['tag'],str(path),'--clobber'], check=True, timeout=90)
     else:
         files.append(path)
 if files:
@@ -91,13 +94,15 @@ for name, dest in [("ci-online17-update-flow.cjs","update-flow.cjs"),
     shutil.copyfile(root/name, qa/dest)
 seed = resources/"seed"
 seed.mkdir()
-manifest = stage["prior"]["runtime-"+target+".json"]
-row = lock["old_bridges"][target]
-assert manifest["sha256"] == row["sha256"] and manifest["archive"] == row["name"]
-assert not manifest.get("baseRuntimeId")
-write(seed/"runtime.json", manifest)
+old_state = read(root/'tested-native-bases.json')
+native = old_state['native'][target]
+manifest, row, old_overlay = native['manifest'], native['asset'], native['overlay']
+assert manifest['sha256'] == row['sha256'] and manifest['archive'] == row['name'] and not manifest.get('baseRuntimeId')
+assert old_overlay['baseRuntimeId'] == manifest['runtimeId'] and old_overlay['sha256'] == lock['old_core']['sha256']
+write(seed/'runtime.json', manifest)
+runner.PREVIOUS = old_state['native_tag']
 archive = download(row, seed)
-profile = work/"disposable-profile"
+profile = work/'disposable-profile'
 profile.mkdir()
 code = """
 import { readFile, writeFile } from 'node:fs/promises';
@@ -112,14 +117,16 @@ assert(verify(null, Buffer.from(canonicalManifest(descriptor)), key, Buffer.from
 const result = await installBundle(seed, profile, key);
 await writeFile(profile + '/active.json', JSON.stringify(result.manifest));
 """
-subprocess.run(["node", "--input-type=module", "-e", code, str(resources/"app"), str(seed/"runtime.json"), str(profile)],
-               check=True, timeout=600)
+def install(manifest_file, home):
+    subprocess.run(["node", "--input-type=module", "-e", code, str(resources/"app"), str(manifest_file), str(home)],
+                   check=True, timeout=600)
+
+install(seed/'runtime.json', profile)
 archive.unlink()
 if is_mac:
     subprocess.run(["/usr/bin/codesign", "--force", "--deep", "--sign", "-", str(app)], check=True, timeout=120)
 prior_core = profile/"runtimes"/manifest["runtimeId"]
 native_python = prior_core/("python/bin/python3" if is_mac else "python/python.exe")
-old_active = (profile/"active.json").read_bytes()
 memory = profile/"workspace/data/user/memory/L3/profile.md"
 memory.parent.mkdir(parents=True)
 memory.write_text("k12-18 synthetic learning memory", encoding="utf-8")
@@ -128,12 +135,16 @@ delta = stage["proof"]["delta"]["archive"]
 
 for scene, expected, forbidden, restart in [("launcher-migration", core, delta, True), ("matching-delta", delta, core, False)]:
     output = evidence/(scene+".json")
+    before = read(profile/"active.json")
     env = dict(os.environ, OPEN_DEEPTUTOR_TEST_HOME=str(profile), KX_UPDATE_FLOW_RESULT=str(output),
                KX_CANDIDATE_TAG=lock["tag"], KX_ONLINE_SOURCE=lock["source_commit"], KX_ONLINE_EXPECT_ARCHIVE=expected,
                KX_ONLINE_FORBID_ARCHIVE=forbidden, KX_EXPECT_SHELL_RESTART="1" if restart else "0",
                KX_START_LAUNCHER_BUILD=descriptor["buildId"] if restart else stage["proof"]["launcher_build"])
     with (evidence/(scene+".log")).open("wb") as log:
-        subprocess.run([str(executable)], env=env, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=1400)
+        result = subprocess.run([str(executable)], env=env, stdout=log, stderr=subprocess.STDOUT, timeout=1400)
+    if result.returncode and (profile/'logs/runtime.log').is_file():
+        shutil.copyfile(profile/'logs/runtime.log', evidence/(scene+'-runtime.log'))
+    result.check_returncode()
     deadline = time.monotonic() + 180
     while not output.is_file():
         error = output.with_suffix(".json.error.json")
@@ -143,7 +154,7 @@ for scene, expected, forbidden, restart in [("launcher-migration", core, delta, 
     receipt = read(output)
     active = read(profile/"active.json")
     assert receipt["check_again_current"] and receipt["memory_preserved"] and receipt["backup_created"]
-    assert receipt["from_runtime"] == manifest["runtimeId"] and receipt["to_launcher"] == stage["proof"]["launcher_build"]
+    assert receipt["from_runtime"] == before["runtimeId"] and receipt["to_launcher"] == stage["proof"]["launcher_build"]
     assert receipt["signed_launcher_restarted"] is restart and receipt["requested_archives"] == [expected]
     assert active["commit"] == lock["source_commit"] and active["baseRuntimeId"] == manifest["runtimeId"]
     assert receipt["checked_bank"]["revision"] == read(root/"online-bank-expectations.json")["revision"] and len(receipt["checked_bank"]["questions"]) == 38
@@ -151,14 +162,44 @@ for scene, expected, forbidden, restart in [("launcher-migration", core, delta, 
                     "import psutil,sys; p=int(sys.argv[1]); psutil.Process(p).wait(timeout=60) if psutil.pid_exists(p) else None",
                     str(receipt["restarted_pid"])], check=True, timeout=70)
     if restart:
-        # Exercise the same verified prior core again, with the new launcher installed.
-        assert active["runtimeId"] != manifest["runtimeId"]
-        shutil.rmtree(profile/"runtimes"/active["runtimeId"])
-        (profile/"active.json").write_bytes(old_active)
-        (profile/"upgrade.json").unlink()
+        # Retain the validated native base and load the signed k12-17 compatibility overlay.
+        assert active['runtimeId'] != manifest['runtimeId']
+        shutil.rmtree(profile/'runtimes'/active['runtimeId'])
+        (profile/'upgrade.json').unlink()
+        overlay = work/'prior-compatible-core'
+        overlay.mkdir()
+        write(overlay/'runtime.json', old_overlay)
+        runner.PREVIOUS = old_state['overlay_tag']
+        old_asset = download(old_state['overlay_assets'], overlay)
+        install(overlay/'runtime.json', profile)
+        old_asset.unlink()
+        assert read(profile/'active.json')['runtimeId'] == old_overlay['runtimeId']
+
+# The no-compatible-base path must actually boot using all its own native dependencies.
+shutil.rmtree(profile/'runtimes')
+bridge = stage['manifests'][f'runtime-{target}.json']
+bridge_assets = work/'standalone-bridge'
+bridge_assets.mkdir()
+write(bridge_assets/'runtime.json', bridge)
+assert bridge['archive'].endswith(f'-r2-{target}.tar.gz')
+bridge_asset = remote[bridge['archive']]
+assert bridge_asset['digest'] == 'sha256:' + bridge['sha256']
+runner.PREVIOUS = lock['tag']
+archive = download(dict(name=bridge_asset['name'],bytes=bridge_asset['size'],sha256=bridge['sha256'],id=bridge_asset['id']), bridge_assets)
+install(bridge_assets/'runtime.json', profile)
+archive.unlink()
+output = evidence/'standalone-bridge.json'
+with (evidence/'standalone-bridge.log').open('wb') as log:
+    result = subprocess.run([str(executable)], stdout=log, stderr=subprocess.STDOUT, timeout=400,
+                            env=dict(os.environ, OPEN_DEEPTUTOR_TEST_HOME=str(profile), KX_UPDATE_FLOW_RESULT=str(output), KX_BRIDGE_BOOT='1'))
+if result.returncode and (profile/'logs/runtime.log').is_file():
+    shutil.copyfile(profile/'logs/runtime.log', evidence/'standalone-bridge-runtime.log')
+result.check_returncode()
+bridge_receipt = read(output)
+assert bridge_receipt['booted'] and bridge_receipt['runtime_id'] == bridge['runtimeId'] and bridge_receipt['commit'] == lock['source_commit']
 
 write(evidence/"ONLINE-NATIVE-PASSED.json", {"passed": True, "target": target, "source_commit": lock["source_commit"],
       "run_id": int(os.environ["GITHUB_RUN_ID"]), "workflow_commit": os.environ["GITHUB_SHA"],
       "prior_core_sha256": lock["old_core"]["sha256"], "prior_bridge_sha256": row["sha256"], "electron": version,
       "core_sha256": stage["proof"]["archives"][core]["sha256"], "delta_sha256": stage["proof"]["delta"]["sha256"],
-      "launcher_migration": read(evidence/"launcher-migration.json"), "matching_delta": read(evidence/"matching-delta.json")})
+      "launcher_migration": read(evidence/"launcher-migration.json"), "matching_delta": read(evidence/"matching-delta.json"), "standalone_bridge": bridge_receipt})
