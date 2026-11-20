@@ -1,11 +1,11 @@
 {
-  "tag": "student-20261117-k12-13",
-  "source_commit": "46bb8ecd7394c6be6bbf4b6eef4d62eed2719127",
-  "baseline_source_commit": "896e79b517a008ac6d584526151862ff6191cf77",
-  "archive": "kaixin-core-20261117-k12-13.tar.gz",
+  "tag": "student-20261117-k12-15",
+  "source_commit": "c1235cc5af0d669c83735e57d8867a819f65eb31",
+  "baseline_source_commit": "46bb8ecd7394c6be6bbf4b6eef4d62eed2719127",
+  "archive": "kaixin-core-20261117-k12-15.tar.gz",
   "prior_core": {
-    "archive": "kaixin-core-20261117-k12-8.tar.gz",
-    "sha256": "ad637c748061b639e9c984437e3439a3d82b8e0ecb0d86ac33ad002e11443728"
+    "archive": "kaixin-core-20261117-k12-13.tar.gz",
+    "sha256": "5584d7253480ac2e91c3cdbe7742a217c01454c3baccb649b70bb34e7f644a01"
   },
   "web_tests": [
     "tests/pending-material.spec.ts",
@@ -68,13 +68,15 @@
     "tests/task-link-composer-status.spec.tsx",
     "tests/trace-memory.test.ts",
     "tests/image-description-model.spec.tsx",
-    "tests/visualize/VisualizationViewer.spec.tsx"
+    "tests/visualize/VisualizationViewer.spec.tsx",
+    "tests/desktop-citation-continuity.spec.tsx",
+    "tests/ready-original-message-streaming.spec.tsx"
   ],
-  "source_files_sha256": "921128ac62964ce9ea610364ca7952e9594ba909ad9c1c97a159f1764a1bdbd2",
+  "source_files_sha256": "5119ead5f6ebcbee981293fd4b1c8f96452aa83cdb8fc646af3539dfb22c79fc",
   "prepared": true,
   "source_scope": "published_export",
   "isolation_ledger_sha256": "c4bdee3d06ce8387103d5e7556269c62f502e8a18b730402257d5f5c95ff01ea",
-  "runtime_manifest_sha256": "915c7c2e832beaa985e110b786dd540950bcebbd1a2d246d96d491140d9ae889",
+  "runtime_manifest_sha256": "914126e9d69f118b23fe710166c42ddf9517d9c75ed5d68d116e4087e951d016",
   "bank_manifest_sha256": "6743986468d69c720dfb5b59bb2ab07c69d515243406db86ebacfaef35643606",
   "bank_payload_manifest_sha256": "fe3acc9a3e671075d67f6cf3ba33a80440af7bf5581810bb2dff311d8759b179",
   "native_pages": {
