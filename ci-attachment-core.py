@@ -92,7 +92,8 @@ def main():
         assert (remote["size"], remote["digest"], remote["id"]) == (row["bytes"], "sha256:" + row["sha256"], row["id"])
     work = ROOT / "attachment-core"
     work.mkdir()
-    old_index_path = download(lock["old_file_manifest"], work)
+    published_index = download(lock["old_file_manifest"], work)
+    old_index_path = published_index.rename(work/"previous-core-file-manifest.json")
     old_index = read(old_index_path)
     assert old_index["source_commit"] == lock["old_source_commit"]
     previous = download(lock["old_core"], work)
@@ -172,6 +173,8 @@ def main():
     with (work / "delta-descriptor.json").open("wb") as f:
         subprocess.run(["python", str(inputs/"source/apps/desktop/scripts/build-core-delta.py"),
             str(old_index_path), str(new_index), lock["old_core"]["sha256"], str(clean_core), str(delta)], stdout=f, check=True)
+    with tarfile.open(delta, "r:gz") as changed:
+        assert set(changed.getnames()) == actual_changes | {"delta-inventory.json"}
     delta_proof = read(work/"delta-descriptor.json")
     assert delta.stat().st_size < clean_core.stat().st_size and digest(delta) == delta_proof["sha256"]
 
