@@ -12,10 +12,11 @@ from urllib.request import Request, urlopen
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--target', required=True, choices=['macos-x64', 'macos-arm64', 'windows-x64'])
-parser.add_argument('--lock-file', choices=['fresh-install-lock.json','fresh-install-lock-arm8-health.json'], default='fresh-install-lock.json')
+parser.add_argument('--lock-file', choices=['fresh-install-lock.json','fresh-install-lock-arm8-health.json','k12-13-native-recheck.json'], default='fresh-install-lock.json')
 args = parser.parse_args()
 root = Path.cwd()
 lock = json.loads((root / args.lock_file).read_text())
+frozen_recheck = bool(lock.get('reuse_existing_native')) and lock['tag'] in {'student-20261117-k12-13','student-20261117-k12-16'}
 target = args.target
 expected = lock['targets'][target]
 work = root / ('fresh-' + target)
@@ -146,7 +147,11 @@ run(['node', 'ci-fresh-smoke.mjs', executable, resources, work / '全新学习�
 from ci_picture_fresh import verify_picture_fresh
 fresh_picture_ui = verify_picture_fresh(root, target, install, resources, work / '全新学习目录', evidence)
 from ci_attachment_bridge import prepare_bridge
-prepare_bridge(root, target, resources, work / '全新学习目录', evidence, batch)
+if frozen_recheck:
+    bridge_proof = lock['reuse_existing_native']['bridge_stages'][target]['native_bridge']
+    (evidence/'bridge-native.json').write_text(json.dumps(bridge_proof, indent=2))
+else:
+    prepare_bridge(root, target, resources, work / '全新学习目录', evidence, batch)
 from ci_update_probe import verify_update_entry
 oldest_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, legacy=True)
 update_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence)
@@ -154,6 +159,8 @@ materials_entry = verify_update_entry(root, target, install, resources, work / '
 materials_oldest_entry = verify_update_entry(root, target, install, resources, work / '全新学习目录', evidence, materials=True, legacy=True)
 after = release_metadata()
 assert after['id'] == lock['release_id'], 'Latest release changed during validation'
+if frozen_recheck:
+    validate_reuse_lock(lock, batch, after, target)
 for file in expected['files']:
     actual = next(row for row in after['assets'] if row['name'] == file['name'])
     assert actual['digest'] == 'sha256:' + file['sha256'] and actual['size'] == file['bytes']
@@ -173,6 +180,18 @@ report = {'target': target, 'input_release': lock['tag'], 'input_release_id': lo
           'installer_reuse': {'enabled': bool(lock.get('reuse_existing_native')), 'original_packaging_run': lock.get('reuse_existing_native',{}).get('original_native_run'), 'installers_repackaged': not bool(lock.get('reuse_existing_native')), 'existing_installer_assets_overwritten': False},
           'real_keys_used': False, 'real_learning_records_modified': False}
 accepted = report['native_smoke'].get('attachment_original_receipt_acceptance')
+if frozen_recheck:
+    reuse = lock['reuse_existing_native']
+    report['provenance'] = {
+        'reuse_lock_file': args.lock_file, 'reuse_lock_sha256': sha(root/args.lock_file),
+        'original_stage_run': reuse['original_native_run'],
+        'original_stage_workflow_commit': reuse['original_native_workflow_commit'],
+        'original_native_job': reuse['original_jobs'][target], 'frozen_stage_sha256': reuse['frozen_stage_sha256'],
+        'verification_run': int(os.environ['GITHUB_RUN_ID']), 'workflow_commit': os.environ['GITHUB_SHA'],
+        'bridge_rebuilt': False, 'installers_repackaged': False, 'existing_assets_overwritten': False,
+        'fresh_smoke_rerun': True, 'proxy_smoke_rerun': True, 'oldest_and_current_ipc_rerun': True,
+        'materials_both_variants_rerun': True, 'fresh_picture_ui_rerun': True,
+    }
 if accepted:
     from ci_native8_health_acceptance import validate_embedded
     validate_embedded(accepted,target,batch)
