@@ -62,7 +62,47 @@ async def seed(core):
         events=[{**event, "metadata": {"sources": [native_source]}}], metadata={"sources": [native_source]})
     native_fixture = {"session": native_session["id"], "qualified_id": native_id, "bank_revision": manifest["bank_revision"],
         "href": native_source["url"], "answer_marker": native_marker, "native": native_source["native"]}
-    return {"session": session["id"], "qualified_id": question["qualified_id"], "bank_revision": question["bank_revision"], "href": source["url"], "question": question["question"], "title": question["title"], "images": len(question["assets"]), "native": source.get("native"), "picture_fixture": picture_fixture, "native_fixture": native_fixture, "model_calls": 0}
+    # Attach an actual three-page PDF and a legacy synthetic quote to the
+    # same saved user message. Seed a separate subsequent answer for history.
+    import hashlib
+    import fitz
+    from deeptutor.services.storage import get_attachment_store
+
+    citation_session = (await store.create_session("桌面引用端到端验收"))["id"]
+    filename = "citation-native-proof.pdf"
+    proof_text = "CITATION_NATIVE_PAGE_3"
+    with fitz.open() as pdf:
+        for page_number in range(1, 4):
+            page = pdf.new_page()
+            page.insert_text((72, 78), proof_text if page_number == 3 else f"CITATION_NATIVE_PAGE_{page_number}")
+        data = pdf.tobytes()
+    attachment_store = get_attachment_store()
+    pdf_url = await attachment_store.put(session_id=citation_session, attachment_id="citationpdf1",
+                                         filename=filename, data=data, mime_type="application/pdf")
+    quote_url = await attachment_store.put(session_id=citation_session, attachment_id="citationsnip",
+                                           filename="quote.md", data=b"Selected only", mime_type="text/markdown")
+    user = await store.add_message(citation_session, "user", "用第三页合成资料核对。",
+        attachments=[{"type": "quote", "id": "citationsnip", "filename": "quote.md",
+                      "url": quote_url, "extracted_text": "选段留在学生消息里。"},
+                     {"type": "file", "id": "citationpdf1", "filename": filename,
+                      "url": pdf_url, "mime_type": "application/pdf"}])
+    paragraph = "原件第三页支持这一句。"
+    pdf_href = pdf_url + "#page=3"
+    citations = [
+        {"type": "attachment", "url": pdf_href, "reference_used": True, "title": "已验证第三页",
+         "attachment_id": "citationpdf1", "unit": "page", "page": 3, "mime_type": "application/pdf"},
+        {"type": "attachment", "url": quote_url, "reference_used": True, "title": "误标的摘录",
+         "attachment_id": "citationsnip", "mime_type": "text/markdown"},
+    ]
+    assistant = await store.add_message(citation_session, "assistant", paragraph +
+        f"[实际原件]({pdf_href}) [误标的摘录]({quote_url})\n\n下一段不带引用。",
+        capability="chat", events=[{**event, "metadata": {"sources": citations}}], parent_message_id=user)
+    followup = await store.add_message(citation_session, "user", "再核对一遍。", parent_message_id=assistant)
+    await store.add_message(citation_session, "assistant", "第二轮已保留。", capability="chat",
+                            parent_message_id=followup)
+    citation_fixture = {"session": citation_session, "message": assistant, "paragraph": paragraph,
+      "href": pdf_href, "filename": filename, "sha256": hashlib.sha256(data).hexdigest(), "page_text": proof_text}
+    return {"session": session["id"], "qualified_id": question["qualified_id"], "bank_revision": question["bank_revision"], "href": source["url"], "question": question["question"], "title": question["title"], "images": len(question["assets"]), "native": source.get("native"), "picture_fixture": picture_fixture, "native_fixture": native_fixture, "desktop_citation_fixture": citation_fixture, "model_calls": 0}
 
 
 if __name__ == "__main__":
