@@ -51,6 +51,14 @@ jobs:
           with ZipFile(BytesIO(archive)) as bundle:
               assert all(Path(name).name == name for name in bundle.namelist())
               bundle.extractall(recipe)
+          repackage = recipe / 'ci_repackage.py'
+          checks = repackage.read_text(encoding='utf-8')
+          line = "run('/usr/bin/codesign', '--verify', '--deep', '--strict', app, timeout=240)"
+          assert checks.count(line) == 2
+          # The Intel runner can spend over four minutes hashing the app bundle.
+          checks = checks.replace(line, line.replace('timeout=240', 'timeout=900'))
+          compile(checks, str(repackage), 'exec')
+          repackage.write_text(checks, encoding='utf-8')
           PYTHON
           python resource-native-recipe/diagram_ci.py "${{ matrix.target }}"
       - uses: actions/upload-artifact@v4
