@@ -53,7 +53,7 @@ def stage_one(name, row):
         assert verified(prior,row)
         assert name.endswith('.json') or name+'.cos-receipt.json' in release
         return
-    deadline = time.monotonic()+1080
+    deadline = time.monotonic()+1030
     while True:
         try:
             remote=open_url(url)
@@ -65,9 +65,11 @@ def stage_one(name, row):
     saved=WORK/name
     count=0
     digest=sha256()
+    first_byte=None
     with remote as response, saved.open('xb') as output:
         headers={key.lower():value for key,value in response.headers.items()}
         while piece:=response.read(8<<20):
+            if count==0: first_byte=piece[:1].hex()
             count+=len(piece)
             assert count<=row['bytes']
             digest.update(piece)
@@ -79,7 +81,7 @@ def stage_one(name, row):
         write(receipt,{'channel':'COS','url':url,'verified':True,'bytes':count,'sha256':digest.hexdigest(),
                        'at':datetime.datetime.now(datetime.UTC).isoformat(), 'version':headers.get('x-cos-version-id'),
                        'etag':headers.get('etag'),'last_modified':headers.get('last-modified'),
-                       'crc64':headers.get('x-cos-hash-crc64ecma')})
+                       'crc64':headers.get('x-cos-hash-crc64ecma'),'first_byte':first_byte})
         gh('release','upload',TAG,receipt,timeout=120)
     gh('release','upload',TAG,saved,timeout=1050)
     assert verified(inventory(TAG)[name],row)
@@ -103,10 +105,10 @@ def main(config_url, config_hash):
     release=api('releases/tags/'+TAG)
     assert release['prerelease'] and not release['draft'] and release['target_commitish']==config['source_carrier']
     archives=config['archives']
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        list(pool.map(lambda item:stage_one(*item),config['feeds'].items()))
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(lambda item:stage_one(*item),archives.items()))
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        list(pool.map(lambda item:stage_one(*item),config['feeds'].items()))
     rows=inventory(TAG)
     for name,row in (archives|config['feeds']).items():
         assert verified(rows[name],row),name
