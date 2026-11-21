@@ -435,10 +435,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--target', choices=['macos-x64', 'macos-arm64', 'windows-x64'], required=True)
     target = parser.parse_args().target
-    url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/805c69f1aa353c5fa33f30a159eeaea970d0d9af/releases/student-20261121-resource-2-native.txt'
+    url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/e1f8a67ac0194ca2069f4b7c314d2b676a2132a9/releases/student-20261121-resource-4-native.txt'
     with urlopen(url, timeout=55) as stream:
         archive = base64.b64decode(stream.read(150000).strip(), validate=True)
-    assert hashlib.sha256(archive).hexdigest() == 'd437feb0617a254e368f17bcb15601d9cfd7337f0ce31cb834a1cbf22770418e'
+    assert hashlib.sha256(archive).hexdigest() == '3d0a4ed6959744f06a120fb20758cac553b922a3390352a616b749f46e9e0b9f'
     directory = Path('resource-native-recipe').resolve()
     directory.mkdir()
     with ZipFile(io.BytesIO(archive)) as bundle:
