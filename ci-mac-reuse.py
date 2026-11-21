@@ -39,6 +39,7 @@ def download(url, dest, timeout=600):
 def checked_launcher(resources, runtime, expected_commit):
     launcher = resources/'app'
     shutil.copytree(runtime/'launcher', launcher)
+    (launcher/'assets').mkdir(exist_ok=True)
     (launcher/'assets/runtime-public.pem').write_text(KEY, encoding='utf-8')
     node = """
 import assert from 'node:assert/strict';
@@ -78,6 +79,7 @@ def run_probe(executable, work, profile, spec, evidence, label, native=False):
                 time.sleep(1)
         finally:
             if process.poll() is None:
+                process.terminate()
                 process.wait(timeout=20)
     result=read(target)
     assert result['passed'] and result['target']=='macos-arm64' and result['source_commit']==COMMIT
@@ -92,6 +94,7 @@ def main():
     if target != 'macos-arm64':
         write(evidence/'local-intel.json',{'notice':'Intel acceptance runs on the local physical Mac.'})
         return
+    write(evidence/'qa-inputs.json',dict(expected_commit=COMMIT, core_sha256=CORE))
     assert platform.machine() == 'arm64' and platform.system() == 'Darwin'
     work=Path(tempfile.mkdtemp(prefix='kaixin-mac-arm-qa.'))
     stable=work/'runtime-macos-arm64.json'
