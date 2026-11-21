@@ -2,7 +2,7 @@ import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, sess
 import { fork } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { watch } from 'node:fs';
-import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { installBundle, bundleConfig, bundledRelease, verifyManifest, shouldUseBundledUpdate } from './bundles.mjs';
@@ -24,12 +24,12 @@ const updateProgressFile = path.join(sourceDirectory, 'update-progress.html');
 const userRoot = process.env.OPEN_DEEPTUTOR_TEST_HOME
   || path.join(WINDOWS ? process.env.LOCALAPPDATA ?? app.getPath('appData') : app.getPath('appData'), '开心动力超级学霸');
 app.setPath('userData', userRoot);
-const runtimeHome = path.join(userRoot, 'workspace');
+let runtimeHome = path.join(userRoot, 'workspace');
 const logPath = path.join(userRoot, 'logs/runtime.log');
 const activeFile = path.join(userRoot, 'active.json');
 const transactionFile = path.join(userRoot, 'upgrade.json');
 // DeepTutor's own Settings page writes the interface language and theme here.
-const interfaceFile = path.join(runtimeHome, 'data/user/settings/interface.json');
+const interfaceFile = () => path.join(runtimeHome, 'data/user/settings/interface.json');
 const seed = app.isPackaged ? path.join(process.resourcesPath, 'seed/runtime.json') : path.join(sourceDirectory, '../.local', targetId(), 'seed/runtime.json');
 const publicKey = await readFile(path.join(sourceDirectory, '../assets/runtime-public.pem'), 'utf8');
 // Chromium follows the same system proxy/PAC settings as the desktop browser.
@@ -180,7 +180,7 @@ function status(next) {
 
 async function readInterface() {
   let saved;
-  try { saved = await readJSON(interfaceFile) ?? {}; }
+  try { saved = await readJSON(interfaceFile()) ?? {}; }
   catch { return ui; } // A half-written or hand-edited file keeps the current choice.
   const dark = saved.theme === 'dark' || (saved.theme === 'system' && nativeTheme.shouldUseDarkColors);
   return { language: resolveLanguage(saved.language), theme: dark ? 'dark' : 'light' };
@@ -199,7 +199,7 @@ function watchInterface() {
   if (interfaceWatcher) return;
   try {
     // Settings are replaced atomically, so watch the folder rather than the file.
-    interfaceWatcher = watch(path.dirname(interfaceFile), () => {
+    interfaceWatcher = watch(path.dirname(interfaceFile()), () => {
       clearTimeout(interfaceTimer);
       interfaceTimer = setTimeout(() => void refreshInterface(), 150);
     });
@@ -316,23 +316,49 @@ async function launchRuntime(installed) {
 
 async function recoverInterruptedUpgrade() {
   const transaction = await readJSON(transactionFile);
+  const locationFile = path.join(userRoot, 'workspace-location.json');
+  const location = await readJSON(locationFile);
+  if (location) {
+    if (!/^workspace-recovered-\d{13}$/.test(location.name)) throw new Error('Invalid recovered workspace location');
+    const selected = path.join(userRoot, location.name);
+    if (!(await lstat(selected)).isDirectory()) throw new Error('Recovered workspace is missing');
+    if (selected !== runtimeHome) {
+      interfaceWatcher?.close();
+      interfaceWatcher = undefined;
+      runtimeHome = selected;
+    }
+  }
   if (!transaction || transaction.phase !== 'testing') return;
   status({ phase: 'starting', step: 'recovering' });
-  if (transaction.backup) {
+  if (transaction.backup && location?.backup !== transaction.backup) {
+    const backup = path.resolve(transaction.backup);
+    const backupRoot = path.resolve(userRoot, 'backups');
+    if (path.dirname(backup) !== backupRoot || !(await lstat(backupRoot)).isDirectory()
+      || !(await lstat(backup)).isDirectory()) throw new Error('Invalid learning workspace backup');
     const interrupted = `${runtimeHome}.interrupted-${Date.now()}`;
+    let redirected = false;
     for (let attempt = 0; ; attempt++) {
       try { await rename(runtimeHome, interrupted); break; }
       catch (error) {
         if (error.code === 'ENOENT') break;
         if (!WINDOWS || !['EPERM', 'EACCES', 'EBUSY'].includes(error.code)) throw error;
-        if (attempt === 7) {
-          throw new Error(`Windows 无法移动学习目录。请退出其他超级学霸窗口，必要时重启 Windows 后再打开。\n${error.message}`, { cause: error });
+        if (attempt === 3) {
+          const name = `workspace-recovered-${Date.now()}`;
+          const restored = path.join(userRoot, name);
+          await snapshotWorkspace(backup, restored);
+          // Persist the verified alternative before finalizing the rollback journal.
+          await writeJSON(locationFile, { name, backup: transaction.backup });
+          interfaceWatcher?.close();
+          interfaceWatcher = undefined;
+          runtimeHome = restored;
+          redirected = true;
+          break;
         }
         // A just-exited Python or Node process can still have a handle open.
         await delay(400 * (attempt + 1));
       }
     }
-    await snapshotWorkspace(transaction.backup, runtimeHome);
+    if (!redirected) await snapshotWorkspace(backup, runtimeHome);
   }
   await writeJSON(activeFile, transaction.previous);
   await writeJSON(transactionFile, { ...transaction, phase: 'recovered' });

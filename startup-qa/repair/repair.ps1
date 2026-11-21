@@ -15,7 +15,7 @@ try {
     }
     $edits = @(
         @{Name='bundles.mjs'; Old='aaff9df354910a87efb44705ab7398466a4498720bdee756e4fb134f7cf0dea5'; Fixed='2e7d7991ab2f590d79fda28fee3a5c9587edc20024834fa5a3ace4419b509015'},
-        @{Name='main.mjs'; Old='73482a9a12c3ede23844ca898b8e514834700ed45c6e7568c68976e42fe4d1e2'; Fixed='56083aea41456c8982b168c663e48b432711bfa7d3ca1eb2826f33cd1ed6a3ec'}
+        @{Name='main.mjs'; Old='73482a9a12c3ede23844ca898b8e514834700ed45c6e7568c68976e42fe4d1e2'; Fixed='8a287764c9b29e22843fe64897d034724a85f464dc09b2bc3fe8cc34b41ee49b'}
     )
     function Get-Hash([string]$file) { (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash }
     foreach ($row in $edits) {
