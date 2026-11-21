@@ -75,6 +75,10 @@ def run_probe(executable, work, profile, spec, evidence, label, native=False):
             error = Path(str(target)+'.error.json')
             while not target.exists():
                 assert not error.exists(), error.read_text() if error.exists() else ''
+                runtime_log = profile/'logs/runtime.log'
+                if runtime_log.is_file():
+                    startup = runtime_log.read_text(errors='replace')
+                    assert 'Desktop startup failed:' not in startup, startup[-4500:]
                 assert time.monotonic() < deadline, 'No receipt from native Apple Silicon app'
                 time.sleep(1)
         finally:
@@ -142,7 +146,7 @@ def main():
     app_config.update(CFBundleExecutable=NAME,CFBundleIdentifier='org.kaixindongli.super-scholar',
                       CFBundleName=NAME,CFBundleDisplayName=NAME)
     metadata.write_bytes(plistlib.dumps(app_config,sort_keys=False))
-    (resources/'app/package.json').write_text('{"main":"update-probe.cjs","name":"kaixin-native-qa","version":"1.7.1"}')
+    (resources/'app/package.json').write_text('{"name": "kaixin-super-scholar", "productName": "开心动力超级学霸", "version": "1.7.1", "description": "开心动力超级学霸学生版：基于 DeepTutor 的本地学习客户端，支持 macOS 和 Windows", "license": "Apache-2.0", "type": "module", "main": "update-probe.cjs", "author": "开心动力"}')
     (resources/'app/update-probe.cjs').write_text(PROBE,encoding='utf-8')
     subprocess.run(['/usr/bin/codesign','--force','--deep','--sign','-',str(app)],check=True,timeout=120)
     subprocess.run(['/usr/bin/codesign','--verify','--deep','--strict',str(app)],check=True,timeout=120)
