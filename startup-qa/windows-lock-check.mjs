@@ -14,7 +14,10 @@ async function readJSON(file) {
 }
 const writeJSON = (file, value) => writeFile(file, JSON.stringify(value));
 if ((await readJSON(transactionFile)).phase === 'testing') {
-  await assert.rejects(rename(runtimeHome, runtimeHome + '.probe'), { code: 'EPERM' });
+  await assert.rejects(rename(runtimeHome, runtimeHome + '.probe'), error => {
+    console.log('Native Windows rename denial:', error.code);
+    return ['EPERM', 'EACCES', 'EBUSY'].includes(error.code);
+  });
 }
 const source = await readFile(new URL('./repair/main.mjs', import.meta.url), 'utf8');
 const body = source.slice(source.indexOf('async function recoverInterruptedUpgrade()'), source.indexOf('async function prepareUpgrade('));

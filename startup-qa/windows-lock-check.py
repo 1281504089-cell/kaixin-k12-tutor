@@ -25,7 +25,7 @@ with TemporaryDirectory(prefix="学霸回滚 ") as tmp:
     (root/"upgrade.json").write_text(json.dumps(transaction), encoding="utf-8")
 
     # Allow reads and writes, deny sharing DELETE as Windows does with the reported busy directory.
-    handle = kernel.CreateFileW(str(workspace), 0x80, 3, None, 3, 0x02000000, None)
+    handle = kernel.CreateFileW(str(workspace/"history.txt"), 0x80000000, 3, None, 3, 0x80, None)
     if handle == ctypes.c_void_p(-1).value:
         raise ctypes.WinError(ctypes.get_last_error())
     try:
