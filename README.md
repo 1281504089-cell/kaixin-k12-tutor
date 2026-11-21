@@ -5,12 +5,13 @@
 - 想听讲解，点回答下方的朗读。想和老师边说边聊，用语音通话。要给老师看纸上的题，用高拍仪。
 - 想安排复习，从聊天里的「规划」开始。错题、笔记、日历和任务看板都在左侧工作台。
 
-**[下载桌面版图文操作手册](docs/desktop-student-guide.pdf)** · [首次安装说明](INSTALL-LATEST.md) · [GitHub 最新安装包](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)
+**[下载桌面版图文操作手册](docs/desktop-student-guide.pdf)** · [首次安装说明](INSTALL-LATEST.md) · [Windows 安装包](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261122-windows-startup-1) · [Mac 安装包](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/latest)
 
 手册对应 `student-20261117-k12-13`，按学生要做的事分节。首次通过 GitHub 下载安装包时，中国大陆用户请先开启 VPN。已经安装可在应用内检查更新。
 
 ## 本批变化
 
+Windows 专项更新修复安装后启动失败、升级中断时从备份恢复，以及恢复后的启动器更新入口。Windows x64 用户可在应用内检查更新。
 - 静态图、动态图、主动配图和参考图共用核对后的图库。动态图在正文、右栏与全屏显示完整表达式和滑块。
 - 教材蓝色链接打开实际 PDF 页，重开历史保留引用、图和答题记录。
 - 出题承接当前知识点，依次查询授权长期资料、题库和教材。各题型参加检索，合适的非选择题保留条件和出处改编成选择题。

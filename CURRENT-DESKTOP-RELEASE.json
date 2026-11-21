@@ -488,5 +488,205 @@
     "base_commit": "64ec3957abd504086777df87becf3851f5908aed",
     "frozen_source_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/blob/8280c758378e646527e0fe87580a19e0f2bc452e/releases/student-20261121-resource-5.json",
     "patch_sha256": "4d44ad03041338dca7652ac8b41311726ebdada0900bf45399cddc81c451d2f4"
+  },
+  "per_target_release": {
+    "macos-x64": {
+      "tag": "student-20261121-resource-5",
+      "source_commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad"
+    },
+    "macos-arm64": {
+      "tag": "student-20261121-resource-5",
+      "source_commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad"
+    },
+    "windows-x64": {
+      "status": "published_verified",
+      "target": "windows-x64",
+      "tag": "student-20261122-windows-startup-1",
+      "release_id": 454066941,
+      "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261122-windows-startup-1",
+      "source_commit": "fc90e367fc31f44a19cea5b8cf87d8a7a8dd5f64",
+      "release_repository_commit": "cd4ce699b3d543daf96c7b1b2a4000432bdf9ac1",
+      "source_tree": "2663c9cfda5465a5907f925879b93b0fc8bec50a",
+      "launcher_build": "20261122-updater-9",
+      "core_archive": "kaixin-core-20261122-windows-startup-1.tar.gz",
+      "core_bytes": 905188101,
+      "core_sha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+      "core_delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "toCoreSha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+        "archive": "kaixin-core-delta-resource-5-to-windows-startup-1.tar.gz",
+        "bytes": 594968,
+        "sha256": "6fb56d1c579ae1bac7592049c7e3d42263408e1f8b3b8373678a2c6d96337530"
+      },
+      "native_acceptance": {
+        "run_id": 44961793747,
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/actions/runs/44961793747",
+        "workflow_sha": "a345821d5c27fc29348d53dda90f2e38d1434155",
+        "fresh_installer_launch": true,
+        "online_update": true,
+        "reopened_recovered_learning": true,
+        "full_fallback": true
+      },
+      "full_installation_files": {
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001": {
+          "bytes": 1992294400,
+          "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6"
+        },
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002": {
+          "bytes": 1992294400,
+          "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142"
+        },
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003": {
+          "bytes": 1992294400,
+          "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d"
+        },
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004": {
+          "bytes": 1005564586,
+          "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034"
+        },
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe": {
+          "bytes": 1064162015,
+          "sha256": "6972895a2deeff0e5d40d69966872d15588ffa46a12c6f2a4ba066e26a3c8492"
+        }
+      },
+      "installation_links": {
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+        "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261122-windows-startup-1/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe"
+      },
+      "signed_runtime_manifests": {
+        "runtime-windows-x64-20261122-windows-startup-1-base-f1752e13feb9.json": {
+          "bytes": 1105,
+          "sha256": "2dd1f83d3339addd2254a6c72edabd48a6d078348b0340ab33a84c3ebc560280"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-6245df8566b7.json": {
+          "bytes": 1105,
+          "sha256": "ac2d2f17fc11cc29cad2a1b624de5282219751f6250f657f46e57af2a1fb3ac0"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-4557d1c62a96.json": {
+          "bytes": 1104,
+          "sha256": "cb6f6e26542bff95e20e10149b998862adf2805dab2a4ceda44a19e4ce6d64eb"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-d86e6c1a78ce.json": {
+          "bytes": 1101,
+          "sha256": "0d37a04c13dc21c57371e38daa4e1cad0298f6d9879ef0e8aebe5032bb2a9f77"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-346ca41274b3.json": {
+          "bytes": 1070,
+          "sha256": "033978fe51c41485c1e95a7680efe7f2566f6b3ee3807a006861e9613ee45b5c"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-bb8f5191555d.json": {
+          "bytes": 1100,
+          "sha256": "6a728fa224db0736b6a0334faadd2e881a81f3ae02736141e5f3ced2e2e90e2b"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-573f105ed118.json": {
+          "bytes": 1098,
+          "sha256": "09c1a06112956c62fe86ac1e8ef20ac453d576f71b54280c3d664648214e638b"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-9b7c2b84f908.json": {
+          "bytes": 1103,
+          "sha256": "8009ac596ecabd34160994df2f8362008fc63964a3070611f2e6d9d4a56748c3"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-3e01c184c6a4.json": {
+          "bytes": 1106,
+          "sha256": "d4cb0135efeade871328425153fe840fbb6a245a5e68236372497a1e7425ea1e"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-7a52e2cacc9f.json": {
+          "bytes": 1101,
+          "sha256": "0c209629f5468bb30ec353d96c252596a21d926607e53e934506e3d8a00d02a7"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-e4abdb1cb594.json": {
+          "bytes": 1102,
+          "sha256": "5aabbbedc1f77f01c2d327de5dd384936f6a1443f6ba9fd11fc9a35d15d335c4"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-afb4dfe97ae4.json": {
+          "bytes": 1104,
+          "sha256": "61a85360d3aab0eb093508614280663b8ae02f38fdc9d01fdd6dc786905d6f91"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-77b621411568.json": {
+          "bytes": 1100,
+          "sha256": "07549efbf5b05a6d3b9d214e451307a16df8f4ff03ee01781a4bf74769f68cd0"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-a0419326e159.json": {
+          "bytes": 1103,
+          "sha256": "a32e50390c7b067d9b02831af673701378a18300ecad79f2fe9ab86791c21aa6"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-324194bea65b.json": {
+          "bytes": 1103,
+          "sha256": "85485526dff4d8d624dbaaea061aef80e09be491eebeef51aa16d917377d1508"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-967544a178f2.json": {
+          "bytes": 1100,
+          "sha256": "e45bcb73c00d454edf6c071e55e11baf46c26f038e28c39a08594589e954ef68"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-70c8bc192b30.json": {
+          "bytes": 1100,
+          "sha256": "e0f489ee92e3d1e18e73aa224e6b358ce6067d6d087a05731e43e9cb654cbe96"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-9b7dc543315e.json": {
+          "bytes": 1100,
+          "sha256": "50655cc0eebbc8126e589fda5646ddbbcd504f6441fad48188e9101c2733fb85"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-e4b58f199119.json": {
+          "bytes": 1100,
+          "sha256": "a3101a2236c1d24782a2b6d4c6ff054dafec75cca41b7226273fb27dcf34943e"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-b6c3920aebfa.json": {
+          "bytes": 1100,
+          "sha256": "801e5e3b3d37ec4b85364af136a219ccae084d533f8e13f79128ab61d2a9b582"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-5a6e0e76c856.json": {
+          "bytes": 1101,
+          "sha256": "571fd61384d07a8077c6eb04ae2eb0b73d3230fe8fae14486f483eaba5e1ca82"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-8690cf0863da.json": {
+          "bytes": 1101,
+          "sha256": "a76faf49a6496a5df68eaed7fd1ecc673c6bf58445c9920fa728a98612a002a3"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-51534d24d922.json": {
+          "bytes": 1101,
+          "sha256": "09675c100b5d1963a0a3e4b3214ab4c6d9e8d7063ae0e772e66e1500b822aabc"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-base-1bb8a743bc42.json": {
+          "bytes": 1101,
+          "sha256": "dc75c0f1ba8782d1f429b4e67c393ba6483b42805e2e5c43045b5e49670a8983"
+        },
+        "runtime-windows-x64.json": {
+          "bytes": 4877,
+          "sha256": "b4fac6bf03dd8a822cd97b842f4f4835788248de4f14b0bd385e3883e4e48790"
+        },
+        "runtime-windows-x64-20261122-windows-startup-1-candidate.json": {
+          "bytes": 4877,
+          "sha256": "b4fac6bf03dd8a822cd97b842f4f4835788248de4f14b0bd385e3883e4e48790"
+        }
+      },
+      "archives": {
+        "kaixin-core-20261122-windows-startup-1.tar.gz": {
+          "bytes": 905188101,
+          "sha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae"
+        },
+        "kaixin-core-delta-resource-5-to-windows-startup-1.tar.gz": {
+          "bytes": 594968,
+          "sha256": "6fb56d1c579ae1bac7592049c7e3d42263408e1f8b3b8373678a2c6d96337530"
+        },
+        "kaixin-bridge-20261122-windows-startup-1-windows-x64.tar.gz": {
+          "bytes": 2026405216,
+          "sha256": "aed9883471641fd518c0d316fe795fc4e14bade9d2c45c1d77a2eae45e204c4d"
+        }
+      },
+      "cos_default_update_manifest": {
+        "bytes": 4877,
+        "sha256": "b4fac6bf03dd8a822cd97b842f4f4835788248de4f14b0bd385e3883e4e48790"
+      },
+      "publication_receipt": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261122-windows-startup-1/PUBLICATION-RECEIPT.json",
+      "reconstruction": {
+        "base": "student-20261121-resource-5",
+        "patch_sha256": "9f4300577f7eaa81f3166698f61a7161c0f5a898bda715ed3c37c0186692ed3d",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/blob/cd4ce699b3d543daf96c7b1b2a4000432bdf9ac1/releases/student-20261122-windows-startup-1.json"
+      }
+    }
   }
 }
