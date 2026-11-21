@@ -460,7 +460,7 @@ def previous_defaults(lock, documents, staged, live):
     return saved, protected
 
 
-def build_history_plan(live, pending, protected):
+def build_history_plan(source_commit, live, pending, protected):
     """Use exact signed, superseded compatibility descriptors to make room when needed."""
     excess = len(set(live) | set(pending)) - 1000
     if excess <= 0:
@@ -476,7 +476,7 @@ def build_history_plan(live, pending, protected):
         body = read_asset('core-updates', name, live[name])
         doc = json.loads(body)
         signed_target(doc, eligible.fullmatch(name)[1])
-        assert doc['commit'] not in {lock['source_commit'], GITHUB_PRIOR, COS_PRIOR}
+        assert doc['commit'] not in {source_commit, GITHUB_PRIOR, COS_PRIOR}
         assert 'baseRuntimeId' in doc and not doc.get('compatibleBaseManifests')
         docs.append(doc)
         selection[name] = body
@@ -567,7 +567,7 @@ def promote(config_url, stage_hash, approval_url, approval_hash, *, verify_only=
     with TemporaryDirectory(prefix='kaixin-resource5-') as folder:
         work = Path(folder)
         installers, reports = read_native(work, approval, lock, documents, staged)
-        history = build_history_plan(active, pending, protected | set(pending))
+        history = build_history_plan(lock['source_commit'], active, pending, protected | set(pending))
         print('Resource-5 gates passed:', len(installers), 'installer assets,', len(bodies), 'signed COS feeds,',
               len(anchors), 'anchored COS archives,', len(history), 'history entries to relocate', flush=True)
         if verify_only:
