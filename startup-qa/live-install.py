@@ -18,6 +18,12 @@ proof = root/'real-proof'
 proof.mkdir()
 work = Path(os.environ['RUNNER_TEMP'])/'k12-18 Windows repair'
 work.mkdir()
+powershell = Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
+env = dict(os.environ)
+env.pop('PSMODULEPATH', None)
+subprocess.run([str(powershell), '-NoProfile', '-Command',
+                "Get-Command Get-FileHash -ErrorAction Stop | Out-Null"], env=env, check=True, timeout=20)
+
 downloads = work/'public installers'
 downloads.mkdir()
 receipts = []
@@ -33,9 +39,7 @@ profile = work/'中文学习账号'
 learning = profile/'workspace/data/user/memory/L3/profile.md'
 learning.parent.mkdir(parents=True)
 learning.write_text('isolated synthetic learning history')
-env = dict(os.environ, OPEN_DEEPTUTOR_TEST_HOME=str(profile))
-env.pop('PSModulePath', None)
-powershell = Path(env['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
+env['OPEN_DEEPTUTOR_TEST_HOME'] = str(profile)
 proc = subprocess.run([str(powershell),'-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'repair/repair.ps1'),
                        '-AppDirectory',str(executable.parent)],env=env,capture_output=True,timeout=40)
 (proof/'repair-console.log').write_bytes(proc.stdout+proc.stderr)

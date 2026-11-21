@@ -2,6 +2,9 @@ name: Windows startup repair verification
 on:
   push:
     branches: [codex/verify-windows-startup-k12-18]
+concurrency:
+  group: windows-startup-repair-test
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
