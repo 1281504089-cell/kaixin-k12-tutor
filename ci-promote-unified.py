@@ -1,6 +1,6 @@
 """Read each frozen COS object once and stage the same bytes on GitHub."""
 from concurrent.futures import ThreadPoolExecutor
-from hashlib import sha256
+from hashlib import sha256, sha256 as release_gate_hash
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
@@ -11,7 +11,8 @@ import subprocess
 import time
 
 REPO = os.environ['GH_REPO']
-TAG = 'student-20261121-resource-4'
+assert REPO == '1281504089-cell/kaixin-k12-tutor'
+TAG = 'student-20261121-resource-5'
 COS = 'https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/'
 WORK = Path('publication-work')
 RECEIPT = WORK/'previous'
@@ -44,14 +45,43 @@ def inventory(tag):
 def verified(remote, expected):
     return remote['state']=='uploaded' and remote['size']==expected['bytes'] and remote['digest']=='sha256:'+expected['sha256']
 
+def verify_cos_anchor(url, proof):
+    version = proof.get('version')
+    etag = proof.get('etag')
+    modified = proof.get('last_modified')
+    assert (version and version.lower() != 'null') or (etag and modified), url
+    headers = {'Range': 'bytes=0-0', 'Accept-Encoding': 'identity', 'User-Agent': 'Kaixin-release-verification'}
+    if etag:
+        headers['If-Match'] = etag
+    with urlopen(Request(url, headers=headers), timeout=30) as response:
+        assert urlparse(response.geturl()).netloc == urlparse(COS).netloc, url
+        assert response.status == 206 and response.headers.get('Content-Range') == f'bytes 0-0/{proof["bytes"]}', url
+        assert response.read(2).hex() == proof['first_byte'] and len(proof['first_byte']) == 2, url
+        observed = {'version': response.headers.get('x-cos-version-id'), 'etag': response.headers.get('etag'),
+                    'last_modified': response.headers.get('last-modified')}
+        assert all(not proof.get(key) or proof[key] == value for key, value in observed.items()), url
+
+
 def stage_one(name, row):
     assert Path(name).name==name
     release = inventory(TAG)
     prior = release.get(name)
     url = COS+row.get('cos_name',name)
+    archived = not name.endswith('.json')
+    receipt_name = name + '.cos-receipt.json'
+    previous_receipt = release.get(receipt_name) if archived else None
     if prior:
-        assert verified(prior,row)
-        assert name.endswith('.json') or name+'.cos-receipt.json' in release
+        assert verified(prior, row), name
+    if previous_receipt:
+        proof_raw = bytes_for(previous_receipt['browser_download_url'])
+        assert verified(previous_receipt, {'bytes': len(proof_raw), 'sha256': sha256(proof_raw).hexdigest()}), name
+        proof = json.loads(proof_raw)
+        assert proof['verified'] is True and proof['url'] == url, name
+        assert (proof['bytes'], proof['sha256']) == (row['bytes'], row['sha256']), name
+    if prior and previous_receipt:
+        verify_cos_anchor(url, proof)
+        return
+    if prior and not archived:
         return
     deadline = time.monotonic()+1030
     while True:
@@ -76,23 +106,41 @@ def stage_one(name, row):
             output.write(piece)
     assert (count,digest.hexdigest())==(row['bytes'],row['sha256']), name
     print('COS bytes verified',name,count,digest.hexdigest(),flush=True)
-    if not name.endswith('.json'):
-        receipt=RECEIPT/(name+'.cos-receipt.json')
+    if archived and not previous_receipt:
+        receipt=RECEIPT/receipt_name
         write(receipt,{'channel':'COS','url':url,'verified':True,'bytes':count,'sha256':digest.hexdigest(),
                        'at':datetime.datetime.now(datetime.UTC).isoformat(), 'version':headers.get('x-cos-version-id'),
                        'etag':headers.get('etag'),'last_modified':headers.get('last-modified'),
                        'crc64':headers.get('x-cos-hash-crc64ecma'),'first_byte':first_byte})
         gh('release','upload',TAG,receipt,timeout=120)
-    gh('release','upload',TAG,saved,timeout=1050)
+    if previous_receipt:
+        assert first_byte == proof['first_byte'], name
+        observed = {'version': headers.get('x-cos-version-id'), 'etag':headers.get('etag'),
+                    'last_modified':headers.get('last-modified')}
+        assert all(not proof.get(key) or proof[key] == value for key, value in observed.items()), name
+    if not prior:
+        gh('release','upload',TAG,saved,timeout=1050)
     assert verified(inventory(TAG)[name],row)
     saved.unlink()
 
 def main(config_url, config_hash):
+    import sys as release_sys
+    if release_sys.flags.optimize:
+        raise RuntimeError('Resource-5 workstation checks require Python assertions')
+    report_bytes = Path(__file__).with_name('native-local-workflow.json').read_bytes()
+    if release_gate_hash(report_bytes).hexdigest() != 'd3b403af92710ab6afed422d34294c2351497c10f744e5d613f1690a174f71e5':
+        raise RuntimeError('The Resource-5 workstation proof does not match the approved digest')
+    report = json.loads(report_bytes)
+    assert report['passed'] is True and report['source_commit'] == 'a8d4dac2292e093d68b144b26d7ef7b2716f99ad' and report['core_sha256'] == '61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8'
+    for check in ('drag_dynamic', 'dynamic_layout', 'textbook_jump', 'single_verified_question', 'history_reopen', 'alternate_phrasing_and_topic', 'non_gallery_diagram', 'fast_new_chat_completion'):
+        assert report['checks'].get(check) is True, f'Workstation check is missing: {check}'
     config_raw=bytes_for(config_url)
     assert sha256(config_raw).hexdigest()==config_hash
     config=json.loads(config_raw)
-    assert config['tag']==TAG and config['source_commit']=='7bcb3359941fa09dd944d25b70a45bef6ee5ceee'
-    assert api('releases/latest')['tag_name']=='student-20261121-diagram-1'
+    assert config['tag'] == TAG and config['source_commit'] == 'a8d4dac2292e093d68b144b26d7ef7b2716f99ad'
+    assert config['core_sha256'] == '61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8' and config['source_carrier'] == '8280c758378e646527e0fe87580a19e0f2bc452e'
+    latest = api('releases/latest')
+    assert latest['tag_name'] == 'student-20261121-diagram-1' and latest['id'] == 453559695
     exists=subprocess.run(['gh','release','view',TAG],capture_output=True,timeout=30)
     if exists.returncode:
         notes=WORK/'notes.md'
@@ -113,9 +161,11 @@ def main(config_url, config_hash):
     rows=inventory(TAG)
     for name,row in (archives|config['feeds']).items():
         assert verified(rows[name],row),name
-    assert api('releases/latest')['tag_name']=='student-20261121-diagram-1'
+    latest = api('releases/latest')
+    assert latest['tag_name'] == 'student-20261121-diagram-1' and latest['id'] == 453559695
     write(Path('PUBLICATION-RECEIPT.json'),{'staged':True,'published':False,'tag':TAG,'source_commit':config['source_commit'],
-              'release_id':release['id'],'config_sha256':config_hash,'github_verified_asset_digests':len(archives)+len(config['feeds'])})
+              'release_id':release['id'],'config_sha256':config_hash,'local_workflow_sha256':sha256(report_bytes).hexdigest(),'github_verified_asset_digests':len(archives)+len(config['feeds'])})
 
-if __name__=='__main__':
-    main('https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/44b0dcc7657babb5a6224ee9d0b9b949e2ed1bf9/releases/student-20261121-resource-4-stage.json', '983b5fbf94f5024ca564f1c7dc7f4ad950aa57dee6d9fc3a09a1ecd211f295fe')
+
+if __name__ == '__main__':
+    main('https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/79a0f43907a335e50f67d438c1b19dce0b88eead/releases/student-20261121-resource-5-stage.json', '356e6c3f890530060341436cc77c4ee12b020f5a6bc8c3086e7e03b0ce99eb90')
