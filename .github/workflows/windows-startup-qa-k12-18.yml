@@ -1,0 +1,41 @@
+name: Windows startup repair verification
+on:
+  push:
+    branches: [codex/verify-windows-startup-k12-18]
+permissions:
+  contents: read
+jobs:
+  windows-extraction:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exercise the USB repair on an isolated installation
+        shell: powershell
+        run: .\startup-qa\check-repair.ps1
+      - name: Extract signed archives with Windows system tar
+        run: node --test startup-qa/windows-extract.test.mjs
+  installed-app:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: On the real public installer, apply the USB repair and open the app
+        run: python startup-qa/live-install.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-startup-repair-real-install
+          path: startup-qa/real-proof/
