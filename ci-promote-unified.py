@@ -1,151 +1,121 @@
-"""Promote one fully verified desktop batch; production signing happens locally."""
-import hashlib
+"""Read each frozen COS object once and stage the same bytes on GitHub."""
+from concurrent.futures import ThreadPoolExecutor
+from hashlib import sha256
+from pathlib import Path
+from urllib.request import Request, urlopen
+from urllib.parse import urlparse
+import datetime
 import json
 import os
-from pathlib import Path
-import shutil
 import subprocess
 import time
-from urllib.request import Request, urlopen
 
-ROOT = Path.cwd()
-REPO = '1281504089-cell/kaixin-k12-tutor'
-batch = json.loads((ROOT / 'unified-publication.json').read_text())
-targets = ['windows-x64', 'macos-x64', 'macos-arm64']
+REPO = os.environ['GH_REPO']
+TAG = 'student-20261121-resource-1'
+COS = 'https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/'
+WORK = Path('publication-work')
+RECEIPT = WORK/'previous'
+RECEIPT.mkdir(parents=True)
+DEFAULTS = {'runtime-macos-x64.json','runtime-macos-arm64.json','runtime-windows-x64.json'}
 
-
-def gh(*args):
-    return subprocess.check_output(['gh', *map(str, args)])
-
+def gh(*args, timeout=120):
+    return subprocess.run(['gh', *map(str,args)], check=True, stdout=subprocess.PIPE, timeout=timeout).stdout
 
 def api(path):
-    return json.loads(gh('api', 'repos/' + REPO + '/' + path))
+    return json.loads(gh('api',f'repos/{REPO}/{path}'))
 
+def write(path, payload):
+    path.write_text(json.dumps(payload,indent=2)+'\n')
 
-def digest(file):
-    h = hashlib.sha256()
-    with file.open('rb') as stream:
-        while data := stream.read(8 * 1024**2):
-            h.update(data)
-    return h.hexdigest()
+def open_url(url, timeout=100):
+    result = urlopen(Request(url,headers={'User-Agent':'Kaixin-release-verification','Accept-Encoding':'identity'}),timeout=timeout)
+    assert urlparse(result.geturl()).netloc in {urlparse(COS).netloc,'raw.githubusercontent.com','github.com','release-assets.githubusercontent.com'}
+    return result
 
+def bytes_for(url, max_bytes=250_000):
+    with open_url(url) as response:
+        result = response.read(max_bytes+1)
+    assert len(result)<=max_bytes
+    return result
 
-def public(asset):
-    for url in [asset['browser_download_url'], asset['url'] + '?readback=' + str(time.time_ns())]:
+def inventory(tag):
+    return {row['name']:row for row in api('releases/tags/'+tag)['assets']}
+
+def verified(remote, expected):
+    return remote['state']=='uploaded' and remote['size']==expected['bytes'] and remote['digest']=='sha256:'+expected['sha256']
+
+def stage_one(name, row):
+    assert Path(name).name==name
+    release = inventory(TAG)
+    prior = release.get(name)
+    url = COS+row.get('cos_name',name)
+    if prior:
+        assert verified(prior,row)
+        assert name.endswith('.json') or name+'.cos-receipt.json' in release
+        return
+    deadline = time.monotonic()+1030
+    while True:
         try:
-            raw = urlopen(Request(url, headers={'User-Agent': 'Kaixin-Publication-Readback',
-                          'Accept': 'application/octet-stream'}), timeout=60).read()
-            assert hashlib.sha256(raw).hexdigest() == asset['digest'].split(':')[1]
-            return raw
-        except Exception as error:
-            last = error
-    raise last
+            remote=open_url(url)
+            break
+        except OSError:
+            if time.monotonic()>=deadline:
+                raise
+            time.sleep(20)
+    saved=WORK/name
+    count=0
+    digest=sha256()
+    first_byte=None
+    with remote as response, saved.open('xb') as output:
+        headers={key.lower():value for key,value in response.headers.items()}
+        while piece:=response.read(8<<20):
+            if count==0: first_byte=piece[:1].hex()
+            count+=len(piece)
+            assert count<=row['bytes']
+            digest.update(piece)
+            output.write(piece)
+    assert (count,digest.hexdigest())==(row['bytes'],row['sha256']), name
+    print('COS bytes verified',name,count,digest.hexdigest(),flush=True)
+    if not name.endswith('.json'):
+        receipt=RECEIPT/(name+'.cos-receipt.json')
+        write(receipt,{'channel':'COS','url':url,'verified':True,'bytes':count,'sha256':digest.hexdigest(),
+                       'at':datetime.datetime.now(datetime.UTC).isoformat(), 'version':headers.get('x-cos-version-id'),
+                       'etag':headers.get('etag'),'last_modified':headers.get('last-modified'),
+                       'crc64':headers.get('x-cos-hash-crc64ecma'),'first_byte':first_byte})
+        gh('release','upload',TAG,receipt,timeout=120)
+    gh('release','upload',TAG,saved,timeout=1050)
+    assert verified(inventory(TAG)[name],row)
+    saved.unlink()
 
+def main(config_url, config_hash):
+    config_raw=bytes_for(config_url)
+    assert sha256(config_raw).hexdigest()==config_hash
+    config=json.loads(config_raw)
+    assert config['tag']==TAG and config['source_commit']=='090cd16589223f1143c1cf0ca4c5ac38ed0faaa2'
+    assert api('releases/latest')['tag_name']=='student-20261121-diagram-1'
+    exists=subprocess.run(['gh','release','view',TAG],capture_output=True,timeout=30)
+    if exists.returncode:
+        notes=WORK/'notes.md'
+        notes.write_text('超级学霸桌面版出题来源更新候选。发布后可在应用内检查更新。\n\n'
+                         '- 所有对话入口共享获授权的长期资料、题库与教材检索。\n'
+                         '- 保留完整原题和出处，普通找题与显式找题使用各自的检索预算。\n'
+                         '- 必须配图的题目仅在有已核对图时交付。\n'
+                         '- 优化题库索引准备，保留学习记录并支持匹配基线走增量。\n',encoding='utf-8')
+        gh('release','create',TAG,'--target',config['source_carrier'],'--prerelease','--title',
+           '开心动力超级学霸 2026-11-21 出题与题源更新','--notes-file',notes)
+    release=api('releases/tags/'+TAG)
+    assert release['prerelease'] and not release['draft'] and release['target_commitish']==config['source_carrier']
+    archives=config['archives']
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        list(pool.map(lambda item:stage_one(*item),config['feeds'].items()))
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(lambda item:stage_one(*item),archives.items()))
+    rows=inventory(TAG)
+    for name,row in (archives|config['feeds']).items():
+        assert verified(rows[name],row),name
+    assert api('releases/latest')['tag_name']=='student-20261121-diagram-1'
+    write(Path('PUBLICATION-RECEIPT.json'),{'staged':True,'published':False,'tag':TAG,'source_commit':config['source_commit'],
+              'release_id':release['id'],'config_sha256':config_hash,'github_verified_asset_digests':len(archives)+len(config['feeds'])})
 
-for target, proof in batch['native_runs'].items():
-    run = api('actions/runs/' + str(proof['run_id']))
-    assert run['status'] == 'completed' and run['head_sha'] == proof['workflow_commit']
-    jobs = api('actions/runs/' + str(proof['run_id']) + '/jobs')['jobs']
-    assert any(j['conclusion'] == 'success' and j['name'].startswith('native (' + target + ',') for j in jobs)
-assert set(batch['native_runs']) == set(targets)
-upstream = api('actions/runs/' + str(batch['upstream_native_run']))
-assert upstream['conclusion'] == 'success'
-assert api('releases/latest')['id'] == batch['expected_latest_release_id']
-candidate = api('releases/tags/' + batch['tag'])
-assert candidate['prerelease'] and not candidate['draft']
-assets = {a['name']: a for a in candidate['assets']}
-proofs, full_files, migrations = {}, [], []
-for target in targets:
-    report = json.loads(public(assets['verification-' + target + '.json']))
-    assert report['release'] == batch['tag'] and report['launcher_build'] == batch['launcher_build']
-    assert report['core_commit'] == batch['core_commit'] and report['native_install'] == 'passed'
-    assert report['shell_files'] == json.loads((ROOT / 'fetchfix-batch.json').read_text())['shell_files']
-    assert report['network']['direct_fetch_failed'] and report['network']['proxy_connections'] > 0
-    assert report['native_smoke']['current_core_included'] and report['native_smoke']['pdf']['pdf_files'] == 136
-    assert len(report['native_smoke']['local_spoken_stt']) == 2
-    assert all(row['spoken_audio_decoded'] for row in report['native_smoke']['local_spoken_stt'])
-    update = report['update_entry']
-    assert update['actual_download_install_backup_restart'] == 'passed' and update['check_again_current']
-    assert all(update[k] for k in ['chat_preserved', 'task_preserved', 'saved_key_preserved'])
-    migration = report['launcher_migration']
-    assert migration['nativeMigration'] == 'passed' and migration['data_preservation']['passed']
-    assert migration['originalSeedMetadataUnchanged'] and not migration['runtimeArchivesIncluded']
-    for row in [*report['full_files'], {'file': migration['artifact'], 'bytes': migration['size'], 'sha256': migration['sha256']}]:
-        actual = assets[row['file']]
-        assert actual['digest'] == 'sha256:' + row['sha256'] and actual['size'] == row['bytes']
-    proofs[target] = report
-    full_files += report['full_files']
-    migrations.append({'file': migration['artifact'], 'bytes': migration['size'], 'sha256': migration['sha256']})
-assert len(full_files) == 13 and len(migrations) == 3
-
-work = ROOT / 'publication-work'
-work.mkdir()
-stable = api('releases/tags/core-updates')
-stable_assets = {a['name']: a for a in stable['assets']}
-backups = work / 'previous'
-backups.mkdir()
-for name, expected in batch['expected_previous'].items():
-    actual = stable_assets[name]
-    assert actual['digest'] == 'sha256:' + expected, 'Live update feed changed: ' + name
-    raw = public(actual)
-    (backups / name).write_bytes(raw)
-    retained = work / ('before-unified-' + name)
-    retained.write_bytes(raw)
-    gh('release', 'upload', batch['tag'], retained, '--clobber')
-
-# Copy verified native bridge bytes before exposing any new default manifest.
-for name, row in batch['archives'].items():
-    if name in stable_assets:
-        assert stable_assets[name]['digest'] == 'sha256:' + row['sha256']
-        assert stable_assets[name]['size'] == row['bytes']
-        continue
-    gh('release', 'download', row['source_tag'], '--pattern', name, '--dir', work)
-    file = work / name
-    assert file.stat().st_size == row['bytes'] and digest(file) == row['sha256']
-    gh('release', 'upload', 'core-updates', file)
-    file.unlink()
-
-manifest_dir = ROOT / 'signed-unified'
-for name, manifest in batch['manifests'].items():
-    assert json.loads((manifest_dir / name).read_text()) == manifest
-    if name not in batch['expected_previous']:
-        if name in stable_assets:
-            assert public(stable_assets[name]) == (manifest_dir / name).read_bytes()
-            continue
-        gh('release', 'upload', 'core-updates', manifest_dir / name)
-
-switched = []
-try:
-    current = {a['name']: a for a in api('releases/tags/core-updates')['assets']}
-    for name, expected in batch['expected_previous'].items():
-        assert current[name]['digest'] == 'sha256:' + expected
-        gh('release', 'upload', 'core-updates', manifest_dir / name, '--clobber')
-        switched.append(name)
-    readback = {a['name']: a for a in api('releases/tags/core-updates')['assets']}
-    for name, manifest in batch['manifests'].items():
-        assert public(readback[name]) == (manifest_dir / name).read_bytes()
-    for name, row in batch['archives'].items():
-        assert readback[name]['digest'] == 'sha256:' + row['sha256'] and readback[name]['size'] == row['bytes']
-except Exception:
-    for name in switched:
-        gh('release', 'upload', 'core-updates', backups / name, '--clobber')
-    raise
-
-gh('release', 'upload', batch['tag'], ROOT / 'INSTALLATION.txt', '--clobber')
-gh('api', '-X', 'PATCH', 'repos/' + REPO + '/git/refs/tags/' + batch['tag'],
-   '-f', 'sha=' + os.environ['GITHUB_SHA'], '-F', 'force=true')
-gh('release', 'edit', batch['tag'], '--prerelease=false', '--latest=true',
-   '--title', '开心动力超级学霸 · 三系统整合版 2026-11-14', '--notes-file', ROOT / 'RELEASE-NOTES.md')
-latest = api('releases/latest')
-assert latest['tag_name'] == batch['tag'] and not latest['prerelease']
-receipt = {**batch, 'published_at_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-           'release_repository_commit': os.environ['GITHUB_SHA'],
-           'release_id': latest['id'], 'release_url': latest['html_url'],
-           'full_files': full_files, 'launcher_migration_files': migrations,
-           'previous_manifests': {name: json.loads((backups / name).read_text()) for name in batch['expected_previous']},
-           'stable_manifests_read_back': list(batch['manifests']), 'proofs': proofs,
-           'physical_user_devices_tested': False, 'private_key_uploaded': False}
-receipt_file = ROOT / 'PUBLICATION-RECEIPT.json'
-receipt_file.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n')
-gh('release', 'upload', batch['tag'], receipt_file, '--clobber')
-print(json.dumps({'published': True, 'tag': batch['tag'], 'release_id': latest['id'], 'platforms': targets}))
+if __name__ == '__main__':
+    main('https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/e52a359bbcd7cf2a99d7ff6b3e0b04fcc678b22c/releases/student-20261121-resource-1-core-stage.json', '4a51bb344c0149d2a76f413d6bc5005d115eb1ba978e832f079733a33a3cb484')
