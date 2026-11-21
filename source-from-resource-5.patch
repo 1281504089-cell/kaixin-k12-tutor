@@ -1,0 +1,388 @@
+diff --git a/apps/desktop/src/bundles.mjs b/apps/desktop/src/bundles.mjs
+index 0845c68fa734c013eeee414ab45e24e69f1a2d8c..372f11100e12a763ce4ad1936a69a893cc3b900e 100644
+--- a/apps/desktop/src/bundles.mjs
++++ b/apps/desktop/src/bundles.mjs
+@@ -1,13 +1,11 @@
+ import { createHash, verify } from 'node:crypto';
+ import { constants, createReadStream } from 'node:fs';
+-import { readFile, mkdir, rename, rm, access, writeFile, copyFile, chmod, lstat, readdir, realpath } from 'node:fs/promises';
++import { readFile, mkdir, mkdtemp, rename, rm, access, writeFile, copyFile, chmod, lstat, readdir, realpath } from 'node:fs/promises';
+ import path from 'node:path';
+-import { execFile } from 'node:child_process';
+-import { promisify } from 'node:util';
++import { spawn } from 'node:child_process';
+ import { pipeline } from 'node:stream/promises';
+-import { runtimeLayout, systemTar } from './platform.mjs';
++import { runtimeLayout, systemTar, WINDOWS } from './platform.mjs';
+ 
+-const exec = promisify(execFile);
+ export function canonicalManifest(manifest) {
+   return JSON.stringify(Object.fromEntries(Object.entries(manifest).filter(([key]) => key !== 'signature').sort(([a], [b]) => a.localeCompare(b))));
+ }
+@@ -56,6 +54,28 @@ export async function sha256(filename) {
+   return hash.digest('hex');
+ }
+ 
++export async function extractVerifiedArchive(archive, destination, command = systemTar(), args = ['-xzf', '-']) {
++  const child = spawn(command, args, {
++    cwd: destination, timeout: 600000, windowsHide: true, stdio: ['pipe', 'ignore', 'pipe'],
++  });
++  let diagnostics = '';
++  const diagnosticLimit = 4096;
++  child.stderr.setEncoding('utf8');
++  child.stderr.on('data', chunk => {
++    if (diagnostics.length < diagnosticLimit) diagnostics += chunk.slice(0, diagnosticLimit - diagnostics.length);
++  });
++  const completed = new Promise((resolve, reject) => {
++    child.once('error', reject);
++    child.once('close', (code, signal) => {
++      if (code === 0) resolve();
++      else reject(new Error(`Runtime extraction failed (${code ?? signal}). ${diagnostics.trim()}`.trim()));
++    });
++  });
++  const [input, result] = await Promise.allSettled([pipeline(createReadStream(archive), child.stdin), completed]);
++  if (result.status === 'rejected') throw result.reason;
++  if (input.status === 'rejected') throw input.reason;
++}
++
+ export function coreDeltaDescriptor(manifest) {
+   const delta = manifest.coreDelta;
+   const digest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+@@ -173,20 +193,17 @@ export async function installBundle(manifestFile, root, publicKey, progress = ()
+     throw new Error('The core bundle checksum does not match; download it again');
+   }
+   await mkdir(path.dirname(destination), { recursive: true, mode: 0o700 });
+-  const staging = `${destination}.installing`;
+-  await rm(staging, { recursive: true, force: true });
+-  await mkdir(staging, { mode: 0o700 });
++  const previousStaging = `${destination}.installing`;
++  await rm(previousStaging, { recursive: true, force: true });
++  // Keep Windows tar's working path short and on the same volume as the final runtime.
++  const staging = WINDOWS ? await mkdtemp(path.join(root, '.kx-')) : previousStaging;
++  if (!WINDOWS) await mkdir(staging, { mode: 0o700 });
+   try {
+     progress('firstLaunch');
+     // Only locally signed, hash-verified artifacts reach extraction.
+     // Windows' system tar can mangle non-ASCII command-line paths. Node opens
+     // the archive and sets the working directory using Unicode-aware OS APIs.
+-    const extraction = exec(systemTar(), ['-xzf', '-'], { cwd: staging, timeout: 600000, windowsHide: true });
+-    const [input, result] = await Promise.allSettled([
+-      pipeline(createReadStream(archive), extraction.child.stdin), extraction,
+-    ]);
+-    if (result.status === 'rejected') throw result.reason;
+-    if (input.status === 'rejected') throw input.reason;
++    await extractVerifiedArchive(archive, staging);
+     if (delta) {
+       await assembleDelta(staging, donor, delta, incremental.signal);
+       if ((await readFile(path.join(staging, 'BUILD_COMMIT'), 'utf8')).trim() !== manifest.commit) {
+diff --git a/apps/desktop/src/main.mjs b/apps/desktop/src/main.mjs
+index fdcf07d6fdf163cf3ed64c4be009d3aa9cbd95fd..17b806689fad384244e44d458c5de21e9deaf06e 100644
+--- a/apps/desktop/src/main.mjs
++++ b/apps/desktop/src/main.mjs
+@@ -2,7 +2,7 @@ import { app, BrowserWindow, WebContentsView, Menu, ipcMain, shell, dialog, sess
+ import { fork } from 'node:child_process';
+ import { setTimeout as delay } from 'node:timers/promises';
+ import { watch } from 'node:fs';
+-import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access } from 'node:fs/promises';
++import { mkdir, readFile, writeFile, rename, appendFile, mkdtemp, rm, access, lstat } from 'node:fs/promises';
+ import path from 'node:path';
+ import { fileURLToPath, pathToFileURL } from 'node:url';
+ import { installBundle, bundleConfig, bundledRelease, verifyManifest, shouldUseBundledUpdate } from './bundles.mjs';
+@@ -24,12 +24,12 @@ const updateProgressFile = path.join(sourceDirectory, 'update-progress.html');
+ const userRoot = process.env.OPEN_DEEPTUTOR_TEST_HOME
+   || path.join(WINDOWS ? process.env.LOCALAPPDATA ?? app.getPath('appData') : app.getPath('appData'), '开心动力超级学霸');
+ app.setPath('userData', userRoot);
+-const runtimeHome = path.join(userRoot, 'workspace');
++let runtimeHome = path.join(userRoot, 'workspace');
+ const logPath = path.join(userRoot, 'logs/runtime.log');
+ const activeFile = path.join(userRoot, 'active.json');
+ const transactionFile = path.join(userRoot, 'upgrade.json');
+ // DeepTutor's own Settings page writes the interface language and theme here.
+-const interfaceFile = path.join(runtimeHome, 'data/user/settings/interface.json');
++const interfaceFile = () => path.join(runtimeHome, 'data/user/settings/interface.json');
+ const seed = app.isPackaged ? path.join(process.resourcesPath, 'seed/runtime.json') : path.join(sourceDirectory, '../.local', targetId(), 'seed/runtime.json');
+ const publicKey = await readFile(path.join(sourceDirectory, '../assets/runtime-public.pem'), 'utf8');
+ // Chromium follows the same system proxy/PAC settings as the desktop browser.
+@@ -180,7 +180,7 @@ function status(next) {
+ 
+ async function readInterface() {
+   let saved;
+-  try { saved = await readJSON(interfaceFile) ?? {}; }
++  try { saved = await readJSON(interfaceFile()) ?? {}; }
+   catch { return ui; } // A half-written or hand-edited file keeps the current choice.
+   const dark = saved.theme === 'dark' || (saved.theme === 'system' && nativeTheme.shouldUseDarkColors);
+   return { language: resolveLanguage(saved.language), theme: dark ? 'dark' : 'light' };
+@@ -199,7 +199,7 @@ function watchInterface() {
+   if (interfaceWatcher) return;
+   try {
+     // Settings are replaced atomically, so watch the folder rather than the file.
+-    interfaceWatcher = watch(path.dirname(interfaceFile), () => {
++    interfaceWatcher = watch(path.dirname(interfaceFile()), () => {
+       clearTimeout(interfaceTimer);
+       interfaceTimer = setTimeout(() => void refreshInterface(), 150);
+     });
+@@ -316,12 +316,49 @@ async function launchRuntime(installed) {
+ 
+ async function recoverInterruptedUpgrade() {
+   const transaction = await readJSON(transactionFile);
++  const locationFile = path.join(userRoot, 'workspace-location.json');
++  const location = await readJSON(locationFile);
++  if (location) {
++    if (!/^workspace-recovered-\d{13}$/.test(location.name)) throw new Error('Invalid recovered workspace location');
++    const selected = path.join(userRoot, location.name);
++    if (!(await lstat(selected)).isDirectory()) throw new Error('Recovered workspace is missing');
++    if (selected !== runtimeHome) {
++      interfaceWatcher?.close();
++      interfaceWatcher = undefined;
++      runtimeHome = selected;
++    }
++  }
+   if (!transaction || transaction.phase !== 'testing') return;
+   status({ phase: 'starting', step: 'recovering' });
+-  if (transaction.backup) {
+-    try { await rename(runtimeHome, `${runtimeHome}.interrupted-${Date.now()}`); }
+-    catch (error) { if (error.code !== 'ENOENT') throw error; }
+-    await snapshotWorkspace(transaction.backup, runtimeHome);
++  if (transaction.backup && location?.backup !== transaction.backup) {
++    const backup = path.resolve(transaction.backup);
++    const backupRoot = path.resolve(userRoot, 'backups');
++    if (path.dirname(backup) !== backupRoot || !(await lstat(backupRoot)).isDirectory()
++      || !(await lstat(backup)).isDirectory()) throw new Error('Invalid learning workspace backup');
++    const interrupted = `${runtimeHome}.interrupted-${Date.now()}`;
++    let redirected = false;
++    for (let attempt = 0; ; attempt++) {
++      try { await rename(runtimeHome, interrupted); break; }
++      catch (error) {
++        if (error.code === 'ENOENT') break;
++        if (!WINDOWS || !['EPERM', 'EACCES', 'EBUSY'].includes(error.code)) throw error;
++        if (attempt === 3) {
++          const name = `workspace-recovered-${Date.now()}`;
++          const restored = path.join(userRoot, name);
++          await snapshotWorkspace(backup, restored);
++          // Persist the verified alternative before finalizing the rollback journal.
++          await writeJSON(locationFile, { name, backup: transaction.backup });
++          interfaceWatcher?.close();
++          interfaceWatcher = undefined;
++          runtimeHome = restored;
++          redirected = true;
++          break;
++        }
++        // A just-exited Python or Node process can still have a handle open.
++        await delay(400 * (attempt + 1));
++      }
++    }
++    if (!redirected) await snapshotWorkspace(backup, runtimeHome);
+   }
+   await writeJSON(activeFile, transaction.previous);
+   await writeJSON(transactionFile, { ...transaction, phase: 'recovered' });
+@@ -341,7 +378,7 @@ async function logStartupFailure(error) {
+   console.error(error);
+   try {
+     await mkdir(path.dirname(logPath), { recursive: true });
+-    await appendFile(logPath, `\nDesktop startup failed: ${error.stack ?? error}\n`);
++    await appendFile(logPath, `\n[${new Date().toISOString()}] Desktop startup failed: ${error.stack ?? error}\n`);
+   } catch (logError) { console.error(logError); }
+ }
+ 
+diff --git a/apps/desktop/test/main-lifecycle.test.mjs b/apps/desktop/test/main-lifecycle.test.mjs
+index 1996ecaa28d59ab4260050ca75659798e7115d56..2d2ea56c2ccf792abb186068f1d472163f7fe320 100644
+--- a/apps/desktop/test/main-lifecycle.test.mjs
++++ b/apps/desktop/test/main-lifecycle.test.mjs
+@@ -1,12 +1,17 @@
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
+-import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
++import { lstat, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+ import { spawn } from 'node:child_process';
+ import { once } from 'node:events';
+ import os from 'node:os';
+ import path from 'node:path';
+ import { snapshotWorkspace } from '../src/workspace-snapshot.mjs';
+ 
++async function readJSON(file) {
++  try { return JSON.parse(await readFile(file, 'utf8')); }
++  catch (error) { if (error.code === 'ENOENT') return null; throw error; }
++}
++
+ // Exercise the production shutdown function without starting Electron or a learner profile.
+ test('shutdown recognizes signal-ended workers and still waits for live workers', async t => {
+   const source = await readFile(new URL('../src/main.mjs', import.meta.url), 'utf8');
+@@ -50,7 +55,6 @@ test('a prepared update keeps student memory on success and restores it if the n
+     const activeFile = path.join(userRoot, 'active.json');
+     const transactionFile = path.join(userRoot, 'upgrade.json');
+     const previous = { runtimeId: 'previous' }, next = { runtimeId: 'candidate' };
+-    const readJSON = async file => JSON.parse(await readFile(file, 'utf8'));
+     const writeJSON = (file, value) => writeFile(file, JSON.stringify(value));
+     const noop = () => {};
+     const launchRuntime = async () => {
+@@ -64,6 +68,7 @@ test('a prepared update keeps student memory on success and restores it if the n
+     let recovered = false;
+     const boot = () => { recovered = true; };
+     const helpers = { userRoot, runtimeHome, activeFile, transactionFile, readJSON, writeJSON, path, mkdir, rename,
++      WINDOWS: process.platform === 'win32', delay: async () => {}, lstat, interfaceWatcher: undefined,
+       snapshotWorkspace, status: noop, stopWorker: noop, openContent: noop, publishRelease: noop,
+       buildMenu: noop, publish: noop, launchRuntime, boot };
+     const runUpdate = new Function(...Object.keys(helpers), 'manifest',
+@@ -79,3 +84,54 @@ test('a prepared update keeps student memory on success and restores it if the n
+     assert.equal(recovered, fail);
+   }
+ });
++
++test('Windows rollback recovers from the backup even when the workspace cannot be moved', async t => {
++  const main = await readFile(new URL('../src/main.mjs', import.meta.url), 'utf8');
++  const body = main.slice(main.indexOf('async function recoverInterruptedUpgrade()'), main.indexOf('async function prepareUpgrade('));
++  for (const persistent of [false, true]) {
++    const root = await mkdtemp(path.join(os.tmpdir(), 'kaixin-recovery-lock-'));
++    t.after(() => rm(root, { recursive: true, force: true }));
++    const runtimeHome = path.join(root, 'workspace');
++    const backup = path.join(root, 'backups', 'before-test');
++    const locationFile = path.join(root, 'workspace-location.json');
++    const transactionFile = path.join(root, 'upgrade.json');
++    const activeFile = path.join(root, 'active.json');
++    const previous = { runtimeId: 'previous' };
++    const active = { runtimeId: 'candidate' };
++    const transaction = { phase: 'testing', previous, backup };
++    for (const dir of [backup, runtimeHome]) await mkdir(dir, { recursive: true });
++    await writeFile(path.join(runtimeHome, 'learning.txt'), 'preserved interrupted copy');
++    await writeFile(path.join(backup, 'learning.txt'), 'original learning record');
++    const writeJSON = (file, data) => writeFile(file, JSON.stringify(data));
++    await writeJSON(activeFile, active);
++    await writeJSON(transactionFile, transaction);
++    let attempts = 0;
++    const denied = Object.assign(new Error('EPERM: workspace still open'), { code: 'EPERM' });
++    const helpers = { userRoot: root, runtimeHome, transactionFile, activeFile, WINDOWS: true,
++      path, lstat, interfaceWatcher: undefined,
++      readJSON, writeJSON, status: () => {}, delay: async () => {}, snapshotWorkspace,
++      rename: (...args) => {
++        if (++attempts <= 2 || persistent) throw denied;
++        return rename(...args);
++      },
++    };
++    const createRecovery = new Function(...Object.keys(helpers), body + '\nreturn async () => { await recoverInterruptedUpgrade(); return runtimeHome; };');
++    const selected = await createRecovery(...Object.values(helpers))();
++    assert.equal(attempts, persistent ? 4 : 3);
++    assert.deepEqual(await readJSON(activeFile), previous);
++    assert.equal((await readJSON(transactionFile)).phase, 'recovered');
++    assert.equal(await readFile(path.join(runtimeHome, 'learning.txt'), 'utf8'),
++      persistent ? 'preserved interrupted copy' : 'original learning record');
++    assert.equal(await readFile(path.join(selected, 'learning.txt'), 'utf8'), 'original learning record');
++    if (persistent) {
++      assert.notEqual(selected, runtimeHome);
++      await writeJSON(transactionFile, transaction);
++      assert.equal(await createRecovery(...Object.values(helpers))(), selected);
++      assert.equal(attempts, 4);
++      assert.equal((await readJSON(transactionFile)).phase, 'recovered');
++    } else {
++      assert.equal(selected, runtimeHome);
++      assert.equal(await readJSON(locationFile), null);
++    }
++  }
++});
+diff --git a/apps/desktop/test/runtime.test.mjs b/apps/desktop/test/runtime.test.mjs
+index 0b4e577fc848b8e7bc44d7f5cff8da49affcfb1f..d93d6117a6ceabaf9fc938bb94b982a6b91b0adf 100644
+--- a/apps/desktop/test/runtime.test.mjs
++++ b/apps/desktop/test/runtime.test.mjs
+@@ -7,7 +7,7 @@ import os from 'node:os';
+ import path from 'node:path';
+ import { execFileSync } from 'node:child_process';
+ import { localURL, externalURL, validateConfig } from '../src/config.mjs';
+-import { canonicalManifest, verifyManifest, installBundle, sha256, shouldUseBundledUpdate } from '../src/bundles.mjs';
++import { canonicalManifest, verifyManifest, extractVerifiedArchive, installBundle, sha256, shouldUseBundledUpdate } from '../src/bundles.mjs';
+ import { runtimeLayout, systemTar } from '../src/platform.mjs';
+ import { ProcessGroup, availablePort, probe, waitReady } from '../src/processes.mjs';
+ import { SourceRuntime, stageBundledWeb } from '../src/runtime.mjs';
+@@ -87,6 +87,23 @@ test('a signed bundle installs from and into paths containing spaces and Chinese
+   assert.deepEqual((await installBundle(manifestFile, path.join(root, '用户 data'), publicKey)).manifest, manifest);
+ });
+ 
++test('runtime extraction drains large diagnostics and reports a real failure', async t => {
++  const root = await mkdtemp(path.join(os.tmpdir(), 'DeepTutor 解包 '));
++  t.after(() => rm(root, { recursive: true, force: true }));
++  const archive = path.join(root, 'incoming');
++  await writeFile(archive, 'test archive');
++  const extractor = [
++    '-e',
++    "process.stderr.write('first diagnostic\\n' + 'x'.repeat(2 * 1024 ** 2));"
++      + " process.stdin.pipe(require('node:fs').createWriteStream('unpacked'));"
++      + " process.exitCode = Number(process.argv[1]);",
++  ];
++  await extractVerifiedArchive(archive, root, process.execPath, [...extractor, '0']);
++  assert.equal(await readFile(path.join(root, 'unpacked'), 'utf8'), 'test archive');
++  await assert.rejects(extractVerifiedArchive(archive, root, process.execPath, [...extractor, '2']), error =>
++    error.message.startsWith('Runtime extraction failed (2). first diagnostic') && error.message.length < 4200);
++});
++
+ test('stopping attach mode never stops the attached server', async t => {
+   const server = http.createServer((_req, res) => res.end('ready'));
+   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+diff --git a/deeptutor/services/student_learning/desktop_update.py b/deeptutor/services/student_learning/desktop_update.py
+index 96baa5caee29bbdc853e1c41e5334a9a053c9d3b..eeb05772a7b2f5e9a021b3c40736e3048404b015 100644
+--- a/deeptutor/services/student_learning/desktop_update.py
++++ b/deeptutor/services/student_learning/desktop_update.py
+@@ -19,8 +19,20 @@ def desktop_context():
+     if not executable or runtime.parent.name != "runtimes":
+         return None
+     profile = runtime.parent.parent
+-    if Path(os.environ.get("DEEPTUTOR_HOME", "")).resolve() != (profile / "workspace").resolve():
+-        return None
++    home = Path(os.environ.get("DEEPTUTOR_HOME", "")).resolve()
++    if home != (profile / "workspace").resolve():
++        if sys.platform != "win32":
++            return None
++        try:
++            location = json.loads((profile / "workspace-location.json").read_text(encoding="utf-8"))
++            name = location.get("name") if isinstance(location, dict) else None
++            if not isinstance(name, str) or not re.fullmatch(r"workspace-recovered-\d{13}", name):
++                return None
++            recovered = profile / name
++            if home != recovered or not recovered.is_dir():
++                return None
++        except (OSError, ValueError):
++            return None
+     executable = Path(executable).resolve(strict=True)
+     parent = None
+     for process in psutil.Process().parents():
+diff --git a/tests/services/test_restore_ui_preferences.py b/tests/services/test_restore_ui_preferences.py
+index e4ecdcdec418aa5e8bb1a3346c48c932e8def8a1..f0df3229ad2d957189ffa3958cf92288fe8246cf 100644
+--- a/tests/services/test_restore_ui_preferences.py
++++ b/tests/services/test_restore_ui_preferences.py
+@@ -1,6 +1,7 @@
+ import hashlib
+ import json
+ from concurrent.futures import ThreadPoolExecutor
++from types import SimpleNamespace
+ 
+ import pytest
+ 
+@@ -88,6 +89,31 @@ def test_installed_build_uses_running_runtime_not_active_or_latest(tmp_path, mon
+         "build_id": runtime_id, "source_commit": "a" * 40}
+ 
+ 
++def test_windows_launcher_restarts_from_a_recorded_recovered_workspace(tmp_path, monkeypatch):
++    profile = tmp_path / "profile"
++    runtime = profile / "runtimes" / "current"
++    service = runtime / "core/deeptutor/services/student_learning/desktop_update.py"
++    service.parent.mkdir(parents=True)
++    monkeypatch.setattr(desktop_update, "__file__", str(service))
++    monkeypatch.setattr(desktop_update.sys, "platform", "win32")
++    launcher = tmp_path / "scholar.exe"
++    launcher.touch()
++    parent = SimpleNamespace(exe=lambda: str(launcher), pid=42, create_time=lambda: 12.0)
++    monkeypatch.setattr(desktop_update.psutil, "Process", lambda: SimpleNamespace(parents=lambda: [parent]))
++    monkeypatch.setenv("DEEPTUTOR_ELECTRON_EXECUTABLE", str(launcher))
++    (runtime / "installed.json").write_text('{}', encoding="utf-8")
++    recovered = profile / "workspace-recovered-1795278000000"
++    recovered.mkdir()
++    monkeypatch.setenv("DEEPTUTOR_HOME", str(recovered))
++    assert desktop_update.desktop_context() is None
++    location = profile / "workspace-location.json"
++    location.write_text(json.dumps({"name": recovered.name}), encoding="utf-8")
++    context = desktop_update.desktop_context()
++    assert (context["profileRoot"], context["appPid"]) == (str(profile.resolve()), 42)
++    location.write_text(json.dumps({"name": "../" + recovered.name}), encoding="utf-8")
++    assert desktop_update.desktop_context() is None
++
++
+ @pytest.mark.parametrize("bad", [None, [], {"runtimeId": "other", "coreVersion": "1.7.1"},
+                                    {"runtimeId": "runtime", "coreVersion": "../unsafe"}])
+ def test_unreadable_or_wrong_runtime_never_claims_latest(tmp_path, monkeypatch, bad):
