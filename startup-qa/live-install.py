@@ -34,7 +34,9 @@ learning = profile/'workspace/data/user/memory/L3/profile.md'
 learning.parent.mkdir(parents=True)
 learning.write_text('isolated synthetic learning history')
 env = dict(os.environ, OPEN_DEEPTUTOR_TEST_HOME=str(profile))
-proc = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'repair/repair.ps1'),
+env.pop('PSModulePath', None)
+powershell = Path(env['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
+proc = subprocess.run([str(powershell),'-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'repair/repair.ps1'),
                        '-AppDirectory',str(executable.parent)],env=env,capture_output=True,timeout=40)
 (proof/'repair-console.log').write_bytes(proc.stdout+proc.stderr)
 assert proc.returncode==0, repr(proc.stdout+proc.stderr)
