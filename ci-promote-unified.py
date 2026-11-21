@@ -115,6 +115,24 @@ def main(config_url, config_hash):
     assert api('releases/latest')['tag_name']=='student-20261117-k12-18'
     write(Path('PUBLICATION-RECEIPT.json'),{'staged':True,'published':False,'tag':TAG,'source_commit':config['source_commit'],
               'release_id':release['id'],'config_sha256':config_hash,'github_verified_asset_digests':len(archives)+len(config['feeds'])})
+def wait_native(native_runs):
+    deadline=time.monotonic()+1040
+    while True:
+        settled=True
+        for platform,expected in native_runs.items():
+            run=api('actions/runs/'+str(expected['id']))
+            assert run['head_sha']==expected['sha'] and run['head_branch']=='codex/k12-native-reverify-20261117-diagram-1'
+            jobs=api('actions/runs/'+str(expected['id'])+'/jobs')['jobs']
+            job,=(j for j in jobs if f'({platform},' in j['name'])
+            if job['status']=='completed':
+                assert job['conclusion']=='success', f'Native verification {platform}: {job["conclusion"]}'
+            if run['status']!='completed' or job['status']!='completed':
+                settled=False
+        if settled: return
+        if time.monotonic()>=deadline: raise TimeoutError('Native installer checks are still running')
+        print('Waiting for frozen native installer publication receipts',flush=True)
+        time.sleep(20)
+
 def artifact_receipts(native_runs):
     targets=('macos-x64','macos-arm64','windows-x64')
     assert set(native_runs)==set(targets)
@@ -234,6 +252,7 @@ def activate(config_url,config_hash,approval_url,approval_hash):
     candidate=api('releases/tags/'+TAG)
     assert candidate['target_commitish']==config['source_carrier'] and candidate['prerelease']
     globals()['rows']={row['name']:row for row in candidate['assets']}
+    wait_native(approval['native_runs'])
     installers=artifact_receipts(approval['native_runs'])
     for name,row in config['feeds'].items():
         assert verified(rows[name],row)
@@ -314,28 +333,9 @@ def activate(config_url,config_hash,approval_url,approval_hash):
         'release_repository_commit':config['source_carrier'],'installers':installers,'stable_assets':len(assets)+3,'preserved_history':historical,'native_runs':approval['native_runs'],'core_sha256':config['core_sha256']})
     gh('release','upload',TAG,Path('PUBLICATION-RECEIPT.json'),timeout=120)
 
-CONFIG_URL = "https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/27e8a9db96a0e32be6eb5baaddfa037bd54640f1/release-sources/20261121-diagram-1-stage.json"
-CONFIG_SHA = "f3d525adfa8c5543393ec96a1c04adbbdbe7820d74dcf28f4dada896702a6683"
-
-def prepare_archives():
-    raw=bytes_for(CONFIG_URL)
-    assert sha256(raw).hexdigest()==CONFIG_SHA
-    lock=json.loads(raw)
-    assert lock['tag']==TAG and api('releases/latest')['tag_name']=='student-20261117-k12-18'
-    global rows
-    rows=inventory(TAG)
-    live=inventory('core-updates')
-    pending=lock['archives']
-    defaults={name:live[name]['digest'] for name in DEFAULTS}
-    assert len(live.keys()|pending.keys())<=1000
-    assert all(verified(rows[name],row) for name,row in pending.items())
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        list(pool.map(lambda item:copy_new(*item), ((n,r) for n,r in pending.items() if n not in live)))
-    final=inventory('core-updates')
-    assert all(verified(final[name],row) for name,row in pending.items())
-    assert {name:final[name]['digest'] for name in DEFAULTS}==defaults
-    assert api('releases/latest')['tag_name']=='student-20261117-k12-18'
-    write(Path('PUBLICATION-RECEIPT.json'),{'staged_archives':list(pending),'defaults_unchanged':True,'published':False})
-
-if __name__=='__main__':
-    prepare_archives()
+if __name__ == "__main__":
+    activate(
+        "https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/27e8a9db96a0e32be6eb5baaddfa037bd54640f1/release-sources/20261121-diagram-1-stage.json",
+        "f3d525adfa8c5543393ec96a1c04adbbdbe7820d74dcf28f4dada896702a6683",
+        "https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/d7886a3ef091f983c0319f153b46a6fd70e07cdb/release-sources/20261121-diagram-1-activate.json",
+        "d1af98b7bbbd1ea5c732b2c2fe90ea77f319496810b3285e14744233d3ee12fa")
