@@ -11,30 +11,18 @@
 
 ## 本批变化
 
-1. 出题依次查长期资料、题库和教材。普通出题共用 1 秒快检，明确找原题时最长 30 秒。查完无合适原题才原创。
-2. 继续练习会沿用目标并跳过已展示的题。回看、讲解和批改走原对话。
-3. 九科新增 5,486 条逐题索引，补齐 3,243 条原题的选项。原题卡显示题干、选项、共享材料和可核验的原图。
-4. 蓝色引用紧跟对应句段，追问和重新打开历史时可回溯。
-5. 长期资料上传后后台建立图文索引。教材和资料读图沿用当前对话选模。
-6. 更新包持续收到数据时可超过原 30 分钟。保留取消、断流保护和签名校验。
+- 静态图、动态图、主动配图和参考图共用核对后的图库。动态图在正文、右栏与全屏显示完整表达式和滑块。
+- 教材蓝色链接打开实际 PDF 页，重开历史保留引用、图和答题记录。
+- 出题承接当前知识点，依次查询授权长期资料、题库和教材。各题型参加检索，合适的非选择题保留条件和出处改编成选择题。
+- 新对话的快图完成后直接显示。已安装三端支持签名增量、整包回退和学习记录保留。
+
+[查看 20261121-resource-5 的详细更新](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261121-resource-5)
 
 ## 安装与更新
 
-已有软件使用“设置 → 关于 → 检查更新”或顶部“核心 → 检查更新”，点击“下载并更新”。只有出现“重新打开完成更新”提示时才按提示重开。无需先卸载、清空聊天或删除学习目录。
+已有软件在「设置 → 关于 → 检查更新」或顶部「核心 → 检查更新」升级。默认使用 COS，访问或校验失败可回退 GitHub。
 
-完成后在“设置 → 关于 → 当前已安装版本”核对构建号包含 `20261117-k12-13`，再检查一次更新。`v1.7.1`是主版本，不能单独用来判断批次；本批配套启动器为 `20261119-updater-6`。
-
-新电脑请从[同批发行页面](https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261117-k12-13)下载对应系统的完整一组，不使用页面底部的Source code代替安装包。
-
-| 电脑 | GitHub所需文件 | 打开哪个 |
-| --- | --- | --- |
-| Windows x64 | Setup和4个Runtime，共5份，同一文件夹 | Setup.exe |
-| Intel Mac | 首卷dmg和002至005，共5份 | 只打开首卷-part.dmg |
-| Apple芯片Mac | 首卷dmg和002至004，共4份 | 只打开首卷-part.dmg |
-
-两种Mac需macOS13或以上。首次安装建议预留40GB临时空间。Windows完整ZIP先“全部解压”，Mac挂载后拖入“应用程序”。首次启动默认简体中文，填写自己的模型API；麦克风、摄像头和共享屏幕按需要授权。详细步骤及文件链接见[首次安装](INSTALL-LATEST.md)。
-
-正常更新显示下载大小与进度。本批核心约 799 MiB，首次完整安装及某些历史运行环境会更大。升级到本批并按提示重开后，应用默认通过腾讯云 COS 检查和下载更新。COS 访问或校验失败时，应用自动尝试 GitHub。旧启动器首次迁移使用 GitHub，在中国大陆请先开启 VPN。遇到错误请保留错误文字和运行日志，再核对完整构建。排查时请保留原有运行环境编号，并使用对应批次的安装文件。 [历史迁移说明](MIGRATE-LEGACY.md)
+新电脑下载对应平台的全套安装文件。GitHub 无法访问时，需要开 VPN。 [首次安装说明及三端文件](https://github.com/1281504089-cell/kaixin-k12-tutor/blob/main/INSTALL-LATEST.md)
 
 ## 学习资料与记录
 
@@ -46,6 +34,6 @@ U 盘以盘内说明和交付回执为准。安装包不包含个人学习记录
 
 ## 开发与验证
 
-完整版本、签名与回执见 [CURRENT-DESKTOP-RELEASE.json](CURRENT-DESKTOP-RELEASE.json)。源码重建按[SOURCE-RECONSTRUCTION.json](SOURCE-RECONSTRUCTION.json)、source-manifest.json及有序补丁执行；source-overlay为增量包，不能当完整源码。主分支保留薄配方，题库生成资料另按[BANK-RECOVERY.md](BANK-RECOVERY.md)核对恢复。
+完整版本、签名与回执见 [CURRENT-DESKTOP-RELEASE.json](CURRENT-DESKTOP-RELEASE.json)。源码重建按[SOURCE-RECONSTRUCTION.json](SOURCE-RECONSTRUCTION.json)、source-manifest.json及有序补丁执行；source-overlay为增量包，不能当完整源码。本批冻结源码差分与摘要见[版本源码载体](https://github.com/1281504089-cell/kaixin-k12-tutor/blob/8280c758378e646527e0fe87580a19e0f2bc452e/releases/student-20261121-resource-5.json)。主分支保留薄配方，题库生成资料另按[BANK-RECOVERY.md](BANK-RECOVERY.md)核对恢复。
 
 保留上游LICENSE与THIRD_PARTY_NOTICES.md。[上游DeepTutor](https://github.com/HKUDS/DeepTutor)。
