@@ -435,13 +435,27 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--target', choices=['macos-x64', 'macos-arm64', 'windows-x64'], required=True)
     target = parser.parse_args().target
-    url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/e1f8a67ac0194ca2069f4b7c314d2b676a2132a9/releases/student-20261121-resource-4-native.txt'
+    from hashlib import sha256 as release_gate_hash
+    import sys as release_sys
+    if release_sys.flags.optimize:
+        raise RuntimeError('Resource-5 workstation checks require Python assertions')
+    report_bytes = Path(__file__).with_name('native-local-workflow.json').read_bytes()
+    if release_gate_hash(report_bytes).hexdigest() != 'd3b403af92710ab6afed422d34294c2351497c10f744e5d613f1690a174f71e5':
+        raise RuntimeError('The Resource-5 workstation proof does not match the approved digest')
+    report = json.loads(report_bytes)
+    assert report['passed'] is True and report['source_commit'] == 'a8d4dac2292e093d68b144b26d7ef7b2716f99ad' and report['core_sha256'] == '61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8'
+    for check in ('drag_dynamic', 'dynamic_layout', 'textbook_jump', 'single_verified_question', 'history_reopen', 'alternate_phrasing_and_topic', 'non_gallery_diagram', 'fast_new_chat_completion'):
+        assert report['checks'].get(check) is True, f'Workstation check is missing: {check}'
+    url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/79a0f43907a335e50f67d438c1b19dce0b88eead/releases/student-20261121-resource-5-native.txt'
     with urlopen(url, timeout=55) as stream:
         archive = base64.b64decode(stream.read(150000).strip(), validate=True)
-    assert hashlib.sha256(archive).hexdigest() == '3d0a4ed6959744f06a120fb20758cac553b922a3390352a616b749f46e9e0b9f'
+    assert hashlib.sha256(archive).hexdigest() == 'bdf5400add758bc3ad35c03b3df1c99067526d77ad4aef183635e96e2da0aff6'
     directory = Path('resource-native-recipe').resolve()
     directory.mkdir()
     with ZipFile(io.BytesIO(archive)) as bundle:
         assert all(Path(name).name == name for name in bundle.namelist())
+        locked = json.loads(bundle.read('native-plan.json'))['lock']
+        assert locked['tag'] == 'student-20261121-resource-5' and locked['source_commit'] == 'a8d4dac2292e093d68b144b26d7ef7b2716f99ad'
+        assert locked['core_sha256'] == '61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8' and locked['source_carrier'] == '8280c758378e646527e0fe87580a19e0f2bc452e'
         bundle.extractall(directory)
     subprocess.run([sys.executable, str(directory/'diagram_ci.py'), target], check=True)
