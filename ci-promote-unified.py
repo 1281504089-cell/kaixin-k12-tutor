@@ -249,10 +249,10 @@ def activate(config_url,config_hash,approval_url,approval_hash):
     globals()['approval']=json.loads(approval_bytes:=bytes_for(approval_url))
     assert sha256(config_bytes).hexdigest()==config_hash and sha256(approval_bytes).hexdigest()==approval_hash
     assert config['source_commit']==approval['source_commit'] and config['core_sha256']==approval['core_sha256']
+    wait_native(approval['native_runs'])
     candidate=api('releases/tags/'+TAG)
     assert candidate['target_commitish']==config['source_carrier'] and candidate['prerelease']
     globals()['rows']={row['name']:row for row in candidate['assets']}
-    wait_native(approval['native_runs'])
     installers=artifact_receipts(approval['native_runs'])
     for name,row in config['feeds'].items():
         assert verified(rows[name],row)
