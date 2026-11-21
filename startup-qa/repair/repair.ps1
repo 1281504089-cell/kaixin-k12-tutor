@@ -1,4 +1,4 @@
-﻿param([string]$AppDirectory)
+﻿param([string]$AppDirectory, [switch]$UseAnotherDrive)
 $ErrorActionPreference = 'Stop'
 try {
     $name = '开心动力超级学霸'
@@ -57,6 +57,63 @@ try {
             if ((Get-Hash $file) -ne $row.Fixed) { throw '写入后校验未通过。' }
         } finally {
             if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp }
+        }
+    }
+    if ($UseAnotherDrive) {
+        $profile = Join-Path $env:LOCALAPPDATA $name
+        $item = Get-Item -LiteralPath $profile -Force -ErrorAction SilentlyContinue
+        if ($item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            if ($item.LinkType -ne 'Junction') { throw '检测到自定义数据目录。请使用普通启动修复。' }
+            Write-Host ('已配置其他磁盘的数据目录：' + $item.Target)
+        } else {
+            foreach ($entry in @('workspace','workspace-location.json','active.json','upgrade.json','backups')) {
+                if (Test-Path -LiteralPath (Join-Path $profile $entry)) {
+                    throw '该电脑已有学习目录或升级记录。请使用普通启动修复，文件已保留。'
+                }
+            }
+            $systemVolume = [IO.Path]::GetPathRoot($profile)
+            $required = 20GB
+            $drives = @([IO.DriveInfo]::GetDrives() | Where-Object {
+                $_.IsReady -and $_.DriveType -eq 'Fixed' -and $_.DriveFormat -eq 'NTFS' -and
+                $_.RootDirectory.FullName -ne $systemVolume -and $_.AvailableFreeSpace -ge $required
+            } | Sort-Object AvailableFreeSpace -Descending)
+            if (-not $drives.Count) { throw '没有找到其他可用的 NTFS 硬盘分区（需至少 20 GB 可用）。请在系统盘腾出足够空间后点重试。' }
+            $identity = [Security.Principal.WindowsIdentity]::GetCurrent().User
+            $acl = New-Object Security.AccessControl.DirectorySecurity
+            $acl.SetAccessRuleProtection($true, $false)
+            foreach ($sid in @($identity, [Security.Principal.SecurityIdentifier]::new('S-1-5-18'))) {
+                $rule = [Security.AccessControl.FileSystemAccessRule]::new($sid, 'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
+                $acl.AddAccessRule($rule)
+            }
+            $alternate = $null
+            foreach ($drive in $drives) {
+                $target = Join-Path $drive.RootDirectory.FullName ('Kaixin-' + [Guid]::NewGuid().ToString('N').Substring(0,12))
+                try {
+                    [void][IO.Directory]::CreateDirectory($target, $acl)
+                    $alternate = $target
+                    break
+                } catch { Write-Host ('无法在 ' + $drive.Name + ' 创建目录：' + $_.Exception.Message) }
+            }
+            if (-not $alternate) { throw '其他硬盘分区无法写入。请检查可用空间和写入权限。' }
+            $original = $profile + '.before-fresh-storage-' + [Guid]::NewGuid().ToString('N').Substring(0,8)
+            $moved = $false
+            $junctionCreated = $false
+            try {
+                if ($item) {
+                    [IO.Directory]::Move($profile, $original)
+                    $moved = $true
+                }
+                [void](New-Item -Path $profile -ItemType Junction -Target $alternate)
+                $junctionCreated = $true
+                $link = Get-Item -LiteralPath $profile -Force
+                if ($link.LinkType -ne 'Junction' -or $link.Target -notcontains $alternate) { throw '数据目录核对失败。' }
+            } catch {
+                if ($junctionCreated) { [IO.Directory]::Delete($profile) }
+                if ($moved -and -not (Test-Path -LiteralPath $profile)) { [IO.Directory]::Move($original, $profile) }
+                [IO.Directory]::Delete($alternate)
+                throw
+            }
+            Write-Host ('学习数据和运行资源将写入 ' + $alternate) -ForegroundColor Green
         }
     }
     Write-Host ('已修复启动程序，正在打开 ' + $app) -ForegroundColor Green

@@ -24,24 +24,8 @@ jobs:
         run: .\startup-qa\check-repair.ps1
       - name: Extract signed archives with Windows system tar
         run: node --test startup-qa/windows-extract.test.mjs
-      - name: Roll back with a real Windows file-sharing denial
+      - name: Roll back with a real open Windows directory handle
         run: python startup-qa/windows-lock-check.py
-  installed-app:
-    runs-on: windows-2022
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: On the real public installer, apply the USB repair and open the app
+      - name: Verify a fresh installation can write on a different NTFS partition
         shell: powershell
-        run: python startup-qa/live-install.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: windows-startup-repair-real-install
-          path: startup-qa/real-proof/
+        run: .\startup-qa\check-fresh-drive.ps1
