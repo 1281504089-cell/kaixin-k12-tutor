@@ -1,45 +1,66 @@
-﻿$ErrorActionPreference = 'Stop'
+﻿param([string]$AppDirectory)
+$ErrorActionPreference = 'Stop'
 try {
     $name = '开心动力超级学霸'
-    $reg = Get-ItemProperty -LiteralPath (Join-Path 'HKCU:\Software' $name) -Name InstallDir -ErrorAction SilentlyContinue
-    $default = Join-Path (Join-Path $env:LOCALAPPDATA 'Programs') $name
-    $app = @($reg.InstallDir, $default) | Where-Object { $_ -and (Test-Path -LiteralPath (Join-Path $_ ($name + '.exe')) -PathType Leaf) } | Select-Object -First 1
-    if (-not $app) { throw '找不到已安装的程序。请先解压完整安装 ZIP，运行 Setup.exe。' }
-    $exe = Join-Path $app ($name + '.exe')
-    $res = Join-Path $app 'resources\app'
-    $package = Get-Content -LiteralPath (Join-Path $res 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($package.kaixinLauncherBuild -ne '20261121-updater-8') { throw '当前安装不是 k12-18 本批启动器，暂未改动。' }
-    $file = Join-Path $res 'src\bundles.mjs'
-    $payload = Join-Path $PSScriptRoot 'bundles.mjs'
-    $old = 'aaff9df354910a87efb44705ab7398466a4498720bdee756e4fb134f7cf0dea5'
-    $fix = '2e7d7991ab2f590d79fda28fee3a5c9587edc20024834fa5a3ace4419b509015'
-    function Get-Hash([string]$path) { (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash }
-    $current = Get-Hash $file
-    if ($current -ne $old -and $current -ne $fix) { throw '当前启动文件与发行版校验值不一致，暂未改动。' }
-    if ((Get-Hash $payload) -ne $fix) { throw 'U 盘修复文件校验失败。' }
-    $running = @(Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe })
+    $binary = $name + '.exe'
+    $running = @(Get-Process -Name $name -ErrorAction SilentlyContinue)
+    if ($AppDirectory) { $candidates = @($AppDirectory) }
+    else {
+        $candidates = @($running | Where-Object { $_.MainWindowHandle -and $_.Path } | Sort-Object StartTime -Descending | ForEach-Object { Split-Path -Parent $_.Path })
+        $registered = Get-ItemProperty -LiteralPath (Join-Path 'HKCU:\Software' $name) -Name InstallDir -ErrorAction SilentlyContinue
+        $candidates += $registered.InstallDir
+        $candidates += (Join-Path (Join-Path $env:LOCALAPPDATA 'Programs') $name)
+        $candidates += @([IO.DriveInfo]::GetDrives() | Where-Object { $_.IsReady -and $_.DriveType -in @('Fixed','Removable') } | ForEach-Object { Join-Path $_.RootDirectory.FullName $name })
+        $candidates += (Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) $name)
+    }
+    $edits = @(
+        @{Name='bundles.mjs'; Old='aaff9df354910a87efb44705ab7398466a4498720bdee756e4fb134f7cf0dea5'; Fixed='2e7d7991ab2f590d79fda28fee3a5c9587edc20024834fa5a3ace4419b509015'},
+        @{Name='main.mjs'; Old='73482a9a12c3ede23844ca898b8e514834700ed45c6e7568c68976e42fe4d1e2'; Fixed='56083aea41456c8982b168c663e48b432711bfa7d3ca1eb2826f33cd1ed6a3ec'}
+    )
+    function Get-Hash([string]$file) { (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash }
+    foreach ($row in $edits) {
+        if ((Get-Hash (Join-Path $PSScriptRoot $row.Name)) -ne $row.Fixed) { throw '修复文件校验未通过。' }
+    }
+    $app = $null
+    foreach ($dir in @($candidates | Where-Object { $_ } | Select-Object -Unique)) {
+        if (-not (Test-Path -LiteralPath (Join-Path $dir $binary) -PathType Leaf)) { continue }
+        $res = Join-Path $dir 'resources\app'
+        $meta = Join-Path $res 'package.json'
+        if (-not (Test-Path -LiteralPath $meta -PathType Leaf)) { continue }
+        $package = Get-Content -LiteralPath $meta -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($package.kaixinLauncherBuild -ne '20261121-updater-8') { continue }
+        $misses = @($edits | Where-Object {
+            $target = Join-Path (Join-Path $res 'src') $_.Name
+            -not (Test-Path -LiteralPath $target -PathType Leaf) -or (Get-Hash $target) -notin @($_.Old,$_.Fixed)
+        })
+        if (-not $misses.Count) { $app = $dir; break }
+    }
+    if (-not $app) { throw '没有找到校验一致的 k12-18 程序。请打开正在使用的那份程序所在文件夹后重试。' }
     foreach ($child in $running) { if ($child.MainWindowHandle) { [void]$child.CloseMainWindow() } }
     $deadline = [DateTime]::UtcNow.AddSeconds(12)
     do {
-        $running = @(Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe })
+        $running = @(Get-Process -Name $name -ErrorAction SilentlyContinue)
         if ($running.Count) { Start-Sleep -Milliseconds 250 }
     } while ($running.Count -and [DateTime]::UtcNow -lt $deadline)
-    if ($running.Count) { throw '请关闭超级学霸窗口，再双击一次修复。' }
-    if ($current -ne $fix) {
-        $backup = $file + '.before-k12-18-repair'
-        if (Test-Path -LiteralPath $backup) { throw '启动文件已有备份，暂未覆盖。' }
+    if ($running.Count) { throw '程序仍在运行。请重启 Windows 后再运行修复，只打开一份软件。' }
+    $src = Join-Path $app 'resources\app\src'
+    foreach ($row in $edits) {
+        $file = Join-Path $src $row.Name
+        if ((Get-Hash $file) -eq $row.Fixed) { continue }
+        $backup = $file + '.before-k12-18-recovery'
+        if (Test-Path -LiteralPath $backup) { throw '该启动文件已有备份，暂未覆盖。' }
         $temp = $file + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
         try {
-            Copy-Item -LiteralPath $payload -Destination $temp
-            if ((Get-Hash $temp) -ne $fix -or (Get-Hash $file) -ne $old) { throw '写入前校验失败。' }
+            Copy-Item -LiteralPath (Join-Path $PSScriptRoot $row.Name) -Destination $temp
+            if ((Get-Hash $temp) -ne $row.Fixed -or (Get-Hash $file) -ne $row.Old) { throw '写入前校验未通过。' }
             [IO.File]::Replace($temp, $file, $backup, $true)
-            if ((Get-Hash $file) -ne $fix) { throw '写入后校验失败。' }
+            if ((Get-Hash $file) -ne $row.Fixed) { throw '写入后校验未通过。' }
         } finally {
             if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp }
         }
     }
-    Start-Process -FilePath $exe -WorkingDirectory $app
-    Write-Host '启动修复已写入，程序会重新打开。第一次打开可能需要几分钟解包。' -ForegroundColor Green
+    Write-Host ('已修复启动程序，正在打开 ' + $app) -ForegroundColor Green
+    Start-Process -FilePath (Join-Path $app $binary) -WorkingDirectory $app
     exit 0
 } catch {
     Write-Host $_.Exception.Message -ForegroundColor Red

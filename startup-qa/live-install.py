@@ -34,10 +34,13 @@ learning = profile/'workspace/data/user/memory/L3/profile.md'
 learning.parent.mkdir(parents=True)
 learning.write_text('isolated synthetic learning history')
 env = dict(os.environ, OPEN_DEEPTUTOR_TEST_HOME=str(profile))
-proc = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'repair/repair.ps1')],
-                      env=env,check=True,capture_output=True,timeout=40)
+proc = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'repair/repair.ps1'),
+                       '-AppDirectory',str(executable.parent)],env=env,capture_output=True,timeout=40)
+(proof/'repair-console.log').write_bytes(proc.stdout+proc.stderr)
+assert proc.returncode==0, repr(proc.stdout+proc.stderr)
+assert (target.parent/'main.mjs').read_bytes() == (root/'repair/main.mjs').read_bytes()
 assert target.read_bytes() == (root/'repair/bundles.mjs').read_bytes()
-assert target.with_name('bundles.mjs.before-k12-18-repair').read_bytes() == (root/'original-bundles.mjs').read_bytes()
+assert target.with_name('bundles.mjs.before-k12-18-recovery').read_bytes() == (root/'original-bundles.mjs').read_bytes()
 started = time.monotonic()
 log = profile/'logs/runtime.log'
 try:

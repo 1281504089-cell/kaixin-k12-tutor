@@ -10,14 +10,16 @@ $sentinel = New-Item -Type Directory -Force $env:OPEN_DEEPTUTOR_TEST_HOME
 $sentinelPath = Join-Path $sentinel.FullName 'learning.txt'
 [IO.File]::WriteAllText($sentinelPath, 'synthetic learning data')
 Copy-Item 'startup-qa/original-bundles.mjs' $target
+Copy-Item 'startup-qa/original-main.mjs' (Join-Path $src.FullName 'main.mjs')
 Copy-Item (Join-Path $env:SystemRoot 'System32/where.exe') (Join-Path $installed ($brand+'.exe'))
 [IO.File]::WriteAllText((Join-Path $app 'package.json'), '{"kaixinLauncherBuild":"20261121-updater-8"}')
 $before = (Get-FileHash -LiteralPath $target).Hash
 $after = (Get-FileHash -LiteralPath 'startup-qa/repair/bundles.mjs').Hash
 for ($i = 0; $i -lt 2; $i++) {
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "startup-qa/repair/repair.ps1"
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "startup-qa/repair/repair.ps1" -AppDirectory $installed
     if ($LASTEXITCODE -ne 0) { throw 'The Windows repair returned a failure' }
     if ((Get-FileHash -LiteralPath $target).Hash -ne $after) { throw 'Installed bytes mismatch' }
-    if ((Get-FileHash -LiteralPath ($target+'.before-k12-18-repair')).Hash -ne $before) { throw 'Backup bytes mismatch' }
+    if ((Get-FileHash -LiteralPath (Join-Path $src.FullName 'main.mjs')).Hash -ne (Get-FileHash 'startup-qa/repair/main.mjs').Hash) { throw 'Recovery code mismatch' }
+    if ((Get-FileHash -LiteralPath ($target+'.before-k12-18-recovery')).Hash -ne $before) { throw 'Backup bytes mismatch' }
 }
 if ([IO.File]::ReadAllText($sentinelPath) -ne 'synthetic learning data') { throw 'Learning data changed' }
