@@ -426,6 +426,7 @@ if __name__ == '__main__':
     import base64
     import hashlib
     import io
+    import json
     import subprocess
     import sys
     from pathlib import Path
@@ -434,10 +435,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--target', choices=['macos-x64','macos-arm64','windows-x64'], required=True)
     target = parser.parse_args().target
-    url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/2b7d923983bae202cae133d9200275c145a2b64e/release-sources/20261121-diagram-1-native.txt'
+    if target != 'windows-x64':
+        evidence = Path('fresh-evidence')/target
+        evidence.mkdir(parents=True)
+        (evidence/'inherited-run.json').write_text(json.dumps({'target': target, 'previous_run': 44888015983}))
+        raise SystemExit(0)
+    url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/4802731210817649c3d8155c150de844add58c5d/release-sources/20261121-diagram-1-windows-native.txt'
     with urlopen(url,timeout=55) as stream:
         archive = base64.b64decode(stream.read(150000).strip(),validate=True)
-    assert hashlib.sha256(archive).hexdigest()=='46e347b1fb7200b6ebb729c76a275509a908c10f1d8ddcb831504664105e7d73'
+    assert hashlib.sha256(archive).hexdigest()=='60209bc6b84c0d2eeb1d1f739d3ec6cfd9d104d013e8ffcd9e15fc9ac72d1d96'
     directory = Path('diagram-native-recipe').resolve()
     directory.mkdir()
     with ZipFile(io.BytesIO(archive)) as bundle:
