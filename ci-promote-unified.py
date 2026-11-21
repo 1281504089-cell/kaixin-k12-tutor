@@ -11,7 +11,7 @@ import subprocess
 import time
 
 REPO = os.environ['GH_REPO']
-TAG = 'student-20261121-resource-2'
+TAG = 'student-20261121-resource-4'
 COS = 'https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/'
 WORK = Path('publication-work')
 RECEIPT = WORK/'previous'
@@ -91,7 +91,7 @@ def main(config_url, config_hash):
     config_raw=bytes_for(config_url)
     assert sha256(config_raw).hexdigest()==config_hash
     config=json.loads(config_raw)
-    assert config['tag']==TAG and config['source_commit']=='5225dc95565a0b805d3368effc91008713f97a38'
+    assert config['tag']==TAG and config['source_commit']=='7bcb3359941fa09dd944d25b70a45bef6ee5ceee'
     assert api('releases/latest')['tag_name']=='student-20261121-diagram-1'
     exists=subprocess.run(['gh','release','view',TAG],capture_output=True,timeout=30)
     if exists.returncode:
@@ -117,5 +117,5 @@ def main(config_url, config_hash):
     write(Path('PUBLICATION-RECEIPT.json'),{'staged':True,'published':False,'tag':TAG,'source_commit':config['source_commit'],
               'release_id':release['id'],'config_sha256':config_hash,'github_verified_asset_digests':len(archives)+len(config['feeds'])})
 
-if __name__ == '__main__':
-    main('https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/18b6458be74d02e1a34e35531b6c4987d259aa69/releases/student-20261121-resource-2-stage.json', 'a59b114922f3515e1f95df8eb51d8195d1012555ef1dec0974e859135d80694f')
+if __name__=='__main__':
+    main('https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/44b0dcc7657babb5a6224ee9d0b9b949e2ed1bf9/releases/student-20261121-resource-4-stage.json', '983b5fbf94f5024ca564f1c7dc7f4ad950aa57dee6d9fc3a09a1ecd211f295fe')
