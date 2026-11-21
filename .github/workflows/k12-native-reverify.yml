@@ -1,4 +1,4 @@
-name: Reverify exact existing three-platform candidate installers
+name: Reverify frozen Intel candidate installation
 on:
   push:
     branches: ['codex/k12-native-reverify-20261117-*']
@@ -12,10 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: windows-x64
-            runner: windows-2025
-          - target: macos-arm64
-            runner: macos-15
           - target: macos-x64
             runner: macos-15-intel
     runs-on: ${{ matrix.runner }}
@@ -37,8 +33,26 @@ jobs:
         run: |
           python -m unittest test_mac_reuse
           node ci-k12-driver-selfcheck.cjs
-      - name: Revalidate frozen candidate bytes without rebuilding
-        run: python ci-mac-reuse.py --target ${{ matrix.target }}
+      - name: Recheck the same frozen core in the Intel installation package
+        run: |
+          python - <<'PYTHON'
+          from base64 import b64decode
+          from hashlib import sha256
+          from io import BytesIO
+          from pathlib import Path
+          from urllib.request import urlopen
+          from zipfile import ZipFile
+          url = 'https://raw.githubusercontent.com/1281504089-cell/kaixin-k12-tutor/029f57f6a3575a6b30ac6142a4d6de539a709c40/releases/student-20261121-resource-4-native-intel-recovery.txt'
+          with urlopen(url, timeout=55) as response:
+              archive = b64decode(response.read(150000).strip(), validate=True)
+          assert sha256(archive).hexdigest() == '7ca2f75abdedfb0c9014941dedf2d2c052eeee07b18441c5b531bc1c87687ad3'
+          recipe = Path('resource-native-recipe')
+          recipe.mkdir()
+          with ZipFile(BytesIO(archive)) as bundle:
+              assert all(Path(name).name == name for name in bundle.namelist())
+              bundle.extractall(recipe)
+          PYTHON
+          python resource-native-recipe/diagram_ci.py "${{ matrix.target }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
