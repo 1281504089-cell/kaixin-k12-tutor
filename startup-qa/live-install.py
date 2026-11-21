@@ -21,6 +21,7 @@ work.mkdir()
 powershell = Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
 env = dict(os.environ)
 env.pop('PSMODULEPATH', None)
+env.pop('OPEN_DEEPTUTOR_TEST_HOME', None)
 subprocess.run([str(powershell), '-NoProfile', '-Command',
                 "Get-Command Get-FileHash -ErrorAction Stop | Out-Null"], env=env, check=True, timeout=20)
 
@@ -35,18 +36,20 @@ assert executable.is_file()
 target = resources/'app/src/bundles.mjs'
 assert target.read_bytes() == (root/'original-bundles.mjs').read_bytes()
 shutil.rmtree(downloads)
-profile = work/'中文学习账号'
-learning = profile/'workspace/data/user/memory/L3/profile.md'
-learning.parent.mkdir(parents=True)
-learning.write_text('isolated synthetic learning history')
-env['OPEN_DEEPTUTOR_TEST_HOME'] = str(profile)
+system = Path(os.environ['LOCALAPPDATA'])
+env['LOCALAPPDATA'] = str(system / f"KaixinIsolated-{os.environ['GITHUB_RUN_ID']}")
+Path(env['LOCALAPPDATA']).mkdir()
+profile = Path(env['LOCALAPPDATA']) / '开心动力超级学霸'
 proc = subprocess.run([str(powershell),'-NoProfile','-ExecutionPolicy','Bypass','-File',str(root/'repair/repair.ps1'),
-                       '-AppDirectory',str(executable.parent)],env=env,capture_output=True,timeout=40)
+                       '-AppDirectory',str(executable.parent),'-UseAnotherDrive'],env=env,capture_output=True,timeout=40)
 (proof/'repair-console.log').write_bytes(proc.stdout+proc.stderr)
 assert proc.returncode==0, repr(proc.stdout+proc.stderr)
 assert (target.parent/'main.mjs').read_bytes() == (root/'repair/main.mjs').read_bytes()
 assert target.read_bytes() == (root/'repair/bundles.mjs').read_bytes()
 assert target.with_name('bundles.mjs.before-k12-18-recovery').read_bytes() == (root/'original-bundles.mjs').read_bytes()
+physical = profile.resolve(strict=True)
+assert physical.drive != profile.drive, (physical, profile)
+print('Actual runtime writes to', physical.drive, flush=True)
 started = time.monotonic()
 log = profile/'logs/runtime.log'
 try:
@@ -61,10 +64,10 @@ try:
             assert installed['commit']==metadata['source_commit']
             with urlopen(backend[1]+'/health/ready',timeout=12) as response: assert response.status==200
             with urlopen(frontend[1]+'/chat',timeout=12) as response: assert response.status==200
-            assert learning.read_text() == 'isolated synthetic learning history'
+            assert (physical/'workspace/data/user').is_dir()
             (proof/'PASSED.json').write_text(json.dumps({
                 'passed':True,'platform':'windows-x64','installed_runtime':installed['runtimeId'],
-                'source_commit':installed['commit'],'existing_learning_data_retained':True,
+                'source_commit':installed['commit'],'runtime_volume':physical.drive,'switched_volume':True,
                 'boot_seconds':round(time.monotonic()-started,2),'repair_sha256':sha256(target.read_bytes()).hexdigest(),
                 'archive_sha256_verified_by_installed_app':True,'run_id':os.environ['GITHUB_RUN_ID'],
             },indent=2))

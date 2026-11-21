@@ -36,5 +36,6 @@ try {
 } finally {
     if ((Get-Item -LiteralPath $profile -Force).LinkType -eq 'Junction') { [IO.Directory]::Delete($profile) }
     if ($target -and (Test-Path -LiteralPath $target)) { Remove-Item -LiteralPath $target -Recurse }
+    @(Get-Process -Name $name -ErrorAction SilentlyContinue) | Where-Object { $_.Path -eq (Join-Path $appDir ($name+'.exe')) } | Wait-Process -Timeout 10
     Remove-Item -LiteralPath $env:LOCALAPPDATA -Recurse
 }
