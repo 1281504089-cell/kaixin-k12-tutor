@@ -1,0 +1,34 @@
+{
+  "source_commit": "64ec3957abd504086777df87becf3851f5908aed",
+  "core_sha256": "9a451de6f9764c1c663c158569852d64d8345ba70e88c84a32ace6a4b5444b1d",
+  "native_runs": {
+    "macos-x64": {
+      "id": 44888015983,
+      "sha": "28b1adc53c8da6d60ed259b5bb8061b4aed2dd7f"
+    },
+    "macos-arm64": {
+      "id": 44888015983,
+      "sha": "28b1adc53c8da6d60ed259b5bb8061b4aed2dd7f"
+    },
+    "windows-x64": {
+      "id": 44890196116,
+      "sha": "3e136620247e82324306b30080f330900521978e"
+    }
+  },
+  "local_intel": {
+    "passed": true,
+    "target": "macos-x64",
+    "source_commit": "64ec3957abd504086777df87becf3851f5908aed",
+    "network": {
+      "filename": "kaixin-core-delta-integrated-2-to-diagram-1.tar.gz",
+      "status": 200,
+      "bytes": 652736,
+      "sha256": "e323427660c5405dfd4015080be1daa4f54ed32905d16a2b798e865ff2e6e6fb"
+    },
+    "signed_restart": true,
+    "check_again_current": true,
+    "learning_memory_sha256": "e07f68e2a21d9e9ea0e7530c28ae418d75cc0b11936efc095382818d49dfb4d1"
+  },
+  "frozen_package_figure_tests": 95,
+  "cos_stable_receipt_sha256": "2c5f89c0e7adf7bf08ebd18d42861d72aaee29e40e13138a27084f6d13c7d7cf"
+}
