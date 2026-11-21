@@ -78,6 +78,9 @@ def run_probe(executable, work, profile, spec, evidence, label, native=False):
                 assert time.monotonic() < deadline, 'No receipt from native Apple Silicon app'
                 time.sleep(1)
         finally:
+            runtime_log = profile/'logs/runtime.log'
+            if runtime_log.is_file():
+                shutil.copyfile(runtime_log, evidence/(label+'-runtime.log'))
             if process.poll() is None:
                 process.terminate()
                 process.wait(timeout=20)
@@ -129,6 +132,8 @@ def main():
     app=work/'Electron.app'
     resources=app/'Contents/Resources'
     (resources/'default_app.asar').unlink(missing_ok=True)
+    (resources/'seed').mkdir()
+    shutil.copyfile(stable, resources/'seed/runtime.json')
     checked_launcher(resources,old_runtime,old['commit'])
     metadata=app/'Contents/Info.plist'
     app_config=plistlib.loads(metadata.read_bytes())
