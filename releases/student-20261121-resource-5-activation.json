@@ -1,0 +1,62 @@
+{
+  "approved": true,
+  "tag": "student-20261121-resource-5",
+  "source_commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad",
+  "core_sha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+  "stage_sha256": "356e6c3f890530060341436cc77c4ee12b020f5a6bc8c3086e7e03b0ce99eb90",
+  "stage_release_id": 453846225,
+  "native_runs": {
+    "macos-x64": {
+      "id": 44928344396,
+      "sha": "183bfe088d371c33cb36be499689c2d304da3be1",
+      "workflow_path": ".github/workflows/k12-native-reverify.yml"
+    },
+    "macos-arm64": {
+      "id": 44928344396,
+      "sha": "183bfe088d371c33cb36be499689c2d304da3be1",
+      "workflow_path": ".github/workflows/k12-native-reverify.yml"
+    },
+    "windows-x64": {
+      "id": 44928344396,
+      "sha": "183bfe088d371c33cb36be499689c2d304da3be1",
+      "workflow_path": ".github/workflows/k12-native-reverify.yml"
+    }
+  },
+  "local_intel": {
+    "passed": true,
+    "target": "macos-x64",
+    "source_commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad",
+    "signed_restart": true,
+    "application_ipc_update": true,
+    "check_again_current": true,
+    "isolated_profile": true,
+    "transaction_phase": "complete",
+    "transfer_origin": "loopback-of-staged-artifacts",
+    "from": "1.7.1-kaixin-20261121-resource-4-macos-x64-base-c41831772671",
+    "to": "1.7.1-kaixin-20261121-resource-5-macos-x64-base-c41831772671",
+    "learning_memory_sha256": "e07f68e2a21d9e9ea0e7530c28ae418d75cc0b11936efc095382818d49dfb4d1",
+    "network": {
+      "bytes": 3273271,
+      "sha256": "35e26846bf5a36ab63be9d13e11864bf11ed890c8615fe5f55547c251d1f832c"
+    },
+    "signed_manifest": {
+      "bytes": 1081,
+      "sha256": "d3afd0d0efa3045ef535256b1c2304aaae011345cd78346158c6ac22f2ff446c"
+    }
+  },
+  "local_workflow": {
+    "passed": true,
+    "checks": {
+      "alternate_phrasing_and_topic": true,
+      "drag_dynamic": true,
+      "dynamic_layout": true,
+      "fast_new_chat_completion": true,
+      "history_reopen": true,
+      "non_gallery_diagram": true,
+      "single_verified_question": true,
+      "textbook_jump": true
+    },
+    "source_commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad",
+    "receipt_sha256": "4f2cdeb8cc39788946e956d96b50e0f91e7bb3c085ae1b6a81f9649571f0e0a3"
+  }
+}
