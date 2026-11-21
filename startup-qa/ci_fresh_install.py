@@ -129,8 +129,8 @@ def main():
     old = baseline['targets'][target]
     manifest = batch['manifests'][target]
     core = batch['core_asset']
-    assert baseline['tag'] == 'student-20261117-k12-16'
-    assert batch['tag'] == 'student-20261117-k12-18'
+    assert baseline['tag'] == 'student-20261121-diagram-1'
+    assert batch['tag'] == 'student-20261121-resource-5'
     assert batch['launcher_build'] == descriptor['buildId'] == '20261121-updater-8'
     assert stage['proof']['source_commit'] == batch['core_commit'] == descriptor['coreCommit'] == manifest['commit']
     assert manifest['archive'] == core['name']
@@ -189,6 +189,7 @@ def main():
         'release': batch['tag'], 'launcher_build': descriptor['buildId'], 'core_commit': manifest['commit'],
         'core_sha256': manifest['sha256'], 'base_runtime_id': manifest['baseRuntimeId'],
         'native_install': 'passed', 'downloaded_from_public_github': True,
+        'drawing_catalog': read(evidence / 'drawing-catalog.json'),
         'native_smoke': read(evidence / 'app.json'), 'download_files': download_rows,
         'full_files': full_files, 'real_keys_used': False, 'real_learning_records_modified': False,
         'installer_reuse': {'existing_installers_repackaged': True, 'native_seed_unchanged': True,

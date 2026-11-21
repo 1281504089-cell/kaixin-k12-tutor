@@ -4,6 +4,7 @@ from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
 import tarfile
+import time
 
 
 APP = '开心动力超级学霸'
@@ -40,8 +41,18 @@ def install_native(target, files, install):
         app = install / (APP + '.app')
         run('/usr/bin/ditto', mount / app.name, app, timeout=900)
     finally:
-        run('/usr/bin/hdiutil', 'detach', mount, timeout=120)
-    run('/usr/bin/codesign', '--verify', '--deep', '--strict', app, timeout=240)
+        # APFS can briefly retain a handle to this read-only CI image.
+        for attempt in range(3):
+            try:
+                run('/usr/bin/hdiutil', 'detach', mount, timeout=120)
+                break
+            except subprocess.CalledProcessError as error:
+                if error.returncode != 16:
+                    raise
+                time.sleep(2)
+        else:
+            run('/usr/bin/hdiutil', 'detach', '-force', mount, timeout=120)
+    run('/usr/bin/codesign', '--verify', '--deep', '--strict', app, timeout=900)
     return app / 'Contents/Resources', app / 'Contents/MacOS' / APP
 
 
@@ -62,7 +73,8 @@ def replace_included_core(resources, core, manifest, descriptor, launcher_files)
     shutil.rmtree(app / 'src')
     (app / 'src').mkdir()
     installed = set()
-    with tarfile.open(archive, 'r|gz') as bundle:
+    import gzip
+    with gzip.open(archive, 'rb') as compressed, tarfile.open(fileobj=compressed, mode='r|') as bundle:
         for member in bundle:
             if member.name == 'launcher/manifest.json':
                 assert member.isfile()
@@ -93,7 +105,7 @@ def prepare_candidate(target, tag, install, resources, downloads, expected, outp
     if target.startswith('macos-'):
         app = resources.parent.parent
         run('/usr/bin/codesign', '--force', '--deep', '--sign', '-', app, timeout=240)
-        run('/usr/bin/codesign', '--verify', '--deep', '--strict', app, timeout=240)
+        run('/usr/bin/codesign', '--verify', '--deep', '--strict', app, timeout=900)
         shutil.rmtree(downloads)
         (install / 'Applications').symlink_to('/Applications')
         brand = 'Intel' if target == 'macos-x64' else 'Apple-Silicon'
