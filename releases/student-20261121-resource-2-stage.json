@@ -1,0 +1,647 @@
+{
+  "tag": "student-20261121-resource-2",
+  "source_commit": "5225dc95565a0b805d3368effc91008713f97a38",
+  "core_sha256": "a604a963c8bf38e85e0670c7b08c6f0946e79c190a391639b0f757c4a715dc40",
+  "source_carrier": "2ee655db36df053d58f343e0ea7a78757515b1a6",
+  "archives": {
+    "kaixin-core-20261121-resource-2.tar.gz": {
+      "bytes": 905197553,
+      "sha256": "a604a963c8bf38e85e0670c7b08c6f0946e79c190a391639b0f757c4a715dc40"
+    },
+    "kaixin-core-delta-diagram-1-to-resource-2.tar.gz": {
+      "bytes": 705600,
+      "sha256": "80c6623022fa74aa5c39e6849815e52f1f4086d03ba16c9c2ca5afc7050a74eb"
+    },
+    "kaixin-bridge-20261121-resource-2-macos-x64.tar.gz": {
+      "bytes": 2108650121,
+      "sha256": "c8a71acbf8866bea7052b2b36d2071817a6d43894a5363776b50de9912bb8ebb"
+    },
+    "kaixin-bridge-20261121-resource-2-macos-arm64.tar.gz": {
+      "bytes": 2045244825,
+      "sha256": "5e173decd48c62f6ec92a54b4750e1013c411603e7061c9bd82a5027426a7635"
+    },
+    "kaixin-bridge-20261121-resource-2-windows-x64.tar.gz": {
+      "bytes": 2020509334,
+      "sha256": "fda4c496e6a9012b9273938c56210f7a3806142459d4b3f7ad4318a24a4a8275"
+    }
+  },
+  "feeds": {
+    "runtime-macos-x64-20261121-resource-2-base-29d17c35927d.json": {
+      "sha256": "b65d0dd4a018522a3d2fa9e0d70a215085c9d7484b54c675abdd08a36044faad",
+      "bytes": 1079
+    },
+    "runtime-macos-x64-20261121-resource-2-base-ec5453e867cc.json": {
+      "sha256": "72b2f356c05eefbbbaf1dc9c754eb7cca1d8501f20f1e4235721625e890c215c",
+      "bytes": 1091
+    },
+    "runtime-macos-x64-20261121-resource-2-base-346ca41274b3.json": {
+      "sha256": "b146a7c30a9de5b716b9e7dc829400f590e773365e021d5c33fd3b977d07ca5e",
+      "bytes": 1047
+    },
+    "runtime-macos-x64-20261121-resource-2-base-e2a196e1e65a.json": {
+      "sha256": "23d71a1bbbf6004dad19aa30ea47b0b27c21f6a87ff57eed966e3c5b0543f5e5",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-681a198cf308.json": {
+      "sha256": "d36a07216d66b0c8dd342545cfe28cd3fd0a64d2c55aa44b166a309285cec147",
+      "bytes": 1073
+    },
+    "runtime-macos-x64-20261121-resource-2-base-170a15b2f1a2.json": {
+      "sha256": "2f6cbcb09287cc4f65dae04ff5fca1f2db9b6dce41c5b1cba425bfab26ceb05c",
+      "bytes": 1078
+    },
+    "runtime-macos-x64-20261121-resource-2-base-22eb20a39a60.json": {
+      "sha256": "2e6abf94ffd7615970c86e520c3587f3f4e1a63e862eed75fa7c0f204fd8799f",
+      "bytes": 1081
+    },
+    "runtime-macos-x64-20261121-resource-2-base-80115ecd6d3d.json": {
+      "sha256": "e889564a9ee6471782c76e1083457adea925fef2353b1f7d958a4904cb58cb55",
+      "bytes": 1076
+    },
+    "runtime-macos-x64-20261121-resource-2-base-c452d12cb482.json": {
+      "sha256": "880b127705c963d63ddc1219f4c092ae97e71f02fc451e1480b821c1f131472d",
+      "bytes": 1077
+    },
+    "runtime-macos-x64-20261121-resource-2-base-c41831772671.json": {
+      "sha256": "33f75832a0cd74cdd96677b0aac5e16d81402a258b2a6933fc6ca6cd5c636020",
+      "bytes": 1079
+    },
+    "runtime-macos-x64-20261121-resource-2-base-3e8b6a21262c.json": {
+      "sha256": "f6815c7377e192c1386097b8286bb1f3f8946506795bb85ea6ec6352c447cd52",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-a521f11854b3.json": {
+      "sha256": "85944d92b085ce077114ca87fcfa16b0e61b4c52c69ced1592962c84e402fb6f",
+      "bytes": 1078
+    },
+    "runtime-macos-x64-20261121-resource-2-base-688da252df85.json": {
+      "sha256": "6d42fc57acccb6e9b81eaef995fcc08caf116bce76645ba9489590e987d53b69",
+      "bytes": 1078
+    },
+    "runtime-macos-x64-20261121-resource-2-base-7d62b8ead190.json": {
+      "sha256": "55bd4e08581d880763d593dd9d85426882a681ab4c2ed40caddf3aeeb267e8d2",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-da8f97d625eb.json": {
+      "sha256": "4913f5fc9d712265baa08c6003f1d0c8abc7d85b151060afa8a372f82bead6be",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-0a88aea2bd5e.json": {
+      "sha256": "a9096ed3161672151d938c38e87a6acbbb56cbf49ebd740db88d453302ed8eea",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-20001c7d4d7e.json": {
+      "sha256": "037ae91e6eaa1cc7b0bf9ce768d842363e99f35a3b6bca1a9838fcbb18bf10c2",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-77869c010a21.json": {
+      "sha256": "fdd041cffb5bd6c18293d15c62671ddfe6fe71d6936544a1d50619faaabc626b",
+      "bytes": 1075
+    },
+    "runtime-macos-x64-20261121-resource-2-base-c70748768152.json": {
+      "sha256": "d624d416a7dba2845f4e9a52f4c050eff72ad36f35b4b2b25244b90c245bf39b",
+      "bytes": 1076
+    },
+    "runtime-macos-x64-20261121-resource-2-base-43a8d480d5b9.json": {
+      "sha256": "b0e48e8ff15ffb30e0fbfc742c8def6ed48c5c928e5e2fac70ca4a2f8d2a7d0e",
+      "bytes": 1076
+    },
+    "runtime-macos-x64-20261121-resource-2-base-4fc8d877e09a.json": {
+      "sha256": "e43403ff9addc51202906a4b0d8eb7133a4e141be6a8712c30b0baaf06cf7b04",
+      "bytes": 1076
+    },
+    "runtime-macos-x64-20261121-resource-2-base-a898dae55578.json": {
+      "sha256": "64a8d8497304f8bb7c40184ad5977ec02c05f84b4c42a35d17a8c5181a374d7e",
+      "bytes": 1076
+    },
+    "runtime-macos-x64-20261121-resource-2-base-efc97ca96fe4.json": {
+      "sha256": "6d7c9cd196186c09cffd95920adf6dcab19d28fb42b6b54c6b429061975a1653",
+      "bytes": 1076
+    },
+    "runtime-macos-x64-20261121-resource-2-base-6e91b9965da5.json": {
+      "sha256": "ba4ec71765d84e6ebed871e21ec234e9aab64af4f50bd6fa954b0a7976134319",
+      "bytes": 1084
+    },
+    "runtime-macos-x64.json": {
+      "sha256": "abdc851b4717fcd9a4b2be2fd4f8287f0c0c3b6d8b82f8e3a3ddc43a05f9f4a4",
+      "bytes": 4613,
+      "cos_name": "runtime-macos-x64-20261121-resource-2-candidate.json"
+    },
+    "runtime-macos-x64-20261121-resource-2-candidate.json": {
+      "sha256": "abdc851b4717fcd9a4b2be2fd4f8287f0c0c3b6d8b82f8e3a3ddc43a05f9f4a4",
+      "bytes": 4613
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-b34f5e7a134e.json": {
+      "sha256": "91cf7771529bc6d9d764e7bc09267b1454bc4eb6a2378aebdc28375ae5b3724c",
+      "bytes": 1085
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-2ff4a4586e5d.json": {
+      "sha256": "26dd6b067a936647c59b7eee5817652915f80cece79d6166c869c96d365faaea",
+      "bytes": 1095
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-33f13d78d5c7.json": {
+      "sha256": "8c7fd67accac4d77be931ff1e6c99765b59304a110d88274f53f90ce8bda4ff6",
+      "bytes": 1053
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-7744dbeb8d09.json": {
+      "sha256": "8d49930ea16c037a1c589bcebff2d7ef507e447725d12f5b4f8a8f02dc8537e4",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-7056f6bb9861.json": {
+      "sha256": "5542fe3781e2ec0da8b70ab956c2efa12944dc339b89c55bfece898443f30cd0",
+      "bytes": 1079
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-b445b7c83c4d.json": {
+      "sha256": "989794d4f2af479c4cd280db7b45b878a3c5e19b1298a1c84179126d2b55a7b8",
+      "bytes": 1084
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-c09b1d53f8d0.json": {
+      "sha256": "fdd7c13b295fe2b0cf9ab55f3ddcb66454f3bd84fd404be215f213fc5907ca5e",
+      "bytes": 1087
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-194178f05eea.json": {
+      "sha256": "16e96d5f954514f227d2143df0d1a596f390308e770bdba920f5b9b2602d92e8",
+      "bytes": 1082
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-6f6222533fad.json": {
+      "sha256": "dd258bc9db575d9a4113a431316ea2e5ec453bca61669c92ded88e96f44e50af",
+      "bytes": 1083
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-b83c8329037e.json": {
+      "sha256": "f7776a309e3c2001f33990ed3924a123dc5b8cc259585c396500f9a1d8f3760e",
+      "bytes": 1085
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-6c9c7f936933.json": {
+      "sha256": "5dbf9f3e3a31da555e5fb26b37457bfb7af9196f28ba1a41f1fbb781bc80ab2b",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-ba05e5de452a.json": {
+      "sha256": "1060e06c27cc3520cf20ccbfc460329eff7c38ecbb138457c1dacd8b66e85ac7",
+      "bytes": 1084
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-306c0073e240.json": {
+      "sha256": "0218340c18c9a69bb423712830d2c30aad0ba793e43e82c7e36b2b317199ea58",
+      "bytes": 1084
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-cda1e4c99289.json": {
+      "sha256": "dadb70f0dfa807ff89a51f84d1551e7ae93c2c2331a427162adf939842b91f00",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-afbad5ed9bc4.json": {
+      "sha256": "3d64f971ca279e081a8c4cd7b2c90080e061e00b2f675dbcb80ceeda8be7d37d",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-1ba5c03632ca.json": {
+      "sha256": "4841ee144a2c64a9c11ae5bbd4b44fab3e9890d61838ab3e8f376e3e3fab623d",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-70cb97c3b840.json": {
+      "sha256": "3931ec226cb61067b435ebf3952b9e56cbae19415076fcbfc4cf58e88814d83a",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-8fdc2e3e782e.json": {
+      "sha256": "c2a808498a38258e766ac1925a51510246880d39eda0cd92c13c7f61899e07fa",
+      "bytes": 1081
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-7c3938d776e5.json": {
+      "sha256": "310ee0fb77f657ffebae6c525536e98546bea8842dbefc89bbe2f58ce6f15ca3",
+      "bytes": 1082
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-6fbf654d5ac1.json": {
+      "sha256": "e33ce93760ae1fac0d20f4479cab7b67d4ce5376a3e1c72b76359caee96fc8fa",
+      "bytes": 1082
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-f24bcb9ab831.json": {
+      "sha256": "77de61496674f641c27165d85869b469697036779720e7c4c155fa98414697c3",
+      "bytes": 1082
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-d9957978846e.json": {
+      "sha256": "52d48b842356a976dbd3ced1d0d80ec3017ac576eb6518b9dcea7001130196b8",
+      "bytes": 1082
+    },
+    "runtime-macos-arm64-20261121-resource-2-base-4f19a2730ed1.json": {
+      "sha256": "b24b779a7ba36e4543c523194dd3034b21c6769ade54abbc827b0055a6a235de",
+      "bytes": 1082
+    },
+    "runtime-macos-arm64.json": {
+      "sha256": "baa15272ed53f2968e332ce4c69909aa922655f8012787ec6983bade8ce8be36",
+      "bytes": 4536,
+      "cos_name": "runtime-macos-arm64-20261121-resource-2-candidate.json"
+    },
+    "runtime-macos-arm64-20261121-resource-2-candidate.json": {
+      "sha256": "baa15272ed53f2968e332ce4c69909aa922655f8012787ec6983bade8ce8be36",
+      "bytes": 4536
+    },
+    "runtime-windows-x64-20261121-resource-2-base-4557d1c62a96.json": {
+      "sha256": "873b62685b19d7dce1f47235f75b750533693b7964229d0671d125c7d9e15a98",
+      "bytes": 1082
+    },
+    "runtime-windows-x64-20261121-resource-2-base-d86e6c1a78ce.json": {
+      "sha256": "4496cdfcaf26fc0b0703a5fd37640880f1318f37a859d77cf3791350dc4267eb",
+      "bytes": 1079
+    },
+    "runtime-windows-x64-20261121-resource-2-base-346ca41274b3.json": {
+      "sha256": "9f04b2a8c607ab6111ecbd006aad8ea19586b028a7b54c6905da51b8252122ea",
+      "bytes": 1048
+    },
+    "runtime-windows-x64-20261121-resource-2-base-bb8f5191555d.json": {
+      "sha256": "7a2cd9c2174e29060cc42db95ec9e98511c7775d908934029b9e232d7ca2e4f7",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-573f105ed118.json": {
+      "sha256": "9fbe2db13f51e2154b069e718d8d653c79bd2653a285ff91170a33b4049c6ed0",
+      "bytes": 1076
+    },
+    "runtime-windows-x64-20261121-resource-2-base-9b7c2b84f908.json": {
+      "sha256": "06ce9418036a3e6c85268c962626888faf955532df1c0f2b9f2dc45c8e1551d2",
+      "bytes": 1081
+    },
+    "runtime-windows-x64-20261121-resource-2-base-3e01c184c6a4.json": {
+      "sha256": "147ed3a80f9eddfc9793862f447edfdf5bf5a30ca14b9d8fdc76cd7c6e454cdf",
+      "bytes": 1084
+    },
+    "runtime-windows-x64-20261121-resource-2-base-7a52e2cacc9f.json": {
+      "sha256": "318b080d25f4558f130f002b104586b175a974221c94f218dc9ae635c12fac7b",
+      "bytes": 1079
+    },
+    "runtime-windows-x64-20261121-resource-2-base-e4abdb1cb594.json": {
+      "sha256": "52e70a5c0f6a759e4c0aff7c002cba3971f9e63abea3237bd8a7e8ead6cd4632",
+      "bytes": 1080
+    },
+    "runtime-windows-x64-20261121-resource-2-base-afb4dfe97ae4.json": {
+      "sha256": "27e908d579ae445bfeea391c4eb8f5972909425d3deb5dd2ac04c82d0693338c",
+      "bytes": 1082
+    },
+    "runtime-windows-x64-20261121-resource-2-base-77b621411568.json": {
+      "sha256": "6eac207a1453c524196bbc4c302298a0dd9b07970cf7d487c09aa1247cb640e9",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-a0419326e159.json": {
+      "sha256": "a8003cb72c5d573a256f97390f36474b4250601f1ec9112714fc78c1eb355007",
+      "bytes": 1081
+    },
+    "runtime-windows-x64-20261121-resource-2-base-324194bea65b.json": {
+      "sha256": "31cd1e787ff37c0e76108d753bfa31b73fd141714c4b5727ecd772526b07f84a",
+      "bytes": 1081
+    },
+    "runtime-windows-x64-20261121-resource-2-base-967544a178f2.json": {
+      "sha256": "ea84fe9e7bea0ff26c306e1433b8d71573bc08bce4552ba5b212af67108a4d30",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-70c8bc192b30.json": {
+      "sha256": "a9a84e0508c96ed7db4df2b77b96112c3b69653ba30f9d8417d3b94563076a9b",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-9b7dc543315e.json": {
+      "sha256": "2e36a46ee8170121cfca02db9ea2bb59229237f002ac4b672fd52977ec0fb104",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-e4b58f199119.json": {
+      "sha256": "5b4a3ea63c82e50a6912e5ef72100a12657be6d6eb2c9119241d516a95ed9c4f",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-b6c3920aebfa.json": {
+      "sha256": "155ffd826b543aba585aceb7ae6b253e7ae47f5777e27c19f1c096bbcb3a4993",
+      "bytes": 1078
+    },
+    "runtime-windows-x64-20261121-resource-2-base-5a6e0e76c856.json": {
+      "sha256": "3f0b2828a89310b68f15f0af374f496272469da1a5675bdb5b448eb27eec0ca2",
+      "bytes": 1079
+    },
+    "runtime-windows-x64-20261121-resource-2-base-8690cf0863da.json": {
+      "sha256": "3c2439e9f65a81d98ec16e095701e7fbede9f86197263012b35e6de7a796c203",
+      "bytes": 1079
+    },
+    "runtime-windows-x64-20261121-resource-2-base-51534d24d922.json": {
+      "sha256": "557db44633615d8af481a580f38bfc057d2885cada71837358ded2b4fc6be5a1",
+      "bytes": 1079
+    },
+    "runtime-windows-x64-20261121-resource-2-base-1bb8a743bc42.json": {
+      "sha256": "397b2d77e3501e83c7287f425dd92dea838c28d8fe01beaf55e8e8aa22b61473",
+      "bytes": 1079
+    },
+    "runtime-windows-x64.json": {
+      "sha256": "3e6313dcdc77c0990903d51ade88e504f50e3f45c83d70a61a2f4abeb4d34f13",
+      "bytes": 4349,
+      "cos_name": "runtime-windows-x64-20261121-resource-2-candidate.json"
+    },
+    "runtime-windows-x64-20261121-resource-2-candidate.json": {
+      "sha256": "3e6313dcdc77c0990903d51ade88e504f50e3f45c83d70a61a2f4abeb4d34f13",
+      "bytes": 4349
+    }
+  },
+  "prior": {
+    "macos-x64": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "darwin",
+      "arch": "x64",
+      "coreVersion": "1.7.1",
+      "commit": "64ec3957abd504086777df87becf3851f5908aed",
+      "builtAt": 1795251043292,
+      "corePayloadSha256": "9a451de6f9764c1c663c158569852d64d8345ba70e88c84a32ace6a4b5444b1d",
+      "runtimeId": "1.7.1-kaixin-20261121-diagram-1-macos-x64-universal",
+      "archive": "kaixin-bridge-20261121-diagram-1-macos-x64.tar.gz",
+      "sha256": "afa9e6257711fc04e3174b22f88748572279482d1a3e2f8df45b2a19a72c5a12",
+      "compatibleBaseManifests": [
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261121-intel-integrated-2-macos-x64-r2-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-ec5453e867cc.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-04276f68a-x64",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-346ca41274b3.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-e2a196e1e65a.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-681a198cf308.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-170a15b2f1a2.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-22eb20a39a60.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-80115ecd6d3d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-c452d12cb482.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-c41831772671.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-3e8b6a21262c.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-a521f11854b3.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-688da252df85.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-7d62b8ead190.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-da8f97d625eb.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-0a88aea2bd5e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-20001c7d4d7e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-77869c010a21.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-c70748768152.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-43a8d480d5b9.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-4fc8d877e09a.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-a898dae55578.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-18-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-efc97ca96fe4.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261121-figure-intel-1-macos-x64-universal",
+          "file": "runtime-macos-x64-20261121-diagram-1-base-6e91b9965da5.json"
+        }
+      ],
+      "signature": "X+GLGrM7CK3yf1PNCWRelURZ8WQmzMl5DJedTf4EwdIh8EZPrjQiFqTNjbV5055nAzCBDdymjnInRYaGMTP1Ag=="
+    },
+    "macos-arm64": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "darwin",
+      "arch": "arm64",
+      "coreVersion": "1.7.1",
+      "commit": "64ec3957abd504086777df87becf3851f5908aed",
+      "builtAt": 1795251043292,
+      "corePayloadSha256": "9a451de6f9764c1c663c158569852d64d8345ba70e88c84a32ace6a4b5444b1d",
+      "runtimeId": "1.7.1-kaixin-20261121-diagram-1-macos-arm64-universal",
+      "archive": "kaixin-bridge-20261121-diagram-1-macos-arm64.tar.gz",
+      "sha256": "cbfd9deaa0772350d5b3e9ee1ce217dfd513572116d9ac7df430d34bf361acf6",
+      "compatibleBaseManifests": [
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261121-mac-integrated-2-macos-arm64-r2-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-2ff4a4586e5d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-04276f68a-arm64",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-33f13d78d5c7.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-7744dbeb8d09.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-7056f6bb9861.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-b445b7c83c4d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-c09b1d53f8d0.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-194178f05eea.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-6f6222533fad.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-b83c8329037e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-6c9c7f936933.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-ba05e5de452a.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-306c0073e240.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-cda1e4c99289.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-afbad5ed9bc4.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-1ba5c03632ca.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-70cb97c3b840.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-8fdc2e3e782e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-7c3938d776e5.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-6fbf654d5ac1.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-f24bcb9ab831.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-d9957978846e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-18-macos-arm64-universal",
+          "file": "runtime-macos-arm64-20261121-diagram-1-base-4f19a2730ed1.json"
+        }
+      ],
+      "signature": "tKgZnjjDqm3O4Nkz+lBDt4T7NGwazgrPvMGH2FmFgWkA//rrrp8lRqzMneBgitKD92tXe7tBq7Jrbnuq2LJLAg=="
+    },
+    "windows-x64": {
+      "formatVersion": 1,
+      "protocolVersion": 1,
+      "platform": "win32",
+      "arch": "x64",
+      "coreVersion": "1.7.1",
+      "commit": "64ec3957abd504086777df87becf3851f5908aed",
+      "builtAt": 1795251043292,
+      "corePayloadSha256": "9a451de6f9764c1c663c158569852d64d8345ba70e88c84a32ace6a4b5444b1d",
+      "runtimeId": "1.7.1-kaixin-20261121-diagram-1-windows-x64-universal",
+      "archive": "kaixin-bridge-20261121-diagram-1-windows-x64.tar.gz",
+      "sha256": "2704f78bf7f2c440d2af0a9daca34649987063c8d88a44c6e46719a1a9333789",
+      "compatibleBaseManifests": [
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-18-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-d86e6c1a78ce.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-04276f68a-x64",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-346ca41274b3.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-bb8f5191555d.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-stt-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-573f105ed118.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-projects-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-9b7c2b84f908.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-3e01c184c6a4.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-review-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-7a52e2cacc9f.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-library-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-e4abdb1cb594.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-materials-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-afb4dfe97ae4.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261114-audio-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-77b621411568.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-a0419326e159.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-324194bea65b.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-967544a178f2.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-70c8bc192b30.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-9b7dc543315e.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-e4b58f199119.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-b6c3920aebfa.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-5a6e0e76c856.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-8690cf0863da.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-51534d24d922.json"
+        },
+        {
+          "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-windows-x64-universal",
+          "file": "runtime-windows-x64-20261121-diagram-1-base-1bb8a743bc42.json"
+        }
+      ],
+      "signature": "L0tBIOW5zb1fte09VUR3wTrMTzx32pLXhuiJAxUl7TcRpg9al73FvBFBa3WEUIEeY3/bOxLRpVxCpSS9RbGnDA=="
+    }
+  }
+}
