@@ -1,0 +1,138 @@
+{
+  "macos-arm64": {
+    "previous": {
+      "commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad",
+      "corePayloadSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8"
+    },
+    "final_commit": "68df0f08b39ad31c9d24b3c4d934791a87787e45",
+    "stable_sha256": "5c692d186820e0991071994b4d812e37eacb55cbda85a3e1b017d5248e8a2726",
+    "compatibility": {
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-30bd45c34bd3.json": "f53f8a4ae16dc7e4c85ecd53fdb0867d34b012b2b6a550d8ec8809abd52c9579",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-1813d419f843.json": "43ce6d1b05f93456ec7ca0765359724b9fc9a1ebc4866092b74d082b42bd4e4c",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-b34f5e7a134e.json": "df5089aa7e929f2b1ebd8148b438a677da0e3171ee99eaad14de1a37ca5d2fe1",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-2ff4a4586e5d.json": "6ea31090857a76180be50956dcd6de216dd0b483132121373c6e0545f88d923f",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-33f13d78d5c7.json": "c1cf76e20bf580dab3dd3d3801ac02442b605a3c5c482fdb8dc2cd0d9b666b23",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-7744dbeb8d09.json": "225f409d6fcc7702457f9de3ecb5467b94a2eedd6e88179b00677e33cf9fd3ee",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-7056f6bb9861.json": "76a586f43d73301f18d0143793f9ca95aaa73a3a9b7db0a2a9d80aa0250aa853",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-b445b7c83c4d.json": "7e8cefead6ae99f0188cffa8ba8a05e272ee290eee6f86514ba76822aac1bf57",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-c09b1d53f8d0.json": "0deee7f992fc622f55a6fd53d4069833bd33d3fecbc152575d0b722c686e2abe",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-194178f05eea.json": "2280fbb7b9ed989e735a0d5f4a3db3c86abeea9a859ee97e0317c2088e8a7d53",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-6f6222533fad.json": "0c6fa6105aacb78558322c3cb0dcf7f71e49bb3296c4492dd28d20122fd00639",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-b83c8329037e.json": "75b372ce6ef89dd4d0f841a529fd0991a9d99c9680dac43e3483afef252edbad",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-6c9c7f936933.json": "359baa17bc2aad51d3c24924945c09ca03631a80e9d9388a67ac812c2ba2556f",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-ba05e5de452a.json": "968a7be3faef86935a70b21d25e93229c6057b8827540b44e30f5e78b54c015d",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-306c0073e240.json": "b801755d5b2f71f41f61cdf35ebebbb5d8892a59f502b5ce4d2a87321af0806c",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-cda1e4c99289.json": "d59ab011172621567b759f59f111dd793b081d78196676589a0c7f58cdd5aa59",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-afbad5ed9bc4.json": "d15538766e4c1785fc6067bccc60b62e8b471a7eab5b2d91981fbe1025cb8d4c",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-1ba5c03632ca.json": "2f848e173b1ce6385d0adfb9299f8ca6a634c538d469008a7bc4d79da970cc68",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-70cb97c3b840.json": "f459695a4eb673116e857f03ec008c3699877cb883d44a166f131ed2da7e77e8",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-8fdc2e3e782e.json": "29b5cb23bdf94199ac94c79e9f5552bd5005c18c4fc686c3658e769370108416",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-7c3938d776e5.json": "1f8df558434c06484a71b753332cfaf3df81ead5c08e191ce38afcaef577fae6",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-6fbf654d5ac1.json": "c79927fedfc463f8b39e7e3f297afdb72eb4030cda45eba25b92506bd0fc8799",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-f24bcb9ab831.json": "27d385b1640cedb88cfdfa373f895c47d218976dc3a4fb581f2cc8e77cb4bd81",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-d9957978846e.json": "529a34235068e7a5c41be8b7f1e09a9382f02257552befe6e4ec36d5b08615c3",
+      "runtime-macos-arm64-20261122-textbook-interactive-3-base-4f19a2730ed1.json": "aa87d524be6c580c49c5709c99df3b214650de47b776119403f4300c33955459"
+    },
+    "installers": [
+      {
+        "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.002.dmgpart",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.002.dmgpart",
+        "bytes": 1992295135,
+        "sha256": "5b11880104ffe0dc05bbc70e26fb2af10f9300149778c3ee83b1d811672dfeb7"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.003.dmgpart",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.003.dmgpart",
+        "bytes": 1992295135,
+        "sha256": "e0260dbeaf6ab7bcdc6d13270f1f10c58b47c2ddd218c253e711eab3c758f10a"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.004.dmgpart",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.004.dmgpart",
+        "bytes": 1992295135,
+        "sha256": "56157511dde5675eb9a842804e65e06adf04cd3723b5ef7e31c946b687295054"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.005.dmgpart",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.005.dmgpart",
+        "bytes": 8453944,
+        "sha256": "c93900ee0b74366953c3c35a60782345cc38405cad96ba7b15c795a859ee3b43"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.dmg",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.dmg",
+        "bytes": 1992779189,
+        "sha256": "129cbf1f29d72dc1d3e570fc96d20c4cbd151b934a8eb4919d2ec4ca2ac29248"
+      }
+    ],
+    "launcher": "20261121-updater-8"
+  },
+  "windows-x64": {
+    "previous": {
+      "commit": "fc90e367fc31f44a19cea5b8cf87d8a7a8dd5f64",
+      "corePayloadSha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae"
+    },
+    "final_commit": "095875b15cdb1afe9c6db5db56ccc65c9015c1f9",
+    "stable_sha256": "16ca6914e4b0df985413fc1d8366b5c114a90b16dd9855b47fcab732eb5906dc",
+    "compatibility": {
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-42be25309949.json": "11133c7e0b12ba7cc9bce7224fd1eb277d04908481bb26b8e4ab88f63047b9c1",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-f1752e13feb9.json": "aadedf54c27f55f7d342280d719320f56da333887d7f932fc9354935a132625b",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-6245df8566b7.json": "4a0f48708e25e0a5238763dca7b1e887db646e95d3383cec0ddf2b87a3190eac",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-4557d1c62a96.json": "bdaf1b03c809114a43dc77c844872d40f43eeb2122f9ab78d2f24b32d4dd953a",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-d86e6c1a78ce.json": "d257959fd6d4c005f7b5f69b7ae959088619ddd7ab842f476fdeaeb618efd439",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-346ca41274b3.json": "7ed948a17a323951884caad90ba63f1b4a9b1e3902a1c3c3874ceb7f72c2453f",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-bb8f5191555d.json": "2afd2352da94ce954064c53f7495ef77d8c7282e7c8f81fc4f259e3bcc95c75f",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-573f105ed118.json": "25feeb01a503622afa3a9ab2203f931acfea39c7719cbe81cb249c76469b652a",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-9b7c2b84f908.json": "755805eea2976bc7ee720e77e119aa8d59f15d8c83b457363bfa30f60371b84f",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-3e01c184c6a4.json": "c799d04dc054b32780bfde458284e397b6719c2d642a7c285bcf61f421c2d1da",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-7a52e2cacc9f.json": "6f6e07376fe8e1e1bd3af5c79f9e20883652f06a9579ef548855b8c8efb6087f",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-e4abdb1cb594.json": "b70aa17abdf583b7486794a648eb99b3df1ef7749b0775ec8fbde6ee845f200e",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-afb4dfe97ae4.json": "d7f486cd7fa6921184d36e0408c9747b8f0775730ab9d6c705a58974fde355ba",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-77b621411568.json": "d635efced3ea8da9781b1a2cbaac6b7ba5f06d14d5c803b4aa7a9ffe1c02c80c",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-a0419326e159.json": "6af7fb2fd1d33232b237d7aded4ab1776a6a5d897d4df4f7224b2cf2ea758258",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-324194bea65b.json": "787ddfb3cb37c8f4ccf23e197f950cef93c3b391614e7ab6b06d7ab8e84dfaa4",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-967544a178f2.json": "9fbcda6b7258c9ec87b5285e6e1c54fcd39c42e084a0d23b985fefff856e7212",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-70c8bc192b30.json": "ece467fb62ce110d0a31bf530bbc34cc095e734892e78f947b8d2d847da37fad",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-9b7dc543315e.json": "d009171c8cd9659dfd9173f834482af032251cb806a4fcb92b2908d960b8d1bb",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-e4b58f199119.json": "5f3ab5fc95164597b782412a5140232980f570c804ae67c5ac418695bfed72d9",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-b6c3920aebfa.json": "c43b80387e2139c768bcbf6815ddf41d97c52c0e64099be1bd1220cc1fb18ffe",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-5a6e0e76c856.json": "e2ac4e8f62fde178cb5f29b722553a036c0fc16721bae42f123f6e74d9b652e5",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-8690cf0863da.json": "5905612542290468fa99481332faeeef37a3220fc0d6cbc569836086e8756f88",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-51534d24d922.json": "3561370d8327a052fdca322881ce28be14ed8c9539a11cb6408dbbda14978a4b",
+      "runtime-windows-x64-20261122-textbook-interactive-3-base-1bb8a743bc42.json": "8de23aaadd242afc491c89fcf05b8ef91d4e18255dc9bd46613f5f4ddaf5b301"
+    },
+    "installers": [
+      {
+        "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+        "bytes": 1992294400,
+        "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+        "bytes": 1992294400,
+        "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+        "bytes": 1992294400,
+        "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261121-resource-5/Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+        "bytes": 1005564586,
+        "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034"
+      },
+      {
+        "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+        "url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/student-20261122-windows-startup-1/Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+        "bytes": 1064162015,
+        "sha256": "6972895a2deeff0e5d40d69966872d15588ffa46a12c6f2a4ba066e26a3c8492"
+      }
+    ],
+    "launcher": "20261122-updater-9"
+  }
+}
