@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const {createHash} = require('node:crypto');
-const {existsSync, readFileSync, writeFileSync} = require('node:fs');
+const {existsSync, readdirSync, readFileSync, writeFileSync} = require('node:fs');
 const path = require('node:path');
 const {pathToFileURL} = require('node:url');
 const {setTimeout: pause} = require('node:timers/promises');
@@ -11,9 +11,11 @@ const spec = read(process.env.KX_QA_SPEC);
 const home = process.env.OPEN_DEEPTUTOR_TEST_HOME;
 const phase = spec.result + '.phase';
 const restarted = existsSync(phase);
-const memory = path.join('data', 'user', 'memory', 'L3', 'profile.md');
+const recordText = '# 升级验收\n\n我的学习记录：我会用正斜率判断一次函数递增。\n';
+const recordPhrase = '我会用正斜率判断一次函数递增';
+const workspace = path.join(home,'workspace');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const memoryBytes = folder => readFileSync(path.join(folder, memory));
+const memoryBytes = (folder, relative) => readFileSync(path.join(folder, relative));
 const receipt = new Map();
 const attempts = [];
 const notices = [];
@@ -78,12 +80,25 @@ function ready() {
   });
 }
 
+async function seedRecord(contents) {
+  const script = `fetch('/api/memory/doc/L3/profile', {
+    method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({content:${JSON.stringify(recordText)}})
+  }).then(async r => ({status:r.status, saved:r.ok && (await r.json()).saved}))`;
+  assert.deepEqual(await contents.executeJavaScript(script), {status:200,saved:true});
+  const suffix = path.join('L3','profile.md');
+  const matches = readdirSync(workspace,{recursive:true}).filter(file =>
+    file.endsWith(suffix) && memoryBytes(workspace,file).toString('utf8').includes(recordPhrase));
+  assert.equal(matches.length, 1, 'Locate the test record actually written by the application');
+  return matches[0];
+}
+
 async function visibleRecord(contents) {
   const record = await contents.executeJavaScript(
     "fetch('/api/memory/doc/L3/profile', {cache:'no-store'}).then(async r => ({status:r.status, content:r.ok ? (await r.json()).content : null}))"
   );
   assert.equal(record.status, 200, 'learning memory endpoint');
-  assert.match(record.content, /我会用正斜率判断一次函数递增/);
+  assert(record.content.includes(recordPhrase));
   return hash(record.content);
 }
 
@@ -110,9 +125,9 @@ async function main() {
     const descriptor = read(path.join(home,'runtimes',spec.selected.runtimeId,'launcher','manifest.json'));
     assert.equal(descriptor.coreCommit, spec.selected.commit);
     for (const row of descriptor.files) assert.equal(hash(readFileSync(path.join(__dirname,row.file))),row.sha256);
-    assert.equal(hash(memoryBytes(path.join(home,'workspace'))), before.disk_sha256);
+    assert.equal(hash(memoryBytes(workspace,before.record_path)), before.disk_sha256);
     assert.equal(await visibleRecord(window), before.record_sha256);
-    assert.equal(hash(memoryBytes(journal().backup)), before.disk_sha256);
+    assert.equal(hash(memoryBytes(journal().backup,before.record_path)), before.disk_sha256);
     await window.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
     assert(notices.some(row=>/已是最新版本|already.*up to date/i.test(row.message)));
     assert(attempts.every(name=>allowed.has(name)));
@@ -127,8 +142,9 @@ async function main() {
   }
 
   assert.deepEqual(active(), spec.baseline);
+  const recordPath = await seedRecord(window);
   const afterSeed = await visibleRecord(window);
-  const diskHash = hash(memoryBytes(path.join(home, 'workspace')));
+  const diskHash = hash(memoryBytes(workspace,recordPath));
   void window.executeJavaScript('window.kaixinDesktop.checkForUpdates()').catch(error => {
     if (!/disposed|destroyed/i.test(error.message)) notices.push({type:'error',message:error.message});
   });
@@ -143,9 +159,9 @@ async function main() {
   assert.equal(receipt.get(spec.cos.stable).sha256,spec.cos.stable_sha256);
   assert.equal(receipt.get(spec.cos.selected).sha256,spec.cos.selected_sha256);
   assert(attempts.every(name=>allowed.has(name)));
-  assert.equal(hash(memoryBytes(update.backup)),diskHash);
+  assert.equal(hash(memoryBytes(update.backup,recordPath)),diskHash);
   await ready();
-  writeFileSync(phase, JSON.stringify({pid:process.pid,disk_sha256:diskHash,record_sha256:afterSeed,delta:receipt.get(spec.cos.delta.archive)}));
+  writeFileSync(phase, JSON.stringify({pid:process.pid,record_path:recordPath,disk_sha256:diskHash,record_sha256:afterSeed,delta:receipt.get(spec.cos.delta.archive)}));
   app.relaunch();
   app.quit();
 }

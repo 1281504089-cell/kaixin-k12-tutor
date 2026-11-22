@@ -140,9 +140,6 @@ def run_app(target, plan, baseline, resources, executable, work):
         run('/usr/bin/codesign', '--force', '--sign', '-', bundle, timeout=450)
         run('/usr/bin/codesign', '--verify', '--deep', '--strict', bundle, timeout=450)
     home = work / 'isolated-learning'
-    memory = home / 'workspace/data/user/memory/L3/profile.md'
-    memory.parent.mkdir(parents=True)
-    memory.write_text('# 升级验收\n\n我的学习记录：我会用正斜率判断一次函数递增。\n', encoding='utf8', newline='\n')
     result = EVIDENCE / 'native-update.json'
     spec_path = work / 'probe.json'
     with ThreadingHTTPServer(('127.0.0.1', 0), Feed) as server:
