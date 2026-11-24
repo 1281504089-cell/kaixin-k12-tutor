@@ -55,7 +55,7 @@ function mapFeed() {
       const url = new URL(input);
       if (url.origin !== mirror || !/^\/desktop\/[\w.+-]+\.(?:json|tar\.gz)$/.test(url.pathname)) return new Response(null, { status: 404 });
       const filename = path.basename(url.pathname);
-      if (stage && filename === 'runtime-macos-x64.json') await pause(1200);
+      if (stage && filename === `runtime-${spec.target}.json`) await pause(1200);
       const response = await net.fetch(spec.origin + '/' + filename, options);
       if (!response.ok || !response.body) return response;
       const digest = createHash('sha256');
@@ -130,15 +130,36 @@ async function run() {
     }
     const manifest = receipts.find(row => row.filename === spec.manifest.requested && row.sha256 === spec.manifest.sha256);
     assert(manifest && manifest.status === 200 && manifest.bytes === spec.manifest.bytes);
-    await readyView();
-    const launcherState = launcher();
-    assert.equal(launcherState.buildId, spec.launcherBuild);
-    assert.equal(launcherState.status, 'current');
+    const { view } = await readyView();
+    const launcherState = await waitFor('the signed launcher to be staged', () => {
+      if (!existsSync(path.join(profile, 'launcher-update.json'))) return;
+      const state = launcher();
+      if (state.buildId === spec.launcherBuild && state.status === 'ready') return state;
+    });
+    assert.equal(launcherState.restartRequired, true);
+    const button = await waitFor('the actual launcher restart button', () =>
+      view.webContents.executeJavaScript(`(() => {
+        const button = [...document.querySelectorAll('button')].find(node =>
+          !node.disabled && node.textContent.trim() === '重新打开完成更新');
+        if (!button) return null;
+        const rect = button.getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+        const x = Math.round(rect.x + rect.width / 2);
+        const y = Math.round(rect.y + rect.height / 2);
+        return button.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+      })()`));
     writeFileSync(stateFile, JSON.stringify({ before, originalMemory, started, completed: Date.now(), beforePid: process.pid, archive, manifest }));
-    event('reopened-app-with-existing-verified-launcher', { launcher: launcherState.buildId });
-    app.relaunch();
-    app.quit();
-    return;
+    event('clicked-restart-signed-launcher', { launcher: launcherState.buildId });
+    view.webContents.focus();
+    view.webContents.sendInputEvent({ type: 'mouseDown', ...button, button: 'left', clickCount: 1 });
+    view.webContents.sendInputEvent({ type: 'mouseUp', ...button, button: 'left', clickCount: 1 });
+    const until = Date.now() + 150000;
+    while (Date.now() < until) {
+      await pause(250);
+      const state = launcher();
+      if (state.status === 'failed') throw Error(state.error);
+    }
+    throw Error('The visible restart command did not close the original application');
   }
   assert.notEqual(process.pid, stage.beforePid);
   assert.deepEqual(active(), spec.selected);
