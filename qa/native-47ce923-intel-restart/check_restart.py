@@ -328,7 +328,8 @@ def main():
         release, assets = pinned_draft()
         assert release['id'] == 456863262
         previous = assets.get(item['name'])
-        asset_id = previous['id'] if previous and match(previous,item) else upload_one(release,item,work/item['name'])
+        asset_id = previous['id'] if previous and match(previous,item) else upload_one(
+            release,{**item,'file':item['name']},work/item['name'])
         release, assets = pinned_draft()
         assert assets[item['name']]['id'] == asset_id and match(assets[item['name']],item)
     write(output/'staged-exact-media.json', {'release_id': 456863262, 'version': LOCK['source_commit'], 'core': LOCK['core']})
