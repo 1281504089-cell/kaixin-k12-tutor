@@ -11,12 +11,16 @@ sys.path[:0]=[str(HERE.parent/'native-17bf2ce'),str(HERE.parent/'native-47ce923-
 from ci_repackage import read,write
 from draft_assets import draft,gh,pinned_draft_asset
 from rebuild import delta as rebuild_delta
-from retain_verified_media import match,upload_one
+from retain_verified_media import match as match_media,upload_one
 
 LOCK=read(HERE/'input-lock.json')
 OLD=read(HERE.parent/'native-17bf2ce/input-lock.json')
 REPO='1281504089-cell/kaixin-k12-tutor'
 CORE=LOCK['core']
+
+
+def match(row,expected):
+    return match_media(row,{**expected,'file':expected['name']})
 
 
 def create_or_get_draft(work):
