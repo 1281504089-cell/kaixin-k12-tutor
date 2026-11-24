@@ -1,0 +1,39 @@
+name: 47ce923 Windows exact-byte native bridge verification
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-bridge-windows-47ce923.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  native-bridge-windows:
+    runs-on: windows-2025
+    timeout-minutes: 75
+    steps:
+      - name: Preserve the signed input files exactly during checkout
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify the frozen Windows bridge in a cold native window
+        env:
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+          GH_TOKEN: ${{ github.token }}
+        run: python qa/native-47ce923-bridges/ci_bridge.py windows-x64 --evidence bridge-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-47ce923-universal-bridge-windows-x64
+          path: |
+            bridge-evidence/*.json
+            bridge-evidence/*.log
+            bridge-evidence/*.png
+          retention-days: 7
