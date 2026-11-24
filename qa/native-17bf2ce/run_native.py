@@ -212,6 +212,7 @@ def main():
     parser.add_argument('target', choices=list(MACHINES))
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--downloads-only', action='store_true')
+    parser.add_argument('--retain-verified-media', action='store_true')
     args = parser.parse_args()
     if platform.machine() != MACHINES[args.target] or (os.name == 'nt') != (args.target=='windows-x64'):
         raise ValueError('Run on the expected native OS and architecture')
@@ -307,7 +308,8 @@ def main():
     media_hashes=[{'file':file.name,'bytes':file.stat().st_size,'sha256':sha(file)} for file in media]
     fresh=work/'candidate-native-clean-install'
     resources,app=install_native(target,native_media,fresh)
-    shutil.rmtree(native_media)
+    if not args.retain_verified_media:
+        shutil.rmtree(native_media)
     fresh_profile=work/'fresh-synthetic-profile'
     fresh_profile.mkdir()
     assert sha(resources/'update'/selected['archive'])==LOCK['core']['sha256']
@@ -316,10 +318,17 @@ def main():
         started=wait_ready(candidate,fresh_profile,selected)
     finally:
         stop(candidate)
-    write(output/'native-acceptance.json',{'passed':True,'source_commit':LOCK['source_commit'],'core':LOCK['core'],
+    proof={'passed':True,'source_commit':LOCK['source_commit'],'core':LOCK['core'],
       'target':target,'runner':platform.machine(),'installer_media':media_hashes,
       'fresh_install':started,'update':upgraded,'recovery':recovered,'cos_used':False,
-      'real_learning_data_used':False})
+      'real_learning_data_used':False,'run_id':os.environ.get('GITHUB_RUN_ID'),
+      'workflow_sha':os.environ.get('GITHUB_SHA')}
+    if args.retain_verified_media:
+        for record in media_hashes:
+            file = native_media/record['file']
+            assert (file.stat().st_size,sha(file)) == (record['bytes'],record['sha256']),file.name
+        proof['retained_media_path']=str(native_media)
+    write(output/'native-acceptance.json',proof)
 
 
 if __name__=='__main__':

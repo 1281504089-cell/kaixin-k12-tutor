@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 # GitHub requires push access to list and read this release's draft assets.
-# The recipe uses GET exclusively and never transitions the draft.
+# The final step may add verified installer files to exactly this draft. It never transitions the release.
 permissions:
   contents: write
 
@@ -54,7 +54,16 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
           GH_TOKEN: ${{ github.token }}
           QA_TARGET: ${{ matrix.target }}
-        run: python qa/native-17bf2ce/run_native.py "$QA_TARGET" --evidence native-qa-evidence
+        run: python qa/native-17bf2ce/run_native.py "$QA_TARGET" --evidence native-qa-evidence --retain-verified-media
+      - name: Retain exact verified native media in the private release draft
+        if: success() && github.ref == 'refs/heads/codex/desktop-native-qa-17bf2ce'
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+        run: python qa/native-17bf2ce/retain_verified_media.py "$QA_TARGET" --evidence native-qa-evidence
       - name: Retain small receipts only
         if: always()
         uses: actions/upload-artifact@v4

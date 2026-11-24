@@ -72,11 +72,16 @@ def pinned_draft_asset(assets, expected, destination):
 
 
 def historical_installers(profile, directory):
-    release = metadata(profile['baseline_tag'])
-    assert release['id'] == profile['baseline_release_id'] and not release['draft'] and not release['prerelease']
+    releases = {}
     directory.mkdir()
     receipts = []
     for expected in profile['baseline_installers']:
-        row, = (item for item in release['assets'] if item['name'] == expected['name'])
-        receipts.append(download(release, {**expected, 'id': row['id']}, directory / expected['name']))
+        tag = expected.get('source_tag', profile['baseline_tag'])
+        release_id = expected.get('source_release_id', profile['baseline_release_id'])
+        if tag not in releases:
+            releases[tag] = metadata(tag)
+        release = releases[tag]
+        assert (release['id'], release['tag_name'], release['draft'], release['prerelease']) == (
+            release_id, tag, False, False)
+        receipts.append(download(release, expected, directory / expected['name']))
     return receipts
