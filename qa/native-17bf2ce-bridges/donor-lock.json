@@ -1,0 +1,41 @@
+{
+  "repository": "1281504089-cell/kaixin-k12-tutor",
+  "tag": "core-updates",
+  "commit": "17bf2ce6b062a2ba9b838b1b35b68feba2e7daa5",
+  "launcher_build": "20261124-local-qa-17bf2ce",
+  "core": {
+    "name": "kaixin-core-local-20261124-17bf2ce.tar.gz",
+    "bytes": 912447528,
+    "sha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7"
+  },
+  "targets": {
+    "macos-x64": {
+      "runner": "macos-15-intel",
+      "asset": {
+        "id": 776395042,
+        "name": "kaixin-bridge-20261121-resource-5-macos-x64.tar.gz",
+        "bytes": 2114544606,
+        "sha256": "6f7e67790092de0c033b57a7715565b6452d87a8e9e83ad77474ad34e5eb4a10"
+      }
+    },
+    "macos-arm64": {
+      "runner": "macos-15",
+      "asset": {
+        "id": 776395087,
+        "name": "kaixin-bridge-20261121-resource-5-macos-arm64.tar.gz",
+        "bytes": 2051149254,
+        "sha256": "08b949d563c413931ca837dd8db826a63726a7d65de4247b0b3a0ba6931cc18e"
+      }
+    },
+    "windows-x64": {
+      "runner": "windows-2025",
+      "asset": {
+        "id": 777242649,
+        "name": "kaixin-bridge-20261122-windows-startup-1-windows-x64.tar.gz",
+        "bytes": 2026405216,
+        "sha256": "aed9883471641fd518c0d316fe795fc4e14bade9d2c45c1d77a2eae45e204c4d"
+      }
+    }
+  },
+  "draft_release_id": 456863262
+}

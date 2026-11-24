@@ -1,0 +1,59 @@
+name: Native signed universal bridges (draft only)
+
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-bridge-17bf2ce.yml", "qa/native-17bf2ce-bridges/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: native-bridge-17bf2ce
+  cancel-in-progress: false
+
+# GitHub requires push access to read the existing private draft and add an asset.
+# The recipe checks the draft ID again before adding any verified archive.
+permissions:
+  contents: write
+
+jobs:
+  native-bridge:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify frozen universal bridge in a native cold window and retain exact bytes
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+        run: python qa/native-17bf2ce-bridges/ci_bridge.py "$QA_TARGET" --evidence bridge-evidence
+      - name: Retain small verification receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-universal-bridge-${{ matrix.target }}
+          path: |
+            bridge-evidence/*.json
+            bridge-evidence/*.log
+            bridge-evidence/*.png
+          retention-days: 3
