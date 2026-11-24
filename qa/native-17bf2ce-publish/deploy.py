@@ -24,6 +24,7 @@ BUILD = '17bf2ce6b062a2ba9b838b1b35b68feba2e7daa5'
 TARGETS = ('macos-x64','macos-arm64','windows-x64')
 STABLE = 'core-updates'
 HISTORY = 'core-updates-history-20261121-resource-5'
+STUDENT_TAG = 'student-20261124-unified-17bf2ce'
 HOSTS = {'api.github.com','github.com','release-assets.githubusercontent.com','objects.githubusercontent.com'}
 
 
@@ -138,28 +139,42 @@ def ensure(row, name, file, inventory):
 
 
 def draft(lock):
-    pages=gh('--paginate','--slurp',f'repos/{REPO}/releases?per_page=100')
-    row,=(item for page in pages for item in page if item['draft'] and item['name']==lock['draft_title'])
+    row=gh(f'repos/{REPO}/releases/{lock["draft_id"]}')
     assert row['id']==lock['draft_id']
+    assert row['name']==lock['draft_title'] if row['draft'] else row['tag_name']==STUDENT_TAG
     return row
 
 
-def native_reports(target, expected, scratch, *, bridge=False):
+def native_reports(target, expected, scratch, *, variant='native'):
+    if variant == 'intel-clean':
+        name = 'intel-clean-full-installer-17bf2ce'
+        workflow = 'native-intel-clean-17bf2ce.yml'
+        names = ('intel-clean-install.json', 'intel-clean-retained-media.json')
+    elif variant == 'intel-restart':
+        name = 'intel-signed-update-and-recovery-17bf2ce'
+        workflow = 'native-intel-restart-17bf2ce.yml'
+        names = ('intel-signed-update-and-recovery.json',)
+    elif variant == 'bridge':
+        name = 'native-universal-bridge-' + target
+        workflow = 'native-bridge-17bf2ce.yml'
+        names = ('result.json', 'retained-native-bridge.json')
+    else:
+        name = 'native-17bf2ce-' + target
+        workflow = 'native-17bf2ce-qa.yml'
+        names = ('native-acceptance.json', 'retained-native-media.json')
     artifact=gh(f'repos/{REPO}/actions/artifacts/{expected["artifact_id"]}')
     assert not artifact['expired'] and artifact['workflow_run']['id']==expected['run_id']
-    prefix='native-universal-bridge-' if bridge else 'native-17bf2ce-'
-    assert artifact['name']==prefix+target and artifact['size_in_bytes']<5*1024**2
+    assert artifact['name']==name and artifact['size_in_bytes']<5*1024**2
     run=gh(f'repos/{REPO}/actions/runs/{expected["run_id"]}')
     assert run['status']=='completed' and run['head_sha']==expected['workflow_sha']
-    expected_path='native-bridge-17bf2ce.yml' if bridge else 'native-17bf2ce-qa.yml'
-    assert run['path'].split('@')[0]=='.github/workflows/'+expected_path
-    local=scratch/(prefix+target+'.zip')
+    assert run['path'].split('@')[0]=='.github/workflows/'+workflow
+    if variant in ('intel-clean', 'intel-restart', 'bridge'):
+        assert run['conclusion']=='success'
+    local=scratch/(name+'.zip')
     with local.open('xb') as output:
         subprocess.run(['gh','api',f'repos/{REPO}/actions/artifacts/{artifact["id"]}/zip'],
                        stdout=output,check=True)
     assert local.stat().st_size<9*1024**2
-    names=('result.json','retained-native-bridge.json') if bridge else (
-        'native-acceptance.json','retained-native-media.json')
     with ZipFile(local) as packed:
         reports={}
         for name in names:
@@ -171,6 +186,14 @@ def native_reports(target, expected, scratch, *, bridge=False):
     return reports
 
 
+def native_install_reports(target, expected, scratch):
+    if target == 'macos-x64':
+        clean = native_reports(target, expected, scratch, variant='intel-clean')
+        return clean['intel-clean-install.json'], clean['intel-clean-retained-media.json']
+    combined = native_reports(target, expected, scratch)
+    return combined['native-acceptance.json'], combined['retained-native-media.json']
+
+
 def native_gate(lock, approval, scratch):
     assert approval['explicit_release_ready'] is True
     assert approval['source_commit']==BUILD and approval['core_sha256']==lock['core']['sha256']
@@ -180,23 +203,29 @@ def native_gate(lock, approval, scratch):
     prior=assets(release('student-20261121-resource-5'))
     for target in TARGETS:
         expected=approval['native'][target]
-        reports=native_reports(target,expected,scratch)
-        native=reports['native-acceptance.json']
-        media=reports['retained-native-media.json']
+        native,media=native_install_reports(target,expected,scratch)
         assert native['passed'] and native['source_commit']==BUILD and native['target']==target
         assert native['core']==lock['core'] and native['fresh_install']['active_commit']==BUILD
-        assert native['update']['signed_restart'] and native['update']['check_again_current']
-        assert native['update']['source_commit']==BUILD
-        assert native['recovery']['learning_record_intact'] and native['recovery']['phase']=='recovered'
+        tested_update=native
+        if target=='macos-x64':
+            restart=approval['intel_restart']
+            tested_update=native_reports(target,restart,scratch,variant='intel-restart')['intel-signed-update-and-recovery.json']
+            assert tested_update['passed'] and tested_update['target']==target
+            assert tested_update['source_commit']==BUILD and tested_update['core']==lock['core']
+            assert str(tested_update['run_id'])==str(restart['run_id']) and tested_update['workflow_sha']==restart['workflow_sha']
+        assert tested_update['update']['signed_restart'] and tested_update['update']['check_again_current']
+        assert tested_update['update']['source_commit']==BUILD
+        assert tested_update['recovery']['learning_record_intact'] and tested_update['recovery']['phase']=='recovered'
         assert media['passed'] and media['target']==target and media['draft_release_id']==lock['draft_id']
         assert media['source_commit']==BUILD and str(media['run_id'])==str(expected['run_id'])
         assert media['workflow_sha']==expected['workflow_sha']
+        assert [{key: item[key] for key in ('file','bytes','sha256')} for item in media['installer_media']]==native['installer_media']
         for item in media['installer_media']:
             rows=current if item['storage']=='draft' else prior
             row=rows[item['file']]
             assert match(row,item) and row['id']==item['asset_id']
         expected_bridge=approval['bridges'][target]
-        bridge_reports=native_reports(target,expected_bridge,scratch,bridge=True)
+        bridge_reports=native_reports(target,expected_bridge,scratch,variant='bridge')
         result=bridge_reports['result.json']
         retained=bridge_reports['retained-native-bridge.json']
         locked,=(item for item in lock['archives'] if item['name']==f'kaixin-bridge-20261124-17bf2ce-{target}.tar.gz')
@@ -260,6 +289,23 @@ def main():
         assert match(staged[item['name']],item)
     for item in lock['feeds']:
         assert descriptor(HERE/'feed/github'/item['name'])=={k:item[k] for k in ('bytes','sha256')}
+    current_defaults={row['name']:row for row in lock['feeds'] if row['name'] in lock['previous']}
+    if args.apply and all(match(live_objects.get(name,{}),row) for name,row in current_defaults.items()):
+        with TemporaryDirectory(prefix='scholar-stable-readback-') as temp:
+            work=Path(temp)
+            native_gate(lock,read(args.approval),work)
+            for item in installed_aliases(lock)+lock['archives']:
+                assert match(live_objects[item['name']],item)
+            for name,item in current_defaults.items():
+                assert verified_body(live_objects[name],item,work,name).read_bytes()==(HERE/'feed/github'/name).read_bytes()
+                old=lock['previous'][name]
+                saved=verified_body(staged['previous-github-'+name],old,work,'previous-'+name)
+                assert saved.read_bytes()==(HERE/'previous'/name).read_bytes()
+        evidence(args.evidence/'activated.json',{'passed':True,'source_commit':BUILD,'stable_release':live['id'],
+            'draft_release':staging['id'],'activated':list(current_defaults),'core':lock['core'],
+            'original_default_sha256':{name: row['sha256'] for name,row in lock['previous'].items()},
+            'resumed_readback':True})
+        return
     for name,item in lock['previous'].items():
         current=live_objects[name]
         assert match(current,item)
