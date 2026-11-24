@@ -1,0 +1,304 @@
+{
+  "source_commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+  "tree": "54ed57ff7953d6bf03c263631808bb4194447212",
+  "web": {
+    "source_commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+    "build_id": "SHNyOgRGCKbzUJnzd3JN5",
+    "inventory_sha256": "b04b588a78035f3650858c3d37c98bf1bff36c810a70caea14266ee245468268",
+    "files": 2289
+  },
+  "launcher_build": "20261125-local-qa-47ce923",
+  "core": {
+    "name": "kaixin-core-local-20261125-47ce923.tar.gz",
+    "bytes": 912444602,
+    "sha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78"
+  },
+  "draft_title": "开心动力超级学霸桌面版 47ce923 原生验收候选",
+  "launcher": {
+    "name": "launcher-manifest-47ce923.json",
+    "bytes": 3928,
+    "sha256": "1788f6c627f6afcc286e8ec1a36d6eb25fdfecfc6afb4ce8ac0eab09e01c00f3"
+  },
+  "targets": {
+    "macos-arm64": {
+      "baseline_tag": "student-20261121-resource-5",
+      "baseline_release_id": 453846225,
+      "baseline_manifest": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "arm64",
+        "coreVersion": "1.7.1",
+        "commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad",
+        "builtAt": 1795277586793,
+        "corePayloadSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "baseRuntimeId": "1.7.1-04276f68a-arm64",
+        "runtimeId": "1.7.1-kaixin-20261121-resource-5-macos-arm64-base-33f13d78d5c7",
+        "archive": "kaixin-core-20261121-resource-5.tar.gz",
+        "sha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "coreDelta": {
+          "formatVersion": 1,
+          "fromCoreSha256": "243b4dfca3ba68699a2d46e16b8053439b21295d5f71142784c9ba4fe80fa572",
+          "toCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+          "archive": "kaixin-core-delta-resource-4-to-resource-5.tar.gz",
+          "bytes": 3273271,
+          "sha256": "35e26846bf5a36ab63be9d13e11864bf11ed890c8615fe5f55547c251d1f832c"
+        },
+        "signature": "3jrHtZNxLrItasGby24Eerx7rSu12uRtNzJhRp2LUPV0QfLySD9xOihi4gWBaHW80Aeg9by6GA+90cHD58S8Cw=="
+      },
+      "baseline_installers": [
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "5b11880104ffe0dc05bbc70e26fb2af10f9300149778c3ee83b1d811672dfeb7",
+          "id": 776319226
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "e0260dbeaf6ab7bcdc6d13270f1f10c58b47c2ddd218c253e711eab3c758f10a",
+          "id": 776322757
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.004.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "56157511dde5675eb9a842804e65e06adf04cd3723b5ef7e31c946b687295054",
+          "id": 776326666
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.005.dmgpart",
+          "bytes": 8453944,
+          "sha256": "c93900ee0b74366953c3c35a60782345cc38405cad96ba7b15c795a859ee3b43",
+          "id": 776329775
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Apple-Silicon-v1.7.1-20261121-resource-5-part.dmg",
+          "bytes": 1992779189,
+          "sha256": "129cbf1f29d72dc1d3e570fc96d20c4cbd151b934a8eb4919d2ec4ca2ac29248",
+          "id": 776329860
+        }
+      ],
+      "seed_base_runtime_id": "1.7.1-04276f68a-arm64",
+      "delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "toCoreSha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78",
+        "archive": "delta-resource5-to-47ce923-local.tar.gz",
+        "bytes": 17174766,
+        "sha256": "d62edbf3eeb14095ed2e2cee45fae2b061396e7ba293c09f69994791585c63f9"
+      },
+      "default": {
+        "name": "qa-default-macos-arm64-47ce923-r2.json",
+        "bytes": 874,
+        "sha256": "046d92cac5bfad36dfbb898e652032a91f67433374acd03f039287a137bdd926"
+      },
+      "compatible": {
+        "name": "runtime-macos-arm64-qa-47ce923-r2-base-33f13d78d5c7.json",
+        "bytes": 1046,
+        "sha256": "189b1ef07d0a16cebe9a552058dfb8e7225e44a4a12e394e11a8412fa31bfba1"
+      },
+      "previous_delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+        "archive": "delta-resource5-to-17bf2ce-local.tar.gz",
+        "bytes": 17171268,
+        "sha256": "6fdce5bb551838e9c17e6d27348f3c54758c4247ef8317c7af1185e35e42a4d1"
+      }
+    },
+    "windows-x64": {
+      "baseline_tag": "student-20261122-windows-startup-1",
+      "baseline_release_id": 454066941,
+      "baseline_manifest": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "win32",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "commit": "fc90e367fc31f44a19cea5b8cf87d8a7a8dd5f64",
+        "builtAt": 1795303375801,
+        "corePayloadSha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+        "runtimeId": "1.7.1-kaixin-20261122-windows-startup-1-windows-x64-base-346ca41274b3",
+        "baseRuntimeId": "1.7.1-04276f68a-x64",
+        "archive": "kaixin-core-20261122-windows-startup-1.tar.gz",
+        "sha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+        "coreDelta": {
+          "formatVersion": 1,
+          "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+          "toCoreSha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+          "archive": "kaixin-core-delta-resource-5-to-windows-startup-1.tar.gz",
+          "bytes": 594968,
+          "sha256": "6fb56d1c579ae1bac7592049c7e3d42263408e1f8b3b8373678a2c6d96337530"
+        },
+        "signature": "tPzVh4uhwT8+TYx4RHpFK7IjrHelsR9tAecpnHTdkxSIRNFShQxQghFN82dF7W1HyIRlpB9nHs63WWlQDRoqAg=="
+      },
+      "baseline_installers": [
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.001",
+          "bytes": 1992294400,
+          "sha256": "529ab17c901fd0efc15cd10cbdd7530e3356423cfbd0eae92859d226607501c6",
+          "source_tag": "student-20261121-resource-5",
+          "source_release_id": 453846225,
+          "id": 776311172
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.002",
+          "bytes": 1992294400,
+          "sha256": "8ea3c897e0401228b517755c1e39dcc4071e38585eeed08aecd880ec5dea0142",
+          "source_tag": "student-20261121-resource-5",
+          "source_release_id": 453846225,
+          "id": 776313305
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.003",
+          "bytes": 1992294400,
+          "sha256": "8ac6f062f60c88945cca94040b0ed085c18a6b4d62c9c5b7b21697b360ddf13d",
+          "source_tag": "student-20261121-resource-5",
+          "source_release_id": 453846225,
+          "id": 776315773
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Runtime.004",
+          "bytes": 1005564586,
+          "sha256": "8fd3f08fc3cccc5f751d508bb197de53cd24bbc2f03561171416cf186c6c1034",
+          "source_tag": "student-20261121-resource-5",
+          "source_release_id": 453846225,
+          "id": 776318399
+        },
+        {
+          "name": "Kaixin-Super-Scholar-Windows-v1.7.1-Setup.exe",
+          "bytes": 1064162015,
+          "sha256": "6972895a2deeff0e5d40d69966872d15588ffa46a12c6f2a4ba066e26a3c8492",
+          "id": 777246366
+        }
+      ],
+      "seed_base_runtime_id": "1.7.1-04276f68a-x64",
+      "delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+        "toCoreSha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78",
+        "archive": "delta-fc90e36-to-47ce923-local.tar.gz",
+        "bytes": 17170986,
+        "sha256": "f6c0551b8915bfa437d993c3f4171c0f9df6a6c993883a1641867a5d9495161b"
+      },
+      "default": {
+        "name": "qa-default-windows-x64-47ce923-r2.json",
+        "bytes": 869,
+        "sha256": "2f4245af4dbaad61a6c280c916ddf3b5f136dff40b9dd9520abed95dd34dc4cd"
+      },
+      "compatible": {
+        "name": "runtime-windows-x64-qa-47ce923-r2-base-346ca41274b3.json",
+        "bytes": 1039,
+        "sha256": "af2ba09c09d18f47a48ca12b1d700adac830f735a530a1e792be9baea9410349"
+      },
+      "previous_delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "1ab34ec80440f52851234ca0e87b7b00167c22cfd0b5fa5a9587b19de9b9c3ae",
+        "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+        "archive": "delta-fc90e36-to-17bf2ce-local.tar.gz",
+        "bytes": 17167350,
+        "sha256": "c01fe7aaf8ff4d5aecfda0ce85a124a128fcb20a56bbb098096cec201d5aa0be"
+      }
+    },
+    "macos-x64": {
+      "baseline_tag": "student-20261121-resource-5",
+      "baseline_release_id": 453846225,
+      "baseline_manifest": {
+        "formatVersion": 1,
+        "protocolVersion": 1,
+        "platform": "darwin",
+        "arch": "x64",
+        "coreVersion": "1.7.1",
+        "commit": "a8d4dac2292e093d68b144b26d7ef7b2716f99ad",
+        "builtAt": 1795277586793,
+        "corePayloadSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "baseRuntimeId": "1.7.1-04276f68a-x64",
+        "runtimeId": "1.7.1-kaixin-20261121-resource-5-macos-x64-base-346ca41274b3",
+        "archive": "kaixin-core-20261121-resource-5.tar.gz",
+        "sha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "coreDelta": {
+          "formatVersion": 1,
+          "fromCoreSha256": "243b4dfca3ba68699a2d46e16b8053439b21295d5f71142784c9ba4fe80fa572",
+          "toCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+          "archive": "kaixin-core-delta-resource-4-to-resource-5.tar.gz",
+          "bytes": 3273271,
+          "sha256": "35e26846bf5a36ab63be9d13e11864bf11ed890c8615fe5f55547c251d1f832c"
+        },
+        "signature": "O7h/TN1UYcTuieoScTJOTcIdGaPaydOnQocdSgM3YATi8xt4SCzmY5NU2Zf5MMzt7qs3ItPGijY+848RT9dKDg=="
+      },
+      "baseline_installers": [
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261121-resource-5-part.002.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "6e671a64a2659163aab80471ea98a24e0c62274da5d2a5f36bef099c1220ff49",
+          "id": 776343897
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261121-resource-5-part.003.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "50873b1b3aecf13c775ea0a62215b0fb9b63a78d8dca8242eb4a6612d3dbd7fa",
+          "id": 776348116
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261121-resource-5-part.004.dmgpart",
+          "bytes": 1992295135,
+          "sha256": "af31e0a0de55e0c4e6c2989e69fe2f106386df23c16446b43ab92c8e392f6670",
+          "id": 776350904
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261121-resource-5-part.005.dmgpart",
+          "bytes": 77630052,
+          "sha256": "a15a655d7f5f87e751aeef01e47d4b871d10ded83d7bb749aae4a966fbe57fa6",
+          "id": 776356638
+        },
+        {
+          "name": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261121-resource-5-part.dmg",
+          "bytes": 1992783521,
+          "sha256": "4c05571dbaefe5af44e6f645e2a81bec2e3a95fbed5da19f31b37daa6e66ad55",
+          "id": 776356843
+        }
+      ],
+      "seed_base_runtime_id": "1.7.1-04276f68a-x64",
+      "delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "toCoreSha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78",
+        "archive": "delta-resource5-to-47ce923-local.tar.gz",
+        "bytes": 17174766,
+        "sha256": "d62edbf3eeb14095ed2e2cee45fae2b061396e7ba293c09f69994791585c63f9"
+      },
+      "default": {
+        "name": "qa-default-macos-x64-47ce923-r2.json",
+        "bytes": 864,
+        "sha256": "d8bdfee6311c5d7e8d1b7da6a2fcac4c3ab642495a592fa7e3a3e586e9f625ad"
+      },
+      "compatible": {
+        "name": "runtime-macos-x64-qa-47ce923-r2-base-346ca41274b3.json",
+        "bytes": 1040,
+        "sha256": "89c3c26f2d83435147b05f71721635afe9f005b8cbc0f65832ca82903a3f95f6"
+      },
+      "previous_delta": {
+        "formatVersion": 1,
+        "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+        "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+        "archive": "delta-resource5-to-17bf2ce-local.tar.gz",
+        "bytes": 17171268,
+        "sha256": "6fdce5bb551838e9c17e6d27348f3c54758c4247ef8317c7af1185e35e42a4d1"
+      }
+    }
+  },
+  "previous_core": {
+    "name": "kaixin-core-local-20261124-17bf2ce.tar.gz",
+    "bytes": 912447528,
+    "sha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7"
+  },
+  "previous_delta": {
+    "formatVersion": 1,
+    "fromCoreSha256": "61842b2e8c2e8b670f4e0390c94859a29fd90d03b72a04f3781220bdc341b8b8",
+    "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+    "archive": "delta-resource5-to-17bf2ce-local.tar.gz",
+    "bytes": 17171268,
+    "sha256": "6fdce5bb551838e9c17e6d27348f3c54758c4247ef8317c7af1185e35e42a4d1"
+  },
+  "old_draft_title": "开心动力超级学霸桌面版 17bf2ce 原生验收候选"
+}

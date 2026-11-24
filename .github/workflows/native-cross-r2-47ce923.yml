@@ -1,0 +1,89 @@
+name: 47ce923 Windows and Apple silicon signed native acceptance
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-cross-r2-47ce923.yml", "qa/native-47ce923-cross-r2/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: scholar-47ce923-native-cross-r2
+  cancel-in-progress: false
+jobs:
+  stage:
+    runs-on: macos-15-intel
+    timeout-minutes: 38
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pin and stage the exact signed checks without activation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-cross-r2/prepare.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signed-native-inputs-47ce923
+          path: native-47ce923-input-evidence/
+          retention-days: 7
+  native:
+    needs: stage
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows-x64
+            runner: windows-2025
+          - target: macos-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 126
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Ensure the existing Windows packaging helper
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\NSIS\makensis.exe")) {
+            choco install nsis --no-progress -y
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Check source, true restart, recovery and empty-profile installation
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-cross-r2/run_native.py "$QA_TARGET" --evidence native-47ce923-evidence --retain-verified-media
+      - name: Retain each exact accepted installer in the isolated draft
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-cross-r2/retain_verified_media.py "$QA_TARGET" --evidence native-47ce923-evidence
+      - name: Retain diagnostic and native test proofs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-47ce923-${{ matrix.target }}
+          path: |
+            native-47ce923-evidence/*.json
+            native-47ce923-evidence/*.jsonl
+            native-47ce923-evidence/*.log
+          retention-days: 7

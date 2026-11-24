@@ -1,0 +1,21 @@
+{
+  "formatVersion": 1,
+  "protocolVersion": 1,
+  "platform": "darwin",
+  "arch": "arm64",
+  "coreVersion": "1.7.1",
+  "commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+  "builtAt": 1795538395326,
+  "archive": "kaixin-core-local-20261125-47ce923.tar.gz",
+  "sha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78",
+  "corePayloadSha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78",
+  "baseRuntimeId": "1.7.1-kaixin-20261122-textbook-interactive-3-macos-arm64-universal",
+  "runtimeId": "1.7.1-kaixin-20261125-47ce923-macos-arm64-base-dae624a8268d",
+  "compatibleBaseManifests": [
+    {
+      "baseRuntimeId": "1.7.1-04276f68a-arm64",
+      "file": "runtime-macos-arm64-qa-47ce923-r2-base-33f13d78d5c7.json"
+    }
+  ],
+  "signature": "wbdVqsRZV9BRFh2o/xVJIlXq4QVaSceURgc1sfnoBjTfrtFUqU/HowPGg5JXNvm2QUqivwZzjdrailv7p+cQAA=="
+}
