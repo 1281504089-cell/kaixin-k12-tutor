@@ -12,7 +12,14 @@ const output = process.env.KX_QA_RECEIPT;
 const spec = JSON.parse(readFileSync(process.env.KX_QA_UPDATE_SPEC));
 const stateFile = `${output}.state.json`;
 const read = file => JSON.parse(readFileSync(file));
-const active = () => read(path.join(profile, 'active.json'));
+function active() {
+  try {
+    return read(path.join(profile, 'active.json'));
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
 const launcher = () => read(path.join(profile, 'launcher-update.json'));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const memory = path.join('data', 'user', 'memory', 'L3', 'profile.md');
@@ -96,6 +103,11 @@ async function run() {
   await app.whenReady();
   mapFeed();
   await import(pathToFileURL(path.join(__dirname, 'src/main.mjs')));
+  const expected = stage ? spec.selected : spec.baseline;
+  await waitFor('the signed runtime to be activated', () => {
+    const manifest = active();
+    return manifest?.runtimeId === expected.runtimeId ? manifest : null;
+  }, 900000);
   const beforeView = await readyView();
   if (!stage) {
     const before = active();
@@ -108,7 +120,7 @@ async function run() {
     });
     const transaction = await waitFor('the completed installation journal', () => {
       const file = path.join(profile, 'upgrade.json');
-      if (!existsSync(file) || active().commit !== spec.selected.commit) return;
+      if (!existsSync(file) || active()?.commit !== spec.selected.commit) return;
       const journal = read(file);
       if (journal.phase === 'complete') return journal;
     }, 780000);
@@ -201,7 +213,9 @@ async function run() {
 }
 
 run().catch(error => {
-  const detail = { error: error.stack, notices, pid: process.pid, active: active()?.runtimeId, stage: stage ? 'new-launcher' : 'existing-launcher' };
+  let runtimeId;
+  try { runtimeId = active()?.runtimeId; } catch { /* Preserve the original failure. */ }
+  const detail = { error: error.stack, notices, pid: process.pid, active: runtimeId, stage: stage ? 'new-launcher' : 'existing-launcher' };
   writeFileSync(`${output}.error.json`, JSON.stringify(detail, null, 2));
   app.exit(1);
 });

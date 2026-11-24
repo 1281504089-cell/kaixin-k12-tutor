@@ -170,7 +170,7 @@ def probed_update(executable, resources, profile, baseline, selected, default, a
                 if error.exists():
                     raise RuntimeError(error.read_text(encoding='utf-8'))
                 return read(report) if report.exists() else None
-            result = poll(finished, 1450, 'Actual application incremental update and restart')
+            result = poll(finished, 2250, 'Actual application incremental update and restart')
             assert result['passed'] and result['signed_restart'] and result['check_again_current']
             assert result['source_commit'] == LOCK['source_commit']
             assert result['network']['bytes'] == delta.stat().st_size
@@ -178,6 +178,9 @@ def probed_update(executable, resources, profile, baseline, selected, default, a
             time.sleep(8)
         finally:
             stop(process)
+            runtime_log = profile / 'logs/runtime.log'
+            if runtime_log.is_file():
+                shutil.copyfile(runtime_log, output / 'update-runtime.log')
             package.write_bytes(original)
             probe.unlink()
             reseal_mac(resources)
