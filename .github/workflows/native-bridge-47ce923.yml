@@ -1,0 +1,122 @@
+name: 47ce923 universal native bridges (draft only)
+
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-bridge-47ce923.yml", "qa/native-47ce923-bridges/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: native-bridge-47ce923
+  cancel-in-progress: false
+
+# GitHub requires push access to read the existing private draft and add an asset.
+# The recipe checks the draft ID again before adding any verified archive.
+permissions:
+  contents: write
+
+jobs:
+  native-bridge:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify frozen universal bridge in a native cold window and retain exact bytes
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+        run: python qa/native-47ce923-bridges/ci_bridge.py "$QA_TARGET" --evidence bridge-evidence
+      - name: Retain small verification receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-47ce923-universal-bridge-${{ matrix.target }}
+          path: |
+            bridge-evidence/*.json
+            bridge-evidence/*.log
+            bridge-evidence/*.png
+          retention-days: 3
+  source:
+    runs-on: macos-15-intel
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify and retain the frozen source archive without activation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-bridges/stage_source.py
+  cos-assets:
+    runs-on: macos-15-intel
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Retain the two exact current COS deltas without COS downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-bridges/stage_cos.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frozen-cos-deltas-47ce923
+          path: cos-delta-native-evidence/
+          retention-days: 7
+  windows-cos-native:
+    needs: cos-assets
+    runs-on: windows-2025
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Update a real Windows app seeded from the current signed COS baseline over loopback
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-bridges/run_windows_cos_native.py --evidence windows-cos-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-exact-cos-baseline-native-47ce923
+          path: windows-cos-evidence/
+          retention-days: 7
