@@ -1,0 +1,59 @@
+{
+  "draft_id": 456863262,
+  "draft_title": "开心动力超级学霸桌面版 17bf2ce 原生验收候选",
+  "source_commit": "17bf2ce6b062a2ba9b838b1b35b68feba2e7daa5",
+  "core": {
+    "name": "kaixin-core-local-20261124-17bf2ce.tar.gz",
+    "bytes": 912447528,
+    "sha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7"
+  },
+  "expected_delta": {
+    "formatVersion": 1,
+    "fromCoreSha256": "7d1ab1a50ca2f073121b208c24bd13b8a3b8044731a915219d4531f2daf31d01",
+    "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+    "archive": "delta-cos-windows-095875-to-17bf2ce-local.tar.gz",
+    "bytes": 17158862,
+    "sha256": "5da924289652444b6c7e04cc0e8113135ba5d2ea17327424b0d0bf9459fcca95"
+  },
+  "builder": {
+    "name": "build-core-delta.py",
+    "bytes": 5994,
+    "sha256": "8dbb61259eba175df5e98046047a059656cd6f2eb9c69a2675cf6a5a2d9e9276"
+  },
+  "signed_alias": {
+    "name": "signed-cos-windows-alias.json",
+    "bytes": 1050,
+    "sha256": "7caf35cf156bf73f1f3af6f044f18c097f2dbbb672e16335e3a8bdaacc87c023"
+  },
+  "public_key": {
+    "name": "runtime-public.pem",
+    "bytes": 113,
+    "sha256": "aed6f122112b2dcd78e98e9811c48dcaa779d0ab7a9150acadca36255603e062"
+  },
+  "inventories": {
+    "previous-cos-windows-inventory": {
+      "packed": {
+        "name": "previous-cos-windows-inventory.json.gz",
+        "bytes": 585718,
+        "sha256": "2e55a94d8e9c67d137c1ae2ea5e4b3f666e7b5d12ef3c38fbc1ffa9c870e7b27"
+      },
+      "plain": {
+        "name": "core-file-manifest.json",
+        "bytes": 3138122,
+        "sha256": "109ef7247f973ebec7d8cab9406c61d8630b2c6c273d42e416c4200cff877352"
+      }
+    },
+    "final-17bf2ce-inventory": {
+      "packed": {
+        "name": "final-17bf2ce-inventory.json.gz",
+        "bytes": 604994,
+        "sha256": "e2aab8ffdc8256ecd98f018bb2d9e4aecb63eab71f16ebbe96695f4c22fc5f72"
+      },
+      "plain": {
+        "name": "core-file-manifest.json",
+        "bytes": 3208346,
+        "sha256": "444f2fa421b5393b4aeed1b37982a65d7f18cf43c1cc38bd91e91b2eac0a418d"
+      }
+    }
+  }
+}

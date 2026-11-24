@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "protocolVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "coreVersion": "1.7.1",
+  "commit": "17bf2ce6b062a2ba9b838b1b35b68feba2e7daa5",
+  "builtAt": 1795529499457,
+  "corePayloadSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+  "baseRuntimeId": "1.7.1-04276f68a-x64",
+  "runtimeId": "1.7.1-kaixin-20261124-17bf2ce-windows-x64-base-346ca41274b3",
+  "archive": "kaixin-core-local-20261124-17bf2ce.tar.gz",
+  "sha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+  "coreDelta": {
+    "formatVersion": 1,
+    "fromCoreSha256": "7d1ab1a50ca2f073121b208c24bd13b8a3b8044731a915219d4531f2daf31d01",
+    "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+    "archive": "delta-cos-windows-095875-to-17bf2ce-local.tar.gz",
+    "bytes": 17158862,
+    "sha256": "5da924289652444b6c7e04cc0e8113135ba5d2ea17327424b0d0bf9459fcca95"
+  },
+  "signature": "3Ap16knOPOKw1v1qLZDhJUj4SWjLDsuXYDDfOEwvJDoQuH6R6hljDkONTIC9SgLHm4f8UVAM6T2twQHwSJXuBg=="
+}

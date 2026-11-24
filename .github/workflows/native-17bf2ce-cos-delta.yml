@@ -1,0 +1,43 @@
+name: Verify and retain the exact Windows COS delta
+
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths:
+      - ".github/workflows/native-17bf2ce-cos-delta.yml"
+      - "qa/native-17bf2ce-cos-delta/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scholar-17bf2ce-single-cos-delta
+  cancel-in-progress: false
+
+jobs:
+  exact-delta:
+    if: github.ref == 'refs/heads/codex/desktop-native-qa-17bf2ce'
+    runs-on: macos-15-intel
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify frozen bytes and retain only the matching delta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONUTF8: "1"
+        run: python qa/native-17bf2ce-cos-delta/stage_delta.py --upload --receipt exact-cos-delta-receipt.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-cos-windows-delta-17bf2ce
+          path: exact-cos-delta-receipt.json
+          retention-days: 7
