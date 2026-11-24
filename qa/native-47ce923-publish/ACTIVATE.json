@@ -1,0 +1,58 @@
+{
+  "explicit_release_ready": true,
+  "source_commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+  "core_sha256": "c73daf138dd8448ae6f19ecae5375f3019712576f63441fb81d6cac85d178e78",
+  "draft_id": 457063007,
+  "native": {
+    "macos-x64": {
+      "run_id": 45441894694,
+      "artifact_id": 14948163788,
+      "workflow_sha": "ca2256168cb47a58993cca9c366d408134827acf",
+      "native-acceptance.json": "01349539d5eecbe74cf3c4d21cc8700120189d1c1dfae9d59f391f5bf09a051f",
+      "retained-native-media.json": "8a8eafd3f06b03871549ec57592bbf1fce5d270d44c235e742a0fdeadb0a213c"
+    },
+    "macos-arm64": {
+      "run_id": 45444721337,
+      "artifact_id": 14947642228,
+      "workflow_sha": "e263d95e3e839ac546b604765511eda9040e2c06",
+      "native-acceptance.json": "26ffac5719128b3c102e5953c952087ea1c5031ce478cd9e1d895fa49bcc1162",
+      "retained-native-media.json": "c0bea83849432e42783116a418c1eb4a1e7e188b10ec428b6941005ebb6bd1e8"
+    },
+    "windows-x64": {
+      "run_id": 45444721337,
+      "artifact_id": 14946951949,
+      "workflow_sha": "e263d95e3e839ac546b604765511eda9040e2c06",
+      "native-acceptance.json": "464513723ea827e58cc49203085facd537588ac67caeeb60fdbada0b5a6d4a44",
+      "retained-native-media.json": "3b8c1724a4a4c8114907568c3e7e6597b6c78f4645f4a3e19a09fb24bba9fe51"
+    }
+  },
+  "bridges": {
+    "macos-x64": {
+      "run_id": 45445723854,
+      "artifact_id": 14943899839,
+      "workflow_sha": "d71e4e2a50b63f2458ed0d2f23d7e0396f22f87a",
+      "result.json": "b51c4c08fd3c4cc377f24c0fd9a96723c7385f1392f1ec5d581d7328da744d9c",
+      "retained-native-bridge.json": "6f6323e3f6e6642a156ded31697b1bd1aea4cbb757cc9744d4c69b8bbf74ad25"
+    },
+    "macos-arm64": {
+      "run_id": 45445723854,
+      "artifact_id": 14947791147,
+      "workflow_sha": "d71e4e2a50b63f2458ed0d2f23d7e0396f22f87a",
+      "result.json": "09e530ac7ac41d71714f41b7927605356f35ce6d72afa23df98be434c537cef2",
+      "retained-native-bridge.json": "13596367b5e7f2af4fa7e43baf8eb3b91d54a429354fa603bcd3c57ba53db323"
+    },
+    "windows-x64": {
+      "run_id": 45446289575,
+      "artifact_id": 14944204700,
+      "workflow_sha": "aed8760fce8ae2e94c2c7337cca809036d3337bd",
+      "result.json": "17a1e69d14167436d796abe7536c46a307a7b5045511dad502f052bbfab49754",
+      "retained-native-bridge.json": "c7b81a70d107a8ba7b605f16a7bc3b248f2698f67e120c1dd0b98b8555e055fe"
+    }
+  },
+  "windows_cos": {
+    "run_id": 45445723854,
+    "artifact_id": 14946621447,
+    "workflow_sha": "d71e4e2a50b63f2458ed0d2f23d7e0396f22f87a",
+    "windows-cos-native-acceptance.json": "0e51f3039f91827365a124274b938a737299fdbc481703d8c92b20ea1efca799"
+  }
+}
