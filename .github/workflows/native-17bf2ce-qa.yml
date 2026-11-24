@@ -1,0 +1,67 @@
+name: Native 17bf2ce acceptance (draft only)
+
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-17bf2ce-qa.yml", "qa/native-17bf2ce/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: native-17bf2ce-qa
+  cancel-in-progress: false
+
+# GitHub requires push access to list and read this release's draft assets.
+# The recipe uses GET exclusively and never transitions the draft.
+permissions:
+  contents: write
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-arm64
+            runner: macos-15
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install native Windows packaging helper
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\NSIS\makensis.exe")) {
+            choco install nsis --no-progress -y
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Verify signed native install, update, restart and recovery
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+        run: python qa/native-17bf2ce/run_native.py "$QA_TARGET" --evidence native-qa-evidence
+      - name: Retain small receipts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-17bf2ce-${{ matrix.target }}
+          path: |
+            native-qa-evidence/*.json
+            native-qa-evidence/*.jsonl
+            native-qa-evidence/*.log
+          retention-days: 3
