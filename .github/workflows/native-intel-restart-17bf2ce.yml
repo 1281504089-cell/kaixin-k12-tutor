@@ -1,0 +1,36 @@
+name: Intel published shell restart and recovery
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-intel-restart-17bf2ce.yml", "qa/native-17bf2ce-intel-restart/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: scholar-17bf2ce-intel-restart
+  cancel-in-progress: false
+jobs:
+  signed-launcher-restart:
+    runs-on: macos-15-intel
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Restart and recover the published Intel installer shell with temporary diagnostics
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-17bf2ce-intel-restart/check_restart.py macos-x64 --evidence intel-restart-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intel-signed-update-and-recovery-17bf2ce
+          path: intel-restart-evidence/
+          retention-days: 3
