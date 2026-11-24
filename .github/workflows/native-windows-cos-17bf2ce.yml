@@ -1,0 +1,40 @@
+name: Windows exact COS-baseline native acceptance (local transfer only)
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-windows-cos-17bf2ce.yml", "qa/native-17bf2ce-windows-cos-acceptance/**"]
+  workflow_dispatch:
+concurrency:
+  group: windows-exact-cos-native-17bf2ce
+  cancel-in-progress: false
+# The existing private draft requires push access for retrieval, even though this test does not alter it.
+permissions:
+  contents: write
+jobs:
+  windows-cos-native:
+    runs-on: windows-2025
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install actual published 095875 and do native 17bf2ce update and restart
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+          GH_TOKEN: ${{ github.token }}
+        run: python qa/native-17bf2ce-windows-cos-acceptance/run_windows_cos_native.py --evidence windows-cos-evidence
+      - name: Retain small raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exact-cos-baseline-native-17bf2ce
+          path: windows-cos-evidence/
+          retention-days: 3
