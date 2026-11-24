@@ -1,0 +1,36 @@
+name: Intel full installer clean acceptance (draft only)
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-intel-clean-17bf2ce.yml", "qa/native-17bf2ce-intel-clean/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: scholar-17bf2ce-intel-clean
+  cancel-in-progress: false
+jobs:
+  intel-clean:
+    runs-on: macos-15-intel
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify native clean install and retain exactly those bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-17bf2ce-intel-clean/check_clean_install.py --evidence intel-clean-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intel-clean-full-installer-17bf2ce
+          path: intel-clean-evidence/
+          retention-days: 3
