@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "protocolVersion": 1,
+  "platform": "darwin",
+  "arch": "arm64",
+  "coreVersion": "1.7.1",
+  "commit": "17bf2ce6b062a2ba9b838b1b35b68feba2e7daa5",
+  "builtAt": 1795529499457,
+  "corePayloadSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+  "baseRuntimeId": "1.7.1-kaixin-20261122-textbook-interactive-3-macos-arm64-universal",
+  "runtimeId": "1.7.1-kaixin-20261124-17bf2ce-macos-arm64-base-dae624a8268d",
+  "archive": "kaixin-core-local-20261124-17bf2ce.tar.gz",
+  "sha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+  "coreDelta": {
+    "formatVersion": 1,
+    "fromCoreSha256": "1907da182f40999f45a9098b43b8b8b64de36d6575bc41a066bdb1fe64f61f29",
+    "toCoreSha256": "20077357e941b6099f7432e2262da0115107042250be0fce9259514e5bb507a7",
+    "archive": "kaixin-core-delta-68df0f0-to-17bf2ce-local.tar.gz",
+    "bytes": 17166843,
+    "sha256": "dddffb1dc9f841cd2bd389d41fef88cb74c7ef29fdb7884ed5f687fcafe53210"
+  },
+  "signature": "x0n8pS7eNfyMVnMMnkKUbC9G5ZnvR7dYxmsjodlJTLLLKOeRU4LMrWkpI5zFlrCdfujGRo/2c546a5gzDhahBw=="
+}
