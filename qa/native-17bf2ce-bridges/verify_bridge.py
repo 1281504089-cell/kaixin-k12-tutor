@@ -11,7 +11,7 @@ import tempfile
 import time
 import zlib
 
-from ci_fresh_install import API, MACHINES, REPO, digest, download, fetch, locate, verify_signature
+from ci_fresh_install import MACHINES, REPO, digest, download, fetch, locate, verify_signature
 from ci_repackage import read, run, write
 from native_electron import launcher_files, setup
 from reuse_native_bridge import reuse
@@ -40,8 +40,12 @@ def checked_inputs(target, receipt_path, manifest_path, launcher_path):
 
 def public_release(donor):
     assert LOCK['repository'] == REPO
-    with fetch(API + '/releases/assets/' + str(donor['id']), 'application/vnd.github+json') as response:
-        asset = json.load(response)
+    endpoint = f'repos/{REPO}/releases/assets/{donor["id"]}'
+    if os.environ.get('GH_TOKEN'):
+        asset = json.loads(subprocess.check_output(['gh', 'api', endpoint]))
+    else:
+        with fetch('https://api.github.com/' + endpoint, 'application/vnd.github+json') as response:
+            asset = json.load(response)
     release = {'tag_name': LOCK['tag'], 'assets': [asset]}
     locate(release, donor)
     return release

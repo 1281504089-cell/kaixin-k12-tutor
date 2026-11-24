@@ -21,7 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Both Mac targets continue in the original run. Retry only the Windows checkout normalization.
+          # Intel continues in the initial run. Retry the two recovered input failures.
+          - target: macos-arm64
+            runner: macos-15
           - target: windows-x64
             runner: windows-2025
     runs-on: ${{ matrix.runner }}
