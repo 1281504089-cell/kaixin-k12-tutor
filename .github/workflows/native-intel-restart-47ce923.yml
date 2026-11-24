@@ -1,0 +1,36 @@
+name: Intel legacy installer signed restart fix acceptance
+on:
+  push:
+    branches: [codex/desktop-native-qa-17bf2ce]
+    paths: [".github/workflows/native-intel-restart-47ce923.yml", "qa/native-47ce923-intel-restart/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: scholar-47ce923-intel-restart
+  cancel-in-progress: false
+jobs:
+  signed-reseal:
+    runs-on: macos-15-intel
+    timeout-minutes: 105
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify the rebuilt frozen core and restart the original Intel installer shell
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-47ce923-intel-restart/check_restart.py macos-x64 --evidence intel-reseal-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intel-signed-update-and-recovery-47ce923
+          path: intel-reseal-evidence/
+          retention-days: 3
