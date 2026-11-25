@@ -4,7 +4,7 @@
   "tag": "student-20261125-unified-47ce923",
   "release_id": 457063007,
   "release_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/tag/student-20261125-unified-47ce923",
-  "status": "github_published_verified",
+  "status": "published_verified",
   "combined_source_commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
   "source_tree": "54ed57ff7953d6bf03c263631808bb4194447212",
   "release_repository_commit": "67d343b68ca3704e5a5980a33280c1db9f5224af",
@@ -153,12 +153,40 @@
     "runtime-windows-x64.json"
   ],
   "cos": {
-    "published": false,
-    "existing_update_source_commits": {
+    "published": true,
+    "source_commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+    "verified_at_utc": "2026-11-25T02:28:03.980978+00:00",
+    "previous_update_source_commits": {
       "windows-x64": "095875b15cdb1afe9c6db5db56ccc65c9015c1f9",
       "macos-x64": "68df0f08b39ad31c9d24b3c4d934791a87787e45",
       "macos-arm64": "68df0f08b39ad31c9d24b3c4d934791a87787e45"
-    }
+    },
+    "verified_objects": 88,
+    "stable_manifests": [
+      {
+        "target": "macos-arm64",
+        "commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+        "manifest_sha256": "10d9ca7ae52c0685913f2959508bbadd6082c2a59981f194f180aecbb05dc9a7",
+        "url": "https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/runtime-macos-arm64.json",
+        "delta_bytes_for_previous_stable": 17170617
+      },
+      {
+        "target": "macos-x64",
+        "commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+        "manifest_sha256": "1178459f0042ab44853b886011184af1da921c4189c9396f970a8dc92103d72a",
+        "url": "https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/runtime-macos-x64.json",
+        "delta_bytes_for_previous_stable": 17170617
+      },
+      {
+        "target": "windows-x64",
+        "commit": "47ce92383c557fb37714ef6c9d470e9ee102bb5f",
+        "manifest_sha256": "55049f7fd9fc6a925cff25b318474865969ffa891107440f197f769002c8435d",
+        "url": "https://kaixin-scholar-updates-1492384993.cos.ap-shanghai.myqcloud.com/desktop/runtime-windows-x64.json",
+        "delta_bytes_for_previous_stable": 17166431
+      }
+    ],
+    "public_full_archive_bytes": 0,
+    "public_archive_sample_bytes": 6
   },
   "source_reconstruction": {
     "base_commit": "fc90e367fc31f44a19cea5b8cf87d8a7a8dd5f64",
