@@ -1,0 +1,65 @@
+{
+  "explicit_release_ready": true,
+  "source_commit": "43dba66e3a63cb836c2b3a025d3ef75e71472ec0",
+  "core_sha256": "144ee153ddd8290d8e1dbd2caf343aeb3fe8e1ddaec4fa3a28257b226b33dfd3",
+  "draft_id": 458891607,
+  "native": {
+    "macos-x64": {
+      "artifact_id": 15087193731,
+      "run_id": 45751064461,
+      "workflow_sha": "0474b986a98680b6b97a63aa8105a20510bdc125",
+      "native-acceptance.json": "2151e240a05651df0ca9fc5fc0689783d694f74ade24ab8892ffac53e3821067",
+      "retained-native-media.json": "942b98fbba803ac24ce8c002277e20af80006937c0b2ba78ccf6a497bf51d999"
+    },
+    "macos-arm64": {
+      "artifact_id": 15086126937,
+      "run_id": 45750106304,
+      "workflow_sha": "053bdd5c9d83e9ccfe775e7ca80cca6e9a72fd05",
+      "native-acceptance.json": "f97e875145f97d1975f0f92ce5f6c63ce9cf6dfa86b5b05f85d97737436bb3b0",
+      "retained-native-media.json": "4f0732d798989d86f72f02c4685b77db00145e9bcd8369edcffb6c263f9c419b"
+    },
+    "windows-x64": {
+      "artifact_id": 15084628573,
+      "run_id": 45748509690,
+      "workflow_sha": "69ef8e686b89ece934d3938b98c0c1d6221820b9",
+      "native-acceptance.json": "dbb48be7fc6577a627657fcefa4b675cc12c80f7cb3aea34fb0b202c7e32b2ec",
+      "retained-native-media.json": "dafee1d31e8c01c7097cc00f27952530659fa3f28278670142162d283a96b988"
+    }
+  },
+  "bridges": {
+    "macos-x64": {
+      "run_id": 45746710216,
+      "workflow_sha": "de6bf0684f8d22af06a0da08f8479f5cb59073fb",
+      "artifact_id": 15084231065,
+      "bridge-acceptance.json": "f5a1386018c1229e10db95d868ba6461665026bd2dfed472ef94515422686edc"
+    },
+    "macos-arm64": {
+      "run_id": 45746710216,
+      "workflow_sha": "de6bf0684f8d22af06a0da08f8479f5cb59073fb",
+      "artifact_id": 15083534337,
+      "bridge-acceptance.json": "bf89403649da77f1f4cf478dab80fb9785065e5da23ffff04474d2e7e5106b36"
+    },
+    "windows-x64": {
+      "run_id": 45746710216,
+      "workflow_sha": "de6bf0684f8d22af06a0da08f8479f5cb59073fb",
+      "artifact_id": 15082914062,
+      "bridge-acceptance.json": "68f4d90b4e376d43cf20e88e20ff27535030938431e00f157b208c637a5beaae"
+    }
+  },
+  "qwen_cloud_test_sha256": "2817dbd67748dcbcd6580b8af1a7fecf7d357279c1ec1a0fcd50b0c9e10a43a7",
+  "cos_stable_passed": true,
+  "cos_stable": {
+    "runtime-macos-x64.json": {
+      "bytes": 5208,
+      "sha256": "6f54205a5b0434421b2cb248fc514aa9663e4f9ecfe33d87cded96db4c104202"
+    },
+    "runtime-macos-arm64.json": {
+      "bytes": 5150,
+      "sha256": "c7de8f9603de4802783ec3e891ca89f4663d16f83b1198203dbbf7429b1c151d"
+    },
+    "runtime-windows-x64.json": {
+      "bytes": 5143,
+      "sha256": "c4fff3a47b345d71f4abc60487b5508bc3fb7a3bef9b69aaa411437764eb9092"
+    }
+  }
+}
