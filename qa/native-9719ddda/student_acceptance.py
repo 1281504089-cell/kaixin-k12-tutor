@@ -44,11 +44,18 @@ def verify_student(app,home,selected,output,target):
             proc.wait(timeout=15)
             (HERE/'case').write_text('startup')
             proc=subprocess.Popen([sys.executable,'-u',HERE/'quiz_replay.py'],cwd=HERE,env=env,stdout=log,stderr=log)
+            for _ in range(100):
+                if proc.poll() is not None:raise RuntimeError('The exercise replay service exited')
+                try:
+                    with socket.create_connection(('127.0.0.1', gate),timeout=.5):break
+                except OSError:time.sleep(.1)
+            else:raise TimeoutError('The exercise replay service did not listen')
             batches={}
             for mode,count in [('quiz',3),('always',2)]:
                 subprocess.run(['node',HERE/'quiz.cjs',target],cwd=output,env={**env,'QA_CASE_ID':mode,'QA_TRIAL':mode},check=True,timeout=175)
                 batch=json.loads((HERE/(mode+target+'-quiz.json')).read_bytes())
-                assert batch['submitted'] and len(batch['cards'])==count,(mode,batch.get('error'),len(batch['cards']))
+                write(output/(mode+'-window.json'),batch)
+                assert batch.get('studentTurnVisible') and batch['submitted'] and len(batch['cards'])==count,(mode,batch.get('error'),len(batch['cards']),batch.get('final','')[-500:])
                 if mode=='always':
                     assert '2' in batch['final'] and '暂缺' in batch['final'],batch['final']
                 batches[mode]={'count':count,'submitted':True,'first_visible_ms':batch['cards'][0]['ms']}

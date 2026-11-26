@@ -44,6 +44,7 @@ class Handler(StreamHandler):
         messages=data['messages']
         system=str(messages[0]['content'])
         tools={i['function']['name'] for i in data.get('tools',[])}
+        print('fixture', mode, 'with tools' if tools else 'without tools', 'exercise tool available' if 'ask_user' in tools else '',flush=True)
         def reply(text):
             return self.reply(data,deltas=[{'content':text if isinstance(text,str) else json.dumps(text,ensure_ascii=False)}])
         if 'visual_intent' in system or '判断学生这一轮是否主动要求' in system:
