@@ -239,7 +239,7 @@ def main():
     if free < wait_for_space:
         raise RuntimeError(f'Scratch needs {wait_for_space} bytes for the verified inputs; this runner has {free}')
     release, assets = draft(LOCK)
-    assert release["draft"] and release["tag_name"] in {LOCK["draft_tag"], LOCK["draft_edit_alias"], ""}
+    assert release["draft"] and release["id"]==LOCK["draft_release_id"] and release["name"]==LOCK["draft_title"]
     defaults = [row['default'], row['compatible'], row['delta'], LOCK['launcher'], LOCK['core']]
     receipts = [pinned_draft_asset(assets, asset, work / asset.get('name', asset.get('archive'))) for asset in
       ({**raw,'name':raw.get('name', raw.get('archive'))} for raw in defaults)]

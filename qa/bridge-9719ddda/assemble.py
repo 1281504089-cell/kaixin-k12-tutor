@@ -34,7 +34,7 @@ def main(target):
     assert sha=='9719dddaa36ae80261d676fb5914f2c48473061a'
     core=lock['core']
     release,assets=draft(lock)
-    assert release['draft'] and release['tag_name'] in (lock['draft_tag'],lock['draft_edit_alias'],'')
+    assert release['draft'] and release['id']==lock['draft_release_id'] and release['name']==lock['draft_title']
     work=Path(os.environ['RUNNER_TEMP'])/'scholar-bridge'
     work.mkdir()
     content_path=work/core['name']
