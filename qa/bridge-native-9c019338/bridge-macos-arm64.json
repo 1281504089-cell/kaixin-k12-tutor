@@ -1,0 +1,24 @@
+{
+  "source_commit": "9c0193385e64c36028d0717ad43d51606c8e7ed5",
+  "target": "macos-arm64",
+  "core": {
+    "name": "kaixin-core-local-20261126-9c019338.tar.gz",
+    "bytes": 912775084,
+    "sha256": "ec9339e2347934ae27f9e5e7efeaf0ebd750b0f8d762d60bcf1b9929f19ae463"
+  },
+  "native_prefix": {
+    "bytes": 1145954376,
+    "sha256": "49fedf25c1b1963a97b99380b3654426c75de2df2ef47a8dcbfc78bc689df577",
+    "donor": "kaixin-bridge-20261125-47ce923-macos-arm64.tar.gz",
+    "donor_sha256": "3b3729a8e927ec0a9affa6b04adfcd0c13eafd2b114990ff0a167bd20f5bcab7"
+  },
+  "bridge": {
+    "bytes": 2058729460,
+    "sha256": "70f1b56fd109d1e70815f5db040ee60a7169e70ddeb81d035c178bc5311bbd9f",
+    "name": "kaixin-bridge-20261126-9c019338-macos-arm64.tar.gz"
+  },
+  "draft_release_id": 459120506,
+  "bridge_asset": 794956836,
+  "workflow_sha": "466cb72b50132543967c2ffe8da3e8f9c6a2d499",
+  "run_id": "45783704800"
+}

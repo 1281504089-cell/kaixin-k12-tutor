@@ -1,0 +1,128 @@
+{
+  "formatVersion": 1,
+  "protocolVersion": 1,
+  "platform": "darwin",
+  "arch": "arm64",
+  "coreVersion": "1.7.1",
+  "commit": "9c0193385e64c36028d0717ad43d51606c8e7ed5",
+  "builtAt": 1795680586902,
+  "corePayloadSha256": "ec9339e2347934ae27f9e5e7efeaf0ebd750b0f8d762d60bcf1b9929f19ae463",
+  "runtimeId": "1.7.1-kaixin-20261126-9c019338-macos-arm64-universal",
+  "archive": "kaixin-bridge-20261126-9c019338-macos-arm64.tar.gz",
+  "sha256": "70f1b56fd109d1e70815f5db040ee60a7169e70ddeb81d035c178bc5311bbd9f",
+  "compatibleBaseManifests": [
+    {
+      "baseRuntimeId": "1.7.1-04276f68a-arm64",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-33f13d78d5c7.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-7744dbeb8d09.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-c09b1d53f8d0.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-audio-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-6c9c7f936933.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-library-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-6f6222533fad.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-materials-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-b83c8329037e.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-projects-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-b445b7c83c4d.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-review-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-194178f05eea.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-stt-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-7056f6bb9861.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-306c0073e240.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-ba05e5de452a.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-cda1e4c99289.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-7c3938d776e5.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-6fbf654d5ac1.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-f24bcb9ab831.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-d9957978846e.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-18-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-4f19a2730ed1.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-afbad5ed9bc4.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-1ba5c03632ca.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-70cb97c3b840.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-8fdc2e3e782e.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-diagram-1-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-b34f5e7a134e.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-mac-integrated-2-macos-arm64-r2-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-2ff4a4586e5d.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-resource-4-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-1813d419f843.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-resource-5-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-30bd45c34bd3.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261122-textbook-interactive-3-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-dae624a8268d.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261125-47ce923-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-6a475a3feb76.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261126-43dba66-macos-arm64-universal",
+      "file": "runtime-macos-arm64-20261126-9c019338-base-4e327124a8fa.json"
+    }
+  ],
+  "signature": "oeEQCWo3k4husDHHC0f9j9U/07Xqk2BQ6ibbQ/k1zF7JWcebozQlCdd5c0bbnvDRkT3swss3r07ld3wnuRTvDw=="
+}

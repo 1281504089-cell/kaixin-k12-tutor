@@ -1,0 +1,24 @@
+{
+  "source_commit": "9c0193385e64c36028d0717ad43d51606c8e7ed5",
+  "target": "windows-x64",
+  "core": {
+    "name": "kaixin-core-local-20261126-9c019338.tar.gz",
+    "bytes": 912775084,
+    "sha256": "ec9339e2347934ae27f9e5e7efeaf0ebd750b0f8d762d60bcf1b9929f19ae463"
+  },
+  "native_prefix": {
+    "bytes": 1121217115,
+    "sha256": "b5e9686575e88756e82da7c17ff89760ff70cf11229a76217f2f27cad4485d67",
+    "donor": "kaixin-bridge-20261125-47ce923-windows-x64.tar.gz",
+    "donor_sha256": "868932b08391c7363067256a30b405c8f70294abc6f56dbd4ab005a905c49079"
+  },
+  "bridge": {
+    "bytes": 2033992199,
+    "sha256": "ca4e2470b1f5107d6d2e143dbea4123f87ec45626a11b075d81432835b6d529f",
+    "name": "kaixin-bridge-20261126-9c019338-windows-x64.tar.gz"
+  },
+  "draft_release_id": 459120506,
+  "bridge_asset": 794959080,
+  "workflow_sha": "466cb72b50132543967c2ffe8da3e8f9c6a2d499",
+  "run_id": "45783704800"
+}
