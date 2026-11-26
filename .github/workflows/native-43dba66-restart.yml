@@ -15,8 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: macos-arm64
-            runner: macos-15
+          - target: macos-x64
+            runner: macos-15-intel
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 126
     steps:
