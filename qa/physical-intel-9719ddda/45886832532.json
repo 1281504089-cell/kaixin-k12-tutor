@@ -1,0 +1,105 @@
+{
+  "source_commit": "9719dddaa36ae80261d676fb5914f2c48473061a",
+  "core": {
+    "name": "kaixin-core-local-20261127-9719ddda.tar.gz",
+    "bytes": 912835844,
+    "sha256": "e517982cae314db9a9cf3689b7b3de2dbcda98d69e50eab08d3d27cd375119b0"
+  },
+  "target": "macos-x64",
+  "run_id": "45886832532",
+  "workflow_sha": "9684dd8364986d2824971fba76707bdefa141b92",
+  "installer_media": [
+    {
+      "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261127-9719ddda-native-qa-part.002.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "1d8bb3b3e072594a25721fcfcabb816cf2835e453aff7b64217b1503a9937708"
+    },
+    {
+      "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261127-9719ddda-native-qa-part.003.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "34f4cf1b77b787c5509c3eacfdbb25e11490e447b49e26a1f2806a452bff7c26"
+    },
+    {
+      "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261127-9719ddda-native-qa-part.004.dmgpart",
+      "bytes": 1992295135,
+      "sha256": "6791e71b31da36f86749fd186ba9092c6a45f64d6df0f24b17864a431403cd06"
+    },
+    {
+      "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261127-9719ddda-native-qa-part.005.dmgpart",
+      "bytes": 85209762,
+      "sha256": "c2fec39b66c74bc5dd979947fc0793fe03e7ab30697f0990ef37fb5e09d91241"
+    },
+    {
+      "file": "Kaixin-Super-Scholar-MacOS-Intel-v1.7.1-20261127-9719ddda-native-qa-part.dmg",
+      "bytes": 1992783938,
+      "sha256": "ea5b3f4bb868546ab54876bc955ff3fb0340b1c64ee968dcbfafa87bbed7f3bc"
+    }
+  ],
+  "on_device": true,
+  "signed_app_verified": true,
+  "volume_checksums_verified": true,
+  "processor": "x86_64",
+  "native_gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) Iris(TM) Plus Graphics 655, Unspecified Version)",
+  "active_commit": "9719dddaa36ae80261d676fb5914f2c48473061a",
+  "real_learning_data_used": false,
+  "student_features": {
+    "commit": "9719dddaa36ae80261d676fb5914f2c48473061a",
+    "target": "macos-x64",
+    "attached_exercise": {
+      "key": "found",
+      "sub": "物理",
+      "question": "这次轮到我。从这张纸上挑那道现成的液体密度四选一，保持原来的数据和选项。",
+      "teacher": "物理老师 · 物理通用老师",
+      "first": null,
+      "cardMs": 6080,
+      "end": 6080,
+      "body": "",
+      "rendered": "",
+      "strong": [],
+      "card": true,
+      "cardText": "一瓶均匀液体体积 70 cm³，质量 56 g。它的密度是多少？\n题源 · 本次附件 · 课堂练习.txt\n题源 · 本次附件 · 课堂练习.txt. 原件，点击查看\n1\nA. 0.125 g/cm³\n2\nB. 0.8 g/cm³\n3\nC. 1.25 g/cm³\n4\nD. 8 g/cm³\n其他…\n跳过\n提交",
+      "send": false,
+      "error": false,
+      "feedback": "你选 B 正确。56 g ÷ 70 cm³ = 0.8 g/cm³。"
+    },
+    "illustrated_exercises": {
+      "quiz": {
+        "count": 3,
+        "submitted": true,
+        "first_visible_ms": 4381
+      },
+      "always": {
+        "count": 2,
+        "submitted": true,
+        "first_visible_ms": 5041
+      }
+    },
+    "offline_experiment": {
+      "native": true,
+      "entry": "边读边问 → 教材",
+      "books": [],
+      "errors": [],
+      "sceneErrors": [],
+      "attempts": [],
+      "workbench": {
+        "scene": "/experiment-scenes/livebook/index.html?lesson=avgspeed&entry=pep-wuli-8s-avgspeed",
+        "clickToReadyMs": 7604,
+        "operationVisible": true,
+        "released": true,
+        "operationInput": "pointer",
+        "nativeRenderer": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) Iris(TM) Plus Graphics 655, Unspecified Version)"
+      }
+    },
+    "offline_dictation_with_synthetic_audio": {
+      "desktopRecordingToInputMs": 879,
+      "format": {
+        "name": "recording.wav",
+        "type": "audio/wav",
+        "channels": 1,
+        "sampleRate": 16000
+      },
+      "offlineTranscript": "请给我三道旋转练习题。"
+    }
+  },
+  "launch": "Exact read-only installer, fresh isolated internal APFS storage and default physical graphics"
+}
