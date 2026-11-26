@@ -1,0 +1,25 @@
+{
+  "base": "9c0193385e64c36028d0717ad43d51606c8e7ed5",
+  "commit": "9719dddaa36ae80261d676fb5914f2c48473061a",
+  "tree": "9b97c2e0d0b31238275da8599b8b2bda93d44a1a",
+  "git_tree_rebuilt_from_patch": true,
+  "source_bundle": {
+    "name": "kaixin-source-9c019338-to-9719ddda.bundle",
+    "bytes": 260685,
+    "sha256": "817ce8a3b1a346ae073aa53a6b75a6af56e5becf7df082f1cb19ed68efcf5aeb"
+  },
+  "patch": {
+    "name": "kaixin-source-from-9c019338-to-9719ddda.patch.gz",
+    "bytes": 193770,
+    "sha256": "35b027ee2c0968088c686b65e7bdf7978c31b5fb7f947dd09423b9779cf79697"
+  },
+  "uncompressed_patch_sha256": "15618b4a5fa19ce869f8ed348a860aed7245835939628d89ebafa5b825fb606c",
+  "scene_archive": {
+    "name": "livebook-ccd70e2-scenes.tar.gz",
+    "bytes": 6847757,
+    "sha256": "85a017fde1846068690ef5ddb72a76ddb95a81b49b1865910c19b0c5d818b1b1"
+  },
+  "scene_files": 243,
+  "scene_restore": "Replace web/public/experiment-scenes with the archive directory experiment-scenes and build web. Keep THIRD_PARTY_NOTICES.md.",
+  "license": "Livebook CC BY-NC-SA 4.0"
+}
