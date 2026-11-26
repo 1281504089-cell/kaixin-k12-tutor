@@ -1,0 +1,1686 @@
+diff --git a/deeptutor/agents/chat/agentic_pipeline.py b/deeptutor/agents/chat/agentic_pipeline.py
+index 59be32eb..23a09739 100644
+--- a/deeptutor/agents/chat/agentic_pipeline.py
++++ b/deeptutor/agents/chat/agentic_pipeline.py
+@@ -347,11 +347,43 @@ class AgenticChatPipeline(AgenticLoopPipeline):
+     def _augment_tool_kwargs(self, tool_name, kwargs, context):
+         bound = super()._augment_tool_kwargs(tool_name, kwargs, context)
+         if tool_name == "imagegen":
++            from functools import partial
++
++            from deeptutor.services.llm.capabilities import supports_vision
++            from deeptutor.visualizers.illustration_fallback import deliver_illustration_fallback
++            from deeptutor.visualizers.illustration_review import review_teaching_illustration
++
+             bound["_lesson_context"] = context
++            bound.pop("_lesson_illustration_fallback", None)
++            bound.pop("_lesson_illustration_review", None)
++            if context.runtime.publish_late_figure:
++                config = self._current_request_config()
++                if supports_vision(config.binding, config.model):
++                    bound["_lesson_illustration_review"] = partial(review_teaching_illustration, config, self.usage)
++                diagram = self.tool_lookup.get("math_diagram") if "math_diagram" in self._compose_enabled_tools(context) else None
++                bound["_lesson_illustration_fallback"] = partial(
++                    deliver_illustration_fallback, context, config, self.usage,
++                    diagram=diagram, bind_diagram=lambda args: self._augment_tool_kwargs("math_diagram", args, context),
++                )
+         if tool_name == "ask_user" and (self._guard_study_quiz(context)
+                 or kwargs.get("purpose") == "exercise" and context.extension_state.get("question_sources", {}).get("desktop_practice_decision")):
+             bound["_study_quiz_context"] = context
+         if tool_name == "math_diagram":
++            from functools import partial
++
++            from deeptutor.visualizers.board_fallback import deliver_board_schematic
++
++            bound.pop("_board_schematic", None)
++            imagegen = self.tool_lookup.get("imagegen")
++            if context.runtime.publish_late_figure and imagegen is not None:
++                def enabled():
++                    return "imagegen" in self._compose_enabled_tools(context)
++
++                if enabled():
++                    bound["_board_schematic"] = partial(
++                        deliver_board_schematic, config=self._current_request_config(), usage=self.usage,
++                        imagegen=imagegen, enabled=enabled,
++                    )
+             reply = context.extension("math_diagram").get("pause_figure_context")
+             if reply:
+                 bound["_diagram_context"] = reply
+@@ -475,6 +507,14 @@ class AgenticChatPipeline(AgenticLoopPipeline):
+             figure_state["draw_only_other_work"] = True
+         outcome = await super()._dispatch_tool_calls(tool_calls=tool_calls, context=context, stream=stream,
+                                                      iteration_index=iteration_index, stage=stage)
++        if isinstance(stream, _PracticeOutputStream) and stream.optional_figures:
++            originals = figure_state.setdefault("read_illustration_originals", {})
++            for call in tool_calls:
++                if call.get("name") != "study_library":
++                    continue
++                metadata = outcome.tool_metadata_by_id.get(call.get("id"), {})
++                for original in metadata.get("verified_word_figure_links", ()):
++                    originals[original["url"]] = f"{original['document_key']} · 例{original['example_number']}"
+         retained = context.extension("retained_study")
+         key = retained.get("document", "")
+         if key and not key.lower().endswith((".pdf", ".docx", ".docm")) and any(
+@@ -990,12 +1030,15 @@ class AgenticChatPipeline(AgenticLoopPipeline):
+                         if event.type == StreamEventType.RESULT:
+                             event.metadata.update(response=answer, completed=completed)
+                             await stream.emit(event)
++            if practice_stream and practice_stream.optional_figures and result.get("completed", True):
++                practice_stream.optional_figures.finish_answer(str(result.get("response") or ""))
+             return result
+         finally:
+             optional = practice_stream.optional_figures if practice_stream else None
+             if optional or early is not None:
+                 state = context.extension("math_diagram")
+             if optional:
++                optional.finish_answer()
+                 optional.close()
+                 if optional.selection_job:
+                     optional.selection.add_done_callback(lambda _task: state.pop("optional_delivery", None))
+@@ -1076,9 +1119,13 @@ class AgenticChatPipeline(AgenticLoopPipeline):
+             guidance = LESSON_VISUAL_PURPOSE
+             if "math_diagram" in enabled_tools:
+                 guidance += ("精确图先查适用原件或图库，再用 math_diagram 核对题设和图元。图库无匹配时可提交程序构图数据，"
+-                             "在同一规格里放入标题 title、说明 description 和完整题设数据。")
++                             "在同一规格里放入标题 title、说明 description 和完整题设数据。为每张图填写独立正文 anchor。"
++                             "画板失败后由应用判断是否可补示意图，别为同一张手动调用 imagegen。"
++                             "以前任何标为 AI 示意图的图都不能作为读数、解题或引用的依据。")
+             if "imagegen" in enabled_tools:
+-                guidance += "教学插画用 imagegen，每张单独调用，填写自己的 lesson_title 及正文 anchor。"
++                from deeptutor.visualizers.illustration_review import BRIEF_GUIDANCE
++
++                guidance += "教学插画用 imagegen，每张单独调用，填写自己的 lesson_title 及正文 anchor。\n" + BRIEF_GUIDANCE + "\n"
+             guidance += "所需工具未启用、缺原件或成品失败时，说明对应图的缺项，继续讲清能确认的内容。"
+             if figure_state.get("model_first"):
+                 guidance += ("提前判断只处理当前输入，必要时结合正文读取的原件进一步确认。"
+diff --git a/deeptutor/core/context.py b/deeptutor/core/context.py
+index 8f0f2ce1..aa316836 100644
+--- a/deeptutor/core/context.py
++++ b/deeptutor/core/context.py
+@@ -56,6 +56,7 @@ class TurnRuntimeContext:
+     web_search_budget: dict[str, Any] = field(default_factory=dict, repr=False)
+     turn_id: str = ""
+     publish_late_figure: Callable[[Any], Awaitable[None]] | None = None
++    can_publish_late_figure: Callable[[], Awaitable[bool]] | None = None
+     wait_for_user_reply: Callable[[], Awaitable[dict[str, Any] | None]] | None = None
+     # Takes the messages the learner sent while this turn was running
+     # (``[{command_id, content}]``, oldest first); the loop reads it between steps.
+diff --git a/deeptutor/services/config/provider_runtime.py b/deeptutor/services/config/provider_runtime.py
+index 40a4b6e9..bf898198 100644
+--- a/deeptutor/services/config/provider_runtime.py
++++ b/deeptutor/services/config/provider_runtime.py
+@@ -555,7 +555,7 @@ IMAGEGEN_PROVIDERS: dict[str, GenerationProviderSpec] = {
+         label="Aliyun DashScope",
+         default_api_base="https://dashscope.aliyuncs.com/api/v1",
+         adapter="dashscope",
+-        default_model="wanx2.1-t2i-turbo",
++        default_model="qwen-image-2.1-turbo",
+     ),
+     "openai": GenerationProviderSpec(
+         label="OpenAI",
+diff --git a/deeptutor/services/imagegen/__init__.py b/deeptutor/services/imagegen/__init__.py
+index 962afff9..20459d81 100644
+--- a/deeptutor/services/imagegen/__init__.py
++++ b/deeptutor/services/imagegen/__init__.py
+@@ -18,6 +18,7 @@ async def generate_image(
+     prompt: str,
+     *,
+     catalog: dict[str, Any] | None = None,
++    config: ImagegenConfig | None = None,
+     size: str | None = None,
+     quality: str | None = None,
+     style: str | None = None,
+@@ -33,7 +34,7 @@ async def generate_image(
+     prompt = (prompt or "").strip()
+     if not prompt:
+         raise GenerationProviderError("Cannot generate an image from an empty prompt.")
+-    config = resolve_imagegen_runtime_config(catalog=catalog)
++    config = config or resolve_imagegen_runtime_config(catalog=catalog)
+     if size:
+         config.size = size
+     if quality:
+diff --git a/deeptutor/services/session/turns/executor.py b/deeptutor/services/session/turns/executor.py
+index 130e8d50..a495984e 100644
+--- a/deeptutor/services/session/turns/executor.py
++++ b/deeptutor/services/session/turns/executor.py
+@@ -1084,15 +1084,21 @@ class TurnExecutor:
+ 
+             desktop_turn = asyncio.current_task()
+ 
+-            async def publish_late_figure(event):
++            async def can_publish_late_figure():
+                 # The turn owns sequence allocation until its last write, including the title.
+                 if desktop_turn is not None:
+                     await asyncio.shield(desktop_turn)
+                 turn = await self.store.get_turn(turn_id)
+-                if (turn and turn.get("status") == "completed" and turn.get("assistant_message_id")
+-                        and await self.store.get_session(session_id)):
++                return bool(turn and turn.get("status") == "completed" and turn.get("assistant_message_id")
++                            and await self.store.get_session(session_id))
++
++            async def publish_late_figure(event):
++                if await can_publish_late_figure():
+                     await self.store.append_turn_event(turn_id, event.to_dict())
+ 
++            supports_late_figure = (os.environ.get("DEEPTUTOR_ELECTRON_EXECUTABLE")
++                                    and (self.coordinator is None or isinstance(self.coordinator, MemoryCoordinator)))
++
+             context = UnifiedContext(
+                 session_id=session_id,
+                 user_message=effective_user_message,
+@@ -1115,8 +1121,8 @@ class TurnExecutor:
+                     model_history=getattr(history_result, "model_history", None),
+                     previous_model_turn=getattr(history_result, "previous_model_turn", None),
+                     turn_id=turn_id,
+-                    publish_late_figure=(publish_late_figure if os.environ.get("DEEPTUTOR_ELECTRON_EXECUTABLE")
+-                                         and (self.coordinator is None or isinstance(self.coordinator, MemoryCoordinator)) else None),
++                    publish_late_figure=publish_late_figure if supports_late_figure else None,
++                    can_publish_late_figure=can_publish_late_figure if supports_late_figure else None,
+                     wait_for_user_reply=_wait_for_user_reply,
+                     drain_user_inputs=inbox.drain,
+                     subagent_consult_budget=payload.get("subagent_consult_budget"),
+diff --git a/deeptutor/tools/media_gen_tool.py b/deeptutor/tools/media_gen_tool.py
+index e36d84d3..5c7da7ec 100644
+--- a/deeptutor/tools/media_gen_tool.py
++++ b/deeptutor/tools/media_gen_tool.py
+@@ -17,6 +17,7 @@ Mounting & gating (set by the chat pipeline, not here):
+ 
+ from __future__ import annotations
+ 
++from functools import partial
+ from io import BytesIO
+ import logging
+ import math
+@@ -275,28 +276,46 @@ class ImagegenTool(BaseTool):
+     async def execute(self, **kwargs: Any) -> ToolResult:
+         context = kwargs.get("_lesson_context")
+         title = str(kwargs.get("lesson_title") or "").strip()[:90]
++        anchor = str(kwargs.get("anchor") or "").strip()[:200]
+         if context is not None:
+             from deeptutor.services.student_learning.reference_task_policy import student_request
+             from deeptutor.services.student_learning.study_preferences import figure_file_requested, teaching_figure_excluded
+ 
+             if teaching_figure_excluded(context):
+                 return ToolResult(content="本轮按学生要求沿用原图或文字。", success=False)
++            request = student_request(context)
+             figures = context.extension("math_diagram").get("optional_delivery")
+-            inline = (title or (_requested_image_count(kwargs.get("n")) == 1
+-                               and not figure_file_requested(student_request(context))))
+-            if inline and figures is not None and figures.publish_late:
++            if figures is None or not figures.publish_late:
++                if title or anchor:
++                    return ToolResult(content="当前对话无法核对并展示教学插画。", success=False)
++            elif title or anchor or (_requested_image_count(kwargs.get("n")) == 1 and not figure_file_requested(request)):
+                 title = title or ("Teaching illustration" if (context.language or "").startswith("en") else "教学插画")
+                 prompt = str(kwargs.get("prompt") or "").strip()
+                 size = str(kwargs.get("size") or "").strip()
+-                anchor = str(kwargs.get("anchor") or "").strip()[:200]
+                 key = ("", title, ("illustration", prompt, size, anchor), False, False)
+-                return await figures.submit(key, lambda: self._generate(kwargs, title=title),
+-                                            anchor=anchor, tool_name="imagegen")
++                decide = kwargs.get("_lesson_illustration_fallback")
++                review = kwargs.get("_lesson_illustration_review")
++                verify = partial(review, request=request, brief=prompt) if review is not None else None
++                return await figures.submit(
++                    key, lambda: self._generate(kwargs, title=title, verify=verify), anchor=anchor, tool_name="imagegen",
++                    fallback=(lambda answer, _result: decide(answer, title=title, prompt=prompt, anchor=anchor)) if decide else None,
++                )
+         return await self._generate(kwargs)
+ 
+-    async def _generate(self, kwargs: dict[str, Any], *, title="") -> ToolResult:
++    async def generate_board_schematic(self, *, prompt, title, workspace, config, verify) -> ToolResult:
++        result = await self._generate({
++            "prompt": prompt, "_workspace_id": workspace.workspace_id, "_workspace_dir": workspace.output_dir,
++        }, title=title, config=config, verify=verify)
++        if illustration := result.metadata.get("lesson_illustration"):
++            illustration["approximate"] = True
++            result.content = ""
++        return result
++
++    async def _generate(self, kwargs: dict[str, Any], *, title="", config=None, verify=None) -> ToolResult:
+         from deeptutor.services.imagegen import GenerationProviderError, generate_image
+ 
++        if title and verify is None:
++            return ToolResult(content="当前对话模型无法核对生成的插画。", success=False)
+         prompt = str(kwargs.get("prompt") or "").strip()
+         if not prompt:
+             return ToolResult(content="imagegen requires a non-empty 'prompt'.", success=False)
+@@ -304,7 +323,7 @@ class ImagegenTool(BaseTool):
+         count = 1 if title else _requested_image_count(kwargs.get("n"))
+ 
+         try:
+-            images = await generate_image(prompt, size=size, n=count)
++            images = await generate_image(prompt, size=size, n=count, **({"config": config} if config is not None else {}))
+         except ValueError as exc:  # not configured
+             return ToolResult(content=str(exc), success=False)
+         except GenerationProviderError as exc:
+@@ -326,6 +345,8 @@ class ImagegenTool(BaseTool):
+                 checked.append((data, content_type))
+             if not checked:
+                 return ToolResult(content="插画文件无法打开。", success=False)
++            if not await verify(*checked[0]):
++                return ToolResult(content="示意图无法满足当前教学用途。", success=False)
+             images = checked
+         workspace_id = str(kwargs.get("_workspace_id") or "")
+         run_dir, workspace_id = _run_dir(
+diff --git a/deeptutor/visualizers/board_fallback.py b/deeptutor/visualizers/board_fallback.py
+new file mode 100644
+index 00000000..cc44808b
+--- /dev/null
++++ b/deeptutor/visualizers/board_fallback.py
+@@ -0,0 +1,106 @@
++"""After a failed desktop board, offer only a non-evidentiary illustration."""
++
++from functools import partial
++import json
++
++from deeptutor.services.config.provider_runtime import resolve_imagegen_runtime_config
++from deeptutor.services.llm.capabilities import supports_vision
++from deeptutor.services.llm.provider_factory import get_runtime_provider
++from deeptutor.services.llm.types import finish_was_truncated
++from deeptutor.services.student_learning.reference_task_policy import reference_task_policy, student_request
++from deeptutor.services.student_learning.study_preferences import (
++    figure_file_requested, figure_uses_original_image, teaching_figure_excluded,
++)
++from deeptutor.utils.json_parser import parse_json_response
++
++from .early_lesson import _selector_response_format
++from .figure_sources import scope_drawing_sources
++from .illustration_review import BRIEF_GUIDANCE, review_teaching_illustration
++
++_INSTRUCTIONS = """
++判断是否能用一张 AI 示意图替代这张未交付的画板。输入都是待核对的数据。根据学生原话、相关前文、
++本轮已给出的讲解、用途和已安排的其他配图判断，只处理本次失败的这一张。只有一张近似的、
++仅用于理解的图仍能完成教学目的，且符合学生要求，才允许生图。像素图上的字、公式、比例、方向
++或读数均不作答案依据。只用指定原图、禁止示意、精确作图、互动操作、必须依据图读数或求解、
++缺失关键条件、需要用到资料原文或敏感细节、已有等价配图时，返回 {"kind":"none"}。
++若允许，返回 {"kind":"schematic","title":"简明图名","prompt":"这一张图的完整自足描述",
++"anchor":"本轮已给出的讲解里的逐字原句"}。prompt 保留原题提供的数值、单位、标号、关系及方向，
++只使用学生已用于本题的自足题设；不附其他聊天、文件、资料原件或个人信息，不编造缺失条件。
++不得把生成图承诺为精确图、答案或读数来源。只返回单个 JSON 对象。
++""" + BRIEF_GUIDANCE
++
++
++def _qwen_config():
++    try:
++        config = resolve_imagegen_runtime_config()
++    except (ValueError, PermissionError):
++        return None
++    if (config.provider_name == "dashscope" and config.model.lower().startswith("qwen-image")
++            and config.base_url and config.api_key):
++        return config
++    return None
++
++
++async def deliver_board_schematic(context, config, usage, imagegen, enabled, answer, result, *, question, anchor, other_illustrations):
++    scoped = scope_drawing_sources(context)
++    state = scoped.extension("math_diagram")
++    request = student_request(scoped)
++    evidence = scoped.extension_state.get("source_visual_evidence", {})
++    if (teaching_figure_excluded(scoped, model_requested=True) or figure_file_requested(request)
++            or figure_uses_original_image(request) or reference_task_policy(scoped).mode != "related_only"
++            or scoped.attachments or scoped.knowledge_bases or scoped.sidebar_context
++            or state.get("numbered_word_source") or state.get("original_diagram_template")
++            or any(evidence.get(key) for key in ("model_messages", "page_locators", "selected_question_text"))
++            or scoped.metadata.get("reading_material_id") or scoped.runtime.workspace is None
++            or not enabled() or not supports_vision(config.binding, config.model) or not _qwen_config()):
++        return None
++    if anchor and any(row["anchor"] == anchor for row in other_illustrations):
++        return None
++    data = {
++        "request": request,
++        "history": [
++            {"role": row["role"], "content": row["content"]}
++            for row in scoped.conversation_history
++            if row.get("role") in {"user", "assistant"} and isinstance(row.get("content"), str)
++        ],
++        "answer": answer,
++        "board_task": question,
++        "anchor": anchor,
++        "board_outcome": result.content if result else "画板没有返回可核对成品。",
++        "other_illustrations": other_illustrations,
++    }
++    messages = [
++        {"role": "system", "content": "\n\n".join(filter(None, (scoped.persona_context, scoped.skills_manifest, _INSTRUCTIONS)))},
++        {"role": "user", "content": json.dumps(data, ensure_ascii=False)},
++    ]
++    response = await get_runtime_provider(config).chat_stream_with_retry(
++        messages=messages, model=config.model, reasoning_effort=config.reasoning_effort,
++        retry_delays=[], allow_image_fallback=False, **_selector_response_format(config),
++    )
++    if usage is not None and response.usage:
++        usage.add_from_response(response.usage, model=config.model, provider=config.provider_name)
++    if response.finish_reason == "error" or finish_was_truncated(response.finish_reason):
++        return None
++    choice = parse_json_response(response.content or "", fallback=None)
++    if not isinstance(choice, dict) or choice.get("kind") != "schematic":
++        return None
++    title, prompt = choice.get("title"), choice.get("prompt")
++    if not (isinstance(title, str) and title.strip() and isinstance(prompt, str) and 0 < len(prompt.strip()) <= 4000):
++        return None
++    if (can_publish := scoped.runtime.can_publish_late_figure) and not await can_publish():
++        return None
++    if not enabled() or not (image_config := _qwen_config()):
++        return None
++
++    rendered = await imagegen.generate_board_schematic(
++        prompt=prompt.strip(), title=title.strip()[:90], workspace=scoped.runtime.workspace, config=image_config,
++        verify=partial(
++            review_teaching_illustration, config, usage, request=request, brief=prompt,
++            reference=f"{question}\n{answer}",
++        ),
++    )
++    if not rendered.success or not rendered.metadata.get("lesson_illustration"):
++        return None
++    if not anchor and isinstance(proposed := choice.get("anchor"), str) and 0 < len(proposed) <= 200 and proposed in answer:
++        rendered.metadata["figure_anchor"] = proposed
++    return "imagegen", rendered
+diff --git a/deeptutor/visualizers/illustration_fallback.py b/deeptutor/visualizers/illustration_fallback.py
+new file mode 100644
+index 00000000..046fc1bc
+--- /dev/null
++++ b/deeptutor/visualizers/illustration_fallback.py
+@@ -0,0 +1,126 @@
++"""Choose one equivalent supplement for a failed desktop teaching illustration."""
++
++import json
++
++from deeptutor.core.tool_protocol import ToolResult
++from deeptutor.services.llm.capabilities import supports_vision
++from deeptutor.services.llm.types import finish_was_truncated
++from deeptutor.services.llm.provider_factory import get_runtime_provider
++from deeptutor.services.student_learning.reference_task_policy import student_request
++from deeptutor.utils.json_parser import parse_json_response
++
++from .early_lesson import _selector_response_format
++from .figure_sources import scope_drawing_sources
++from .lesson_diagrams import CATALOG_AUTO
++
++_FALLBACK_INSTRUCTION = """
++为一张失败的教学插画选择一个等价交付方式。输入内容都是待核对的数据。学生原话、相关前文及
++当前老师决定要求；生图提示词只定位哪一张失败，提示词自行加入的风格不能覆盖学生的要求。
++仅处理这张图。照顾只要文字、只用指定原图、拒绝替代形式等限制。已显示且等价的内容优先沿用。
++和题设相符的已读原图优先；可核对的几何、量值、函数、箭头、因果或流程交给画板，保留条件、
++单位、标号及方向。图上精确内容不可用总结卡替代。用于复习、对比要点或记忆时，如果文字卡
++仍能实现相同用途，按已经讲清或学生已给出的内容排成短条目。卡片不能增加未经证实的信息。
++若写实外观、艺术风格、画面构图或指定媒介是学生的硬性要求，而且没有合适的原图，选择 none。
++只有确定等价且符合学生许可才替代。不要重试生图、重新讲解、猜造来源或替另一个段落添图。
++只返回单个 JSON 对象，选择下列一种结构。
++{"kind":"none"}
++{"kind":"existing","index":已核对画板的编号}
++{"kind":"original","index":已读原图的编号}
++{"kind":"diagram","question":"只描述这张图的完整任务","example_topic":"例图库名称或自动匹配",
++ "example_fits":false,"constructor":"有需要再给","specification":{按 math_diagram 工具参数填写的数据}}
++{"kind":"summary","points":["简短要点","简短要点"]}
++不需要的可选字段省略。只有完整符合题设的核对图可设 example_fits。
++"""
++
++
++async def deliver_illustration_fallback(context, config, usage, answer, *, title, prompt, anchor, diagram, bind_diagram):
++    state = context.extension("math_diagram")
++    if state.get("visual_intent") == "text_only":
++        return None
++    given = {
++        "request": student_request(context),
++        "history": [
++            {"role": row["role"], "content": row["content"]}
++            for row in context.conversation_history
++            if row.get("role") in {"user", "assistant"} and isinstance(row.get("content"), str)
++        ],
++        "answer": answer,
++        "failed_illustration": {"title": title, "prompt": prompt, "anchor": anchor},
++        "verified_drawings": dict(state.get("delivered_figures", {})),
++    }
++    originals = {}
++    scoped = scope_drawing_sources(context)
++    image_messages = []
++    if supports_vision(config.binding, config.model):
++        for attachment in scoped.attachments:
++            if attachment.type != "image" or not (attachment.url.startswith("/files/attachments/") and attachment.base64):
++                continue
++            index = len(originals) + 1
++            originals[index] = (attachment.filename, attachment.url)
++            image = attachment.base64
++            if not image.startswith("data:"):
++                image = f"data:{attachment.mime_type or 'image/png'};base64,{image}"
++            image_messages.append({"role": "user", "content": [
++                {"type": "text", "text": f"原图 {index} · {attachment.filename}"},
++                {"type": "image_url", "image_url": {"url": image}},
++            ]})
++        if scoped is context:
++            for url, label in state.get("read_illustration_originals", {}).items():
++                if not any(url == item[1] for item in originals.values()):
++                    originals[len(originals) + 1] = (label, url)
++            image_messages.extend(context.extension_state.get("source_visual_evidence", {}).get("model_messages", ()))
++    if originals:
++        given["read_originals"] = {index: label for index, (label, _) in originals.items()}
++    instruction = _FALLBACK_INSTRUCTION
++    if diagram:
++        instruction += "\n画板参数和内置图库如下。\n" + json.dumps(
++            diagram.get_definition().to_openai_schema()["function"], ensure_ascii=False,
++        )
++    else:
++        instruction += "\n画板当前不可用。"
++    rules = (context.persona_context, context.skills_manifest)
++    messages = [{"role": "system", "content": "\n\n".join(filter(None, (*rules, instruction)))},
++                {"role": "user", "content": json.dumps(given, ensure_ascii=False)}, *image_messages]
++    response = await get_runtime_provider(config).chat_stream_with_retry(
++        messages=messages, model=config.model, reasoning_effort=config.reasoning_effort,
++        retry_delays=[], allow_image_fallback=False, **_selector_response_format(config),
++    )
++    if usage is not None and response.usage:
++        usage.add_from_response(response.usage, model=config.model, provider=config.provider_name)
++    if response.finish_reason == "error" or finish_was_truncated(response.finish_reason):
++        return None
++    choice = parse_json_response(response.content or "", fallback=None)
++    if not isinstance(choice, dict):
++        return None
++    kind = choice.get("kind")
++    index = choice.get("index")
++    if kind == "original" and type(index) is int and index in originals:
++        label, url = originals[index]
++        original = {"title": title, "label": label}
++        original["existing_url" if f"]({url})" in answer else "url"] = url
++        return "read_source", ToolResult(content="", metadata={"lesson_original": original})
++    if state.get("visual_intent") == "original_only":
++        return None
++    if kind == "existing" and type(index) is int and index in given["verified_drawings"]:
++        return "math_diagram", ToolResult(content="", metadata={"existing_figure_index": index})
++    if kind == "summary" and isinstance(points := choice.get("points"), list) and 1 <= len(points) <= 6 and all(
++        isinstance(point, str) and 0 < len(point.strip()) <= 220 for point in points
++    ):
++        return "lesson_summary", ToolResult(content="", metadata={"lesson_summary": {
++            "title": title, "points": list(dict.fromkeys(point.strip() for point in points)),
++        }})
++    if kind == "diagram" and diagram and isinstance(question := choice.get("question"), str) and question.strip():
++        # Bind the same trusted source constraints as a normal drawing tool call.
++        args = {"question": question, "example_topic": CATALOG_AUTO}
++        if isinstance(topic := choice.get("example_topic"), str):
++            args["example_topic"] = topic
++        if choice.get("example_fits") is True:
++            args["example_fits"] = True
++        if isinstance(constructor := choice.get("constructor"), str):
++            args["constructor"] = constructor
++        if isinstance(spec := choice.get("specification"), dict):
++            args["specification"] = json.dumps(spec, ensure_ascii=False)
++        result = await diagram.draw_illustration_fallback(**bind_diagram(args))
++        if result.success:
++            return "math_diagram", result
++    return None
+diff --git a/deeptutor/visualizers/illustration_review.py b/deeptutor/visualizers/illustration_review.py
+new file mode 100644
+index 00000000..e6a9558f
+--- /dev/null
++++ b/deeptutor/visualizers/illustration_review.py
+@@ -0,0 +1,61 @@
++"""Prepare and review AI illustrations shown in desktop lessons."""
++
++from base64 import b64encode
++import json
++
++from deeptutor.services.llm.provider_factory import get_runtime_provider
++from deeptutor.services.llm.types import finish_was_truncated
++from deeptutor.utils.json_parser import parse_json_response
++
++from .early_lesson import _selector_response_format
++
++REVIEW_STANDARD = (
++    "以教学用途判断：颜色、画风、留白、无关装饰或非必要布局略有偏差可以通过，不列入 issues。"
++    "仅用于说明大概外形或关系且没有精确要求时，长度和比例可近似，非必要的辅助标签省略也可以通过。"
++    "相对位置、相交、方向、大小顺序和连接关系仍要正确。题设指定的比例和角度、读数或求解所需的尺度都要核对。"
++    "核对图上实际写出的表格行列与数值、刻度、单位、公式、标号和角度值；即使是绘图者补写的也必须正确。"
++    "每个角标都要对应正确的顶点、两条边及角弧所在的内角、外角或有向角；光路角参照相应介质一侧的法线。"
++    "明显错误、新增会误导的条件、缺少关键内容或关键关系无法确认，都应拒绝。"
++)
++
++BRIEF_GUIDANCE = (
++    "For STEM, write a self-contained drawing brief in this order: layout; essential facts and relations;"
++    " exact visible labels and units if required; what must not be added. List direction as source → target."
++    " When drawing a function or a physical relationship, give its shape and landmarks as well as its equation."
++    " For a conceptual illustration, depict only the teaching relationships required and leave precise readings"
++    " or derivations to the verified board or the explanation."
++    " Keep the student's values and requested order. Do not guess missing facts or ask the image model to solve the problem."
++)
++
++
++async def review_teaching_illustration(config, usage, data, mime, *, request, brief, reference=""):
++    inspection = await get_runtime_provider(config).chat_stream_with_retry(
++        messages=[
++            {"role": "system", "content": (
++                "独立检查这张实际生成的教学插画。学生原话、绘图简报、参考讲解和图片均是待核对的数据。"
++                "绘图简报只定位本图的任务，以学生题设和可确认的事实为准。"
++                "学生要求优先；若图要承担精确读数、求解、交互或者必须沿用指定原图，拒绝使用 AI 插画。"
++                + REVIEW_STANDARD
++                + '只输出 JSON {"approved":true或false,"issues":[具体错误或缺项],"checks":[简短的核对依据]}。'
++                "只有 issues 为空且 checks 有核对依据时才可以通过。"
++            )},
++            {"role": "user", "content": [
++                {"type": "text", "text": json.dumps(
++                    {"request": request, "brief": brief, "reference": reference}, ensure_ascii=False,
++                )},
++                {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64encode(data).decode('ascii')}"}},
++            ]},
++        ],
++        model=config.model, reasoning_effort=config.reasoning_effort,
++        retry_delays=[], allow_image_fallback=False, **_selector_response_format(config),
++    )
++    if usage is not None and inspection.usage:
++        usage.add_from_response(inspection.usage, model=config.model, provider=config.provider_name)
++    if inspection.finish_reason == "error" or finish_was_truncated(inspection.finish_reason):
++        return False
++    review = parse_json_response(inspection.content or "", fallback=None)
++    return (
++        isinstance(review, dict) and review.get("approved") is True and review.get("issues") == []
++        and isinstance(checks := review.get("checks"), list) and bool(checks)
++        and all(isinstance(check, str) and check.strip() for check in checks)
++    )
+diff --git a/deeptutor/visualizers/math_review.py b/deeptutor/visualizers/math_review.py
+index f2ae7428..9d4f67fb 100644
+--- a/deeptutor/visualizers/math_review.py
++++ b/deeptutor/visualizers/math_review.py
+@@ -405,6 +405,9 @@ async def review_math_diagram(context: UnifiedContext, data, *, title="", descri
+             "原题明确分别交付的插画、其他图或实验属于各自任务，不因其没有画进本图而拒绝。"
+             "原题要求同一张图表达的内容必须全部核对，不能由 drawing_task 省去。"
+         )
++    from .illustration_review import REVIEW_STANDARD
++
++    review_system += "\n" + REVIEW_STANDARD
+     config = figure_model_config(get_llm_config())
+     if config is None:
+         raise ValueError("未配置可用的 DeepSeek high 数学审图模型，图形尚未通过核对。")
+diff --git a/deeptutor/visualizers/math_tool.py b/deeptutor/visualizers/math_tool.py
+index 767cb2fb..b54f1c1a 100644
+--- a/deeptutor/visualizers/math_tool.py
++++ b/deeptutor/visualizers/math_tool.py
+@@ -158,6 +158,7 @@ class MathDiagramTool(BaseTool):
+                 success=False, metadata={"numbered_source_required": True},
+             )
+         kwargs.pop("_precompiled_local", None)
++        kwargs.pop("on_attempt", None)
+         token = drawing_progress_sink.set(kwargs.get("event_sink"))
+         try:
+             context = kwargs.get("_diagram_context")
+@@ -186,23 +187,34 @@ class MathDiagramTool(BaseTool):
+                             metadata={"interactive_experiment_handoff": selected},
+                         )
+                 precompiled_local = None
++                attempted = False
++                board_schematic = kwargs.pop("_board_schematic", None)
++
++                def mark_attempted():
++                    nonlocal attempted
++                    attempted = True
+ 
+                 async def draw():
+                     async with state.setdefault("draw_lock", asyncio.Lock()):
+                         if precompiled_local is not None:
+                             kwargs["_precompiled_local"] = precompiled_local
+-                        if not background:
+-                            return await self._draw(**kwargs)
+                         attempts = dict(state.get("attempts", {}))
+                         corrections = set(state.get("corrected_attempts", ()))
+                         try:
+-                            return await self._draw(**kwargs)
++                            result = await self._draw(on_attempt=mark_attempted, **kwargs) if board_schematic else await self._draw(**kwargs)
+                         except asyncio.CancelledError:
+-                            # An interrupted optional draft cannot consume an explicit drawing attempt.
+-                            state.update(attempts=attempts, corrected_attempts=corrections)
++                            if background:
++                                # An interrupted optional draft cannot consume an explicit drawing attempt.
++                                state.update(attempts=attempts, corrected_attempts=corrections)
+                             raise
++                        if board_schematic and result.success:
++                            state.setdefault("board_deliveries", set()).add(identity)
++                        return result
+ 
+                 background = False
++                question = " ".join(str(kwargs.get("question") or "").split())
++                anchor = str(kwargs.get("anchor") or "").strip()[:200]
++                identity = (question, anchor)
+                 if optional := state.get("optional_delivery"):
+                     from deeptutor.services.student_learning.reference_task_policy import (
+                         _text, reference_task_policy, student_request,
+@@ -303,8 +315,25 @@ class MathDiagramTool(BaseTool):
+                                     specification = ("category_bar", category, specification)
+                     constructor_key = f"constructor:{kwargs['constructor']}" if kwargs.get("constructor") else ""
+                     key = (("", request, "polynomial_comparison", False, False) if comparison else
+-                           ("" if topic == CATALOG_AUTO else topic, " ".join(str(kwargs.get("question") or "").split()),
+-                            specification or constructor_key, fits, interactive))
++                           ("" if topic == CATALOG_AUTO else topic, question, specification or constructor_key, fits, interactive))
++                    async def schematic(answer, result):
++                        if not attempted:
++                            return None
++                        claimed = optional.board_schematics
++                        if any(subject == question and (position == anchor or not (position and anchor))
++                               for subject, position in claimed | state.get("board_deliveries", set())):
++                            return None
++                        claimed.add(identity)
++                        other = [
++                            {"title": queued[1], "anchor": queued[2][3]}
++                            for queued in optional.jobs if isinstance(queued[2], tuple) and queued[2][0] == "illustration"
++                        ]
++                        return await board_schematic(
++                            context=context, answer=answer, result=result, question=question, anchor=anchor,
++                            other_illustrations=other,
++                        )
++
++                    fallback = schematic if board_schematic and question and not interactive and optional.publish_late else None
+                     if required:
+                         result = await optional.require(key, draw, reusable=reusable)
+                         if result.success and (index := result.metadata.get("figure_index")
+@@ -313,16 +342,34 @@ class MathDiagramTool(BaseTool):
+                             indices = state.setdefault("required_figure_indices", [])
+                             if index not in indices:
+                                 indices.append(index)
++                        elif fallback and attempted and not result.success:
++                            async def failed_board():
++                                return result
++
++                            await optional.submit(("", question, ("board_fallback", identity), False, False),
++                                                  failed_board, anchor=anchor, fallback=fallback)
+                         return result
+                     background = True
+                     drawing_progress_sink.set(None)
+-                    return await optional.submit(key, draw, anchor=str(kwargs.get("anchor") or ""))
++                    return await optional.submit(key, draw, anchor=anchor, fallback=fallback)
+                 return await draw()
+             return await self._draw(**kwargs)
+         finally:
+             drawing_progress_sink.reset(token)
+ 
+-    async def _draw(self, **kwargs) -> ToolResult:
++    async def draw_illustration_fallback(self, **kwargs) -> ToolResult:
++        context = kwargs["_diagram_context"]
++        if kwargs.get("_numbered_source_missing"):
++            return ToolResult(content="配图缺少已核对的原件条件。", success=False)
++        state = context.extension("math_diagram")
++        # Apply the same drawing lock, source scope and review as an in-answer drawing.
++        async with state.setdefault("draw_lock", asyncio.Lock()):
++            result = await self._draw(**kwargs, purpose="necessary_for_explanation")
++            if result.metadata.get("existing_figure_index"):
++                result.success = True
++            return result
++
++    async def _draw(self, *, on_attempt=None, **kwargs) -> ToolResult:
+         context = kwargs.get("_diagram_context")
+         if not isinstance(context, UnifiedContext):
+             return ToolResult(content="数学绘图缺少原始题目上下文。", success=False)
+@@ -532,6 +579,8 @@ class MathDiagramTool(BaseTool):
+         if plugin is None:
+             state["failure_notice"] = "当前绘图格式不可用，图未生成。"
+             return ToolResult(content=state["failure_notice"], success=False)
++        if on_attempt:
++            on_attempt()
+         started = time.perf_counter()
+         usage = kwargs.get("_diagram_usage")
+         if circle_area:
+@@ -905,6 +954,8 @@ class MathDiagramTool(BaseTool):
+                               success=state.get("optional_delivery") is not None)
+         index = state["figure_index"] = state.get("figure_index", 0) + 1
+         delivered[state["active_attempt"]] = shown[rendered] = index
++        if context.runtime.publish_late_figure:
++            state.setdefault("delivered_figures", {})[index] = figure.get("presentation", {})
+         origin = "这张图命中内置例图库。" if generation_source in {"lesson_example", "verified_catalog_match"} else ""
+         if generation_source == "parameterized_catalog":
+             origin = "已用图库模板按本题数据重新绘制并核对。"
+diff --git a/deeptutor/visualizers/optional_lesson.py b/deeptutor/visualizers/optional_lesson.py
+index def6a1be..dae48cf9 100644
+--- a/deeptutor/visualizers/optional_lesson.py
++++ b/deeptutor/visualizers/optional_lesson.py
+@@ -19,6 +19,8 @@ REUSE_PREVIOUS_FIGURE = "REUSE_PREVIOUS"
+ FOLLOWUP_DRAW_SECONDS = 45
+ MAX_PENDING_FIGURES = 8
+ DELIVERY_SECONDS = 110
++ILLUSTRATION_FALLBACK_SECONDS = 60
++BOARD_FALLBACK_SECONDS = 125
+ 
+ 
+ @dataclass
+@@ -133,6 +135,8 @@ class OptionalLessonFigures:
+         self.jobs = {}
+         self.required = set()
+         self.publishing = set()
++        self.board_results = {}
++        self.board_schematics = set()
+         self.selection = None
+         self.selection_job = None
+         self.closed = False
+@@ -142,6 +146,13 @@ class OptionalLessonFigures:
+         self.shown = False
+         self.publish_late = publish_late
+         self.deliver_after_answer = False
++        self.answer_ready = asyncio.Event()
++        self.answer = None
++
++    def finish_answer(self, answer=None):
++        if not self.answer_ready.is_set():
++            self.answer = answer
++            self.answer_ready.set()
+ 
+     def watch(self, selection, deliver, *, resolved_metadata=None):
+         async def on_choice():
+@@ -173,7 +184,7 @@ class OptionalLessonFigures:
+         else:
+             await self.stream.tool_result(tool_name, "", source=self.source, stage=self.stage, metadata=metadata)
+ 
+-    async def submit(self, key, draw, *, anchor="", tool_name="math_diagram"):
++    async def submit(self, key, draw, *, anchor="", tool_name="math_diagram", fallback=None):
+         queued = ToolResult(content=(
+             "这张辅助图在后台核对。立即用文字讲清全部关系，直接完成回答。"
+             "界面会呈现本轮已经核对的图。正文无需预告、等待或引用尚未显示的图。"
+@@ -187,25 +198,36 @@ class OptionalLessonFigures:
+                 return result
+             return ToolResult(content="本轮辅助图未核对完成。直接讲清题意即可。")
+         job = None
++        fallback_budget = 0
+         if self.publish_late:
+             if len(self.jobs) >= MAX_PENDING_FIGURES:
+                 return ToolResult(content="本轮配图已达到上限，请先讲解已有题目。", success=False)
+             job = {"id": new_call_id("lesson-figure"), "state": "pending",
+                    "label": (key[0] or key[1])[:90], "anchor": anchor.strip()[:200],
+                    "deadline": time() + DELIVERY_SECONDS}
++            if tool_name == "imagegen":
++                job["kind"] = "illustration"
++            if fallback:
++                fallback_budget = BOARD_FALLBACK_SECONDS if tool_name == "math_diagram" else ILLUSTRATION_FALLBACK_SECONDS
++                job["deadline"] += fallback_budget
+         announced = asyncio.get_running_loop().create_future()
+ 
+         async def render():
+             await announced
+-            return await self._render(draw, job, tool_name=tool_name)
++            return await self._render(draw, job, tool_name=tool_name, fallback=fallback if fallback_budget else None,
++                                      fallback_budget=fallback_budget)
+ 
+         # Reserve the request before publishing its receipt, which can yield to a duplicate tool call.
+         task = self.jobs[key] = asyncio.create_task(render())
++        if fallback_budget and tool_name == "math_diagram":
++            primary = self.board_results[task] = asyncio.get_running_loop().create_future()
++            task.add_done_callback(lambda _: primary.cancel() if not primary.done() else None)
+         try:
+             if job:
+                 await self._emit_job(job, late=self.closed, tool_name=tool_name)
+         except BaseException:
+             self.jobs.pop(key, None)
++            self.board_results.pop(task, None)
+             task.cancel()
+             raise
+         if not announced.done():
+@@ -223,7 +245,7 @@ class OptionalLessonFigures:
+         if task := self.jobs.get(key):
+             return task
+         if isinstance(specification, tuple):
+-            if specification[0] == "illustration":
++            if specification[0] in ("illustration", "board_fallback"):
+                 return None
+             if specification[0] == "round_refraction":
+                 from .round_refraction import MEDIA_ROLE_LABELS
+@@ -259,9 +281,10 @@ class OptionalLessonFigures:
+                 task.cancel()
+         if matching is not None:
+             try:
+-                result = await asyncio.shield(matching)
++                primary = self.board_results.get(matching, matching)
++                result = await asyncio.shield(primary)
+             except asyncio.CancelledError:
+-                if not matching.cancelled() or asyncio.current_task().cancelling():
++                if not primary.cancelled() or asyncio.current_task().cancelling():
+                     raise
+             else:
+                 if result and not result.success:
+@@ -313,24 +336,51 @@ class OptionalLessonFigures:
+         await self.submit(("", previous.drawing_task, "", True, False), reuse)
+         return True
+ 
+-    async def _render(self, draw, job=None, *, tool_name):
++    async def _render(self, draw, job=None, *, tool_name, fallback=None, fallback_budget=0):
++        task = asyncio.current_task()
++        board_result = self.board_results.get(task)
+         try:
+-            if self.closed:
+-                if not self.deliver_after_answer:
+-                    return None
++            if self.closed and not self.deliver_after_answer:
++                if board_result is not None:
++                    board_result.cancel()
++                return None
+             if job:
+-                async with asyncio.timeout(max(0, job["deadline"] - time() - 5)):
++                provider_deadline = job["deadline"] - fallback_budget
++                async with asyncio.timeout(max(0, provider_deadline - time() - 5)):
+                     result = await draw()
+             else:
+                 result = await draw()
++        except asyncio.CancelledError:
++            if board_result is not None:
++                board_result.cancel()
++            raise
+         except TimeoutError:
+             result = None
+         except Exception:
+-            logger.debug("Optional teaching illustration did not finish", exc_info=False)
++            logger.debug("Optional teaching figure did not finish", exc_info=False)
+             result = None
+         try:
+-            approved = _approved_figure(result) or bool(result and result.success and result.metadata.get("lesson_illustration"))
+-            task = asyncio.current_task()
++            approved_board = _approved_figure(result) or _existing_index(result)
++            if board_result is not None:
++                board_result.set_result(result)
++            has_illustration = bool(result and result.success and result.metadata.get("lesson_illustration"))
++            if fallback and not (approved_board or has_illustration):
++                try:
++                    async with asyncio.timeout(max(0, min(fallback_budget, job["deadline"] - time() - 2))):
++                        await self.answer_ready.wait()
++                        if self.deliver_after_answer and self.answer is not None:
++                            alternative = await fallback(self.answer, result)
++                            if alternative is not None:
++                                tool_name, result = alternative
++                                if not job["anchor"]:
++                                    job = {**job, "anchor": result.metadata.get("figure_anchor", "")}
++                except Exception:
++                    logger.debug("Teaching figure fallback unavailable", exc_info=False)
++            approved = _approved_figure(result) or bool(
++                result and result.success and any(
++                    result.metadata.get(key) for key in ("lesson_illustration", "lesson_summary", "lesson_original")
++                )
++            )
+             if self.closed and not self.deliver_after_answer:
+                 return result if task is self.kept else None
+             if task not in self.jobs.values():
+diff --git a/tests/api/test_settings_router.py b/tests/api/test_settings_router.py
+index 1d2e776c..b73802c3 100644
+--- a/tests/api/test_settings_router.py
++++ b/tests/api/test_settings_router.py
+@@ -722,7 +722,7 @@ def test_media_and_voice_provider_choices_include_dashscope() -> None:
+     # Voice IDs are selected explicitly from provider discovery or entered by the user.
+     assert dashscope["tts"]["default_voice"] == ""
+     assert dashscope["stt"]["default_model"] == "paraformer-realtime-v2"
+-    assert dashscope["imagegen"]["default_model"] == "wanx2.1-t2i-turbo"
++    assert dashscope["imagegen"]["default_model"] == "qwen-image-2.1-turbo"
+     assert dashscope["videogen"]["default_model"] == "wanx2.1-t2v-turbo"
+ 
+ 
+diff --git a/tests/services/test_media_gen.py b/tests/services/test_media_gen.py
+index cb48e888..770f698e 100644
+--- a/tests/services/test_media_gen.py
++++ b/tests/services/test_media_gen.py
+@@ -696,9 +696,15 @@ async def test_imagegen_tool_saves_then_presents_selected_workspace_artifact(
+ 
+ 
+ @pytest.mark.asyncio
+-@pytest.mark.parametrize("valid_image", [True, False])
+-@pytest.mark.parametrize("named", [True, False])
+-async def test_lesson_illustration_returns_to_its_original_answer(monkeypatch, tmp_path, valid_image, named):
++@pytest.mark.parametrize(("valid_image", "approved"), [(True, True), (False, True), (True, False), (True, None)])
++@pytest.mark.parametrize(("title", "anchor", "count"), [
++    ("水杯里的筷子", "先看水面。", 4),
++    ("", "", 1),
++    ("", "先看水面。", 4),
++])
++async def test_lesson_illustration_returns_to_its_original_answer(
++    monkeypatch, tmp_path, valid_image, approved, title, anchor, count,
++):
+     import asyncio
+     from io import BytesIO
+     from unittest.mock import AsyncMock
+@@ -713,9 +719,11 @@ async def test_lesson_illustration_returns_to_its_original_answer(monkeypatch, t
+     png = BytesIO()
+     Image.new("RGB", (4, 4), "white").save(png, format="PNG")
+     release = asyncio.Event()
++    prompts = []
+ 
+-    async def generate(*_, **kwargs):
++    async def generate(prompt, **kwargs):
+         assert kwargs["n"] == 1
++        prompts.append(prompt)
+         await release.wait()
+         return [(png.getvalue() if valid_image else b"corrupted", "image/png")]
+ 
+@@ -729,30 +737,55 @@ async def test_lesson_illustration_returns_to_its_original_answer(monkeypatch, t
+     context = UnifiedContext(user_message="讲讲为什么杯中的筷子看起来弯了，再附一张情境插画。", language="zh")
+     publish = AsyncMock()
+     stream = AsyncMock()
++    review = AsyncMock(return_value=approved)
+     figures = OptionalLessonFigures(stream, "chat", "exploring", publish_late=publish)
+     context.extension("math_diagram")["optional_delivery"] = figures
+     result = await ImagegenTool().execute(
+-        prompt="A glass of water with chopsticks", lesson_title="水杯里的筷子" if named else "", n=4 if named else 1,
+-        anchor="先看水面。", _lesson_context=context, _workspace_dir=workspace.output_dir,
+-        _workspace_id=workspace.workspace_id,
++        prompt="A glass of water with chopsticks", lesson_title=title, n=count,
++        anchor=anchor, _lesson_context=context, _workspace_dir=workspace.output_dir,
++        _workspace_id=workspace.workspace_id, _lesson_illustration_review=review if approved is not None else None,
+     )
+-    assert result.metadata["optional_figure_pending"]
++    assert bool(result.metadata.get("optional_figure_pending")) is (approved is not None)
+     figures.close(keep_for_followup=True)
+     release.set()
+     await asyncio.gather(*figures.jobs.values())
+     assert stream.tool_result.await_args.args[0] == "imagegen"
+-    published = publish.await_args.args[0].metadata
++    published = publish.await_args.args[0].metadata if approved is not None else stream.tool_result.await_args.kwargs["metadata"]
+     assert published["tool_name"] == "imagegen"
+     output = published["tool_metadata"]
+-    assert output["lesson_figure_job"]["anchor"] == "先看水面。"
+-    assert output["lesson_figure_job"]["label"] == ("水杯里的筷子" if named else "教学插画")
+-    assert output["lesson_figure_job"]["state"] == ("ready" if valid_image else "failed")
+-    if valid_image:
++    assert output["lesson_figure_job"]["anchor"] == anchor
++    assert output["lesson_figure_job"]["label"] == (title or "教学插画")
++    assert output["lesson_figure_job"]["state"] == ("ready" if valid_image and approved else "failed")
++    assert len(prompts) == (approved is not None)
++    if valid_image and approved is not None:
++        review.assert_awaited_once_with(
++            png.getvalue(), "image/png", request=context.user_message, brief="A glass of water with chopsticks",
++        )
++    else:
++        review.assert_not_awaited()
++    if valid_image and approved:
+         assert output["lesson_illustration"]["url"].startswith("/files/workspace-items/")
+     else:
+         assert "lesson_illustration" not in output
+ 
+ 
++@pytest.mark.asyncio
++async def test_anchored_lesson_illustration_without_review_queue_is_not_generated(monkeypatch):
++    from unittest.mock import AsyncMock
++
++    from deeptutor.core.context import UnifiedContext
++
++    tool = ImagegenTool()
++    generate = AsyncMock()
++    monkeypatch.setattr(tool, "_generate", generate)
++    result = await tool.execute(
++        prompt="A glass of water with chopsticks", anchor="先看水面。",
++        _lesson_context=UnifiedContext(user_message="讲讲折射，附一张示意。"),
++    )
++    assert not result.success
++    generate.assert_not_awaited()
++
++
+ @pytest.mark.asyncio
+ @pytest.mark.parametrize(("message", "count"), [("画一张水杯插画，导出成 cup.png。", 1), ("生成三张普通插画。", 3)])
+ async def test_export_and_generic_batches_keep_the_workspace_artifact_contract(monkeypatch, message, count):
+@@ -790,8 +823,9 @@ async def test_same_illustration_prompt_can_fill_different_lesson_sections(monke
+     release = asyncio.Event()
+     generated = []
+ 
+-    async def generate(args, *, title):
++    async def generate(args, *, title, verify):
+         await release.wait()
++        assert callable(verify)
+         generated.append((args["anchor"], args["size"]))
+         if args["size"] == "1024x1536":
+             return ToolResult(content="供应商请求失败", success=False)
+@@ -801,7 +835,9 @@ async def test_same_illustration_prompt_can_fill_different_lesson_sections(monke
+     monkeypatch.setattr(tool, "_generate", generate)
+     specs = [("第一段。", "1024x1024"), ("第二段。", "1024x1024"), ("第二段。", "1024x1536")]
+     await asyncio.gather(*(tool.execute(prompt="Same visual concept", lesson_title="同名插画", size=size,
+-                                        anchor=anchor, _lesson_context=context) for anchor, size in [*specs, specs[0]]))
++                                        anchor=anchor, _lesson_context=context,
++                                        _lesson_illustration_review=AsyncMock(return_value=True))
++                           for anchor, size in [*specs, specs[0]]))
+     figures.close(keep_for_followup=True)
+     release.set()
+     await asyncio.gather(*figures.jobs.values())
+@@ -945,3 +981,32 @@ async def test_generate_video_facade(monkeypatch: pytest.MonkeyPatch) -> None:
+     video, content_type = await generate_video("ocean", catalog=_media_catalog())
+     assert video == b"VID"
+     assert content_type == "video/mp4"
++
++
++@pytest.mark.asyncio
++async def test_rejected_schematic_is_never_published_as_a_workspace_image(monkeypatch):
++    from io import BytesIO
++    from unittest.mock import AsyncMock
++
++    from PIL import Image
++
++    from deeptutor.core.context import WorkspaceRuntimeContext
++    from deeptutor.services.imagegen.config import ImagegenConfig
++
++    png = BytesIO()
++    Image.new("RGB", (4, 4), "white").save(png, format="PNG")
++    generate = AsyncMock(return_value=[(png.getvalue(), "image/png")])
++    verify = AsyncMock(return_value=False)
++    monkeypatch.setattr("deeptutor.services.imagegen.generate_image", generate)
++
++    def unexpected_publish(*_, **__):
++        pytest.fail("An unaccepted schematic must not create a workspace artifact")
++
++    monkeypatch.setattr("deeptutor.tools.media_gen_tool._run_dir", unexpected_publish)
++    result = await ImagegenTool().generate_board_schematic(
++        prompt="A schematic under review", title="Pending", workspace=WorkspaceRuntimeContext(),
++        config=ImagegenConfig(model="qwen-image-2.1-turbo"), verify=verify,
++    )
++    assert not result.success and "lesson_illustration" not in result.metadata
++    generate.assert_awaited_once()
++    verify.assert_awaited_once_with(png.getvalue(), "image/png")
+diff --git a/tests/visualizers/test_board_fallback.py b/tests/visualizers/test_board_fallback.py
+new file mode 100644
+index 00000000..b37df6d9
+--- /dev/null
++++ b/tests/visualizers/test_board_fallback.py
+@@ -0,0 +1,106 @@
++import json
++from types import SimpleNamespace
++from unittest.mock import AsyncMock
++
++import pytest
++
++from deeptutor.core.context import Attachment, TurnRuntimeContext, UnifiedContext, WorkspaceRuntimeContext
++from deeptutor.core.tool_protocol import ToolResult
++from deeptutor.visualizers import board_fallback, illustration_review
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("condition", ["allowed", "declined", "readback_unavailable", "attachment", "disabled", "not_configured"])
++async def test_board_illustration_requires_current_model_approval_and_authorized_inputs(monkeypatch, condition):
++    context = UnifiedContext(
++        user_message="光是怎么转向的？给个印象就行。",
++        runtime=TurnRuntimeContext(workspace=WorkspaceRuntimeContext(workspace_id="fixture")),
++    )
++    if condition == "attachment":
++        context.attachments = [Attachment(type="image", filename="private.png")]
++    binding, model = ("deepseek", "deepseek-v4-pro") if condition == "readback_unavailable" else ("openai", "gpt-4.1")
++    selected = SimpleNamespace(model=model, binding=binding, provider_name=binding, reasoning_effort="high")
++    qwen = SimpleNamespace(model="qwen-image-2.1-turbo")
++    choice = {"kind": "none"} if condition == "declined" else {
++        "kind": "schematic", "title": "光的传播", "prompt": "近似画出传播路径", "anchor": "注意传播方向。",
++    }
++    decide = AsyncMock(return_value=SimpleNamespace(finish_reason="stop", usage=None, content=json.dumps(choice)))
++    monkeypatch.setattr(board_fallback, "_qwen_config", lambda: None if condition == "not_configured" else qwen)
++    monkeypatch.setattr(board_fallback, "get_runtime_provider",
++                        lambda config: SimpleNamespace(chat_stream_with_retry=decide) if config is selected else None)
++    generate = AsyncMock(return_value=ToolResult(
++        content="", metadata={"lesson_illustration": {"url": "/fixture", "approximate": True}},
++    ))
++    alternative = await board_fallback.deliver_board_schematic(
++        context, selected, None, SimpleNamespace(generate_board_schematic=generate),
++        lambda: condition != "disabled", "注意传播方向。", ToolResult(content="布局不可用", success=False),
++        question="只画光的传播路线", anchor="", other_illustrations=[],
++    )
++    if condition in {"allowed", "declined"}:
++        assert decide.await_args.kwargs["model"] == selected.model
++        assert decide.await_args.kwargs["reasoning_effort"] == "high"
++        assert decide.await_args.kwargs["retry_delays"] == []
++    else:
++        decide.assert_not_awaited()
++    if condition != "allowed":
++        generate.assert_not_awaited()
++        assert alternative is None
++    else:
++        generate.assert_awaited_once()
++        kwargs = generate.await_args.kwargs
++        assert kwargs["prompt"] == choice["prompt"] and kwargs["config"] is qwen
++        assert kwargs["workspace"] is context.runtime.workspace
++        assert callable(kwargs["verify"])
++        tool, result = alternative
++        assert tool == "imagegen" and result.content == ""
++        assert result.metadata["figure_anchor"] == choice["anchor"]
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize(("review", "show"), [
++    pytest.param({"approved": True, "issues": [], "checks": ["外形近似且 A 指向 B"]}, True, id="approximate-shape"),
++    pytest.param({"approved": True, "issues": ["表格把 A 行的 25 写成 52"], "checks": ["行标题正确"]},
++                 False, id="contradictory-table-review"),
++    pytest.param({"approved": False, "issues": ["角标放到了相邻外角"], "checks": ["已核对顶点和角弧"]},
++                 False, id="wrong-angle"),
++    pytest.param({"approved": False, "issues": ["公式应为 ρ=m/V"], "checks": ["已读图上公式"]},
++                 False, id="wrong-formula"),
++    pytest.param({"approved": True}, False, id="bare-approval"),
++    pytest.param({"approved": True, "issues": [], "checks": [" "]}, False, id="empty-evidence"),
++])
++async def test_checkable_schematic_must_pass_review_of_its_actual_pixels(monkeypatch, review, show):
++    context = UnifiedContext(
++        user_message="用近似的布局看设备之间的连接。",
++        runtime=TurnRuntimeContext(workspace=WorkspaceRuntimeContext(workspace_id="fixture")),
++    )
++    selected = SimpleNamespace(model="gpt-4.1", binding="openai", provider_name="openai", reasoning_effort="high")
++    choice = {"kind": "schematic", "title": "连接", "prompt": "按题意画 A 指向 B"}
++    responses = [
++        SimpleNamespace(finish_reason="stop", usage=None, content=json.dumps(choice)),
++        SimpleNamespace(finish_reason="stop", usage=None, content=json.dumps(review)),
++    ]
++    decide = AsyncMock(side_effect=responses)
++    monkeypatch.setattr(board_fallback, "_qwen_config", lambda: SimpleNamespace(model="qwen-image-2.1-turbo"))
++    monkeypatch.setattr(board_fallback, "get_runtime_provider", lambda _: SimpleNamespace(chat_stream_with_retry=decide))
++    monkeypatch.setattr(illustration_review, "get_runtime_provider", lambda _: SimpleNamespace(chat_stream_with_retry=decide))
++
++    async def generate(*, verify, **_):
++        if not await verify(b"mock verified PNG bytes", "image/png"):
++            return ToolResult(content="", success=False)
++        return ToolResult(content="", metadata={"lesson_illustration": {"url": "/fixture", "approximate": True}})
++
++    alternative = await board_fallback.deliver_board_schematic(
++        context, selected, None, SimpleNamespace(generate_board_schematic=generate), lambda: True,
++        "A 指向 B。", ToolResult(content="布局不可用", success=False),
++        question="连接从 A 指向 B", anchor="", other_illustrations=[],
++    )
++    assert (alternative is not None) is show
++    assert decide.await_count == 2
++    visual = decide.await_args.kwargs
++    assert visual["messages"][-1]["content"][-1]["image_url"]["url"].startswith("data:image/png;base64,")
++    assert visual["model"] == selected.model and visual["reasoning_effort"] == "high"
++    standard = visual["messages"][0]["content"]
++    assert "长度和比例可近似" in standard
++    assert "表格行列与数值、刻度、单位、公式" in standard
++    assert "正确的顶点、两条边及角弧" in standard
++    assert "关键关系无法确认" in standard
+diff --git a/tests/visualizers/test_illustration_fallback.py b/tests/visualizers/test_illustration_fallback.py
+new file mode 100644
+index 00000000..7553b1da
+--- /dev/null
++++ b/tests/visualizers/test_illustration_fallback.py
+@@ -0,0 +1,53 @@
++import json
++from types import SimpleNamespace
++from unittest.mock import AsyncMock
++
++import pytest
++
++from deeptutor.core.context import Attachment, UnifiedContext
++from deeptutor.visualizers import illustration_fallback
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("already_in_answer", [True, False])
++async def test_fallback_reuses_only_the_bound_original_with_the_selected_model(monkeypatch, already_in_answer):
++    url = "/files/attachments/session/attachment/optics.png"
++    context = UnifiedContext(
++        user_message="照着刚才那张说明一下。",
++        raw_user_message="这张照着讲就行。",
++        conversation_history=[{"role": "user", "content": "这是第15页的光路。"}],
++        attachments=[Attachment(type="image", url=url, base64="aW1hZ2U=", filename="optics.png")],
++    )
++    config = SimpleNamespace(binding="openai", model="gpt-4.1", reasoning_effort="high", provider_name="openai")
++    request = AsyncMock(return_value=SimpleNamespace(finish_reason="stop", usage=None, content='{"kind":"original","index":1}'))
++    monkeypatch.setattr(illustration_fallback, "get_runtime_provider",
++                        lambda selected: SimpleNamespace(chat_stream_with_retry=request) if selected is config else None)
++
++    tool, result = await illustration_fallback.deliver_illustration_fallback(
++        context, config, None, f"![已显示]({url})" if already_in_answer else "折射光向法线靠近。",
++        title="光路", prompt="draw refraction", anchor="", diagram=None, bind_diagram=None,
++    )
++    assert tool == "read_source"
++    assert result.metadata["lesson_original"] == {
++        "title": "光路", "label": "optics.png", "existing_url" if already_in_answer else "url": url,
++    }
++    wire = request.await_args.kwargs
++    assert wire["model"] == config.model and wire["reasoning_effort"] == "high"
++    evidence = json.loads(wire["messages"][1]["content"])
++    assert evidence["request"] == context.raw_user_message
++    assert evidence["history"][0]["content"] == "这是第15页的光路。"
++    assert wire["allow_image_fallback"] is False
++
++
++@pytest.mark.asyncio
++async def test_explicit_original_only_does_not_deliver_a_model_suggested_summary(monkeypatch):
++    context = UnifiedContext(user_message="只用原图。")
++    context.extension("math_diagram")["visual_intent"] = "original_only"
++    config = SimpleNamespace(binding="openai", model="gpt-4.1", reasoning_effort="high", provider_name="openai")
++    request = AsyncMock(return_value=SimpleNamespace(finish_reason="stop", usage=None, content='{"kind":"summary","points":["这个内容不应交付。"]}'))
++    monkeypatch.setattr(illustration_fallback, "get_runtime_provider",
++                        lambda _: SimpleNamespace(chat_stream_with_retry=request))
++    assert await illustration_fallback.deliver_illustration_fallback(
++        context, config, None, "已经解释。", title="光路", prompt="draw refraction",
++        anchor="", diagram=None, bind_diagram=None,
++    ) is None
+diff --git a/tests/visualizers/test_math_diagram.py b/tests/visualizers/test_math_diagram.py
+index 9a380b5a..cb606c37 100644
+--- a/tests/visualizers/test_math_diagram.py
++++ b/tests/visualizers/test_math_diagram.py
+@@ -252,6 +252,11 @@ async def test_same_candidate_review_is_cached_only_within_its_original_context(
+     await checking.review_math_diagram(context, SVG, rules="数学老师完整规则")
+     assert len(calls) == 1
+     assert "数学老师完整规则" in calls[0][1]["content"]
++    assert "非必要的辅助标签省略也可以通过" in calls[0][0]["content"]
++    assert "长度和比例可近似" in calls[0][0]["content"]
++    assert "表格行列与数值、刻度、单位、公式" in calls[0][0]["content"]
++    assert "正确的顶点、两条边及角弧" in calls[0][0]["content"]
++    assert "关键关系无法确认，都应拒绝" in calls[0][0]["content"]
+     context.user_message = "题目B"
+     await checking.review_math_diagram(context, SVG, rules="数学老师完整规则")
+     assert len(calls) == 2
+diff --git a/tests/visualizers/test_optional_lesson.py b/tests/visualizers/test_optional_lesson.py
+index 902936d8..2f56eaf5 100644
+--- a/tests/visualizers/test_optional_lesson.py
++++ b/tests/visualizers/test_optional_lesson.py
+@@ -616,3 +616,80 @@ async def test_two_explicit_scenes_with_one_question_keep_both_reviewed_artifact
+         assert review.await_count == 2
+     finally:
+         figures.close()
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("completed", [True, False])
++async def test_failed_illustration_only_falls_back_after_a_completed_answer(completed):
++    stream, publish = AsyncMock(), AsyncMock()
++    figures = OptionalLessonFigures(stream, "chat", "responding", publish_late=publish)
++    key = ("", "复习提示", ("illustration", "prompt", "", "第二段。"), False, False)
++    failed = AsyncMock(return_value=ToolResult(content="429", success=False))
++    fallback = AsyncMock(return_value=("lesson_summary", ToolResult(
++        content="", metadata={"lesson_summary": {"title": "复习提示", "points": ["质量除以体积"]}},
++    )))
++    await figures.submit(key, failed, anchor="第二段。", tool_name="imagegen", fallback=fallback)
++    failed.assert_awaited_once()
++    fallback.assert_not_awaited()
++    figures.close(keep_for_followup=completed)
++    figures.finish_answer("已经讲了密度。" if completed else None)
++    await asyncio.gather(*figures.jobs.values(), return_exceptions=True)
++    if not completed:
++        fallback.assert_not_awaited()
++        publish.assert_not_awaited()
++        return
++    fallback.assert_awaited_once_with("已经讲了密度。", failed.return_value)
++    publish.assert_awaited_once()
++    pending = stream.tool_result.await_args.kwargs["metadata"]["tool_metadata"]["lesson_figure_job"]
++    event = publish.await_args.args[0].metadata
++    assert event["tool_name"] == "lesson_summary"
++    assert event["tool_metadata"]["lesson_figure_job"] == {**pending, "state": "ready"}
++    assert event["tool_metadata"]["lesson_summary"]["points"] == ["质量除以体积"]
++
++
++@pytest.mark.asyncio
++async def test_successful_illustration_never_calls_the_fallback():
++    stream, publish = AsyncMock(), AsyncMock()
++    figures = OptionalLessonFigures(stream, "chat", "responding", publish_late=publish)
++    key = ("", "插画", ("illustration", "prompt", "", ""), False, False)
++    draw = AsyncMock(return_value=ToolResult(content="", metadata={"lesson_illustration": {"url": "/fixture"}}))
++    fallback = AsyncMock()
++    await figures.submit(key, draw, tool_name="imagegen", fallback=fallback)
++    await asyncio.gather(*figures.jobs.values())
++    fallback.assert_not_awaited()
++    assert stream.tool_result.await_args.kwargs["metadata"]["tool_metadata"]["lesson_figure_job"]["state"] == "ready"
++
++
++@pytest.mark.asyncio
++async def test_failed_optional_board_can_be_required_without_waiting_for_post_answer_fallback():
++    stream, publish = AsyncMock(), AsyncMock()
++    figures = OptionalLessonFigures(stream, "chat", "responding", publish_late=publish)
++    key = ("", "同一张正弦曲线", "", False, False)
++    failed = ToolResult(content="编译失败", success=False)
++    draw = AsyncMock(return_value=failed)
++    fallback = AsyncMock(return_value=("imagegen", ToolResult(
++        content="", metadata={"lesson_illustration": {"url": "/fixture", "approximate": True}},
++    )))
++    await figures.submit(key, draw, anchor="这一段。", fallback=fallback)
++    assert await asyncio.wait_for(figures.require(key, draw), 1) is failed
++    draw.assert_awaited_once()
++    fallback.assert_not_awaited()
++    figures.close(keep_for_followup=True)
++    figures.finish_answer("这一段。")
++    await asyncio.gather(*figures.jobs.values())
++    event = publish.await_args.args[0].metadata
++    receipt = stream.tool_result.await_args.kwargs["metadata"]["tool_metadata"]["lesson_figure_job"]
++    assert event["tool_name"] == "imagegen"
++    assert event["tool_metadata"]["lesson_figure_job"] == {**receipt, "state": "ready"}
++    fallback.assert_awaited_once_with("这一段。", failed)
++
++
++@pytest.mark.asyncio
++async def test_checked_board_never_calls_image_fallback():
++    stream = AsyncMock()
++    figures = OptionalLessonFigures(stream, "chat", "responding", publish_late=AsyncMock())
++    fallback = AsyncMock()
++    await figures.submit(("", "已核对", "", True, False), AsyncMock(return_value=approved()), fallback=fallback)
++    await asyncio.gather(*figures.jobs.values())
++    fallback.assert_not_awaited()
++    assert stream.tool_result.await_args.kwargs["metadata"]["tool_metadata"]["math_review"]["approved"]
+diff --git a/web/components/chat/home/MathFigures.tsx b/web/components/chat/home/MathFigures.tsx
+index 01d8a99e..ac9c97ce 100644
+--- a/web/components/chat/home/MathFigures.tsx
++++ b/web/components/chat/home/MathFigures.tsx
+@@ -2,6 +2,7 @@
+ 
+ import dynamic from "next/dynamic";
+ import { useContext } from "react";
++import { useTranslation } from "react-i18next";
+ import { TeachingFigureViewerContext } from "@/context/TeachingFigureViewerContext";
+ import type { TeachingFigure } from "@/lib/teaching-figures";
+ 
+@@ -9,18 +10,28 @@ const VisualizationViewer = dynamic(() => import("@/components/visualize/Visuali
+ 
+ export default function MathFigures({ figures }: { figures: TeachingFigure[] }) {
+   const openFigure = useContext(TeachingFigureViewerContext);
++  const { i18n } = useTranslation();
++  const en = i18n.language.startsWith("en");
+   if (!figures.length) return null;
+   return <section aria-label="本题配图" className="mb-4 mt-1.5 space-y-3">
+-    {figures.map(({ result, id }) => <figure key={id} id={`teaching-figure-${id}`} className="min-w-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3">
++    {figures.map(({ result, id, illustrationFallback }) => {
++      const summary = result.render_type === "lesson_summary";
++      const original = result.render_type === "lesson_original";
++      return <figure key={id} id={`teaching-figure-${id}`} className="min-w-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3">
+       <figcaption className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
+         {result.presentation.title && <span className="font-medium">{result.presentation.title}</span>}
+         {openFigure && <a href={`#teaching-figure-${id}`} className="shrink-0 text-xs underline" onClick={event => {
+           event.preventDefault();
+           openFigure(id, result);
+-        }}>在右侧查看原图</a>}
++        }}>{summary ? (en ? "Open review card" : "查看复习卡") : "在右侧查看原图"}</a>}
+       </figcaption>
++      {illustrationFallback && <p className="mb-2 text-xs text-[var(--muted-foreground)]">
++        {summary ? (en ? "Review card" : "学习总结卡")
++          : original ? (en ? "Source image" : "已核对原图") : (en ? "Built-in drawing" : "内置画板")}
++      </p>}
+       <VisualizationViewer result={result} showNewTab={!openFigure} labeled />
+       {result.presentation.description && <p className="mt-2 text-xs text-[var(--muted-foreground)]">{result.presentation.description}</p>}
+-    </figure>)}
++      </figure>;
++    })}
+   </section>;
+ }
+diff --git a/web/components/settings/ModelsWorkspace.tsx b/web/components/settings/ModelsWorkspace.tsx
+index 50bc9695..24acfeaf 100644
+--- a/web/components/settings/ModelsWorkspace.tsx
++++ b/web/components/settings/ModelsWorkspace.tsx
+@@ -208,29 +208,15 @@ export function ModelsWorkspace({
+     syncQuery({ provider: id || null, model });
+   };
+   const addSource = selectable.find((p) => p.id === newProvider);
+-  const addModelOptions = addSource
+-    ? [
+-        ...new Set(
+-          [
+-            defaultModelFor(
+-              addSource,
+-              newService,
+-              connectionTargets,
+-              providers,
+-            ),
+-            ...(addSource.source.discovery?.models ?? [])
+-              .filter(
+-                (item) =>
+-                  !item.services?.length ||
+-                  item.services.includes(
+-                    newService === "task" ? "llm" : newService,
+-                  ),
+-              )
+-              .map((item) => item.id),
+-          ].filter(Boolean),
+-        ),
+-      ]
+-    : [];
++  const initialModel = addSource
++    ? defaultModelFor(addSource, newService, connectionTargets, providers)
++    : "";
++  const usesBailianImageDefault = addSource && newService === "imagegen" &&
++    providerAdapter(addSource, newService, connectionTargets, providers).binding === "dashscope";
++  const discoveredModels = usesBailianImageDefault ? [] : (addSource?.source.discovery?.models ?? [])
++    .filter(item => !item.services?.length || item.services.includes(newService === "task" ? "llm" : newService))
++    .map(item => item.id);
++  const addModelOptions = [...new Set([initialModel, ...discoveredModels].filter(Boolean))];
+   const start = () => {
+     setAdding(true);
+     revealDetail();
+diff --git a/web/components/visualize/VisualizationViewer.tsx b/web/components/visualize/VisualizationViewer.tsx
+index 4ceda521..5ae1ea85 100644
+--- a/web/components/visualize/VisualizationViewer.tsx
++++ b/web/components/visualize/VisualizationViewer.tsx
+@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
+ import { Mermaid } from "@/components/Mermaid";
+ import { apiUrl } from "@/lib/api";
+ import { prepareIframeHtml } from "@/lib/iframe-html";
++import { isLessonOriginalUrl } from "@/lib/teaching-figures";
+ import {
+   isManimResult,
+   type VisualizeCanvasResult,
+@@ -452,9 +453,17 @@ function CanvasVisualization({ result, showNewTab = true, labeled = false, fulls
+   }
+ 
+   const renderer = result.renderer.native_renderer || result.render_type;
+-  if (renderer === "lesson_illustration") {
++  if (renderer === "lesson_summary") {
++    const points = result.payload.data;
++    if (!Array.isArray(points) || !points.every(point => typeof point === "string")) return null;
++    return <ul className="list-disc space-y-2 break-words rounded-lg bg-[var(--muted)] py-3 pl-8 pr-4 text-sm leading-relaxed">
++      {points.map(point => <li key={point}>{point}</li>)}
++    </ul>;
++  }
++  if (renderer === "lesson_illustration" || renderer === "lesson_original") {
+     const url = result.code.content;
+-    if (!/^\/files\/workspace-items\/ws_[0-9a-f]{32}\/wsi_[0-9a-f]{32}(?:\?[^#]*)?$/.test(url)) return null;
++    if (renderer === "lesson_original" ? !isLessonOriginalUrl(url) :
++      !/^\/files\/workspace-items\/ws_[0-9a-f]{32}\/wsi_[0-9a-f]{32}(?:\?[^#]*)?$/.test(url)) return null;
+     // The image can arrive after the conversation has scrolled to the next reply.
+     return <img src={apiUrl(url)} alt={result.presentation.alt_text} className="h-auto max-w-full rounded-lg" loading="eager" />;
+   }
+@@ -686,7 +695,8 @@ export default function VisualizationViewer({
+           >
+             <div className="mb-2 flex shrink-0 items-center justify-between text-white">
+               <div className="text-xs tracking-wider opacity-80">
+-                {visualizationLabel(result)}
++                {result.render_type === "lesson_illustration" && result.presentation.description === "AI 示意图 · 不用于读数或解题"
++                  ? result.presentation.description : visualizationLabel(result)}
+               </div>
+               <button
+                 type="button"
+diff --git a/web/features/chat/messages/ChatMessageList.tsx b/web/features/chat/messages/ChatMessageList.tsx
+index a940fa62..9a8755bb 100644
+--- a/web/features/chat/messages/ChatMessageList.tsx
++++ b/web/features/chat/messages/ChatMessageList.tsx
+@@ -1530,8 +1530,10 @@ export const AssistantMessage = memo(function AssistantMessage({
+         const status = job.state === "cancelled"
+           ? (english ? "This figure was stopped." : "这张配图已停止。")
+           : waiting
+-            ? (english ? "Preparing figure…" : "配图正在核对…")
+-            : (english ? "A verified figure could not be delivered." : "这张图未能通过核对并交付。");
++            ? (job.kind === "illustration" ? (english ? "Preparing illustration…" : "正在准备插画…")
++              : (english ? "Preparing figure…" : "配图正在核对…"))
++            : (job.kind === "illustration" ? (english ? "This illustration is unavailable for this reply." : "本次插画暂不可用。")
++              : (english ? "A verified figure could not be delivered." : "这张图未能通过核对并交付。"));
+         return <p key={job.id} role="status" className="my-2 text-sm text-muted-foreground">
+           {job.label && <span className="mr-2">{job.label}</span>}
+           {status}
+diff --git a/web/lib/teaching-figures.ts b/web/lib/teaching-figures.ts
+index b1176d3e..0b39d487 100644
+--- a/web/lib/teaching-figures.ts
++++ b/web/lib/teaching-figures.ts
+@@ -2,9 +2,9 @@ import type { MessageSegment } from "@/components/chat/home/AskUserOptions";
+ import type { StreamEvent } from "@/features/chat/model/protocol";
+ import { extractVisualizeResult, type VisualizeCanvasResult } from "@/lib/visualize-types";
+ 
+-export type TeachingFigure = { id: string; index: number; result: VisualizeCanvasResult; anchor?: string; background?: boolean };
++export type TeachingFigure = { id: string; index: number; result: VisualizeCanvasResult; anchor?: string; background?: boolean; illustrationFallback?: boolean };
+ 
+-type FigureJob = { id: string; state: "selecting" | "settled" | "pending" | "ready" | "failed" | "cancelled"; label: string; anchor: string; deadline: number };
++type FigureJob = { id: string; state: "selecting" | "settled" | "pending" | "ready" | "failed" | "cancelled"; label: string; anchor: string; deadline: number; kind?: "illustration" };
+ 
+ function figureJob(event: StreamEvent): FigureJob | undefined {
+   if (event.type !== "tool_result") return;
+@@ -44,6 +44,11 @@ export function stripTeachingFigureMarkers(content: string): string {
+   return content.replace(/^\s*\[\[配图\s*[:：]\s*\d+\s*\]\][ \t]*$/gm, "");
+ }
+ 
++export function isLessonOriginalUrl(url: string): boolean {
++  return /^\/files\/attachments\/[^/?#]+\/[^/?#]+\/[^/?#]+(?:\?[^#]*)?$/.test(url) ||
++    /^\/api\/knowledge-bases\/[^/?#]+\/(?:word-example-image\?|visual-assets\/|source-page\?)[^#]+$/.test(url);
++}
++
+ export function teachingFigures(events: StreamEvent[] | undefined): TeachingFigure[] {
+   const figures: TeachingFigure[] = [];
+   const seen = new Set<string>();
+@@ -51,12 +56,16 @@ export function teachingFigures(events: StreamEvent[] | undefined): TeachingFigu
+     if (event.type !== "tool_result") continue;
+     const meta = event.metadata?.tool_metadata as Record<string, unknown> | undefined;
+     const job = figureJob(event);
+-    const illustration = meta?.lesson_illustration as { title?: unknown; url?: unknown } | undefined;
++    const illustration = meta?.lesson_illustration as { title?: unknown; url?: unknown; approximate?: unknown } | undefined;
+     if (job?.state === "ready" && typeof illustration?.title === "string" && typeof illustration.url === "string"
+         && /^\/files\/workspace-items\/ws_[0-9a-f]{32}\/wsi_[0-9a-f]{32}(?:\?[^#]*)?$/.test(illustration.url)) {
+       const result = extractVisualizeResult({
+         render_type: "lesson_illustration", payload: { data: illustration.url },
+-        presentation: { title: illustration.title, description: "AI 插画 · 教学示意", alt_text: illustration.title },
++        presentation: {
++          title: illustration.title,
++          description: illustration.approximate === true ? "AI 示意图 · 不用于读数或解题" : "AI 插画 · 教学示意",
++          alt_text: illustration.title,
++        },
+       });
+       if (result && "code" in result && !seen.has(illustration.url)) {
+         seen.add(illustration.url);
+@@ -64,6 +73,28 @@ export function teachingFigures(events: StreamEvent[] | undefined): TeachingFigu
+       }
+       continue;
+     }
++    const original = meta?.lesson_original as { title?: unknown; label?: unknown; url?: unknown } | undefined;
++    const summary = meta?.lesson_summary as { title?: unknown; points?: unknown } | undefined;
++    if (job?.state === "ready" && job.kind === "illustration" && (original || summary)) {
++      const picture = typeof original?.title === "string" && typeof original?.url === "string" &&
++        isLessonOriginalUrl(original.url);
++      const card = typeof summary?.title === "string" && Array.isArray(summary.points) &&
++        summary.points.length > 0 && summary.points.every(point => typeof point === "string" && point.trim());
++      if (!picture && !card) continue;
++      const result = extractVisualizeResult(picture ? {
++        render_type: "lesson_original", payload: { data: original.url },
++        presentation: { title: original.title, description: original.label, alt_text: original.title },
++      } : {
++        render_type: "lesson_summary", payload: { data: summary?.points },
++        presentation: { title: summary?.title },
++      });
++      if (result && "code" in result && !seen.has(result.code.content)) {
++        seen.add(result.code.content);
++        figures.push({ result, index: 0, id: `${event.turn_id ?? ""}-${job.id}`,
++          anchor: job.anchor, background: true, illustrationFallback: true });
++      }
++      continue;
++    }
+     const review = meta?.math_review as Record<string, unknown> | undefined;
+     if (review?.approved !== true) continue;
+     const result = extractVisualizeResult(meta?.math_figure as Record<string, unknown> | undefined);
+@@ -76,6 +107,7 @@ export function teachingFigures(events: StreamEvent[] | undefined): TeachingFigu
+       id: `${event.turn_id ?? event.session_id ?? ""}-${job?.id ?? event.seq ?? figures.length + 1}`,
+       anchor: job?.anchor || undefined,
+       background: job?.state === "ready",
++      illustrationFallback: job?.kind === "illustration",
+     });
+   }
+   return figures;
+@@ -90,6 +122,12 @@ function captionTerms(caption: string): string[] {
+   }))];
+ }
+ 
++function proseKey(text: string): string {
++  return text.replace(/(\*\*|__|`)(?=\S)(.+?)\1/g, "$2")
++    .replace(/(?<=\p{Script=Han})\s+(?=\p{Script=Han})/gu, "")
++    .replace(/\s+/g, " ").trim();
++}
++
+ export function placeTeachingFigures(
+   segments: MessageSegment[],
+   figures: TeachingFigure[],
+@@ -98,7 +136,7 @@ export function placeTeachingFigures(
+   if (!figures.length && !segments.some(segment => segment.kind === "text" && segment.text.includes("[["))) return segments;
+   const textBySegment = new Map<number, string>();
+   const explicit = new Map<number, { segment: number; offset: number }>();
+-  const lines: Array<{ segment: number; offset: number; text: string }> = [];
++  const lines: Array<{ segment: number; offset: number; text: string; prose: string }> = [];
+   segments.forEach((segment, position) => {
+     if (segment.kind !== "text") return;
+     let clean = "";
+@@ -129,7 +167,8 @@ export function placeTeachingFigures(
+       }
+       const prose = row.replace(marker, "").trim();
+       if (prose && !prose.startsWith("|") && (!streaming || rowIndex < rows.length - 1 || /[。！？.!?]\s*$/.test(prose))) {
+-        lines.push({ segment: position, offset: clean.length, text: prose.toLowerCase() });
++        const lower = prose.toLowerCase();
++        lines.push({ segment: position, offset: clean.length, text: lower, prose: proseKey(lower) });
+       }
+     });
+     textBySegment.set(position, clean);
+@@ -140,13 +179,21 @@ export function placeTeachingFigures(
+   for (const figure of figures) {
+     const title = figure.result.presentation.title || "";
+     const terms = captionTerms(title + " " + (figure.result.presentation.description || ""));
+-    const related = lines.reduce<{ line: typeof lines[number]; score: number } | null>((best, line) => {
++    const anchor = figure.anchor?.trim().toLowerCase() || "";
++    let anchors = anchor ? lines.filter(line => line.text.includes(anchor)) : [];
++    if (anchor && !anchors.length) {
++      const proseAnchor = proseKey(anchor);
++      if (proseAnchor) anchors = lines.filter(line => line.prose.includes(proseAnchor));
++    }
++    const candidates = anchors.length > 1 ? anchors : lines;
++    const related = candidates.reduce<{ line: typeof lines[number]; score: number; tied: boolean } | null>((best, line) => {
+       const score = terms.filter(term => line.text.includes(term)).length + (title.length > 1 && line.text.includes(title.toLowerCase()) ? 8 : 0);
+-      return score > (best?.score ?? 0) ? { line, score } : best;
++      if (score > (best?.score ?? 0)) return { line, score, tied: false };
++      return best && score === best.score ? { ...best, tied: true } : best;
+     }, null);
+-    const anchors = figure.anchor ? lines.filter(line => line.text.includes(figure.anchor!.toLowerCase())) : [];
+-    const at = explicit.get(figure.index) ?? (figure.anchor
+-      ? (anchors.length === 1 ? anchors[0] : undefined)
++    const captionMatch = !streaming && related && !related.tied && related.score >= 2 ? related.line : undefined;
++    const at = explicit.get(figure.index) ?? (anchor
++      ? anchors.length === 1 ? anchors[0] : captionMatch
+       : related?.line ?? (streaming ? undefined : lines[0]));
+     if (figure.background && streaming && (!lines.length || !at)) continue;
+     if (at) {
+diff --git a/web/tests/provider-registry-workflow.spec.tsx b/web/tests/provider-registry-workflow.spec.tsx
+index a98b1806..7d47f2de 100644
+--- a/web/tests/provider-registry-workflow.spec.tsx
++++ b/web/tests/provider-registry-workflow.spec.tsx
+@@ -335,6 +335,27 @@ it("prefills the add panel with the provider's default model", () => {
+   expect(screen.getByRole("button", { name: "Continue" })).not.toBeDisabled();
+ });
+ 
++it("prefills only the Bailian image default and accepts a manual model without applying it", () => {
++  live.connections = [{
++    id: "bailian", name: "Bailian", provider: "dashscope", base_url: "https://example.test/api/v1", api_key: "", api_version: "",
++    discovery: { status: "connected", models: [{ id: "speech-model" }, { id: "another-chat-model" }] },
++  }];
++  render(<Harness page="multimodal" providerOptions={{
++    imagegen: [{ value: "dashscope", label: "Bailian", default_model: "qwen-image-2.1-turbo", base_url: "" }],
++  }} />);
++  fireEvent.click(screen.getByRole("button", { name: "Add model" }));
++  fireEvent.change(screen.getByLabelText("Configured provider"), { target: { value: "connection:bailian" } });
++  const input = screen.getByRole("combobox", { name: "Model ID" });
++  expect(input).toHaveValue("qwen-image-2.1-turbo");
++  fireEvent.keyDown(input, { key: "ArrowDown" });
++  expect(within(screen.getByRole("listbox")).getAllByRole("option").map((node) => node.textContent))
++    .toEqual(["qwen-image-2.1-turbo"]);
++  fireEvent.change(input, { target: { value: "qwen-image-2.1-pro" } });
++  expect(input).toHaveValue("qwen-image-2.1-pro");
++  expect(mocks.save).not.toHaveBeenCalled();
++  expect(live.services.imagegen.profiles).toHaveLength(0);
++});
++
+ it("restores the add panel from the URL so a refresh shows the same surface", () => {
+   window.history.replaceState(
+     null,
+diff --git a/web/tests/teaching-figures.spec.ts b/web/tests/teaching-figures.spec.ts
+index d1aeb93a..b92e1b03 100644
+--- a/web/tests/teaching-figures.spec.ts
++++ b/web/tests/teaching-figures.spec.ts
+@@ -61,6 +61,29 @@ describe("placement of checked teaching figures", () => {
+       .toEqual(["先讲折射。\n\n看看水下的部分。", "teaching_figure", "再讲另一个问题。"]);
+   });
+ 
++  it.each([
++    {
++      anchor: "这里先看空气和水的交界。",
++      body: "光会折射。\n\n这里先看 **空气和水的交界。**\n\n再讲冰杯。",
++      next: "再讲冰杯。",
++    },
++    {
++      anchor: "请留意水面。",
++      body: "请留意水面。先看冰杯。\n\n请留意水面。接下来看折射光路。\n\n最后总结。",
++      next: "最后总结。",
++    },
++    {
++      anchor: "先从手电筒看起。",
++      body: "先讲水珠。\n\n接下来看折射光路。\n\n最后总结。",
++      next: "最后总结。",
++    },
++  ])("keeps a late figure with its paragraph when the raw anchor is unusable", ({ anchor, body, next }) => {
++    const [figure] = teachingFigures([result(1, "折射光路")]);
++    const placed = placeTeachingFigures([text(body)], [{ ...figure, anchor, background: true }]);
++    expect(placed.map(part => part.kind)).toEqual(["text", "teaching_figure", "text"]);
++    expect(placed[2]).toMatchObject({ text: expect.stringContaining(next) });
++  });
++
+   it("ignores a completed selection ticket when older events arrive again", () => {
+     const selection = (state: "selecting" | "settled"): StreamEvent => ({
+       ...result(1, ""),
