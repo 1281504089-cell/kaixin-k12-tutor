@@ -49,6 +49,11 @@ const fs = require("node:fs/promises");
     await input.waitFor({timeout: 12000});
     await page.waitForLoadState("load");
     await page.getByRole("button", {name:"选老师",exact:true}).last().waitFor({timeout:30000});
+    const viewer = page.locator('.dt-viewer-panel[data-open="true"]');
+    if (await viewer.count()) {
+      await viewer.getByRole('button',{name:'关闭查看器',exact:true}).click();
+      await viewer.waitFor({state:'hidden',timeout:15000});
+    }
     await input.fill("录音验收");
     await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => (button.getAttribute('aria-label') === '发送' || button.title === '发送') && !button.disabled), null, {timeout:12000});
     await input.fill("");

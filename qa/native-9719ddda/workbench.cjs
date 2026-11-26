@@ -205,6 +205,8 @@ async function test(browser) {
   report.workbench={scene:await speedScene.getAttribute('src'),clickToReadyMs:Date.now()-started,
     operationVisible:true,released:true,operationInput:method};
   save();
+  await shelf.getByRole('button',{name:'关闭查看器',exact:true}).click();
+  await page.locator('.dt-viewer-panel[data-open="true"]').waitFor({state:'hidden',timeout:15000});
   assert.deepEqual(report.errors,[]);
 }
 (async()=>{
