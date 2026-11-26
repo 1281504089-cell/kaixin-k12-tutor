@@ -1,0 +1,69 @@
+name: Transfer the exact 9719ddda physical Intel test media
+on:
+  push:
+    branches: [codex/desktop-native-qa-5af77432]
+    paths: [".github/workflows/physical-intel-transfer-9719ddda.yml", "qa/physical-transfer-9719ddda/**"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  split:
+    strategy:
+      fail-fast: false
+      matrix:
+        volume: [1, 2, 3, 4, 5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify native volume and split transport bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 qa/physical-transfer-9719ddda/split.py ${{ matrix.volume }}
+      - name: Transfer slice 1
+        if: hashFiles('parts/slice-1.bin') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel-9719ddda-v${{ matrix.volume }}-s1
+          path: parts/slice-1.bin
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 2
+      - name: Transfer slice 2
+        if: hashFiles('parts/slice-2.bin') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel-9719ddda-v${{ matrix.volume }}-s2
+          path: parts/slice-2.bin
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 2
+      - name: Transfer slice 3
+        if: hashFiles('parts/slice-3.bin') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel-9719ddda-v${{ matrix.volume }}-s3
+          path: parts/slice-3.bin
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 2
+      - name: Transfer slice 4
+        if: hashFiles('parts/slice-4.bin') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel-9719ddda-v${{ matrix.volume }}-s4
+          path: parts/slice-4.bin
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 2
+      - name: Transfer slice 5
+        if: hashFiles('parts/slice-5.bin') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel-9719ddda-v${{ matrix.volume }}-s5
+          path: parts/slice-5.bin
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 2
