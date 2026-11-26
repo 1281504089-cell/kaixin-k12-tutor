@@ -7,18 +7,14 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: scholar-43dba66-restart
-  cancel-in-progress: true
+  group: scholar-43dba66-restart-${{ github.sha }}
+  cancel-in-progress: false
 jobs:
   native:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - target: macos-x64
-            runner: macos-15-intel
-          - target: windows-x64
-            runner: windows-2025
           - target: macos-arm64
             runner: macos-15
     runs-on: ${{ matrix.runner }}

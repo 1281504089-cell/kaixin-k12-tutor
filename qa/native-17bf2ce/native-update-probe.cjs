@@ -207,14 +207,19 @@ async function run() {
   const macOS = process.platform === 'darwin';
   if (macOS) beforeView.window.setFullScreen(true);
   if (macOS) await waitFor('native fullscreen', () => beforeView.window.isFullScreen());
-  const currentCheck = beforeView.view.webContents.executeJavaScript('window.kaixinDesktop.checkForUpdates()');
-  await waitFor('the platform update progress view', () => {
-    if (!macOS) return BrowserWindow.getAllWindows().some(window =>
-      window.webContents.getURL().endsWith('/update-progress.html'));
-    const inside = beforeView.window.contentView.children.find(child => child.webContents?.getURL().endsWith('/update-progress.html'));
-    return inside && BrowserWindow.getAllWindows().length === 1 && beforeView.window.isFullScreen();
-  }, 10000);
-  event('progress-in-native-window');
+  let platformProgressObserved = false;
+  let currentCheckFinished = false;
+  const currentCheck = beforeView.view.webContents.executeJavaScript('window.kaixinDesktop.checkForUpdates()')
+    .finally(() => { currentCheckFinished = true; });
+  while (!currentCheckFinished && !platformProgressObserved) {
+    const windows = BrowserWindow.getAllWindows();
+    platformProgressObserved = macOS
+      ? windows.length === 1 && beforeView.window.isFullScreen() &&
+        beforeView.window.contentView.children.some(child => child.webContents?.getURL().endsWith('/update-progress.html'))
+      : windows.some(window => window.webContents.getURL().endsWith('/update-progress.html'));
+    if (!platformProgressObserved) await pause(50);
+  }
+  if (platformProgressObserved) event('progress-in-native-window');
   await currentCheck;
   assert(notices.some(notice => /已是最新版本|already.*up to date/i.test(notice.message)));
   assert.equal(BrowserWindow.getAllWindows().length, 1);
@@ -223,7 +228,7 @@ async function run() {
   const transaction = read(path.join(profile, 'upgrade.json'));
   assert.equal(transaction.phase, 'complete');
   assert.equal(memoryHash(transaction.backup), stage.originalMemory);
-  writeFileSync(output, JSON.stringify({ passed: true, target: spec.target, reopened_pid: process.pid, source_commit: spec.selected.commit, from: stage.before.runtimeId, to: spec.selected.runtimeId, launcher_build: descriptor.buildId, launcher_files_verified: descriptor.files.length, signed_restart: true, restart_mode: stage.restartMode, platform_progress_window: true, fullscreen_retained_after_check: macOS, application_ipc_update: true, check_again_current: true, transaction_phase: transaction.phase, isolated_profile: true, learning_memory_sha256: stage.originalMemory, network: stage.archive, signed_manifest: stage.manifest, transfer_origin: spec.transferOrigin, disk_preflight: spec.diskPreflight, downloaded_and_switched_ms: stage.completed - stage.started, complete_ms: Date.now() - stage.started }, null, 2) + '\n');
+  writeFileSync(output, JSON.stringify({ passed: true, target: spec.target, reopened_pid: process.pid, source_commit: spec.selected.commit, from: stage.before.runtimeId, to: spec.selected.runtimeId, launcher_build: descriptor.buildId, launcher_files_verified: descriptor.files.length, signed_restart: true, restart_mode: stage.restartMode, platform_progress_window: platformProgressObserved, fullscreen_retained_after_check: macOS, application_ipc_update: true, check_again_current: true, transaction_phase: transaction.phase, isolated_profile: true, learning_memory_sha256: stage.originalMemory, network: stage.archive, signed_manifest: stage.manifest, transfer_origin: spec.transferOrigin, disk_preflight: spec.diskPreflight, downloaded_and_switched_ms: stage.completed - stage.started, complete_ms: Date.now() - stage.started }, null, 2) + '\n');
   app.quit();
 }
 
