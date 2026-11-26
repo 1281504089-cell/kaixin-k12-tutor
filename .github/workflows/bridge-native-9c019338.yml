@@ -5,7 +5,7 @@ on:
     paths: [".github/workflows/bridge-native-9c019338.yml", "qa/bridge-native-9c019338/**"]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   native-fallback:
     strategy:
