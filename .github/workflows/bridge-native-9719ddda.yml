@@ -1,0 +1,46 @@
+name: 9719ddda signed full fallback native acceptance
+on:
+  push:
+    branches: [codex/desktop-native-qa-5af77432]
+    paths: [".github/workflows/bridge-native-9719ddda.yml", "qa/bridge-native-9719ddda/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  native-fallback:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: macos-arm64
+            runner: macos-15
+          - target: windows-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Cold boot the exact signed fallback on the native processor
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/bridge-native-9719ddda/run_bridge.py "$QA_TARGET" --evidence bridge-native-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bridge-native-9719ddda-${{ matrix.target }}
+          path: bridge-native-evidence/
+          retention-days: 7

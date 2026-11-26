@@ -1,0 +1,132 @@
+{
+  "formatVersion": 1,
+  "protocolVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "coreVersion": "1.7.1",
+  "builtAt": 1795717620048,
+  "commit": "9719dddaa36ae80261d676fb5914f2c48473061a",
+  "corePayloadSha256": "e517982cae314db9a9cf3689b7b3de2dbcda98d69e50eab08d3d27cd375119b0",
+  "runtimeId": "1.7.1-kaixin-20261127-9719ddda-windows-x64-universal",
+  "archive": "kaixin-bridge-20261127-9719ddda-windows-x64.tar.gz",
+  "sha256": "0d731185e19a30fc05796de693019a756d48c308194c8d7d5a5a9ef635ebe701",
+  "compatibleBaseManifests": [
+    {
+      "baseRuntimeId": "1.7.1-04276f68a-x64",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-346ca41274b3.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261113-sync2-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-bb8f5191555d.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-attachments-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-3e01c184c6a4.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-audio-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-77b621411568.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-library-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-e4abdb1cb594.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-materials-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-afb4dfe97ae4.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-projects-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-9b7c2b84f908.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-review-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-7a52e2cacc9f.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261114-stt-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-573f105ed118.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261115-preview3-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-324194bea65b.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261115-updater2-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-a0419326e159.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-1-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-967544a178f2.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-11-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-5a6e0e76c856.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-12-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-8690cf0863da.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-13-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-51534d24d922.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-16-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-1bb8a743bc42.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-18-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-d86e6c1a78ce.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-2-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-70c8bc192b30.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-4-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-9b7dc543315e.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-7-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-e4b58f199119.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261117-k12-8-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-b6c3920aebfa.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-diagram-1-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-4557d1c62a96.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-resource-4-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-6245df8566b7.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261121-resource-5-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-f1752e13feb9.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261122-textbook-interactive-3-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-317a2e477de5.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261122-windows-startup-1-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-42be25309949.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261125-47ce923-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-fce72dbcb4ae.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261126-43dba66-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-ec33ba4fc73b.json"
+    },
+    {
+      "baseRuntimeId": "1.7.1-kaixin-20261126-9c019338-windows-x64-universal",
+      "file": "runtime-windows-x64-20261127-9719ddda-base-72df7661ee50.json"
+    }
+  ],
+  "signature": "0YNYJA3jSkvyquKYJqEQ+bYCza6mulBOedbishG74qGFDFgE4pFiYhxIxQDYOruSLBiFGDWXBbPTRdtWYbv4DA=="
+}
