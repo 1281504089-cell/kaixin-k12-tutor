@@ -1,0 +1,70 @@
+{
+  "purpose": "exercise",
+  "practice_topic": "复数乘法与旋转缩放",
+  "source_mode": "skip",
+  "source_quote": "不查资料，自己出题",
+  "exclude_bank": true,
+  "intro": "三道原创选择题，每题一张复平面图，选出你认为正确的一项。",
+  "questions": [
+    {
+      "id": "q1",
+      "header": "第1题",
+      "prompt": "第1题：如图，复平面内点 $A$ 对应的复数 $z=2$（在实轴正半轴上）。把 $z$ 乘以 $\\dfrac{1}{2}\\left(\\cos 90^\\circ+i\\sin 90^\\circ\\right)$，所得复数对应的点位于哪里？",
+      "options": [
+        {
+          "label": "$i$"
+        },
+        {
+          "label": "$-i$"
+        },
+        {
+          "label": "$2i$"
+        },
+        {
+          "label": "$-2i$"
+        }
+      ],
+      "diagram_specification": "{\"family\":\"math_construct\",\"givens\":{\"points\":[[\"O\",0,0],[\"A\",2,0]],\"construct\":[],\"edges\":[[\"O\",\"A\",\"solid\"]],\"circles\":[],\"marks\":[],\"axes\":true}}"
+    },
+    {
+      "id": "q2",
+      "header": "第2题",
+      "prompt": "第2题：如图，$z=\\sqrt{3}+i$ 对应点 $A$。令 $w=z\\cdot 2\\left(\\cos 60^\\circ+i\\sin 60^\\circ\\right)$，则 $w$ 等于？",
+      "options": [
+        {
+          "label": "$4i$"
+        },
+        {
+          "label": "$4$"
+        },
+        {
+          "label": "$2\\sqrt{3}+2i$"
+        },
+        {
+          "label": "$-4i$"
+        }
+      ],
+      "diagram_specification": "{\"family\":\"math_construct\",\"givens\":{\"points\":[[\"O\",0,0],[\"A\",1.732,1]],\"construct\":[],\"edges\":[[\"O\",\"A\",\"solid\"]],\"circles\":[],\"marks\":[],\"axes\":true}}"
+    },
+    {
+      "id": "q3",
+      "header": "第3题",
+      "prompt": "第3题：如图，复平面内点 $A$、$B$ 分别对应 $z_1=1+i$ 与 $z_2=-2+2i$，且 $z_2=z_1\\cdot w$。则乘数 $w$ 等于？",
+      "options": [
+        {
+          "label": "$2i$"
+        },
+        {
+          "label": "$-2i$"
+        },
+        {
+          "label": "$2$"
+        },
+        {
+          "label": "$1+2i$"
+        }
+      ],
+      "diagram_specification": "{\"family\":\"math_construct\",\"givens\":{\"points\":[[\"O\",0,0],[\"A\",1,1],[\"B\",-2,2]],\"construct\":[],\"edges\":[[\"O\",\"A\",\"solid\"],[\"O\",\"B\",\"solid\"]],\"circles\":[],\"marks\":[],\"axes\":true}}"
+    }
+  ]
+}

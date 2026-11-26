@@ -1,0 +1,31 @@
+name: 9719ddda verified desktop bridge assembly
+on:
+  push:
+    branches: [codex/desktop-native-qa-5af77432]
+    paths: [".github/workflows/bridge-build-9719ddda.yml", "qa/bridge-9719ddda/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  assemble:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [macos-arm64, macos-x64, windows-x64]
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Retain the verified compatibility archive in the isolated draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 qa/bridge-9719ddda/assemble.py "$QA_TARGET"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bridge-assembly-9719ddda-${{ matrix.target }}
+          path: bridge-evidence/
+          retention-days: 7
