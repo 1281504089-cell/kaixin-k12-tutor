@@ -1,0 +1,19 @@
+{
+  "source_commit": "43dba66e3a63cb836c2b3a025d3ef75e71472ec0",
+  "core": {
+    "name": "kaixin-core-local-20261126-43dba66.tar.gz",
+    "bytes": 912768508,
+    "sha256": "144ee153ddd8290d8e1dbd2caf343aeb3fe8e1ddaec4fa3a28257b226b33dfd3"
+  },
+  "bridge": {
+    "name": "kaixin-bridge-20261126-43dba66-macos-arm64.tar.gz",
+    "bytes": 2058722884,
+    "sha256": "2478383a7a1a7d9a86b1d8cea8016518435d42292ba8649040014cc373fa3327"
+  },
+  "native_prefix": {
+    "bytes": 1145954376,
+    "sha256": "49fedf25c1b1963a97b99380b3654426c75de2df2ef47a8dcbfc78bc689df577",
+    "donor": "kaixin-bridge-20261125-47ce923-macos-arm64.tar.gz",
+    "donor_sha256": "3b3729a8e927ec0a9affa6b04adfcd0c13eafd2b114990ff0a167bd20f5bcab7"
+  }
+}
