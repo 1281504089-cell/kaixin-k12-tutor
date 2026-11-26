@@ -1,0 +1,32 @@
+{
+  "macos-arm64": {
+    "prefix": {
+      "bytes": 1145954376,
+      "sha256": "49fedf25c1b1963a97b99380b3654426c75de2df2ef47a8dcbfc78bc689df577",
+      "donor": "kaixin-bridge-20261125-47ce923-macos-arm64.tar.gz",
+      "donor_sha256": "3b3729a8e927ec0a9affa6b04adfcd0c13eafd2b114990ff0a167bd20f5bcab7"
+    },
+    "donor_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-bridge-20261125-47ce923-macos-arm64.tar.gz",
+    "donor_bytes": 2058398978
+  },
+  "macos-x64": {
+    "prefix": {
+      "bytes": 1209349728,
+      "sha256": "320b7e6d87bd85e8e2c3b993d61bb048e8ddaf96088dffccadd34be5007f9b6c",
+      "donor": "kaixin-bridge-20261125-47ce923-macos-x64.tar.gz",
+      "donor_sha256": "f73dd1aa71774ca91221ff05a558168b1b9873f70dfd1700a758d7aa8ba73436"
+    },
+    "donor_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-bridge-20261125-47ce923-macos-x64.tar.gz",
+    "donor_bytes": 2121794330
+  },
+  "windows-x64": {
+    "prefix": {
+      "bytes": 1121217115,
+      "sha256": "b5e9686575e88756e82da7c17ff89760ff70cf11229a76217f2f27cad4485d67",
+      "donor": "kaixin-bridge-20261125-47ce923-windows-x64.tar.gz",
+      "donor_sha256": "868932b08391c7363067256a30b405c8f70294abc6f56dbd4ab005a905c49079"
+    },
+    "donor_url": "https://github.com/1281504089-cell/kaixin-k12-tutor/releases/download/core-updates/kaixin-bridge-20261125-47ce923-windows-x64.tar.gz",
+    "donor_bytes": 2033661717
+  }
+}
