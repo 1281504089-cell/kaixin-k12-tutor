@@ -1,0 +1,69 @@
+name: 43dba66 signed desktop native restart and acceptance
+on:
+  push:
+    branches: [codex/desktop-native-qa-43dba66-restart]
+    paths: [".github/workflows/native-43dba66-restart.yml", "qa/native-43dba66/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: scholar-43dba66-restart
+  cancel-in-progress: false
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: windows-x64
+            runner: windows-2025
+          - target: macos-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 126
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Ensure the existing Windows packaging helper
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\NSIS\makensis.exe")) {
+            choco install nsis --no-progress -y
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Check source, true restart, recovery and empty-profile installation
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-43dba66/run_native.py "$QA_TARGET" --evidence native-43dba66-evidence --retain-verified-media
+      - name: Retain each exact accepted installer in the isolated draft
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TARGET: ${{ matrix.target }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-43dba66/retain_verified_media.py "$QA_TARGET" --evidence native-43dba66-evidence
+      - name: Retain diagnostic and native test proofs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-43dba66-${{ matrix.target }}
+          path: |
+            native-43dba66-evidence/*.json
+            native-43dba66-evidence/*.jsonl
+            native-43dba66-evidence/*.log
+          retention-days: 7

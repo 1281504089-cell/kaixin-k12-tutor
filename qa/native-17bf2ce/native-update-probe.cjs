@@ -21,6 +21,17 @@ function active() {
   }
 }
 const launcher = () => read(path.join(profile, 'launcher-update.json'));
+function verifyInstalledLauncher() {
+  const descriptor = read(path.join(profile, 'runtimes', spec.selected.runtimeId, 'launcher', 'manifest.json'));
+  assert.equal(descriptor.coreCommit, spec.selected.commit);
+  assert.equal(descriptor.buildId, spec.launcherBuild);
+  for (const item of descriptor.files) {
+    const file = readFileSync(path.join(__dirname, item.file));
+    assert.equal(file.byteLength, item.bytes, item.file);
+    assert.equal(hash(file), item.sha256, item.file);
+  }
+  return descriptor;
+}
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const memory = path.join('data', 'user', 'memory', 'L3', 'profile.md');
 const memoryHash = folder => hash(readFileSync(path.join(folder, memory)));
@@ -143,12 +154,24 @@ async function run() {
     const manifest = receipts.find(row => row.filename === spec.manifest.requested && row.sha256 === spec.manifest.sha256);
     assert(manifest && manifest.status === 200 && manifest.bytes === spec.manifest.bytes);
     const { view } = await readyView();
-    const launcherState = await waitFor('the signed launcher to be staged', () => {
+    const launcherState = await waitFor('the signed launcher status', () => {
       if (!existsSync(path.join(profile, 'launcher-update.json'))) return;
       const state = launcher();
-      if (state.buildId === spec.launcherBuild && state.status === 'ready') return state;
+      if (state.buildId === spec.launcherBuild && ['ready', 'current'].includes(state.status)) return state;
+      if (state.buildId === spec.launcherBuild && state.status === 'failed') throw Error(state.error);
     });
-    assert.equal(launcherState.restartRequired, true);
+    const restartMode = launcherState.status === 'ready' ? 'launcher-update' : 'unchanged-launcher';
+    assert.equal(launcherState.restartRequired, restartMode === 'launcher-update');
+    writeFileSync(stateFile, JSON.stringify({
+      before, originalMemory, started, completed: Date.now(), beforePid: process.pid, archive, manifest, restartMode
+    }));
+    if (restartMode === 'unchanged-launcher') {
+      verifyInstalledLauncher();
+      event('reopened-unchanged-signed-launcher', { launcher: launcherState.buildId });
+      app.relaunch();
+      app.quit();
+      return;
+    }
     const button = await waitFor('the actual launcher restart button', () =>
       view.webContents.executeJavaScript(`(() => {
         const button = [...document.querySelectorAll('button')].find(node =>
@@ -160,7 +183,6 @@ async function run() {
         const y = Math.round(rect.y + rect.height / 2);
         return button.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
       })()`));
-    writeFileSync(stateFile, JSON.stringify({ before, originalMemory, started, completed: Date.now(), beforePid: process.pid, archive, manifest }));
     event('clicked-restart-signed-launcher', { launcher: launcherState.buildId });
     view.webContents.focus();
     view.webContents.sendInputEvent({ type: 'mouseDown', ...button, button: 'left', clickCount: 1 });
@@ -181,14 +203,7 @@ async function run() {
     if (state.status === 'current' && !state.restartRequired) return state;
   });
   assert.equal(installedLauncher.buildId, spec.launcherBuild);
-  const descriptor = read(path.join(profile, 'runtimes', spec.selected.runtimeId, 'launcher', 'manifest.json'));
-  assert.equal(descriptor.coreCommit, spec.selected.commit);
-  assert.equal(descriptor.buildId, spec.launcherBuild);
-  for (const item of descriptor.files) {
-    const file = readFileSync(path.join(__dirname, item.file));
-    assert.equal(file.byteLength, item.bytes, item.file);
-    assert.equal(hash(file), item.sha256, item.file);
-  }
+  const descriptor = verifyInstalledLauncher();
   const macOS = process.platform === 'darwin';
   if (macOS) beforeView.window.setFullScreen(true);
   if (macOS) await waitFor('native fullscreen', () => beforeView.window.isFullScreen());
@@ -208,14 +223,14 @@ async function run() {
   const transaction = read(path.join(profile, 'upgrade.json'));
   assert.equal(transaction.phase, 'complete');
   assert.equal(memoryHash(transaction.backup), stage.originalMemory);
-  writeFileSync(output, JSON.stringify({ passed: true, target: spec.target, reopened_pid: process.pid, source_commit: spec.selected.commit, from: stage.before.runtimeId, to: spec.selected.runtimeId, launcher_build: descriptor.buildId, launcher_files_verified: descriptor.files.length, signed_restart: true, platform_progress_window: true, fullscreen_retained_after_check: macOS, application_ipc_update: true, check_again_current: true, transaction_phase: transaction.phase, isolated_profile: true, learning_memory_sha256: stage.originalMemory, network: stage.archive, signed_manifest: stage.manifest, transfer_origin: spec.transferOrigin, disk_preflight: spec.diskPreflight, downloaded_and_switched_ms: stage.completed - stage.started, complete_ms: Date.now() - stage.started }, null, 2) + '\n');
+  writeFileSync(output, JSON.stringify({ passed: true, target: spec.target, reopened_pid: process.pid, source_commit: spec.selected.commit, from: stage.before.runtimeId, to: spec.selected.runtimeId, launcher_build: descriptor.buildId, launcher_files_verified: descriptor.files.length, signed_restart: true, restart_mode: stage.restartMode, platform_progress_window: true, fullscreen_retained_after_check: macOS, application_ipc_update: true, check_again_current: true, transaction_phase: transaction.phase, isolated_profile: true, learning_memory_sha256: stage.originalMemory, network: stage.archive, signed_manifest: stage.manifest, transfer_origin: spec.transferOrigin, disk_preflight: spec.diskPreflight, downloaded_and_switched_ms: stage.completed - stage.started, complete_ms: Date.now() - stage.started }, null, 2) + '\n');
   app.quit();
 }
 
 run().catch(error => {
   let runtimeId;
   try { runtimeId = active()?.runtimeId; } catch { /* Preserve the original failure. */ }
-  const detail = { error: error.stack, notices, pid: process.pid, active: runtimeId, stage: stage ? 'new-launcher' : 'existing-launcher' };
+  const detail = { error: error.stack, notices, launcher_state: existsSync(path.join(profile, 'launcher-update.json')) ? launcher() : null, pid: process.pid, active: runtimeId, stage: stage ? 'new-launcher' : 'existing-launcher' };
   writeFileSync(`${output}.error.json`, JSON.stringify(detail, null, 2));
   app.exit(1);
 });
