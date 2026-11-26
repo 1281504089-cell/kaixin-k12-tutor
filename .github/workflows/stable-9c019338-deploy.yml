@@ -1,0 +1,59 @@
+name: Scholar 9c019338 stable deployment
+
+on:
+  push:
+    branches: [codex/desktop-stable-9c019338]
+    paths:
+      - ".github/workflows/stable-9c019338-deploy.yml"
+      - "qa/native-9c019338-publish/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: scholar-core-updates-stable-deploy
+  cancel-in-progress: false
+
+jobs:
+  stable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact inputs and apply only the approved activation
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+          QA_SOURCE_ROOT: qa/native-9c019338-publish/verifier
+        run: |
+          plan=qa/native-9c019338-publish
+          mkdir -p stable-deployment-evidence
+          python "$plan/hydrate_signed_plan.py"
+          if [ -f "$plan/ACTIVATE.json" ]; then
+            test -f "$plan/ACTIVATE.sha256"
+            python "$plan/deploy.py" --evidence stable-deployment-evidence \
+              --apply --approval "$plan/ACTIVATE.json" \
+              --approval-sha256 "$(cat "$plan/ACTIVATE.sha256")"
+            python "$plan/publish_student_release.py" --evidence stable-deployment-evidence \
+              --approval "$plan/ACTIVATE.json"
+          else
+            python "$plan/deploy.py" --evidence stable-deployment-evidence --stage
+          fi
+      - name: Retain readback and rollback evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable-9c019338-deployment
+          path: stable-deployment-evidence/
+          retention-days: 21
