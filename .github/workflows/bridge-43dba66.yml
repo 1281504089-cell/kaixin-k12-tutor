@@ -1,0 +1,48 @@
+name: 43dba66 signed desktop fallback acceptance
+on:
+  push:
+    branches: [codex/desktop-native-qa-43dba66-bridges]
+    paths: [".github/workflows/bridge-43dba66.yml", "qa/native-43dba66/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: scholar-43dba66-bridges
+  cancel-in-progress: false
+jobs:
+  bridge:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-x64
+            runner: macos-15-intel
+          - target: windows-x64
+            runner: windows-2025
+          - target: macos-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Start the exact signed fallback on the native processor
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONUTF8: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python qa/native-43dba66/run_bridge.py "${{ matrix.target }}" --evidence bridge-43dba66-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bridge-43dba66-${{ matrix.target }}
+          path: bridge-43dba66-evidence/
+          retention-days: 7

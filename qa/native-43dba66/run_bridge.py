@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 HERE = Path(__file__).resolve().parent
 COMPONENTS = HERE.with_name('native-17bf2ce-bridges')
-sys.path[:0] = [str(HERE.with_name('native-17bf2ce')), str(COMPONENTS), str(HERE.with_name('native-47ce923-bridges'))]
+sys.path.extend([str(HERE.with_name('native-17bf2ce')), str(COMPONENTS), str(HERE.with_name('native-47ce923-bridges'))])
 
 from ci_fresh_install import MACHINES, digest, download, metadata, verify_signature
 from ci_repackage import read, run, write
@@ -65,7 +65,7 @@ def main():
     p.add_argument('target', choices=MACHINES)
     p.add_argument('--evidence', type=Path, required=True)
     args = p.parse_args()
-    assert os.environ['GITHUB_REF'] == 'refs/heads/codex/desktop-native-qa-43dba66'
+    assert os.environ['GITHUB_REF'] == 'refs/heads/codex/desktop-native-qa-43dba66-bridges'
     evidence = args.evidence.resolve()
     evidence.mkdir(parents=True, exist_ok=False)
     with TemporaryDirectory(prefix='scholar-43dba66-bridge-', dir=os.environ['RUNNER_TEMP']) as scratch:
