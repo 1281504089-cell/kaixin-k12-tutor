@@ -21,33 +21,47 @@ const fs = require("node:fs/promises");
         }
         return fetch(resource, init);
       };
+      const record = MediaRecorder.prototype.start;
+      MediaRecorder.prototype.start = function(...args) {
+        const value = record.apply(this, args);
+        if (window.__qaAudio) {
+          const {source,audio} = window.__qaAudio;
+          source.start(audio.currentTime + 0.22);
+        }
+        return value;
+      };
       navigator.mediaDevices.getUserMedia = async () => {
         window.__qaMicRequested = true;
         const audio = new AudioContext();
-        const bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0)).buffer;
         const source = audio.createBufferSource();
+        const bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0)).buffer;
         source.buffer = await audio.decodeAudioData(bytes);
         const capture = audio.createMediaStreamDestination();
         source.connect(capture);
         await audio.resume();
-        source.start(audio.currentTime + .2);
+        window.__qaAudio = {source,audio,capture};
+        window.__qaMicReady = [audio.state];
         return capture.stream;
       };
-    }, wave.toString("base64"));
+    },wave.toString("base64"));
     await page.goto(new URL("/chat?dt_workspace=", page.url()).href, { waitUntil: "domcontentloaded" });
     const input = page.locator("textarea:visible").last();
     await input.waitFor({timeout: 12000});
     await page.waitForLoadState("load");
     await page.getByRole("button", {name:"选老师",exact:true}).last().waitFor({timeout:30000});
+    await input.fill("录音验收");
+    await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => (button.getAttribute('aria-label') === '发送' || button.title === '发送') && !button.disabled), null, {timeout:12000});
     await input.fill("");
+    await page.waitForLoadState("networkidle", {timeout:7000}).catch(() => {});
+
     const origin = page.getByRole("button", {name:"录制语音",exact:true}).last();
     await origin.waitFor({timeout:12000});
     await origin.click();
-    const stop = page.getByRole("button", {name:/结束录音|停止录音/}).last();
+    const stop = page.getByRole("button", {name:/完成录音|结束录音|停止录音/}).last();
     try {
       await stop.waitFor({timeout:20000});
     } catch (error) {
-      const state = await page.evaluate(() => ({micRequested:!!window.__qaMicRequested, alerts:[...document.querySelectorAll('[role="alert"],[role="status"]')].map(el=>el.innerText), buttons:[...document.querySelectorAll('button[aria-label*=录]')].map(el=>el.getAttribute("aria-label"))}));
+      const state = await page.evaluate(() => ({micRequested:!!window.__qaMicRequested,device:window.__qaMicReady, alerts:[...document.querySelectorAll('[role="alert"],[role="status"]')].map(el=>el.innerText), buttons:[...document.querySelectorAll('button[aria-label*=录]')].map(el=>el.getAttribute("aria-label"))}));
       throw Error("Recording did not start: "+JSON.stringify(state), {cause:error});
     }
     await page.waitForTimeout(3500);
@@ -55,7 +69,9 @@ const fs = require("node:fs/promises");
     const started = performance.now();
     await stop.click();
     const upload = await response;
-    assert(upload.ok(), await upload.text());
+    const backend = await upload.json();
+    assert(upload.ok(), JSON.stringify(backend));
+    console.log("Isolated offline transcription", JSON.stringify(backend));
     const format = await page.evaluate(() => window.__qaVoice);
     assert.deepEqual(format, { name: "recording.wav", type: "audio/wav", channels: 1, sampleRate: 16000 });
     await page.waitForFunction(() => [...document.querySelectorAll("textarea")].some(el => el.value.includes("旋转")), {timeout:12000});
