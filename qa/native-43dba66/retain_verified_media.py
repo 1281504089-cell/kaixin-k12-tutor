@@ -102,7 +102,7 @@ def main():
     parser.add_argument('target',choices=TYPES)
     parser.add_argument('--evidence',type=Path,required=True)
     args=parser.parse_args()
-    assert os.environ['GITHUB_REF']=='refs/heads/codex/desktop-native-qa-43dba66-intel'
+    assert os.environ['GITHUB_REF']=='refs/heads/codex/desktop-native-qa-43dba66-restart'
     report,directory=verify_receipt(args.target,args.evidence)
     initial,_=pinned_draft()
     draft_id=initial['id']
