@@ -29,7 +29,10 @@ def verify_student(app,home,selected,output,target):
         proc=subprocess.Popen([sys.executable,'-u',HERE/'replay.py',str(gate),'candidate'],env=env,cwd=HERE,stdout=log,stderr=log)
         shell=None
         try:
-            shell=subprocess.Popen([app,'--remote-debugging-port='+str(cdp),'--autoplay-policy=no-user-gesture-required'],env=env,cwd=app.parent,stdout=log,stderr=log,start_new_session=not os_name)
+            (HERE/'grade-selected.txt').unlink(missing_ok=True)
+            # Hosted Intel runners have no graphics device. Use the application's bundled renderer for this synthetic session.
+            graphics=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'] if os.getenv('QA_SOFTWARE_GRAPHICS')=='1' else []
+            shell=subprocess.Popen([app,'--remote-debugging-port='+str(cdp),'--autoplay-policy=no-user-gesture-required',*graphics],env=env,cwd=app.parent,stdout=log,stderr=log,start_new_session=not os_name)
             for _ in range(360):
                 if shell.poll() is not None or proc.poll() is not None:raise RuntimeError('The normal app or fixture quit during student acceptance')
                 try:

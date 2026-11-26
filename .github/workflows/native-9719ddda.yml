@@ -7,7 +7,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: scholar-9719ddda-native-windows-visible-controls
+  group: scholar-9719ddda-native-intel-bundled-graphics
   cancel-in-progress: false
 jobs:
   native:
@@ -15,8 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: windows-x64
-            runner: windows-2025
+          - target: macos-x64
+            runner: macos-15-intel
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 126
     steps:
@@ -45,6 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           QA_TARGET: ${{ matrix.target }}
+          QA_SOFTWARE_GRAPHICS: "1"
           PYTHONUTF8: "1"
           PYTHONDONTWRITEBYTECODE: "1"
         run: python qa/native-9719ddda/run_native.py "$QA_TARGET" --evidence native-9719ddda-evidence --retain-verified-media
