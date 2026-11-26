@@ -327,6 +327,17 @@ def main():
         started=wait_ready(candidate,fresh_profile,selected)
     finally:
         stop(candidate)
+    if os.environ.get('QA_PHYSICAL_INTEL')=='1':
+        assert target=='macos-x64' and args.retain_verified_media and platform.machine()=='x86_64'
+        pending={'passed':False,'pending':['physical_student_window'],'source_commit':LOCK['source_commit'],
+          'core':LOCK['core'],'target':target,'runner':platform.machine(),'installer_media':media_hashes,
+          'fresh_install':started,'update':upgraded,'recovery':recovered,'cos_used':False,
+          'real_learning_data_used':False,'run_id':os.environ['GITHUB_RUN_ID'],'workflow_sha':os.environ['GITHUB_SHA'],
+          'retained_media_path':str(native_media)}
+        write(output/'physical-intel-pending.json',pending)
+        with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as out:
+            out.write('TESTED_INTEL_DIR='+str(native_media)+'\n')
+        return
     features=verify_student(app, fresh_profile, selected, output, target)
     proof={'student_features':features, 'passed':True,'source_commit':LOCK['source_commit'],'core':LOCK['core'],
       'target':target,'runner':platform.machine(),'installer_media':media_hashes,

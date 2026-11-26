@@ -7,7 +7,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: scholar-9719ddda-native-intel-bundled-graphics
+  group: scholar-9719ddda-native-intel-physical-handoff
   cancel-in-progress: false
 jobs:
   native:
@@ -18,7 +18,7 @@ jobs:
           - target: macos-x64
             runner: macos-15-intel
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 126
+    timeout-minutes: 310
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,10 +45,59 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           QA_TARGET: ${{ matrix.target }}
-          QA_SOFTWARE_GRAPHICS: "1"
+          QA_PHYSICAL_INTEL: "1"
           PYTHONUTF8: "1"
           PYTHONDONTWRITEBYTECODE: "1"
         run: python qa/native-9719ddda/run_native.py "$QA_TARGET" --evidence native-9719ddda-evidence --retain-verified-media
+      - name: Bind the freshly installed physical test media
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-intel-9719ddda-input
+          path: native-9719ddda-evidence/physical-intel-pending.json
+          retention-days: 2
+          if-no-files-found: error
+      - name: Transfer Intel installation volume 1
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-intel-9719ddda-volume-1
+          path: ${{ env.TESTED_INTEL_DIR }}/*-part.dmg
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
+      - name: Transfer Intel installation volume 2
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-intel-9719ddda-volume-2
+          path: ${{ env.TESTED_INTEL_DIR }}/*.002.dmgpart
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
+      - name: Transfer Intel installation volume 3
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-intel-9719ddda-volume-3
+          path: ${{ env.TESTED_INTEL_DIR }}/*.003.dmgpart
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
+      - name: Transfer Intel installation volume 4
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-intel-9719ddda-volume-4
+          path: ${{ env.TESTED_INTEL_DIR }}/*.004.dmgpart
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
+      - name: Transfer Intel installation volume 5
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-intel-9719ddda-volume-5
+          path: ${{ env.TESTED_INTEL_DIR }}/*.005.dmgpart
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
+      - name: Verify signed on-device results for these exact five volumes
+        run: python qa/native-9719ddda/physical_finish.py native-9719ddda-evidence
       - name: Retain each exact accepted installer in the isolated draft
         shell: bash
         env:
