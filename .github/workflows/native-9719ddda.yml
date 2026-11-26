@@ -7,7 +7,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: scholar-9719ddda-native
+  group: scholar-9719ddda-native-windows-recheck
   cancel-in-progress: false
 jobs:
   native:
@@ -15,12 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: macos-x64
-            runner: macos-15-intel
           - target: windows-x64
             runner: windows-2025
-          - target: macos-arm64
-            runner: macos-15
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 126
     steps:

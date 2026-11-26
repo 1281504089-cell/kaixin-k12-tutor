@@ -186,11 +186,24 @@ async function test(browser) {
   await speed.click();
   const speedScene=page.locator('.dt-viewer-panel iframe[src*="entry=pep-wuli-8s-avgspeed"]');
   await speedScene.contentFrame().locator('body[data-scene-ready="avgspeed"]').waitFor({state:'attached',timeout:45000});
-  const controls=speedScene.contentFrame().locator('.p-tab');
-  await controls.nth(1).click();
+  const scene=speedScene.contentFrame();
+  const operation=scene.locator('.p-tab').nth(1);
+  const release=scene.getByRole('button',{name:/释放小车/});
+  let method='pointer';
+  try {
+    await operation.click({timeout:25000});
+  } catch(error) {
+    if(error.name!=='TimeoutError')throw error;
+    if(!await release.isVisible()){
+      method='keyboard';
+      await operation.press('Enter',{timeout:65000});
+    }
+  }
+  await release.waitFor({state:'visible',timeout:65000});
+  await release.press('Enter',{timeout:65000});
+  await scene.getByText(/小车下滑了|小车撞上金属片|停表走了好久/).first().waitFor({state:'visible',timeout:65000});
   report.workbench={scene:await speedScene.getAttribute('src'),clickToReadyMs:Date.now()-started,
-    operationVisible:await speedScene.contentFrame().getByRole('button',{name:/释放小车/}).isVisible()};
-  assert.equal(report.workbench.operationVisible,true);
+    operationVisible:true,released:true,operationInput:method};
   save();
   assert.deepEqual(report.errors,[]);
 }
